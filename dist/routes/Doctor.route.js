@@ -22,32 +22,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const mongoose_1 = __importStar(require("mongoose"));
-const schemaOptions_1 = __importDefault(require("../Services/schemaOptions"));
-const doctorSchema = new mongoose_1.Schema({
-    schemaOptions: schemaOptions_1.default,
-    hospitals: [
-        {
-            type: mongoose_1.default.Schema.Types.ObjectId,
-            ref: "hospital",
-        },
-    ],
-    specialization: [
-        {
-            type: mongoose_1.Schema.Types.ObjectId,
-            ref: "speciality",
-        },
-    ],
-    panCard: {
-        type: String,
-        required: true,
-    },
-    qualification: [
-        {
-            type: mongoose_1.default.Schema.Types.ObjectId,
-            ref: "qualification",
-        },
-    ],
-});
-const doctor = (0, mongoose_1.model)("doctor", doctorSchema);
-exports.default = doctor;
+const express_1 = __importDefault(require("express"));
+const doctorController = __importStar(require("../Controllers/Doctor.Controller"));
+const doctorRouter = express_1.default.Router();
+doctorRouter.get("/", doctorController.getAllDoctorsList);
+doctorRouter.post("/", doctorController.createDoctor);
+exports.default = doctorRouter;

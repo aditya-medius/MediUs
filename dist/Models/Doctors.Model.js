@@ -24,30 +24,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const schemaOptions_1 = __importDefault(require("../Services/schemaOptions"));
-const doctorSchema = new mongoose_1.Schema({
-    schemaOptions: schemaOptions_1.default,
-    hospitals: [
+const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schemaOptions_1.default), { hospitals: [
         {
             type: mongoose_1.default.Schema.Types.ObjectId,
             ref: "hospital",
         },
-    ],
-    specialization: [
+    ], specialization: [
         {
             type: mongoose_1.Schema.Types.ObjectId,
             ref: "speciality",
         },
-    ],
-    panCard: {
+    ], panCard: {
         type: String,
         required: true,
-    },
-    qualification: [
+    }, qualification: [
         {
             type: mongoose_1.default.Schema.Types.ObjectId,
             ref: "qualification",
         },
-    ],
-});
+    ] }));
 const doctor = (0, mongoose_1.model)("doctor", doctorSchema);
 exports.default = doctor;
