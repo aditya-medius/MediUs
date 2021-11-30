@@ -1,31 +1,67 @@
 import mongoose, { Schema, model } from "mongoose";
 import schemaOptions from "../Services/schemaOptions";
+import {
+  doctor,
+  hospital,
+  like,
+  qualification,
+  speciality,
+  workingHour,
+} from "../Services/schemaNames";
 const doctorSchema = new Schema({
   ...schemaOptions,
-  hospitals: [
+  hospitalDetails: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "hospital",
+      hospital: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: hospital,
+      },
+      workingHours: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: workingHour,
+      },
+      consultationFee: {
+        min: {
+          type: Number,
+        },
+        max: {
+          type: Number,
+        },
+      },
     },
   ],
+  registrationDate: {
+    type: Date,
+    required: true,
+  },
   specialization: [
     {
       type: Schema.Types.ObjectId,
-      ref: "speciality",
+      ref: speciality,
     },
   ],
   panCard: {
     type: String,
     required: true,
   },
+  adhaarCard: {
+    type: String,
+    required: true,
+    minlength: 12,
+  },
   qualification: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "qualification",
+      ref: qualification,
     },
   ],
+
+  liked: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: like,
+  },
 });
 
-const doctor = model("doctor", doctorSchema);
+const doctorModel = model(doctor, doctorSchema);
 
-export default doctor;
+export default doctorModel;

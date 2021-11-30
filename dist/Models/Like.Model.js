@@ -18,16 +18,18 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const Doctor_auth_1 = require("../authentication/Doctor.auth");
-const doctorController = __importStar(require("../Controllers/Doctor.Controller"));
-const doctorRouter = express_1.default.Router();
-doctorRouter.post("/login", doctorController.doctorLogin);
-doctorRouter.post("/", doctorController.createDoctor);
-doctorRouter.get("/", Doctor_auth_1.authenticateDoctor, doctorController.getAllDoctorsList);
-doctorRouter.post("/getDoctorById/:id", Doctor_auth_1.authenticateDoctor, doctorController.getDoctorById);
-exports.default = doctorRouter;
+const mongoose_1 = __importStar(require("mongoose"));
+const schemaNames_1 = require("../Services/schemaNames");
+const likeSchema = new mongoose_1.Schema({
+    doctor: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        ref: schemaNames_1.doctor,
+    },
+    patient: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        ref: schemaNames_1.patient,
+    },
+});
+const likeModel = (0, mongoose_1.model)(schemaNames_1.like, likeSchema);
+exports.default = likeModel;
