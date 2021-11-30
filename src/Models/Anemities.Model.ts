@@ -1,5 +1,5 @@
 import mongoose, { Schema, model } from "mongoose";
-
+import { anemity } from "../Services/schemaNames";
 const anemitySchema = new Schema({
   name: {
     type: String,
@@ -13,5 +13,5 @@ const anemitySchema = new Schema({
   },
 });
 
-const anemity = model("anemity", anemitySchema);
-export default anemity;
+const anemityModel = model(anemity, anemitySchema);
+export default anemityModel;

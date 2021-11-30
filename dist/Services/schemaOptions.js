@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
+const schemaNames_1 = require("./schemaNames");
 const schemaOptions = {
     firstName: {
         type: String,
@@ -9,6 +10,11 @@ const schemaOptions = {
     lastName: {
         type: String,
         required: true,
+    },
+    gender: {
+        type: String,
+        required: true,
+        enum: ["Male", "Female"],
     },
     DOB: {
         type: Date,
@@ -24,15 +30,15 @@ const schemaOptions = {
     email: {
         type: String,
         required: true,
-        unique: true,
+        unique: [true, "Email already exist"],
     },
     password: {
         type: String,
         required: true,
     },
-    Appointments: {
+    appointments: {
         type: mongoose_1.Schema.Types.ObjectId,
-        ref: "appointment",
+        ref: schemaNames_1.appointment,
     },
     verified: {
         type: Boolean,
