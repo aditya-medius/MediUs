@@ -42,6 +42,10 @@ const schemaOptions: any = {
     type: Boolean,
     default: false,
   },
+  active: {
+    type: Boolean,
+    default: true
+  }
 };
 
 export default schemaOptions;
