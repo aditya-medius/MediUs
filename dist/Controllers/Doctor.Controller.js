@@ -33,6 +33,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
+const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
 const bcrypt = __importStar(require("bcrypt"));
 const response_1 = require("../Services/response");
@@ -78,9 +79,11 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     try {
         let body = req.query;
         if (!("OTP" in body)) {
-            if (/^[0]?[789]\d{9}$/.test(body.phoneNumber)) {
-                const OTP = Math.floor(100000 + Math.random() * 900000);
+            if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
+                const OTP = Math.floor(100000 + Math.random() * 900000).toString();
+                const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 }, OTP);
                 // Add OTP and phone number to temporary collection
+                yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: body.phoneNumber }, { $set: { phoneNumber: body.phoneNumber, otp: otpToken } }, { upsert: true });
                 // Implement message service API
                 return (0, response_1.successResponse)(OTP, "OTP sent successfully", res);
             }
@@ -91,6 +94,42 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             }
         }
         else {
+            const otpData = yield OTP_Model_1.default.findOne({
+                phoneNumber: body.phoneNumber,
+            });
+            try {
+                const data = yield jwt.verify(otpData.otp, body.OTP);
+                if (Date.now() > data.expiresIn)
+                    return (0, response_1.errorResponse)(new Error("OTP expired"), res);
+                if (body.OTP === data.otp) {
+                    const profile = yield Doctors_Model_1.default.findOne({
+                        phoneNumber: body.phoneNumber,
+                        deleted: false,
+                    }, excludeDoctorFields);
+                    if (profile) {
+                        const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_DOCTOR_KEY);
+                        otpData.remove();
+                        return (0, response_1.successResponse)(token, "Successfully logged in", res);
+                    }
+                    else {
+                        otpData.remove();
+                        return (0, response_1.successResponse)({ message: "No Data found" }, "Create a new profile", res, 201);
+                    }
+                }
+                else {
+                    const error = new Error("Invalid OTP");
+                    error.name = "Invalid";
+                    return (0, response_1.errorResponse)(error, res);
+                }
+            }
+            catch (err) {
+                if (err instanceof jwt.JsonWebTokenError) {
+                    const error = new Error("OTP isn't valid");
+                    error.name = "Invalid OTP";
+                    return (0, response_1.errorResponse)(error, res);
+                }
+                return (0, response_1.errorResponse)(err, res);
+            }
         }
     }
     catch (error) {
@@ -134,6 +173,7 @@ const updateDoctorProfile = (req, res) => __awaiter(void 0, void 0, void 0, func
         }, {
             $set: body,
         }, {
+            fields: excludeDoctorFields,
             new: true,
         });
         if (updatedDoctorObj) {
