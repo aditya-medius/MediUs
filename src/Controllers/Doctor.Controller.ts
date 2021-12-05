@@ -61,14 +61,11 @@ export const doctorLogin = async (req: Request, res: Response) => {
   try {
     let body: any = req.query;
     if (!("OTP" in body)) {
-      if (/^[0]?[789]\d{9}$/.test(body.phoneNumber)) {
+      if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
         const OTP = Math.floor(100000 + Math.random() * 900000).toString();
         const otpToken = jwt.sign(
-          { otp: OTP, expiresIn: Date.now() + 10 * 60 * 60 },
-          OTP,
-          {
-            expiresIn: 5 * 60 * 60,
-          }
+          { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
+          OTP
         );
 
         // Add OTP and phone number to temporary collection
@@ -94,9 +91,13 @@ export const doctorLogin = async (req: Request, res: Response) => {
         if (Date.now() > data.expiresIn)
           return errorResponse(new Error("OTP expired"), res);
         if (body.OTP === data.otp) {
-          const profile = await doctorModel.findOne({
-            phoneNumber: body.phoneNumber,
-          });
+          const profile = await doctorModel.findOne(
+            {
+              phoneNumber: body.phoneNumber,
+              deleted: false,
+            },
+            excludeDoctorFields
+          );
           if (profile) {
             const token = await jwt.sign(
               profile.toJSON(),
@@ -175,6 +176,7 @@ export const updateDoctorProfile = async (req: Request, res: Response) => {
         $set: body,
       },
       {
+        fields: excludeDoctorFields,
         new: true,
       }
     );
