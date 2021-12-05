@@ -129,6 +129,21 @@ doctorSchema.pre("findOneAndUpdate", async function (next) {
   return next();
 });
 
+// const mongooseEventList = ["find", "findOne"];
+
+// mongooseEventList.forEach((event: any) => {
+//   doctorSchema.pre(event, async function (next) {
+//     this.select({
+//       password: 0,
+//       panCard: 0,
+//       adhaarCard: 0,
+//       verified: 0,
+//       registrationDate: 0,
+//       DOB: 0,
+//     });
+//     return next();
+//   });
+// });
 const doctorModel = model(doctor, doctorSchema);
 
 export default doctorModel;
