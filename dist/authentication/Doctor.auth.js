@@ -24,7 +24,6 @@ const authenticateDoctor = (req, res, next) => __awaiter(void 0, void 0, void 0,
     }
     catch (error) {
         error.message = "Forbidden";
-        // Forbidden status code - 403
         return (0, response_1.errorResponse)(error, res, 403);
     }
 });
