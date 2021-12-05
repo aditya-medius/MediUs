@@ -7,3 +7,5 @@ export const workingHour: string = "workingHours";
 export const doctor: string = "doctors";
 export const patient: string = "patients";
 export const anemity: string = "anemitys";
+export const treatmentType: string = "treatmentType";
+export const OTP: string = "OTP";
