@@ -11,4 +11,14 @@ doctorRouter.post(
   authenticateDoctor,
   doctorController.getDoctorById
 );
+doctorRouter.post(
+  "/updateProfile",
+  authenticateDoctor,
+  doctorController.updateDoctorProfile
+);
+doctorRouter.post(
+  "/deleteProfile",
+  authenticateDoctor,
+  doctorController.deleteProfile
+);
 export default doctorRouter;

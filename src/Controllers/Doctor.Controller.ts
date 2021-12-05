@@ -16,7 +16,10 @@ const excludeDoctorFields = {
 // Get All Doctors
 export const getAllDoctorsList = async (req: Request, res: Response) => {
   try {
-    const doctorList = await doctorModel.find({}, excludeDoctorFields);
+    const doctorList = await doctorModel.find(
+      { deleted: false },
+      excludeDoctorFields
+    );
     return successResponse(
       doctorList,
       "Successfully fetched doctor's list",
@@ -54,33 +57,21 @@ export const createDoctor = async (req: Request, res: Response) => {
 // Login as Doctor
 export const doctorLogin = async (req: Request, res: Response) => {
   try {
-    const doctorDetail = await doctorModel.findOne({
-      email: req.body.email,
-    });
-    if (doctorDetail) {
-      try {
-        const encryptResult = await bcrypt.compare(
-          req.body.password,
-          doctorDetail.password
-        );
-        if (encryptResult) {
-          const token = await jwt.sign(
-            doctorDetail.toJSON(),
-            process.env.SECRET_DOCTOR_KEY as string
-          );
-          return successResponse(token, "Successfully logged in", res);
-        } else {
-          const error: Error = new Error("Invalid Password");
-          error.name = "Authentication Error";
-          return errorResponse(error, res);
-        }
-      } catch (error: any) {
-        return errorResponse(error, res, 401);
+    let body: any = req.query;
+    if (!("OTP" in body)) {
+      if (/^[0]?[789]\d{9}$/.test(body.phoneNumber)) {
+        const OTP = Math.floor(100000 + Math.random() * 900000);
+
+        // Add OTP and phone number to temporary collection
+
+        // Implement message service API
+        return successResponse(OTP, "OTP sent successfully", res);
+      } else {
+        let error = new Error("Invalid phone number");
+        error.name = "Invalid input";
+        return errorResponse(error, res);
       }
     } else {
-      const error: Error = new Error("Invalid Email");
-      error.name = "Authentication Error";
-      return errorResponse(error, res, 401);
     }
   } catch (error: any) {
     return errorResponse(error, res);
@@ -91,7 +82,7 @@ export const doctorLogin = async (req: Request, res: Response) => {
 export const getDoctorById = async (req: Request, res: Response) => {
   try {
     const doctorData = await doctorModel.findOne(
-      { _id: req.params.id },
+      { _id: req.params.id, deleted: false },
       excludeDoctorFields
     );
     if (doctorData) {
@@ -113,6 +104,55 @@ export const getDoctorById = async (req: Request, res: Response) => {
 // Get Doctor By Hospital
 export const getDoctorByHospitalId = async (req: Request, res: Response) => {
   try {
+  } catch (error) {
+    return errorResponse(error, res);
+  }
+};
+
+export const updateDoctorProfile = async (req: Request, res: Response) => {
+  try {
+    let body = req.body;
+    const updatedDoctorObj = await doctorModel.findOneAndUpdate(
+      {
+        _id: req.currentDoctor,
+        deleted: false,
+      },
+      {
+        $set: body,
+      },
+      {
+        new: true,
+      }
+    );
+    if (updatedDoctorObj) {
+      return successResponse(
+        updatedDoctorObj,
+        "Profile updated successfully,",
+        res
+      );
+    } else {
+      let error = new Error("Profile doesn't exist");
+      error.name = "Not Found";
+      return errorResponse(error, res);
+    }
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const deleteProfile = async (req: Request, res: Response) => {
+  try {
+    const doctorProfile = await doctorModel.findOneAndUpdate(
+      { _id: req.currentDoctor, deleted: false },
+      { $set: { deleted: true } }
+    );
+    if (doctorProfile) {
+      return successResponse({}, "Profile deleted successfully", res);
+    } else {
+      let error = new Error("Profile doesn't exist");
+      error.name = "Not found";
+      return errorResponse(error, res, 404);
+    }
   } catch (error) {
     return errorResponse(error, res);
   }
