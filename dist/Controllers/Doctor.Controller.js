@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = void 0;
+exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
 const bcrypt = __importStar(require("bcrypt"));
@@ -47,7 +47,7 @@ const excludeDoctorFields = {
 // Get All Doctors
 const getAllDoctorsList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const doctorList = yield Doctors_Model_1.default.find({}, excludeDoctorFields);
+        const doctorList = yield Doctors_Model_1.default.find({ deleted: false }, excludeDoctorFields);
         return (0, response_1.successResponse)(doctorList, "Successfully fetched doctor's list", res);
     }
     catch (error) {
@@ -76,30 +76,21 @@ exports.createDoctor = createDoctor;
 // Login as Doctor
 const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const doctorDetail = yield Doctors_Model_1.default.findOne({
-            email: req.body.email,
-        });
-        if (doctorDetail) {
-            try {
-                const encryptResult = yield bcrypt.compare(req.body.password, doctorDetail.password);
-                if (encryptResult) {
-                    const token = yield jwt.sign(doctorDetail.toJSON(), process.env.SECRET_DOCTOR_KEY);
-                    return (0, response_1.successResponse)(token, "Successfully logged in", res);
-                }
-                else {
-                    const error = new Error("Invalid Password");
-                    error.name = "Authentication Error";
-                    return (0, response_1.errorResponse)(error, res);
-                }
+        let body = req.query;
+        if (!("OTP" in body)) {
+            if (/^[0]?[789]\d{9}$/.test(body.phoneNumber)) {
+                const OTP = Math.floor(100000 + Math.random() * 900000);
+                // Add OTP and phone number to temporary collection
+                // Implement message service API
+                return (0, response_1.successResponse)(OTP, "OTP sent successfully", res);
             }
-            catch (error) {
-                return (0, response_1.errorResponse)(error, res, 401);
+            else {
+                let error = new Error("Invalid phone number");
+                error.name = "Invalid input";
+                return (0, response_1.errorResponse)(error, res);
             }
         }
         else {
-            const error = new Error("Invalid Email");
-            error.name = "Authentication Error";
-            return (0, response_1.errorResponse)(error, res, 401);
         }
     }
     catch (error) {
@@ -110,7 +101,7 @@ exports.doctorLogin = doctorLogin;
 // Get Doctor By Doctor Id
 const getDoctorById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const doctorData = yield Doctors_Model_1.default.findOne({ _id: req.params.id }, excludeDoctorFields);
+        const doctorData = yield Doctors_Model_1.default.findOne({ _id: req.params.id, deleted: false }, excludeDoctorFields);
         if (doctorData) {
             return (0, response_1.successResponse)(doctorData, "Successfully fetched doctor details", res);
         }
@@ -134,3 +125,45 @@ const getDoctorByHospitalId = (req, res) => __awaiter(void 0, void 0, void 0, fu
     }
 });
 exports.getDoctorByHospitalId = getDoctorByHospitalId;
+const updateDoctorProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.body;
+        const updatedDoctorObj = yield Doctors_Model_1.default.findOneAndUpdate({
+            _id: req.currentDoctor,
+            deleted: false,
+        }, {
+            $set: body,
+        }, {
+            new: true,
+        });
+        if (updatedDoctorObj) {
+            return (0, response_1.successResponse)(updatedDoctorObj, "Profile updated successfully,", res);
+        }
+        else {
+            let error = new Error("Profile doesn't exist");
+            error.name = "Not Found";
+            return (0, response_1.errorResponse)(error, res);
+        }
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.updateDoctorProfile = updateDoctorProfile;
+const deleteProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const doctorProfile = yield Doctors_Model_1.default.findOneAndUpdate({ _id: req.currentDoctor, deleted: false }, { $set: { deleted: true } });
+        if (doctorProfile) {
+            return (0, response_1.successResponse)({}, "Profile deleted successfully", res);
+        }
+        else {
+            let error = new Error("Profile doesn't exist");
+            error.name = "Not found";
+            return (0, response_1.errorResponse)(error, res, 404);
+        }
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.deleteProfile = deleteProfile;
