@@ -7,6 +7,7 @@ import {
   qualification,
   speciality,
   workingHour,
+  treatmentType,
 } from "../Services/schemaNames";
 const doctorSchema = new Schema({
   ...schemaOptions,
@@ -14,17 +15,21 @@ const doctorSchema = new Schema({
     {
       hospital: {
         type: mongoose.Schema.Types.ObjectId,
+        required: true,
         ref: hospital,
       },
       workingHours: {
         type: mongoose.Schema.Types.ObjectId,
+        required: true,
         ref: workingHour,
       },
       consultationFee: {
         min: {
+          required: true,
           type: Number,
         },
         max: {
+          required: true,
           type: Number,
         },
       },
@@ -60,6 +65,10 @@ const doctorSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: like,
   },
+  treatmentType: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: treatmentType,
+  },
 });
 
 doctorSchema.pre("save", async function (next) {
@@ -92,8 +101,14 @@ doctorSchema.pre("save", async function (next) {
 doctorSchema.pre("findOneAndUpdate", async function (next) {
   let updateQuery: any = this.getUpdate();
   updateQuery = updateQuery["$set"];
-  if ("phoneNumber" in updateQuery || "email" in updateQuery) {
+  if (
+    "phoneNumber" in updateQuery ||
+    "email" in updateQuery ||
+    "panCard" in updateQuery ||
+    "adhaarCard" in updateQuery
+  ) {
     const query = this.getQuery();
+
     const profileExist = await this.model.findOne({
       _id: { $ne: query._id },
       $or: [
