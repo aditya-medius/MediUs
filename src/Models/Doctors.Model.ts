@@ -62,6 +62,58 @@ const doctorSchema = new Schema({
   },
 });
 
+doctorSchema.pre("save", async function (next) {
+  const profileExist = await doctorModel.findOne({
+    $and: [
+      {
+        $or: [
+          {
+            email: this.email,
+          },
+          { phoneNumber: this.phoneNumber },
+        ],
+      },
+      { deleted: false },
+    ],
+  });
+  if (/^[0]?[789]\d{9}$/.test(this.phoneNumber)) {
+    if (!profileExist) {
+      return next();
+    } else {
+      throw new Error(
+        "Profile alredy exist. Select a different phone number and email"
+      );
+    }
+  } else {
+    throw new Error("Invalid phone number");
+  }
+});
+
+doctorSchema.pre("findOneAndUpdate", async function (next) {
+  let updateQuery: any = this.getUpdate();
+  updateQuery = updateQuery["$set"];
+  if ("phoneNumber" in updateQuery || "email" in updateQuery) {
+    const query = this.getQuery();
+    const profileExist = await this.model.findOne({
+      _id: { $ne: query._id },
+      $or: [
+        {
+          email: updateQuery.email,
+        },
+        { phoneNumber: updateQuery.phoneNumber },
+      ],
+    });
+    if (profileExist) {
+      throw new Error(
+        "Profile alredy exist. Select a different phone number and email"
+      );
+    } else {
+      return next();
+    }
+  }
+  return next();
+});
+
 const doctorModel = model(doctor, doctorSchema);
 
 export default doctorModel;

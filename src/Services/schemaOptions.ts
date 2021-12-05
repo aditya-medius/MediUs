@@ -28,7 +28,7 @@ const schemaOptions: any = {
   email: {
     type: String,
     required: true,
-    unique: [true, "Email already exist"],
+    // unique: [true, "Email already exist"],
   },
   password: {
     type: String,
@@ -38,14 +38,14 @@ const schemaOptions: any = {
     type: Schema.Types.ObjectId,
     ref: appointment,
   },
-  verified: {
+  active: {
+    type: Boolean,
+    default: true,
+  },
+  deleted: {
     type: Boolean,
     default: false,
   },
-  active: {
-    type: Boolean,
-    default: true
-  }
 };
 
 export default schemaOptions;
