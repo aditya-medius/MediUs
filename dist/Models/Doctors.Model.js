@@ -38,17 +38,21 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
         {
             hospital: {
                 type: mongoose_1.default.Schema.Types.ObjectId,
+                required: true,
                 ref: schemaNames_1.hospital,
             },
             workingHours: {
                 type: mongoose_1.default.Schema.Types.ObjectId,
+                required: true,
                 ref: schemaNames_1.workingHour,
             },
             consultationFee: {
                 min: {
+                    required: true,
                     type: Number,
                 },
                 max: {
+                    required: true,
                     type: Number,
                 },
             },
@@ -76,6 +80,9 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
     ], liked: {
         type: mongoose_1.default.Schema.Types.ObjectId,
         ref: schemaNames_1.like,
+    }, treatmentType: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        ref: schemaNames_1.treatmentType,
     } }));
 doctorSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -109,7 +116,10 @@ doctorSchema.pre("findOneAndUpdate", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         let updateQuery = this.getUpdate();
         updateQuery = updateQuery["$set"];
-        if ("phoneNumber" in updateQuery || "email" in updateQuery) {
+        if ("phoneNumber" in updateQuery ||
+            "email" in updateQuery ||
+            "panCard" in updateQuery ||
+            "adhaarCard" in updateQuery) {
             const query = this.getQuery();
             const profileExist = yield this.model.findOne({
                 _id: { $ne: query._id },
