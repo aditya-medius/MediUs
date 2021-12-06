@@ -79,11 +79,9 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     try {
         let body = req.query;
         if (!("OTP" in body)) {
-            if (/^[0]?[789]\d{9}$/.test(body.phoneNumber)) {
+            if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
                 const OTP = Math.floor(100000 + Math.random() * 900000).toString();
-                const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 10 * 60 * 60 }, OTP, {
-                    expiresIn: 5 * 60 * 60,
-                });
+                const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 }, OTP);
                 // Add OTP and phone number to temporary collection
                 yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: body.phoneNumber }, { $set: { phoneNumber: body.phoneNumber, otp: otpToken } }, { upsert: true });
                 // Implement message service API
@@ -106,7 +104,8 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                 if (body.OTP === data.otp) {
                     const profile = yield Doctors_Model_1.default.findOne({
                         phoneNumber: body.phoneNumber,
-                    });
+                        deleted: false,
+                    }, excludeDoctorFields);
                     if (profile) {
                         const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_DOCTOR_KEY);
                         otpData.remove();
@@ -174,6 +173,7 @@ const updateDoctorProfile = (req, res) => __awaiter(void 0, void 0, void 0, func
         }, {
             $set: body,
         }, {
+            fields: excludeDoctorFields,
             new: true,
         });
         if (updatedDoctorObj) {
