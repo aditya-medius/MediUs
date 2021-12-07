@@ -1,6 +1,6 @@
 export const appointment: string = "appointments";
 export const qualification: string = "qualifications";
-export const speciality: string = "specialitys";
+export const speciality: string = "speciality";
 export const like: string = "likes";
 export const hospital: string = "hospitals";
 export const workingHour: string = "workingHours";
@@ -9,3 +9,4 @@ export const patient: string = "patients";
 export const anemity: string = "anemitys";
 export const treatmentType: string = "treatmentType";
 export const OTP: string = "OTP";
+export const BodyPart: string = "bodyPart";
