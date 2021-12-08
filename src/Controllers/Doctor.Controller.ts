@@ -4,7 +4,7 @@ import otpModel from "../Models/OTP.Model";
 import * as jwt from "jsonwebtoken";
 import * as bcrypt from "bcrypt";
 import { errorResponse, successResponse } from "../Services/response";
-import { sendMessage } from "../Services/message.service";
+import { AnyArray } from "mongoose";
 
 const excludeDoctorFields = {
   password: 0,
@@ -63,26 +63,20 @@ export const doctorLogin = async (req: Request, res: Response) => {
     if (!("OTP" in body)) {
       if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
         const OTP = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpToken = jwt.sign(
+          { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
+          OTP
+        );
+
+        // Add OTP and phone number to temporary collection
+        await otpModel.findOneAndUpdate(
+          { phoneNumber: body.phoneNumber },
+          { $set: { phoneNumber: body.phoneNumber, otp: otpToken } },
+          { upsert: true }
+        );
 
         // Implement message service API
-        sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
-          .then(async (message) => {
-            const otpToken = jwt.sign(
-              { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
-              OTP
-            );
-            // Add OTP and phone number to temporary collection
-            await otpModel.findOneAndUpdate(
-              { phoneNumber: body.phoneNumber },
-              { $set: { phoneNumber: body.phoneNumber, otp: otpToken } },
-              { upsert: true }
-            );
-          })
-          .catch((error) => {
-            throw error;
-          });
-
-        return successResponse({}, "OTP sent successfully", res);
+        return successResponse(OTP, "OTP sent successfully", res);
       } else {
         let error = new Error("Invalid phone number");
         error.name = "Invalid input";

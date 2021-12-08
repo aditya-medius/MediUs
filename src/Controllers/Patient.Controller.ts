@@ -4,8 +4,7 @@ import otpModel from "../Models/OTP.Model";
 import * as jwt from "jsonwebtoken";
 import * as bcrypt from "bcrypt";
 import { errorResponse, successResponse } from "../Services/response";
-import { AnyArray } from "mongoose";
-import PatientModel from "../Models/Patient.Model";
+import { sendMessage } from "../Services/message.service";
 
 const excludePatientFields = {
   password: 0,
@@ -16,7 +15,10 @@ const excludePatientFields = {
 // Get All Patients
 export const getAllPatientsList = async (req: Request, res: Response) => {
   try {
-    const patientList = await patientModel.find({}, excludePatientFields);
+    const patientList = await patientModel.find(
+      {deleted: false}, 
+      excludePatientFields
+      );
     return successResponse(
       patientList,
       "Successfully fetched patient's list",
@@ -61,14 +63,10 @@ export const patientLogin = async (req: Request, res: Response) => {
         const otpToken = jwt.sign(
           { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
           OTP,
-          {
-            expiresIn: 5 * 60 * 60 * 60,
-          }
         );
         await otpModel.findOneAndUpdate(
-          { phoneNumber: body.phoneNumber },
-          { $set: { phoneNumber: body.phoneNumber, otp: otpToken } },
-          { upsert: true }
+          { phoneNumber: body.phoneNumber 
+          },
         );
         return successResponse(OTP, "OTP sent successfully", res);
       } else {
@@ -87,7 +85,10 @@ export const patientLogin = async (req: Request, res: Response) => {
         if (body.OTP === data.otp) {
           const profile = await patientModel.findOne({
             phoneNumber: body.phoneNumber,
-          });
+             deleted: false,
+          },
+          excludePatientFields
+          );
           if (profile) {
             const token = await jwt.sign(
               profile.toJSON(),
@@ -126,7 +127,7 @@ export const patientLogin = async (req: Request, res: Response) => {
 export const getPatientById = async (req: Request, res: Response) => {
   try {
     const patientData = await patientModel.findOne(
-      { _id: req.params.id },
+      { _id: req.params.id, deleted: false },
       excludePatientFields
     );
     if (patientData) {
@@ -148,6 +149,54 @@ export const getPatientById = async (req: Request, res: Response) => {
 // Get patient By Hospital
 export const getPatientByHospitalId = async (req: Request, res: Response) => {
   try {
+  } catch (error) {
+    return errorResponse(error, res);
+  }
+};
+export const updatePatientProfile = async (req: Request, res: Response) => {
+  try {
+    let body = req.body;
+    const updatedPatientObj = await patientModel.findOneAndUpdate(
+      {
+        _id: req.currentDoctor,
+        deleted: false,
+      },
+      {
+        $set: body,
+      },
+      {
+        fields: excludePatientFields,
+        new: true,
+      }
+    );
+    if (updatedPatientObj) {
+      return successResponse(
+        updatedPatientObj,
+        "Profile updated successfully,",
+        res
+      );
+    } else {
+      let error = new Error("Profile doesn't exist");
+      error.name = "Not Found";
+      return errorResponse(error, res);
+    }
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const deleteProfile = async (req: Request, res: Response) => {
+  try {
+    const patientProfile = await patientModel.findOneAndUpdate(
+      { _id: req.currentDoctor, deleted: false },
+    );
+    if (patientProfile) {
+      return successResponse({}, "Patient Profile deleted successfully", res);
+    } else {
+      let error = new Error("Patient Profile doesn't exist");
+      error.name = "Not found";
+      return errorResponse(error, res, 404);
+    }
   } catch (error) {
     return errorResponse(error, res);
   }

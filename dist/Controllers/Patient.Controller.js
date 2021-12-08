@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = void 0;
+exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = void 0;
 const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -45,7 +45,7 @@ const excludePatientFields = {
 // Get All Patients
 const getAllPatientsList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const patientList = yield Patient_Model_1.default.find({}, excludePatientFields);
+        const patientList = yield Patient_Model_1.default.find({ deleted: false }, excludePatientFields);
         return (0, response_1.successResponse)(patientList, "Successfully fetched patient's list", res);
     }
     catch (error) {
@@ -78,10 +78,9 @@ const patientLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         if (!("OTP" in body)) {
             if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
                 const OTP = Math.floor(100000 + Math.random() * 900000).toString();
-                const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 }, OTP, {
-                    expiresIn: 5 * 60 * 60 * 60,
+                const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 }, OTP);
+                yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: body.phoneNumber
                 });
-                yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: body.phoneNumber }, { $set: { phoneNumber: body.phoneNumber, otp: otpToken } }, { upsert: true });
                 return (0, response_1.successResponse)(OTP, "OTP sent successfully", res);
             }
             else {
@@ -101,7 +100,8 @@ const patientLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                 if (body.OTP === data.otp) {
                     const profile = yield Patient_Model_1.default.findOne({
                         phoneNumber: body.phoneNumber,
-                    });
+                        deleted: false,
+                    }, excludePatientFields);
                     if (profile) {
                         const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_PATIENT_KEY);
                         otpData.remove();
@@ -136,7 +136,7 @@ exports.patientLogin = patientLogin;
 // Get Patient By Patient Id
 const getPatientById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const patientData = yield Patient_Model_1.default.findOne({ _id: req.params.id }, excludePatientFields);
+        const patientData = yield Patient_Model_1.default.findOne({ _id: req.params.id, deleted: false }, excludePatientFields);
         if (patientData) {
             return (0, response_1.successResponse)(patientData, "Successfully fetched patient details", res);
         }
@@ -160,3 +160,46 @@ const getPatientByHospitalId = (req, res) => __awaiter(void 0, void 0, void 0, f
     }
 });
 exports.getPatientByHospitalId = getPatientByHospitalId;
+const updatePatientProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.body;
+        const updatedPatientObj = yield Patient_Model_1.default.findOneAndUpdate({
+            _id: req.currentDoctor,
+            deleted: false,
+        }, {
+            $set: body,
+        }, {
+            fields: excludePatientFields,
+            new: true,
+        });
+        if (updatedPatientObj) {
+            return (0, response_1.successResponse)(updatedPatientObj, "Profile updated successfully,", res);
+        }
+        else {
+            let error = new Error("Profile doesn't exist");
+            error.name = "Not Found";
+            return (0, response_1.errorResponse)(error, res);
+        }
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.updatePatientProfile = updatePatientProfile;
+const deleteProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const patientProfile = yield Patient_Model_1.default.findOneAndUpdate({ _id: req.currentDoctor, deleted: false });
+        if (patientProfile) {
+            return (0, response_1.successResponse)({}, "Patient Profile deleted successfully", res);
+        }
+        else {
+            let error = new Error("Patient Profile doesn't exist");
+            error.name = "Not found";
+            return (0, response_1.errorResponse)(error, res, 404);
+        }
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.deleteProfile = deleteProfile;
