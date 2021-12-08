@@ -29,7 +29,7 @@ export const getAllPatientsList = async (req: Request, res: Response) => {
   }
 };
 
-// Create a new patient account
+// Create a new patient account(CREATE)
 export const createPatient = async (req: Request, res: Response) => {
   try {
     let body = req.body;
@@ -123,7 +123,7 @@ export const patientLogin = async (req: Request, res: Response) => {
     return errorResponse(error, res);
   }
 };
-// Get Patient By Patient Id
+// Get Patient By Patient Id(READ)
 export const getPatientById = async (req: Request, res: Response) => {
   try {
     const patientData = await patientModel.findOne(
@@ -146,7 +146,7 @@ export const getPatientById = async (req: Request, res: Response) => {
   }
 };
 
-// Get patient By Hospital
+// Get patient By Hospital(UPDATE)
 export const getPatientByHospitalId = async (req: Request, res: Response) => {
   try {
   } catch (error) {
@@ -185,6 +185,7 @@ export const updatePatientProfile = async (req: Request, res: Response) => {
   }
 };
 
+// Delete patient profile(DELETE)
 export const deleteProfile = async (req: Request, res: Response) => {
   try {
     const patientProfile = await patientModel.findOneAndUpdate(

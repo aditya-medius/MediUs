@@ -53,7 +53,7 @@ const getAllPatientsList = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.getAllPatientsList = getAllPatientsList;
-// Create a new patient account
+// Create a new patient account(CREATE)
 const createPatient = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
@@ -133,7 +133,7 @@ const patientLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.patientLogin = patientLogin;
-// Get Patient By Patient Id
+// Get Patient By Patient Id(READ)
 const getPatientById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const patientData = yield Patient_Model_1.default.findOne({ _id: req.params.id, deleted: false }, excludePatientFields);
@@ -151,7 +151,7 @@ const getPatientById = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.getPatientById = getPatientById;
-// Get patient By Hospital
+// Get patient By Hospital(UPDATE)
 const getPatientByHospitalId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
     }
@@ -186,6 +186,7 @@ const updatePatientProfile = (req, res) => __awaiter(void 0, void 0, void 0, fun
     }
 });
 exports.updatePatientProfile = updatePatientProfile;
+// Delete patient profile(DELETE)
 const deleteProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const patientProfile = yield Patient_Model_1.default.findOneAndUpdate({ _id: req.currentDoctor, deleted: false });
