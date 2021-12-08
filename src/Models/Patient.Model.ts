@@ -9,20 +9,6 @@ import {
 
 const patientSchema = new Schema({
   ...schemaOptions,
-  hospitalDetails: [
-    {
-      hospital: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: hospital,
-      },
-       doctor: {
-       type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: doctor,
-      },
-    },
-  ],
 });
 
 patientSchema.pre("save", async function (next) {

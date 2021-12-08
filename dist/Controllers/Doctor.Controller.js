@@ -37,6 +37,7 @@ const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
 const bcrypt = __importStar(require("bcrypt"));
 const response_1 = require("../Services/response");
+const message_service_1 = require("../Services/message.service");
 const excludeDoctorFields = {
     password: 0,
     panCard: 0,
@@ -81,11 +82,17 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         if (!("OTP" in body)) {
             if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
                 const OTP = Math.floor(100000 + Math.random() * 900000).toString();
-                const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 }, OTP);
-                // Add OTP and phone number to temporary collection
-                yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: body.phoneNumber }, { $set: { phoneNumber: body.phoneNumber, otp: otpToken } }, { upsert: true });
                 // Implement message service API
-                return (0, response_1.successResponse)(OTP, "OTP sent successfully", res);
+                (0, message_service_1.sendMessage)(`Your OTP is: ${OTP}`, body.phoneNumber)
+                    .then((message) => __awaiter(void 0, void 0, void 0, function* () {
+                    const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 }, OTP);
+                    // Add OTP and phone number to temporary collection
+                    yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: body.phoneNumber }, { $set: { phoneNumber: body.phoneNumber, otp: otpToken } }, { upsert: true });
+                }))
+                    .catch((error) => {
+                    throw error;
+                });
+                return (0, response_1.successResponse)({}, "OTP sent successfully", res);
             }
             else {
                 let error = new Error("Invalid phone number");

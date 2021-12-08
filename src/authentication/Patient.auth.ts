@@ -13,11 +13,10 @@ export const authenticatePatient = async (
       authHeader,
       process.env.SECRET_PATIENT_KEY as string
     );
-    req.currentDoctor = data._id;
+    req.currentPatient = data._id;
     next();
   } catch (error: any) {
     error.message = "Forbidden";
-    // Forbidden status code - 403
     return errorResponse(error, res, 403);
   }
 };

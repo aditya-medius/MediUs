@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import { authenticateDoctor } from "../authentication/Doctor.auth";
+// import * as doctorController from "../Controllers/Doctor.Controller";
 import * as doctorController from "../Controllers/Doctor.Controller";
 const doctorRouter = express.Router();
 

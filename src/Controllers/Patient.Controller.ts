@@ -4,6 +4,7 @@ import otpModel from "../Models/OTP.Model";
 import * as jwt from "jsonwebtoken";
 import * as bcrypt from "bcrypt";
 import { errorResponse, successResponse } from "../Services/response";
+// import { sendMessage } from "../Services/message.service";
 import { sendMessage } from "../Services/message.service";
 
 const excludePatientFields = {
@@ -56,19 +57,30 @@ export const createPatient = async (req: Request, res: Response) => {
 // Login as a Patient
 export const patientLogin = async (req: Request, res: Response) => {
   try {
-     let body: any = req.query;
+    let body: any = req.query;
     if (!("OTP" in body)) {
       if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
         const OTP = Math.floor(100000 + Math.random() * 900000).toString();
-        const otpToken = jwt.sign(
-          { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
-          OTP,
-        );
-        await otpModel.findOneAndUpdate(
-          { phoneNumber: body.phoneNumber 
-          },
-        );
-        return successResponse(OTP, "OTP sent successfully", res);
+
+        // Implement message service API
+        sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
+          .then(async (message) => {
+            const otpToken = jwt.sign(
+              { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
+              OTP
+            );
+            // Add OTP and phone number to temporary collection
+            await otpModel.findOneAndUpdate(
+              { phoneNumber: body.phoneNumber },
+              { $set: { phoneNumber: body.phoneNumber, otp: otpToken } },
+              { upsert: true }
+            );
+          })
+          .catch((error) => {
+            throw error;
+          });
+
+        return successResponse({}, "OTP sent successfully", res);
       } else {
         let error = new Error("Invalid phone number");
         error.name = "Invalid input";
@@ -83,11 +95,12 @@ export const patientLogin = async (req: Request, res: Response) => {
         if (Date.now() > data.expiresIn)
           return errorResponse(new Error("OTP expired"), res);
         if (body.OTP === data.otp) {
-          const profile = await patientModel.findOne({
-            phoneNumber: body.phoneNumber,
-             deleted: false,
-          },
-          excludePatientFields
+          const profile = await patientModel.findOne(
+            {
+              phoneNumber: body.phoneNumber,
+              deleted: false,
+            },
+            excludePatientFields
           );
           if (profile) {
             const token = await jwt.sign(
@@ -99,7 +112,7 @@ export const patientLogin = async (req: Request, res: Response) => {
           } else {
             otpData.remove();
             return successResponse(
-              { message: "Data is not found" },
+              { message: "No Data found" },
               "Create a new profile",
               res,
               201
@@ -112,7 +125,7 @@ export const patientLogin = async (req: Request, res: Response) => {
         }
       } catch (err) {
         if (err instanceof jwt.JsonWebTokenError) {
-          const error = new Error("OTP is not valid");
+          const error = new Error("OTP isn't valid");
           error.name = "Invalid OTP";
           return errorResponse(error, res);
         }
@@ -158,7 +171,7 @@ export const updatePatientProfile = async (req: Request, res: Response) => {
     let body = req.body;
     const updatedPatientObj = await patientModel.findOneAndUpdate(
       {
-        _id: req.currentDoctor,
+        _id: req.currentPatient,
         deleted: false,
       },
       {
@@ -189,7 +202,8 @@ export const updatePatientProfile = async (req: Request, res: Response) => {
 export const deleteProfile = async (req: Request, res: Response) => {
   try {
     const patientProfile = await patientModel.findOneAndUpdate(
-      { _id: req.currentDoctor, deleted: false },
+      { _id: req.currentPatient, deleted: false },
+         { $set: { deleted: true } }
     );
     if (patientProfile) {
       return successResponse({}, "Patient Profile deleted successfully", res);
