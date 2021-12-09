@@ -17,7 +17,6 @@ export const authenticateDoctor = async (
     next();
   } catch (error: any) {
     error.message = "Forbidden";
-    // Forbidden status code - 403
     return errorResponse(error, res, 403);
   }
 };

@@ -1,5 +1,5 @@
 declare namespace Express {
   interface Request {
-    currentDoctor: String;
+    currentDoctor: Object<any>;
   }
 }

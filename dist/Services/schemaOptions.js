@@ -30,7 +30,7 @@ const schemaOptions = {
     email: {
         type: String,
         required: true,
-        unique: [true, "Email already exist"],
+        // unique: [true, "Email already exist"],
     },
     password: {
         type: String,
@@ -40,7 +40,11 @@ const schemaOptions = {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: schemaNames_1.appointment,
     },
-    verified: {
+    active: {
+        type: Boolean,
+        default: true,
+    },
+    deleted: {
         type: Boolean,
         default: false,
     },
