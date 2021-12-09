@@ -5,7 +5,9 @@ import * as jwt from "jsonwebtoken";
 import * as bcrypt from "bcrypt";
 import { errorResponse, successResponse } from "../Services/response";
 import { sendMessage } from "../Services/message.service";
-
+import specialityBodyModel from "../Admin Controlled Models/SpecialityBody.Model";
+import bodyPartModel from "../Admin Controlled Models/BodyPart.Model";
+import _ from "underscore";
 const excludeDoctorFields = {
   password: 0,
   panCard: 0,
@@ -215,6 +217,73 @@ export const deleteProfile = async (req: Request, res: Response) => {
       error.name = "Not found";
       return errorResponse(error, res, 404);
     }
+  } catch (error) {
+    return errorResponse(error, res);
+  }
+};
+
+export const findDoctorByBodyPartSpecialist = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const term = req.params.term;
+    let bodyPart: any = await specialityBodyModel.aggregate([
+      {
+        $facet: {
+          bySpeciality: [
+            {
+              $lookup: {
+                from: "specializations",
+                localField: "speciality",
+                foreignField: "_id",
+                as: "byspeciality",
+              },
+            },
+            {
+              $match: {
+                "byspeciality.specialityName": { $regex: term, $options: "i" },
+              },
+            },
+            {
+              $project: {
+                speciality: 1,
+                _id: 0,
+              },
+            },
+          ],
+          byBodyPart: [
+            {
+              $lookup: {
+                from: "bodyparts",
+                localField: "bodyParts",
+                foreignField: "_id",
+                as: "bodyPart",
+              },
+            },
+            {
+              $match: {
+                "bodyPart.bodyPart": { $regex: term, $options: "i" },
+              },
+            },
+            {
+              $project: {
+                speciality: 1,
+                _id: 0,
+              },
+            },
+          ],
+        },
+      },
+    ]);
+    let { bySpeciality, byBodyPart } = bodyPart[0];
+
+    let specialityArray: Array<string>;
+    specialityArray = _.map([...bySpeciality, ...byBodyPart], (e) => {
+      return e.speciality.toString();
+    });
+    specialityArray = _.uniq(specialityArray);
+    return successResponse(specialityArray, "Success", res);
   } catch (error) {
     return errorResponse(error, res);
   }

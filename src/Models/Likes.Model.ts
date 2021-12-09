@@ -1,16 +1,16 @@
 import mongoose, { Schema, model } from "mongoose";
+import { doctor, like, patient } from "../Services/schemaNames";
 
-const likesSchema = new Schema({
+const likeSchema = new Schema({
   doctor: {
-    type: Schema.Types.ObjectId,
-    ref: "doctor",
+    type: mongoose.Schema.Types.ObjectId,
+    ref: doctor,
   },
   patient: {
-    type: Schema.Types.ObjectId,
-    ref: "patient",
+    type: mongoose.Schema.Types.ObjectId,
+    ref: patient,
   },
 });
 
-const likes = model("likes", likesSchema);
-
-export default likes;
+const likeModel = model(like, likeSchema);
+export default likeModel;

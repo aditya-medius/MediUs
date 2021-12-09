@@ -1,17 +1,22 @@
 import mongoose, { Schema, model } from "mongoose";
-import { BodyPart, speciality } from "../Services/schemaNames";
+import { BodyPart, speciality, specialization } from "../Services/schemaNames";
 
 const specialityBodySchema = new Schema({
   speciality: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: speciality,
+    unique: true,
+    ref: specialization,
   },
-  bodyParts: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: BodyPart,
-  },
+
+  bodyParts: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      uniqueItems: true,
+      required: true,
+      ref: BodyPart,
+    },
+  ],
 });
 
 const specialityBodyModel = model(speciality, specialityBodySchema);

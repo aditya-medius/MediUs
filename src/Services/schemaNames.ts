@@ -1,6 +1,7 @@
 export const appointment: string = "appointments";
 export const qualification: string = "qualifications";
 export const speciality: string = "speciality";
+export const specialization: string = "specialization";
 export const like: string = "likes";
 export const hospital: string = "hospitals";
 export const workingHour: string = "workingHours";

@@ -31,13 +31,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = void 0;
+exports.findDoctorByBodyPartSpecialist = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
 const bcrypt = __importStar(require("bcrypt"));
 const response_1 = require("../Services/response");
 const message_service_1 = require("../Services/message.service");
+const SpecialityBody_Model_1 = __importDefault(require("../Admin Controlled Models/SpecialityBody.Model"));
+const underscore_1 = __importDefault(require("underscore"));
 const excludeDoctorFields = {
     password: 0,
     panCard: 0,
@@ -214,3 +216,67 @@ const deleteProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.deleteProfile = deleteProfile;
+const findDoctorByBodyPartSpecialist = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const term = req.params.term;
+        let bodyPart = yield SpecialityBody_Model_1.default.aggregate([
+            {
+                $facet: {
+                    bySpeciality: [
+                        {
+                            $lookup: {
+                                from: "specializations",
+                                localField: "speciality",
+                                foreignField: "_id",
+                                as: "byspeciality",
+                            },
+                        },
+                        {
+                            $match: {
+                                "byspeciality.specialityName": { $regex: term, $options: "i" },
+                            },
+                        },
+                        {
+                            $project: {
+                                speciality: 1,
+                                _id: 0,
+                            },
+                        },
+                    ],
+                    byBodyPart: [
+                        {
+                            $lookup: {
+                                from: "bodyparts",
+                                localField: "bodyParts",
+                                foreignField: "_id",
+                                as: "bodyPart",
+                            },
+                        },
+                        {
+                            $match: {
+                                "bodyPart.bodyPart": { $regex: term, $options: "i" },
+                            },
+                        },
+                        {
+                            $project: {
+                                speciality: 1,
+                                _id: 0,
+                            },
+                        },
+                    ],
+                },
+            },
+        ]);
+        let { bySpeciality, byBodyPart } = bodyPart[0];
+        let specialityArray;
+        specialityArray = underscore_1.default.map([...bySpeciality, ...byBodyPart], (e) => {
+            return e.speciality.toString();
+        });
+        specialityArray = underscore_1.default.uniq(specialityArray);
+        return (0, response_1.successResponse)(specialityArray, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.findDoctorByBodyPartSpecialist = findDoctorByBodyPartSpecialist;
