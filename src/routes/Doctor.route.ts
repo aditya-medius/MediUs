@@ -24,7 +24,7 @@ doctorRouter.post(
 );
 
 doctorRouter.post(
-  "/findDoctorByBodyPartSpecialist/:term",
-  doctorController.findDoctorByBodyPartSpecialist
+  "/findDoctorBySpecialityOrBodyPart/:term",
+  doctorController.findDoctorBySpecialityOrBodyPart
 );
 export default doctorRouter;

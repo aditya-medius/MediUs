@@ -220,10 +220,9 @@ export const deleteProfile = async (req: Request, res: Response) => {
   } catch (error) {
     return errorResponse(error, res);
   }
-<<<<<<< HEAD
 };
 
-export const findDoctorByBodyPartSpecialist = async (
+export const findDoctorBySpecialityOrBodyPart = async (
   req: Request,
   res: Response
 ) => {
@@ -276,19 +275,30 @@ export const findDoctorByBodyPartSpecialist = async (
           ],
         },
       },
+      {
+        $project: {
+          BodyAndSpeciality: {
+            $setUnion: ["$bySpeciality", "$byBodyPart"],
+          },
+        },
+      },
+      { $unwind: "$BodyAndSpeciality" },
+      { $replaceRoot: { newRoot: "$BodyAndSpeciality" } },
     ]);
-    let { bySpeciality, byBodyPart } = bodyPart[0];
-
     let specialityArray: Array<string>;
-    specialityArray = _.map([...bySpeciality, ...byBodyPart], (e) => {
-      return e.speciality.toString();
-    });
-    specialityArray = _.uniq(specialityArray);
-    return successResponse(specialityArray, "Success", res);
+    specialityArray = _.map(bodyPart, (e) => e.speciality);
+    const doctorArray = await doctorModel
+      .find(
+        {
+          deleted: false,
+          active: true,
+          specialization: { $in: specialityArray },
+        },
+        excludeDoctorFields
+      )
+      .populate("specialization");
+    return successResponse(doctorArray, "Success", res);
   } catch (error) {
     return errorResponse(error, res);
   }
 };
-=======
-};
->>>>>>> cb72251fc2962c83a62cf7c77536576e2ac8815a

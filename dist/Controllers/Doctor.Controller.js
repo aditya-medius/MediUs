@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findDoctorByBodyPartSpecialist = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = void 0;
+exports.findDoctorBySpecialityOrBodyPart = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -216,7 +216,7 @@ const deleteProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.deleteProfile = deleteProfile;
-const findDoctorByBodyPartSpecialist = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const findDoctorBySpecialityOrBodyPart = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const term = req.params.term;
         let bodyPart = yield SpecialityBody_Model_1.default.aggregate([
@@ -266,17 +266,29 @@ const findDoctorByBodyPartSpecialist = (req, res) => __awaiter(void 0, void 0, v
                     ],
                 },
             },
+            {
+                $project: {
+                    BodyAndSpeciality: {
+                        $setUnion: ["$bySpeciality", "$byBodyPart"],
+                    },
+                },
+            },
+            { $unwind: "$BodyAndSpeciality" },
+            { $replaceRoot: { newRoot: "$BodyAndSpeciality" } },
         ]);
-        let { bySpeciality, byBodyPart } = bodyPart[0];
         let specialityArray;
-        specialityArray = underscore_1.default.map([...bySpeciality, ...byBodyPart], (e) => {
-            return e.speciality.toString();
-        });
-        specialityArray = underscore_1.default.uniq(specialityArray);
-        return (0, response_1.successResponse)(specialityArray, "Success", res);
+        specialityArray = underscore_1.default.map(bodyPart, (e) => e.speciality);
+        const doctorArray = yield Doctors_Model_1.default
+            .find({
+            deleted: false,
+            active: true,
+            specialization: { $in: specialityArray },
+        }, excludeDoctorFields)
+            .populate("specialization");
+        return (0, response_1.successResponse)(doctorArray, "Success", res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);
     }
 });
-exports.findDoctorByBodyPartSpecialist = findDoctorByBodyPartSpecialist;
+exports.findDoctorBySpecialityOrBodyPart = findDoctorBySpecialityOrBodyPart;
