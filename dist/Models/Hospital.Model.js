@@ -18,30 +18,55 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
-const schemaOptions_1 = __importDefault(require("../Services/schemaOptions"));
-const hospitalSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schemaOptions_1.default), { hospitals: [
-        {
-            type: mongoose_1.default.Schema.Types.ObjectId,
-            ref: "hospital",
-        },
-    ], specialization: [
-        {
-            type: mongoose_1.Schema.Types.ObjectId,
-            ref: "speciality",
-        },
-    ], panCard: {
-        type: String,
+const schemaNames_1 = require("../Services/schemaNames");
+const hospitalSchema = new mongoose_1.Schema({
+    address: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
         required: true,
-    }, qualification: [
+        ref: schemaNames_1.address
+    },
+    doctors: [
         {
             type: mongoose_1.default.Schema.Types.ObjectId,
-            ref: "qualification",
-        },
-    ] }));
-const hospital = (0, mongoose_1.model)("hospital", hospitalSchema);
-exports.default = hospital;
+            required: true,
+            ref: schemaNames_1.doctor
+        }
+    ],
+    specialisedIn: [
+        {
+            type: mongoose_1.default.Schema.Types.ObjectId,
+            required: true,
+            ref: schemaNames_1.speciality
+        }
+    ],
+    anemity: [{
+            type: mongoose_1.default.Schema.Types.ObjectId,
+            required: true,
+            ref: schemaNames_1.anemity
+        }],
+    treatmentType: [
+        {
+            type: mongoose_1.default.Schema.Types.ObjectId,
+            required: true
+        }
+    ],
+    type: {
+        type: String,
+        required: true
+    },
+    payment: [
+        {
+            type: mongoose_1.default.Schema.Types.ObjectId,
+            required: true,
+            ref: schemaNames_1.payment
+        }
+    ],
+    deleted: {
+        type: Boolean,
+        default: false
+    }
+});
+const hospitalModel = (0, mongoose_1.model)(schemaNames_1.hospital, hospitalSchema);
+exports.default = hospitalModel;

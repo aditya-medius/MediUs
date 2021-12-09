@@ -1,31 +1,60 @@
 import mongoose, { Schema, model } from "mongoose";
 import schemaOptions from "../Services/schemaOptions";
+import 
+{ 
+  speciality, doctor, address, payment, anemity, hospital
+} 
+ from "../Services/schemaNames";
 const hospitalSchema = new Schema({
-  ...schemaOptions,
-  hospitals: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "hospital",
-    },
-  ],
-  specialization: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "speciality",
-    },
-  ],
-  panCard: {
-    type: String,
+  address:{
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
+    ref: address
   },
-  qualification: [
+  doctors:[
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "qualification",
-    },
+      required: true,
+      ref: doctor
+    }
   ],
+  specialisedIn:[
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: speciality
+    }
+  ],
+  anemity:[{
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: anemity
+  }],
+  treatmentType:[
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true
+    }
+  ],
+  type:{
+    type: String,
+    required: true
+  },
+  payment:[
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: payment
+    }
+  ],
+
+  deleted:{
+    type: Boolean,
+    default: false
+  }
+
 });
 
-const hospital = model("hospital", hospitalSchema);
+const hospitalModel = model(hospital, hospitalSchema);
 
-export default hospital;
+export default hospitalModel;

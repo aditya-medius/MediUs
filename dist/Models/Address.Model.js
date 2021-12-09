@@ -18,14 +18,36 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const hospitalController = __importStar(require("../Controllers/Hospital.Controller"));
-const hospitalRouter = express_1.default.Router();
-hospitalRouter.get("/", hospitalController.getAllHospitalsList);
-hospitalRouter.post("/", hospitalController.createHospital);
-hospitalRouter.post("/address", hospitalController.createHospitalAddress);
-exports.default = hospitalRouter;
+const mongoose_1 = __importStar(require("mongoose"));
+const schemaNames_1 = require("../Services/schemaNames");
+const addressSchema = new mongoose_1.Schema({
+    city: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        required: true,
+        ref: schemaNames_1.city
+    },
+    state: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        required: true,
+        ref: schemaNames_1.state
+    },
+    locality: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        required: true,
+        ref: schemaNames_1.locality
+    },
+    country: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        required: true
+    },
+    addressLine_1: {
+        type: String,
+        required: true
+    },
+    addressLine_2: {
+        type: String
+    }
+});
+const addressModel = (0, mongoose_1.model)(schemaNames_1.address, addressSchema);
+exports.default = addressModel;

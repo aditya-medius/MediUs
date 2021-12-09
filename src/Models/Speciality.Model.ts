@@ -1,4 +1,5 @@
 import mongoose, { Schema, model } from "mongoose";
+import { speciality } from "../Services/schemaNames";
 const specialitySchema = new Schema({
   speciality: {
     type: String,
@@ -16,5 +17,5 @@ const specialitySchema = new Schema({
   },
 });
 
-const speciality = model("speciality", specialitySchema);
-export default speciality;
+const specialityModel = model(speciality, specialitySchema);
+export default specialityModel;
