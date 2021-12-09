@@ -24,6 +24,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const Doctor_auth_1 = require("../authentication/Doctor.auth");
+// import * as doctorController from "../Controllers/Doctor.Controller";
 const doctorController = __importStar(require("../Controllers/Doctor.Controller"));
 const doctorRouter = express_1.default.Router();
 doctorRouter.post("/login", doctorController.doctorLogin);
