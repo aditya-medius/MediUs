@@ -24,24 +24,49 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const schemaOptions_1 = __importDefault(require("../Services/schemaOptions"));
-const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schemaOptions_1.default), { hospitals: [
+const schemaNames_1 = require("../Services/schemaNames");
+const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schemaOptions_1.default), { hospitalDetails: [
         {
-            type: mongoose_1.default.Schema.Types.ObjectId,
-            ref: "hospital",
+            hospital: {
+                type: mongoose_1.default.Schema.Types.ObjectId,
+                ref: schemaNames_1.hospital,
+            },
+            workingHours: {
+                type: mongoose_1.default.Schema.Types.ObjectId,
+                ref: schemaNames_1.workingHour,
+            },
+            consultationFee: {
+                min: {
+                    type: Number,
+                },
+                max: {
+                    type: Number,
+                },
+            },
         },
-    ], specialization: [
+    ], registrationDate: {
+        type: Date,
+        required: true,
+    }, specialization: [
         {
             type: mongoose_1.Schema.Types.ObjectId,
-            ref: "speciality",
+            ref: schemaNames_1.speciality,
         },
     ], panCard: {
         type: String,
         required: true,
+    }, adhaarCard: {
+        type: String,
+        required: true,
+        minlength: 12,
     }, qualification: [
         {
             type: mongoose_1.default.Schema.Types.ObjectId,
-            ref: "qualification",
+            ref: schemaNames_1.qualification,
         },
-    ] }));
-const doctor = (0, mongoose_1.model)("doctor", doctorSchema);
-exports.default = doctor;
+    ], liked: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        ref: schemaNames_1.like,
+    } }));
+const doctorModel = (0, mongoose_1.model)(schemaNames_1.doctor, doctorSchema);
+exports.default = doctorModel;

@@ -23,8 +23,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const Doctor_auth_1 = require("../authentication/Doctor.auth");
 const doctorController = __importStar(require("../Controllers/Doctor.Controller"));
 const doctorRouter = express_1.default.Router();
-doctorRouter.get("/", doctorController.getAllDoctorsList);
+doctorRouter.post("/login", doctorController.doctorLogin);
 doctorRouter.post("/", doctorController.createDoctor);
+doctorRouter.get("/", Doctor_auth_1.authenticateDoctor, doctorController.getAllDoctorsList);
+doctorRouter.post("/getDoctorById/:id", Doctor_auth_1.authenticateDoctor, doctorController.getDoctorById);
 exports.default = doctorRouter;

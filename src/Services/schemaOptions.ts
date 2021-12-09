@@ -1,4 +1,5 @@
 import { Schema } from "mongoose";
+import { appointment } from "./schemaNames";
 const schemaOptions: any = {
   firstName: {
     type: String,
@@ -7,6 +8,11 @@ const schemaOptions: any = {
   lastName: {
     type: String,
     required: true,
+  },
+  gender: {
+    type: String,
+    required: true,
+    enum: ["Male", "Female"],
   },
   DOB: {
     type: Date,
@@ -22,15 +28,15 @@ const schemaOptions: any = {
   email: {
     type: String,
     required: true,
-    unique: true,
+    unique: [true, "Email already exist"],
   },
   password: {
     type: String,
     required: true,
   },
-  Appointments: {
+  appointments: {
     type: Schema.Types.ObjectId,
-    ref: "appointment",
+    ref: appointment,
   },
   verified: {
     type: Boolean,

@@ -18,22 +18,18 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const dotenv = __importStar(require("dotenv"));
-// import bodyParser from "body-parser";
-require("./Services/db");
-const Doctor_route_1 = __importDefault(require("./routes/Doctor.route"));
-const Hospital_route_1 = __importDefault(require("./routes/Hospital.route"));
-dotenv.config();
-const port = process.env.PORT;
-const app = (0, express_1.default)();
-app.use(express_1.default.json());
-app.use("/doctor", Doctor_route_1.default);
-app.use("/hospital", Hospital_route_1.default);
-app.listen(port, () => {
-    console.log(`Running on port ${port}`);
+const mongoose_1 = __importStar(require("mongoose"));
+const schemaNames_1 = require("../Services/schemaNames");
+const likeSchema = new mongoose_1.Schema({
+    doctor: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        ref: schemaNames_1.doctor,
+    },
+    patient: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        ref: schemaNames_1.patient,
+    },
 });
+const likeModel = (0, mongoose_1.model)(schemaNames_1.like, likeSchema);
+exports.default = likeModel;

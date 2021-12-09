@@ -1,13 +1,21 @@
 import { Response } from "express";
-import mongoose from "mongoose";
 export const successResponse = (
   data: Object,
   message: String,
-  response: Response
+  response: Response,
+  statusCode: number = 200
 ) => {
-  response.status(200).send({ data, message });
+  response.send({ status: statusCode, data, message });
 };
 
-export const errorResponse = (error: Error, response: Response) => {
-  response.status(400).send({ type: error.name, message: error.message });
+export const errorResponse = (
+  error: Error | any,
+  response: Response,
+  statusCode: number = 400
+) => {
+  response.send({
+    status: statusCode,
+    type: error.name,
+    message: error.message,
+  });
 };
