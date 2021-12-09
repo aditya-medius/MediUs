@@ -63,7 +63,7 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
     }, specialization: [
         {
             type: mongoose_1.Schema.Types.ObjectId,
-            ref: schemaNames_1.speciality,
+            ref: schemaNames_1.specialization,
         },
     ], panCard: {
         type: String,
@@ -83,7 +83,10 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
     }, treatmentType: {
         type: mongoose_1.default.Schema.Types.ObjectId,
         ref: schemaNames_1.treatmentType,
-    } }));
+    } }), {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+});
 doctorSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         const profileExist = yield doctorModel.findOne({
@@ -140,19 +143,12 @@ doctorSchema.pre("findOneAndUpdate", function (next) {
         return next();
     });
 });
-// const mongooseEventList = ["find", "findOne"];
-// mongooseEventList.forEach((event: any) => {
-//   doctorSchema.pre(event, async function (next) {
-//     this.select({
-//       password: 0,
-//       panCard: 0,
-//       adhaarCard: 0,
-//       verified: 0,
-//       registrationDate: 0,
-//       DOB: 0,
-//     });
-//     return next();
-//   });
+// For later
+// doctorSchema.virtual("bodyPart", {
+//   ref: "specialities",
+//   localField: "specialization",
+//   foreignField: "speciality",
+//   justOne: false,
 // });
 const doctorModel = (0, mongoose_1.model)(schemaNames_1.doctor, doctorSchema);
 exports.default = doctorModel;

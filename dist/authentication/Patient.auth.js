@@ -19,12 +19,11 @@ const authenticatePatient = (req, res, next) => __awaiter(void 0, void 0, void 0
     try {
         const authHeader = req.header("auth-header");
         const data = jsonwebtoken_1.default.verify(authHeader, process.env.SECRET_PATIENT_KEY);
-        req.currentDoctor = data._id;
+        req.currentPatient = data._id;
         next();
     }
     catch (error) {
         error.message = "Forbidden";
-        // Forbidden status code - 403
         return (0, response_1.errorResponse)(error, res, 403);
     }
 });

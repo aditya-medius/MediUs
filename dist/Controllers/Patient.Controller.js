@@ -37,6 +37,8 @@ const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
 const bcrypt = __importStar(require("bcrypt"));
 const response_1 = require("../Services/response");
+// import { sendMessage } from "../Services/message.service";
+const message_service_1 = require("../Services/message.service");
 const excludePatientFields = {
     password: 0,
     verified: 0,
@@ -78,10 +80,17 @@ const patientLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         if (!("OTP" in body)) {
             if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
                 const OTP = Math.floor(100000 + Math.random() * 900000).toString();
-                const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 }, OTP);
-                yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: body.phoneNumber
+                // Implement message service API
+                (0, message_service_1.sendMessage)(`Your OTP is: ${OTP}`, body.phoneNumber)
+                    .then((message) => __awaiter(void 0, void 0, void 0, function* () {
+                    const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 }, OTP);
+                    // Add OTP and phone number to temporary collection
+                    yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: body.phoneNumber }, { $set: { phoneNumber: body.phoneNumber, otp: otpToken } }, { upsert: true });
+                }))
+                    .catch((error) => {
+                    throw error;
                 });
-                return (0, response_1.successResponse)(OTP, "OTP sent successfully", res);
+                return (0, response_1.successResponse)({}, "OTP sent successfully", res);
             }
             else {
                 let error = new Error("Invalid phone number");
@@ -109,7 +118,7 @@ const patientLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                     }
                     else {
                         otpData.remove();
-                        return (0, response_1.successResponse)({ message: "Data is not found" }, "Create a new profile", res, 201);
+                        return (0, response_1.successResponse)({ message: "No Data found" }, "Create a new profile", res, 201);
                     }
                 }
                 else {
@@ -120,7 +129,7 @@ const patientLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             }
             catch (err) {
                 if (err instanceof jwt.JsonWebTokenError) {
-                    const error = new Error("OTP is not valid");
+                    const error = new Error("OTP isn't valid");
                     error.name = "Invalid OTP";
                     return (0, response_1.errorResponse)(error, res);
                 }
@@ -164,7 +173,7 @@ const updatePatientProfile = (req, res) => __awaiter(void 0, void 0, void 0, fun
     try {
         let body = req.body;
         const updatedPatientObj = yield Patient_Model_1.default.findOneAndUpdate({
-            _id: req.currentDoctor,
+            _id: req.currentPatient,
             deleted: false,
         }, {
             $set: body,
@@ -189,7 +198,7 @@ exports.updatePatientProfile = updatePatientProfile;
 // Delete patient profile(DELETE)
 const deleteProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const patientProfile = yield Patient_Model_1.default.findOneAndUpdate({ _id: req.currentDoctor, deleted: false });
+        const patientProfile = yield Patient_Model_1.default.findOneAndUpdate({ _id: req.currentPatient, deleted: false }, { $set: { deleted: true } });
         if (patientProfile) {
             return (0, response_1.successResponse)({}, "Patient Profile deleted successfully", res);
         }

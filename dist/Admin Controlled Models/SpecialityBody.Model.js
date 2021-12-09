@@ -18,24 +18,24 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const dotenv = __importStar(require("dotenv"));
-// import bodyParser from "body-parser";
-require("./Services/db");
-const Doctor_route_1 = __importDefault(require("./routes/Doctor.route"));
-const Admin_route_1 = __importDefault(require("./routes/Admin.route"));
-const Patient_route_1 = __importDefault(require("./routes/Patient.route"));
-dotenv.config();
-const port = process.env.PORT;
-const app = (0, express_1.default)();
-app.use(express_1.default.json());
-app.use("/doctor", Doctor_route_1.default);
-app.use("/admin", Admin_route_1.default);
-app.use("/patient", Patient_route_1.default);
-app.listen(port, () => {
-    console.log(`Running on port ${port}`);
+const mongoose_1 = __importStar(require("mongoose"));
+const schemaNames_1 = require("../Services/schemaNames");
+const specialityBodySchema = new mongoose_1.Schema({
+    speciality: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        required: true,
+        unique: true,
+        ref: schemaNames_1.specialization,
+    },
+    bodyParts: [
+        {
+            type: mongoose_1.default.Schema.Types.ObjectId,
+            uniqueItems: true,
+            required: true,
+            ref: schemaNames_1.BodyPart,
+        },
+    ],
 });
+const specialityBodyModel = (0, mongoose_1.model)(schemaNames_1.speciality, specialityBodySchema);
+exports.default = specialityBodyModel;

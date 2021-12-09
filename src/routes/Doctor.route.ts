@@ -22,4 +22,9 @@ doctorRouter.post(
   authenticateDoctor,
   doctorController.deleteProfile
 );
+
+doctorRouter.post(
+  "/findDoctorBySpecialityOrBodyPart/:term",
+  doctorController.findDoctorBySpecialityOrBodyPart
+);
 export default doctorRouter;

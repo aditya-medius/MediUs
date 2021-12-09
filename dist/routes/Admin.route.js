@@ -18,24 +18,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const dotenv = __importStar(require("dotenv"));
-// import bodyParser from "body-parser";
-require("./Services/db");
-const Doctor_route_1 = __importDefault(require("./routes/Doctor.route"));
-const Admin_route_1 = __importDefault(require("./routes/Admin.route"));
-const Patient_route_1 = __importDefault(require("./routes/Patient.route"));
-dotenv.config();
-const port = process.env.PORT;
-const app = (0, express_1.default)();
-app.use(express_1.default.json());
-app.use("/doctor", Doctor_route_1.default);
-app.use("/admin", Admin_route_1.default);
-app.use("/patient", Patient_route_1.default);
-app.listen(port, () => {
-    console.log(`Running on port ${port}`);
-});
+const express_1 = require("express");
+const adminController = __importStar(require("../Controllers/Admin.Controller"));
+const adminRouter = (0, express_1.Router)();
+adminRouter.post("/addSpeciality", adminController.addSpeciality);
+adminRouter.post("/addBodyPart", adminController.addBodyPart);
+adminRouter.post("/addSpecialityBody", adminController.addSpecialityBody);
+adminRouter.post("/addToSpecialityBody/:id", adminController.addToSpecialityBody);
+exports.default = adminRouter;

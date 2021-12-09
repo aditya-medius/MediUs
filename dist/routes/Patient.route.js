@@ -30,4 +30,6 @@ patientRouter.post("/login", patientController.patientLogin);
 patientRouter.post("/", patientController.createPatient);
 patientRouter.get("/", Patient_auth_1.authenticatePatient, patientController.getAllPatientsList);
 patientRouter.post("/getPatientById/:id", Patient_auth_1.authenticatePatient, patientController.getPatientById);
+patientRouter.post("/updateProfile", Patient_auth_1.authenticatePatient, patientController.updatePatientProfile);
+patientRouter.post("/deleteProfile", Patient_auth_1.authenticatePatient, patientController.deleteProfile);
 exports.default = patientRouter;
