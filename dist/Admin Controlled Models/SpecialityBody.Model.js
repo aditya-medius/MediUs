@@ -21,15 +21,21 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const schemaNames_1 = require("../Services/schemaNames");
-const likeSchema = new mongoose_1.Schema({
-    doctor: {
+const specialityBodySchema = new mongoose_1.Schema({
+    speciality: {
         type: mongoose_1.default.Schema.Types.ObjectId,
-        ref: schemaNames_1.doctor,
+        required: true,
+        unique: true,
+        ref: schemaNames_1.specialization,
     },
-    patient: {
-        type: mongoose_1.default.Schema.Types.ObjectId,
-        ref: schemaNames_1.patient,
-    },
+    bodyParts: [
+        {
+            type: mongoose_1.default.Schema.Types.ObjectId,
+            uniqueItems: true,
+            required: true,
+            ref: schemaNames_1.BodyPart,
+        },
+    ],
 });
-const likeModel = (0, mongoose_1.model)(schemaNames_1.like, likeSchema);
-exports.default = likeModel;
+const specialityBodyModel = (0, mongoose_1.model)(schemaNames_1.speciality, specialityBodySchema);
+exports.default = specialityBodyModel;

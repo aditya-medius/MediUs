@@ -32,7 +32,7 @@ export const createHospital = async (req: Request, res: Response) => {
 };
 
 
-export const createHospitalAddress = async(req: Request, res:Response)=>{
+export const createHospitalAnemity = async(req: Request, res:Response)=>{
   try{
     let body=req.body;
     let anemityObj=await new anemityModel(body).save();

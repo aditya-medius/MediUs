@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createHospitalAddress = exports.createHospital = exports.getAllHospitalsList = void 0;
+exports.createHospitalAnemity = exports.createHospital = exports.getAllHospitalsList = void 0;
 const Anemities_Model_1 = __importDefault(require("../Models/Anemities.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
 const response_1 = require("../Services/response");
@@ -64,7 +64,7 @@ const createHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.createHospital = createHospital;
-const createHospitalAddress = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const createHospitalAnemity = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
         let anemityObj = yield new Anemities_Model_1.default(body).save();
@@ -78,4 +78,4 @@ const createHospitalAddress = (req, res) => __awaiter(void 0, void 0, void 0, fu
         return (0, response_1.errorResponse)(error, res);
     }
 });
-exports.createHospitalAddress = createHospitalAddress;
+exports.createHospitalAnemity = createHospitalAnemity;

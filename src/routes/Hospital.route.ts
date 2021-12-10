@@ -4,6 +4,6 @@ const hospitalRouter = express.Router();
 
 hospitalRouter.get("/", hospitalController.getAllHospitalsList);
 hospitalRouter.post("/", hospitalController.createHospital);
-hospitalRouter.post("/address",hospitalController.createHospitalAddress);
+hospitalRouter.post("/anemity",hospitalController.createHospitalAnemity);
 
 export default hospitalRouter;

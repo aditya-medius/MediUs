@@ -1,32 +1,28 @@
 import { Request, Response } from "express";
-import doctorModel from "../Models/Doctors.Model";
+import patientModel from "../Models/Patient.Model";
 import otpModel from "../Models/OTP.Model";
 import * as jwt from "jsonwebtoken";
 import * as bcrypt from "bcrypt";
 import { errorResponse, successResponse } from "../Services/response";
+// import { sendMessage } from "../Services/message.service";
 import { sendMessage } from "../Services/message.service";
-import specialityBodyModel from "../Admin Controlled Models/SpecialityBody.Model";
-import bodyPartModel from "../Admin Controlled Models/BodyPart.Model";
-import _ from "underscore";
-const excludeDoctorFields = {
+
+const excludePatientFields = {
   password: 0,
-  panCard: 0,
-  adhaarCard: 0,
   verified: 0,
-  registrationDate: 0,
   DOB: 0,
 };
 
-// Get All Doctors
-export const getAllDoctorsList = async (req: Request, res: Response) => {
+// Get All Patients
+export const getAllPatientsList = async (req: Request, res: Response) => {
   try {
-    const doctorList = await doctorModel.find(
-      { deleted: false },
-      excludeDoctorFields
-    );
+    const patientList = await patientModel.find(
+      {deleted: false}, 
+      excludePatientFields
+      );
     return successResponse(
-      doctorList,
-      "Successfully fetched doctor's list",
+      patientList,
+      "Successfully fetched patient's list",
       res
     );
   } catch (error: any) {
@@ -34,21 +30,21 @@ export const getAllDoctorsList = async (req: Request, res: Response) => {
   }
 };
 
-// Create a new doctor account
-export const createDoctor = async (req: Request, res: Response) => {
+// Create a new patient account(CREATE)
+export const createPatient = async (req: Request, res: Response) => {
   try {
     let body = req.body;
     let cryptSalt = await bcrypt.genSalt(10);
     body.password = await bcrypt.hash(body.password, cryptSalt);
-    let doctorObj = await new doctorModel(body).save();
+    let patientObj = await new patientModel(body).save();
     jwt.sign(
-      doctorObj.toJSON(),
-      process.env.SECRET_DOCTOR_KEY as string,
+      patientObj.toJSON(),
+      process.env.SECRET_PATIENT_KEY as string,
       (err: any, token: any) => {
         if (err) return errorResponse(err, res);
         return successResponse(
           token,
-          "Doctor profile successfully created",
+          "Patient profile successfully created",
           res
         );
       }
@@ -58,8 +54,8 @@ export const createDoctor = async (req: Request, res: Response) => {
   }
 };
 
-// Login as Doctor
-export const doctorLogin = async (req: Request, res: Response) => {
+// Login as a Patient
+export const patientLogin = async (req: Request, res: Response) => {
   try {
     let body: any = req.query;
     if (!("OTP" in body)) {
@@ -99,17 +95,17 @@ export const doctorLogin = async (req: Request, res: Response) => {
         if (Date.now() > data.expiresIn)
           return errorResponse(new Error("OTP expired"), res);
         if (body.OTP === data.otp) {
-          const profile = await doctorModel.findOne(
+          const profile = await patientModel.findOne(
             {
               phoneNumber: body.phoneNumber,
               deleted: false,
             },
-            excludeDoctorFields
+            excludePatientFields
           );
           if (profile) {
             const token = await jwt.sign(
               profile.toJSON(),
-              process.env.SECRET_DOCTOR_KEY as string
+              process.env.SECRET_PATIENT_KEY as string
             );
             otpData.remove();
             return successResponse(token, "Successfully logged in", res);
@@ -140,22 +136,21 @@ export const doctorLogin = async (req: Request, res: Response) => {
     return errorResponse(error, res);
   }
 };
-
-// Get Doctor By Doctor Id
-export const getDoctorById = async (req: Request, res: Response) => {
+// Get Patient By Patient Id(READ)
+export const getPatientById = async (req: Request, res: Response) => {
   try {
-    const doctorData = await doctorModel.findOne(
+    const patientData = await patientModel.findOne(
       { _id: req.params.id, deleted: false },
-      excludeDoctorFields
+      excludePatientFields
     );
-    if (doctorData) {
+    if (patientData) {
       return successResponse(
-        doctorData,
-        "Successfully fetched doctor details",
+        patientData,
+        "Successfully fetched patient details",
         res
       );
     } else {
-      const error: Error = new Error("Doctor not found");
+      const error: Error = new Error("Patient not found");
       error.name = "Not found";
       return errorResponse(error, res, 404);
     }
@@ -164,33 +159,32 @@ export const getDoctorById = async (req: Request, res: Response) => {
   }
 };
 
-// Get Doctor By Hospital
-export const getDoctorByHospitalId = async (req: Request, res: Response) => {
+// Get patient By Hospital(UPDATE)
+export const getPatientByHospitalId = async (req: Request, res: Response) => {
   try {
   } catch (error) {
     return errorResponse(error, res);
   }
 };
-
-export const updateDoctorProfile = async (req: Request, res: Response) => {
+export const updatePatientProfile = async (req: Request, res: Response) => {
   try {
     let body = req.body;
-    const updatedDoctorObj = await doctorModel.findOneAndUpdate(
+    const updatedPatientObj = await patientModel.findOneAndUpdate(
       {
-        _id: req.currentDoctor,
+        _id: req.currentPatient,
         deleted: false,
       },
       {
         $set: body,
       },
       {
-        fields: excludeDoctorFields,
+        fields: excludePatientFields,
         new: true,
       }
     );
-    if (updatedDoctorObj) {
+    if (updatedPatientObj) {
       return successResponse(
-        updatedDoctorObj,
+        updatedPatientObj,
         "Profile updated successfully,",
         res
       );
@@ -204,100 +198,20 @@ export const updateDoctorProfile = async (req: Request, res: Response) => {
   }
 };
 
+// Delete patient profile(DELETE)
 export const deleteProfile = async (req: Request, res: Response) => {
   try {
-    const doctorProfile = await doctorModel.findOneAndUpdate(
-      { _id: req.currentDoctor, deleted: false },
-      { $set: { deleted: true } }
+    const patientProfile = await patientModel.findOneAndUpdate(
+      { _id: req.currentPatient, deleted: false },
+         { $set: { deleted: true } }
     );
-    if (doctorProfile) {
-      return successResponse({}, "Profile deleted successfully", res);
+    if (patientProfile) {
+      return successResponse({}, "Patient Profile deleted successfully", res);
     } else {
-      let error = new Error("Profile doesn't exist");
+      let error = new Error("Patient Profile doesn't exist");
       error.name = "Not found";
       return errorResponse(error, res, 404);
     }
-  } catch (error) {
-    return errorResponse(error, res);
-  }
-};
-
-export const findDoctorBySpecialityOrBodyPart = async (
-  req: Request,
-  res: Response
-) => {
-  try {
-    const term = req.params.term;
-    let bodyPart: any = await specialityBodyModel.aggregate([
-      {
-        $facet: {
-          bySpeciality: [
-            {
-              $lookup: {
-                from: "specializations",
-                localField: "speciality",
-                foreignField: "_id",
-                as: "byspeciality",
-              },
-            },
-            {
-              $match: {
-                "byspeciality.specialityName": { $regex: term, $options: "i" },
-              },
-            },
-            {
-              $project: {
-                speciality: 1,
-                _id: 0,
-              },
-            },
-          ],
-          byBodyPart: [
-            {
-              $lookup: {
-                from: "bodyparts",
-                localField: "bodyParts",
-                foreignField: "_id",
-                as: "bodyPart",
-              },
-            },
-            {
-              $match: {
-                "bodyPart.bodyPart": { $regex: term, $options: "i" },
-              },
-            },
-            {
-              $project: {
-                speciality: 1,
-                _id: 0,
-              },
-            },
-          ],
-        },
-      },
-      {
-        $project: {
-          BodyAndSpeciality: {
-            $setUnion: ["$bySpeciality", "$byBodyPart"],
-          },
-        },
-      },
-      { $unwind: "$BodyAndSpeciality" },
-      { $replaceRoot: { newRoot: "$BodyAndSpeciality" } },
-    ]);
-    let specialityArray: Array<string>;
-    specialityArray = _.map(bodyPart, (e) => e.speciality);
-    const doctorArray = await doctorModel
-      .find(
-        {
-          deleted: false,
-          active: true,
-          specialization: { $in: specialityArray },
-        },
-        excludeDoctorFields
-      )
-      .populate("specialization");
-    return successResponse(doctorArray, "Success", res);
   } catch (error) {
     return errorResponse(error, res);
   }

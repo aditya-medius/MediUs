@@ -28,12 +28,16 @@ const dotenv = __importStar(require("dotenv"));
 require("./Services/db");
 const Doctor_route_1 = __importDefault(require("./routes/Doctor.route"));
 const Hospital_route_1 = __importDefault(require("./routes/Hospital.route"));
+const Admin_route_1 = __importDefault(require("./routes/Admin.route"));
+const Patient_route_1 = __importDefault(require("./routes/Patient.route"));
 dotenv.config();
 const port = process.env.PORT;
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use("/doctor", Doctor_route_1.default);
 app.use("/hospital", Hospital_route_1.default);
+app.use("/admin", Admin_route_1.default);
+app.use("/patient", Patient_route_1.default);
 app.listen(port, () => {
     console.log(`Running on port ${port}`);
 });

@@ -27,5 +27,5 @@ const hospitalController = __importStar(require("../Controllers/Hospital.Control
 const hospitalRouter = express_1.default.Router();
 hospitalRouter.get("/", hospitalController.getAllHospitalsList);
 hospitalRouter.post("/", hospitalController.createHospital);
-hospitalRouter.post("/address", hospitalController.createHospitalAddress);
+hospitalRouter.post("/anemity", hospitalController.createHospitalAnemity);
 exports.default = hospitalRouter;

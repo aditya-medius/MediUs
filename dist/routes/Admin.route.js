@@ -19,17 +19,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const mongoose_1 = __importStar(require("mongoose"));
-const schemaNames_1 = require("../Services/schemaNames");
-const likeSchema = new mongoose_1.Schema({
-    doctor: {
-        type: mongoose_1.default.Schema.Types.ObjectId,
-        ref: schemaNames_1.doctor,
-    },
-    patient: {
-        type: mongoose_1.default.Schema.Types.ObjectId,
-        ref: schemaNames_1.patient,
-    },
-});
-const likeModel = (0, mongoose_1.model)(schemaNames_1.like, likeSchema);
-exports.default = likeModel;
+const express_1 = require("express");
+const adminController = __importStar(require("../Controllers/Admin.Controller"));
+const adminRouter = (0, express_1.Router)();
+adminRouter.post("/addSpeciality", adminController.addSpeciality);
+adminRouter.post("/addBodyPart", adminController.addBodyPart);
+adminRouter.post("/addSpecialityBody", adminController.addSpecialityBody);
+adminRouter.post("/addToSpecialityBody/:id", adminController.addToSpecialityBody);
+exports.default = adminRouter;

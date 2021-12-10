@@ -8,68 +8,76 @@ import {
   speciality,
   workingHour,
   treatmentType,
+  specialization,
+  BodyPart,
 } from "../Services/schemaNames";
-const doctorSchema = new Schema({
-  ...schemaOptions,
-  hospitalDetails: [
-    {
-      hospital: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: hospital,
-      },
-      workingHours: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: workingHour,
-      },
-      consultationFee: {
-        min: {
+const doctorSchema = new Schema(
+  {
+    ...schemaOptions,
+    hospitalDetails: [
+      {
+        hospital: {
+          type: mongoose.Schema.Types.ObjectId,
           required: true,
-          type: Number,
+          ref: hospital,
         },
-        max: {
+        workingHours: {
+          type: mongoose.Schema.Types.ObjectId,
           required: true,
-          type: Number,
+          ref: workingHour,
+        },
+        consultationFee: {
+          min: {
+            required: true,
+            type: Number,
+          },
+          max: {
+            required: true,
+            type: Number,
+          },
         },
       },
+    ],
+    registrationDate: {
+      type: Date,
+      required: true,
     },
-  ],
-  registrationDate: {
-    type: Date,
-    required: true,
-  },
-  specialization: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: speciality,
+    specialization: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: specialization,
+      },
+    ],
+    panCard: {
+      type: String,
+      required: true,
     },
-  ],
-  panCard: {
-    type: String,
-    required: true,
-  },
-  adhaarCard: {
-    type: String,
-    required: true,
-    minlength: 12,
-  },
-  qualification: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: qualification,
+    adhaarCard: {
+      type: String,
+      required: true,
+      minlength: 12,
     },
-  ],
+    qualification: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: qualification,
+      },
+    ],
 
-  liked: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: like,
+    liked: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: like,
+    },
+    treatmentType: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: treatmentType,
+    },
   },
-  treatmentType: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: treatmentType,
-  },
-});
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
+);
 
 doctorSchema.pre("save", async function (next) {
   const profileExist = await doctorModel.findOne({
@@ -129,20 +137,12 @@ doctorSchema.pre("findOneAndUpdate", async function (next) {
   return next();
 });
 
-// const mongooseEventList = ["find", "findOne"];
-
-// mongooseEventList.forEach((event: any) => {
-//   doctorSchema.pre(event, async function (next) {
-//     this.select({
-//       password: 0,
-//       panCard: 0,
-//       adhaarCard: 0,
-//       verified: 0,
-//       registrationDate: 0,
-//       DOB: 0,
-//     });
-//     return next();
-//   });
+// For later
+// doctorSchema.virtual("bodyPart", {
+//   ref: "specialities",
+//   localField: "specialization",
+//   foreignField: "speciality",
+//   justOne: false,
 // });
 const doctorModel = model(doctor, doctorSchema);
 
