@@ -1,6 +1,6 @@
 import mongoose, { Schema, model } from "mongoose";
 import schemaOptions from "../Services/schemaOptions";
-import {address, city, state, locality} from "../Services/schemaNames";
+import {address, city, state, locality, country} from "../Services/schemaNames";
 
 const addressSchema=new Schema({
     city: {
@@ -20,14 +20,16 @@ const addressSchema=new Schema({
     },
     country:{
         type: mongoose.Schema.Types.ObjectId,
-        required: true
+        required: true,
+        ref: country
     },
     addressLine_1:{
         type: String,
         required: true
     },
     addressLine_2:{
-        type: String
+        type: String,
+        // required: true
     }
 });
 const addressModel= model(address, addressSchema);

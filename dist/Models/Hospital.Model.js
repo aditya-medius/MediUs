@@ -49,12 +49,17 @@ const hospitalSchema = new mongoose_1.Schema({
     treatmentType: [
         {
             type: mongoose_1.default.Schema.Types.ObjectId,
-            required: true
+            required: true,
+            ref: schemaNames_1.treatmentType
         }
     ],
     type: {
         type: String,
-        required: true
+        required: true,
+        enum: {
+            values: ["Private", "Government"],
+            message: "value not supported"
+        }
     },
     payment: [
         {
@@ -66,6 +71,19 @@ const hospitalSchema = new mongoose_1.Schema({
     deleted: {
         type: Boolean,
         default: false
+    },
+    openingHour: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        // required: true,
+        ref: schemaNames_1.openingHour
+    },
+    contactNumber: {
+        type: String,
+        required: true,
+    },
+    numberOfBed: {
+        type: Number,
+        required: true,
     }
 });
 const hospitalModel = (0, mongoose_1.model)(schemaNames_1.hospital, hospitalSchema);

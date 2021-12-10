@@ -2,7 +2,7 @@ import mongoose, { Schema, model } from "mongoose";
 import schemaOptions from "../Services/schemaOptions";
 import 
 { 
-  speciality, doctor, address, payment, anemity, hospital
+  speciality, doctor, address, payment, anemity, hospital, treatmentType, openingHour
 } 
  from "../Services/schemaNames";
 const hospitalSchema = new Schema({
@@ -33,12 +33,17 @@ const hospitalSchema = new Schema({
   treatmentType:[
     {
       type: mongoose.Schema.Types.ObjectId,
-      required: true
+      required: true,
+      ref: treatmentType
     }
   ],
   type:{
     type: String,
-    required: true
+    required: true,
+    enum:{
+      values: ["Private","Government"],
+      message: "value not supported"
+    }
   },
   payment:[
     {
@@ -51,6 +56,20 @@ const hospitalSchema = new Schema({
   deleted:{
     type: Boolean,
     default: false
+  },
+  openingHour:
+  {
+      type: mongoose.Schema.Types.ObjectId,
+      // required: true,
+      ref: openingHour
+  },
+  contactNumber:{
+      type: String,
+      required: true,
+  },
+  numberOfBed:{
+      type: Number,
+      required: true,
   }
 
 });

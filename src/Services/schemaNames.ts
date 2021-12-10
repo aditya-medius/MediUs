@@ -16,3 +16,5 @@ export const locality: string ="localities";
 export const treatmentType: string = "treatmentTypes";
 export const OTP: string = "OTPs";
 export const BodyPart: string = "bodyParts";
+export const country: string = "countries";
+export const openingHour: string = "openingHours";
