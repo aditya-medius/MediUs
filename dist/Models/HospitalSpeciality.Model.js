@@ -19,16 +19,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const adminController = __importStar(require("../Admin Controlled Models/Admin.Controller"));
-const adminRouter = (0, express_1.Router)();
-adminRouter.post("/addSpeciality", adminController.addSpeciality);
-adminRouter.post("/addBodyPart", adminController.addBodyPart);
-adminRouter.post("/addSpecialityBody", adminController.addSpecialityBody);
-adminRouter.post("/addToSpecialityBody/:id", adminController.addToSpecialityBody);
-//routes for city anemity address state country
-adminRouter.post("/city", adminController.addCity);
-adminRouter.post("/state", adminController.addState);
-adminRouter.post("/locality", adminController.addLocality);
-adminRouter.post("/country", adminController.addCountry);
-exports.default = adminRouter;
+const mongoose_1 = __importStar(require("mongoose"));
+// import { specia } from "../Services/schemaNames";
+const hospitalSpecialitySchema = new mongoose_1.Schema({
+    hospitalspeciality: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        required: true,
+    }
+});
+const hospitalSpecialityModel = (0, mongoose_1.model)("special", hospitalSpecialitySchema);
+exports.default = hospitalSpecialityModel;
