@@ -27,12 +27,7 @@ const hospitalController = __importStar(require("../Controllers/Hospital.Control
 const hospitalRouter = express_1.default.Router();
 hospitalRouter.get("/", hospitalController.getAllHospitalsList);
 hospitalRouter.post("/", hospitalController.createHospital);
-//demo routes for city anemity specialities address etc..
+hospitalRouter.post("/address", hospitalController.addAddress);
 hospitalRouter.post("/anemity", hospitalController.createHospitalAnemity);
 hospitalRouter.post("/speciality", hospitalController.addHospitalSpeciality);
-hospitalRouter.post("/city", hospitalController.addCity);
-hospitalRouter.post("/state", hospitalController.addState);
-hospitalRouter.post("/locality", hospitalController.addLocality);
-hospitalRouter.post("/country", hospitalController.addCountry);
-hospitalRouter.post("/address", hospitalController.addAddress);
 exports.default = hospitalRouter;

@@ -20,10 +20,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const adminController = __importStar(require("../Controllers/Admin.Controller"));
+const adminController = __importStar(require("../Admin Controlled Models/Admin.Controller"));
 const adminRouter = (0, express_1.Router)();
 adminRouter.post("/addSpeciality", adminController.addSpeciality);
 adminRouter.post("/addBodyPart", adminController.addBodyPart);
 adminRouter.post("/addSpecialityBody", adminController.addSpecialityBody);
 adminRouter.post("/addToSpecialityBody/:id", adminController.addToSpecialityBody);
+//routes for city anemity address state country
+adminRouter.post("/city", adminController.addCity);
+adminRouter.post("/state", adminController.addState);
+adminRouter.post("/locality", adminController.addLocality);
+adminRouter.post("/country", adminController.addCountry);
 exports.default = adminRouter;

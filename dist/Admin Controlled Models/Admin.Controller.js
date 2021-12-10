@@ -12,12 +12,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addAddress = exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addHospitalSpeciality = exports.createHospitalAnemity = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
-const BodyPart_Model_1 = __importDefault(require("../Admin Controlled Models/BodyPart.Model"));
-const SpecialityBody_Model_1 = __importDefault(require("../Admin Controlled Models/SpecialityBody.Model"));
-const Specialization_Model_1 = __importDefault(require("../Admin Controlled Models/Specialization.Model"));
-const Anemities_Model_1 = __importDefault(require("../Models/Anemities.Model"));
+exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
+const BodyPart_Model_1 = __importDefault(require("./BodyPart.Model"));
+const SpecialityBody_Model_1 = __importDefault(require("./SpecialityBody.Model"));
+const Specialization_Model_1 = __importDefault(require("./Specialization.Model"));
+const City_Model_1 = __importDefault(require("./City.Model"));
+const State_Model_1 = __importDefault(require("./State.Model"));
+const Country_Model_1 = __importDefault(require("./Country.Model"));
 const response_1 = require("../Services/response");
+const Locality_Model_1 = __importDefault(require("./Locality.Model"));
 const addSpeciality = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const body = req.body;
@@ -67,48 +70,12 @@ const addToSpecialityBody = (req, res) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.addToSpecialityBody = addToSpecialityBody;
-//add anemity
-const createHospitalAnemity = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        let body = req.body;
-        let anemityObj = yield new Anemities_Model_1.default(body).save();
-        return (0, response_1.successResponse)(anemityObj, "Address has been successfully added", res);
-    }
-    finally {
-    }
-});
-exports.createHospitalAnemity = createHospitalAnemity;
-try {
-}
-catch (error) {
-    return (0, response_1.errorResponse)(error, res);
-}
-;
-const addHospitalSpeciality = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        let body = req.body;
-        let specialityObj = yield new hospitalSpecialityModel(body).save();
-        jwt.sign(specialityObj.toJSON(), process.env.SECRET_HOSPITAL_KEY, (err, token) => {
-            if (err)
-                return (0, response_1.errorResponse)(err, res);
-            return (0, response_1.successResponse)(token, "Speciality has been successfully added", res);
-        });
-    }
-    catch (error) {
-        return (0, response_1.errorResponse)(error, res);
-    }
-});
-exports.addHospitalSpeciality = addHospitalSpeciality;
 //add city 
 const addCity = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
-        let cityObj = yield new cityModel(body).save();
-        jwt.sign(cityObj.toJSON(), process.env.SECRET_HOSPITAL_KEY, (err, token) => {
-            if (err)
-                return (0, response_1.errorResponse)(err, res);
-            return (0, response_1.successResponse)(token, "City has been successfully added", res);
-        });
+        let cityObj = yield new City_Model_1.default(body).save();
+        return (0, response_1.successResponse)(cityObj, "City has been successfully added", res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);
@@ -119,12 +86,8 @@ exports.addCity = addCity;
 const addState = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
-        let stateObj = yield new stateModel(body).save();
-        jwt.sign(stateObj.toJSON(), process.env.SECRET_HOSPITAL_KEY, (err, token) => {
-            if (err)
-                return (0, response_1.errorResponse)(err, res);
-            return (0, response_1.successResponse)(token, "State has been successfully added", res);
-        });
+        let stateObj = yield new State_Model_1.default(body).save();
+        return (0, response_1.successResponse)(stateObj, "State has been successfully added", res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);
@@ -135,12 +98,8 @@ exports.addState = addState;
 const addLocality = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
-        let localityObj = yield new LocalityModel(body).save();
-        jwt.sign(localityObj.toJSON(), process.env.SECRET_HOSPITAL_KEY, (err, token) => {
-            if (err)
-                return (0, response_1.errorResponse)(err, res);
-            return (0, response_1.successResponse)(token, "Locality has been successfully added", res);
-        });
+        let localityObj = yield new Locality_Model_1.default(body).save();
+        return (0, response_1.successResponse)(localityObj, "Locality has been successfully added", res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);
@@ -151,31 +110,11 @@ exports.addLocality = addLocality;
 const addCountry = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
-        let countryObj = yield new countryModel(body).save();
-        jwt.sign(countryObj.toJSON(), process.env.SECRET_HOSPITAL_KEY, (err, token) => {
-            if (err)
-                return (0, response_1.errorResponse)(err, res);
-            return (0, response_1.successResponse)(token, "Country has been successfully added", res);
-        });
+        let countryObj = yield new Country_Model_1.default(body).save();
+        return (0, response_1.successResponse)(countryObj, "Country has been successfully added", res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);
     }
 });
 exports.addCountry = addCountry;
-//add address
-const addAddress = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        let body = req.body;
-        let addressObj = yield new addressModel(body).save();
-        jwt.sign(addressObj.toJSON(), process.env.SECRET_HOSPITAL_KEY, (err, token) => {
-            if (err)
-                return (0, response_1.errorResponse)(err, res);
-            return (0, response_1.successResponse)(token, "Addresss has been successfully added", res);
-        });
-    }
-    catch (error) {
-        return (0, response_1.errorResponse)(error, res);
-    }
-});
-exports.addAddress = addAddress;
