@@ -1,5 +1,6 @@
 import mongoose, { Schema, model } from "mongoose";
 import schemaOptions from "../Services/schemaOptions";
+import _ from "lodash";
 import {
   doctor,
   hospital,
@@ -65,7 +66,6 @@ const doctorSchema = new Schema(
         panCard: {
           type: String,
           required: true,
-          unique: true,
         },
         bankName: {
           type: String,
@@ -80,7 +80,6 @@ const doctorSchema = new Schema(
           type: String,
           required: true,
           minlength: 12,
-          unique: true,
         },
       },
       required: [true, "KYC details are required"],
@@ -151,6 +150,8 @@ doctorSchema.pre("findOneAndUpdate", async function (next) {
           email: updateQuery.email,
         },
         { phoneNumber: updateQuery.phoneNumber },
+        { panCard: updateQuery.panCard },
+        { adhaarCard: updateQuery.panCard },
       ],
     });
     if (profileExist) {
@@ -164,6 +165,29 @@ doctorSchema.pre("findOneAndUpdate", async function (next) {
   return next();
 });
 
+doctorSchema.pre("findOneAndUpdate", async function (next) {
+  let updateQuery: any = this.getUpdate();
+  updateQuery = updateQuery["$addToSet"];
+  if ("hospitalDetails" in updateQuery) {
+    const currentDoc = await this.model.findOne({ _id: this.getQuery()._id });
+    const incomingHospitals = _.map(updateQuery.hospitalDetails, (e) =>
+      e.hospital.toString()
+    );
+    const currentHospitals = _.map(currentDoc.hospitalDetails, (e) =>
+      e.hospital.toString()
+    );
+
+    const combinedHospitals: Array<string> = [
+      ...incomingHospitals,
+      ...currentHospitals,
+    ];
+    if (combinedHospitals.length != new Set(combinedHospitals).size) {
+      throw new Error("Cannot add same hospital twice");
+    }
+  }
+  next();
+});
+
 // Hospital details validation
 doctorSchema.path("hospitalDetails").validate(function (hospital: any) {
   if (hospital.length < 1) {
@@ -171,6 +195,29 @@ doctorSchema.path("hospitalDetails").validate(function (hospital: any) {
   }
   return true;
 }, "Hospital details are required");
+
+doctorSchema.path("hospitalDetails").validate(function (hospital: any) {
+  // if (hospital.lenght) {
+  // }let element
+  let element: any;
+  if (hospital.length > 1) {
+    for (let index = 0; index < hospital.length; index++) {
+      for (let i = index + 1; i < hospital.length; i++) {
+        if (hospital[i]) {
+          if (
+            hospital[index].hospital.toString() ==
+            hospital[i].hospital.toString()
+          ) {
+            return false;
+          }
+        } else {
+          return true;
+        }
+      }
+    }
+  }
+  return true;
+}, "Cannot enter same hospital twice");
 
 // Specialization validation
 doctorSchema.path("specialization").validate(function (specialization: any) {

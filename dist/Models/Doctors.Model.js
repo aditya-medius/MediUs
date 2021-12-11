@@ -33,6 +33,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const schemaOptions_1 = __importDefault(require("../Services/schemaOptions"));
+const lodash_1 = __importDefault(require("lodash"));
 const schemaNames_1 = require("../Services/schemaNames");
 const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schemaOptions_1.default), { hospitalDetails: [
         {
@@ -82,7 +83,6 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
             panCard: {
                 type: String,
                 required: true,
-                unique: true,
             },
             bankName: {
                 type: String,
@@ -97,7 +97,6 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
                 type: String,
                 required: true,
                 minlength: 12,
-                unique: true,
             },
         },
         required: [true, "KYC details are required"],
@@ -160,6 +159,8 @@ doctorSchema.pre("findOneAndUpdate", function (next) {
                         email: updateQuery.email,
                     },
                     { phoneNumber: updateQuery.phoneNumber },
+                    { panCard: updateQuery.panCard },
+                    { adhaarCard: updateQuery.panCard },
                 ],
             });
             if (profileExist) {
@@ -172,6 +173,25 @@ doctorSchema.pre("findOneAndUpdate", function (next) {
         return next();
     });
 });
+doctorSchema.pre("findOneAndUpdate", function (next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let updateQuery = this.getUpdate();
+        updateQuery = updateQuery["$addToSet"];
+        if ("hospitalDetails" in updateQuery) {
+            const currentDoc = yield this.model.findOne({ _id: this.getQuery()._id });
+            const incomingHospitals = lodash_1.default.map(updateQuery.hospitalDetails, (e) => e.hospital.toString());
+            const currentHospitals = lodash_1.default.map(currentDoc.hospitalDetails, (e) => e.hospital.toString());
+            const combinedHospitals = [
+                ...incomingHospitals,
+                ...currentHospitals,
+            ];
+            if (combinedHospitals.length != new Set(combinedHospitals).size) {
+                throw new Error("Cannot add same hospital twice");
+            }
+        }
+        next();
+    });
+});
 // Hospital details validation
 doctorSchema.path("hospitalDetails").validate(function (hospital) {
     if (hospital.length < 1) {
@@ -179,6 +199,27 @@ doctorSchema.path("hospitalDetails").validate(function (hospital) {
     }
     return true;
 }, "Hospital details are required");
+doctorSchema.path("hospitalDetails").validate(function (hospital) {
+    // if (hospital.lenght) {
+    // }let element
+    let element;
+    if (hospital.length > 1) {
+        for (let index = 0; index < hospital.length; index++) {
+            for (let i = index + 1; i < hospital.length; i++) {
+                if (hospital[i]) {
+                    if (hospital[index].hospital.toString() ==
+                        hospital[i].hospital.toString()) {
+                        return false;
+                    }
+                }
+                else {
+                    return true;
+                }
+            }
+        }
+    }
+    return true;
+}, "Cannot enter same hospital twice");
 // Specialization validation
 doctorSchema.path("specialization").validate(function (specialization) {
     if (specialization.length < 1) {

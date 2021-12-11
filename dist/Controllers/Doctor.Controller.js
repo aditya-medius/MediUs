@@ -27,11 +27,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findDoctorBySpecialityOrBodyPart = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = void 0;
+exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -40,13 +51,18 @@ const response_1 = require("../Services/response");
 const message_service_1 = require("../Services/message.service");
 const SpecialityBody_Model_1 = __importDefault(require("../Admin Controlled Models/SpecialityBody.Model"));
 const underscore_1 = __importDefault(require("underscore"));
+const SpecialityDisease_Model_1 = __importDefault(require("../Admin Controlled Models/SpecialityDisease.Model"));
+const schemaNames_1 = require("../Services/schemaNames");
+const SpecialityDoctorType_Model_1 = __importDefault(require("../Admin Controlled Models/SpecialityDoctorType.Model"));
 const excludeDoctorFields = {
     password: 0,
-    panCard: 0,
-    adhaarCard: 0,
+    // panCard: 0,
+    // adhaarCard: 0,
     verified: 0,
     registrationDate: 0,
     DOB: 0,
+    registration: 0,
+    KYCDetails: 0,
 };
 // Get All Doctors
 const getAllDoctorsList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -175,13 +191,15 @@ const getDoctorByHospitalId = (req, res) => __awaiter(void 0, void 0, void 0, fu
 exports.getDoctorByHospitalId = getDoctorByHospitalId;
 const updateDoctorProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let body = req.body;
+        let _a = req.body, { hospitalDetails, specialization, qualification } = _a, body = __rest(_a, ["hospitalDetails", "specialization", "qualification"]);
+        const updateQuery = {
+            $set: body,
+            $addToSet: { hospitalDetails, specialization, qualification },
+        };
         const updatedDoctorObj = yield Doctors_Model_1.default.findOneAndUpdate({
             _id: req.currentDoctor,
             deleted: false,
-        }, {
-            $set: body,
-        }, {
+        }, updateQuery, {
             fields: excludeDoctorFields,
             new: true,
         });
@@ -199,6 +217,12 @@ const updateDoctorProfile = (req, res) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.updateDoctorProfile = updateDoctorProfile;
+/*
+  Agar yeh doctor kissi hospital array me hai
+  to isko waha se hatane k zaroorat nhi, uski vjhaye
+  jab uss hospital k doctors ko GET kre to ek filter lagaye jisse
+  k soft deleted doctors return na ho.
+*/
 const deleteProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const doctorProfile = yield Doctors_Model_1.default.findOneAndUpdate({ _id: req.currentDoctor, deleted: false }, { $set: { deleted: true } });
@@ -216,79 +240,214 @@ const deleteProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.deleteProfile = deleteProfile;
-const findDoctorBySpecialityOrBodyPart = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// Get doctor by speciality or body parts
+const searchDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const term = req.params.term;
-        let bodyPart = yield SpecialityBody_Model_1.default.aggregate([
-            {
-                $facet: {
-                    bySpeciality: [
-                        {
-                            $lookup: {
-                                from: "specializations",
-                                localField: "speciality",
-                                foreignField: "_id",
-                                as: "byspeciality",
+        const promiseArray = [
+            SpecialityBody_Model_1.default.aggregate([
+                {
+                    $facet: {
+                        bySpeciality: [
+                            {
+                                $lookup: {
+                                    from: "specializations",
+                                    localField: "speciality",
+                                    foreignField: "_id",
+                                    as: "byspeciality",
+                                },
                             },
-                        },
-                        {
-                            $match: {
-                                "byspeciality.specialityName": { $regex: term, $options: "i" },
+                            {
+                                $match: {
+                                    "byspeciality.specialityName": {
+                                        $regex: term,
+                                        $options: "i",
+                                    },
+                                },
                             },
-                        },
-                        {
-                            $project: {
-                                speciality: 1,
-                                _id: 0,
+                            {
+                                $project: {
+                                    speciality: 1,
+                                    _id: 0,
+                                },
                             },
-                        },
-                    ],
-                    byBodyPart: [
-                        {
-                            $lookup: {
-                                from: "bodyparts",
-                                localField: "bodyParts",
-                                foreignField: "_id",
-                                as: "bodyPart",
+                        ],
+                        byBodyPart: [
+                            {
+                                $lookup: {
+                                    from: "bodyparts",
+                                    localField: "bodyParts",
+                                    foreignField: "_id",
+                                    as: "bodyPart",
+                                },
                             },
-                        },
-                        {
-                            $match: {
-                                "bodyPart.bodyPart": { $regex: term, $options: "i" },
+                            {
+                                $match: {
+                                    "bodyPart.bodyPart": { $regex: term, $options: "i" },
+                                },
                             },
-                        },
-                        {
-                            $project: {
-                                speciality: 1,
-                                _id: 0,
+                            {
+                                $project: {
+                                    speciality: 1,
+                                    _id: 0,
+                                },
                             },
-                        },
-                    ],
-                },
-            },
-            {
-                $project: {
-                    BodyAndSpeciality: {
-                        $setUnion: ["$bySpeciality", "$byBodyPart"],
+                        ],
                     },
                 },
-            },
-            { $unwind: "$BodyAndSpeciality" },
-            { $replaceRoot: { newRoot: "$BodyAndSpeciality" } },
-        ]);
-        let specialityArray;
-        specialityArray = underscore_1.default.map(bodyPart, (e) => e.speciality);
-        const doctorArray = yield Doctors_Model_1.default
-            .find({
-            deleted: false,
-            active: true,
-            specialization: { $in: specialityArray },
-        }, excludeDoctorFields)
-            .populate("specialization");
-        return (0, response_1.successResponse)(doctorArray, "Success", res);
+                {
+                    $project: {
+                        BodyAndSpeciality: {
+                            $setUnion: ["$bySpeciality", "$byBodyPart"],
+                        },
+                    },
+                },
+                { $unwind: "$BodyAndSpeciality" },
+                { $replaceRoot: { newRoot: "$BodyAndSpeciality" } },
+            ]),
+            SpecialityDisease_Model_1.default.aggregate([
+                {
+                    $facet: {
+                        bySpeciality: [
+                            {
+                                $lookup: {
+                                    from: schemaNames_1.specialization,
+                                    localField: "speciality",
+                                    foreignField: "_id",
+                                    as: "byspeciality",
+                                },
+                            },
+                            {
+                                $match: {
+                                    "byspeciality.specialityName": {
+                                        $regex: term,
+                                        $options: "i",
+                                    },
+                                },
+                            },
+                            {
+                                $project: {
+                                    speciality: 1,
+                                    _id: 0,
+                                },
+                            },
+                        ],
+                        byDisease: [
+                            {
+                                $lookup: {
+                                    from: schemaNames_1.disease,
+                                    localField: "disease",
+                                    foreignField: "_id",
+                                    as: "disease",
+                                },
+                            },
+                            {
+                                $match: {
+                                    "disease.disease": { $regex: term, $options: "i" },
+                                },
+                            },
+                            {
+                                $project: {
+                                    speciality: 1,
+                                    _id: 0,
+                                },
+                            },
+                        ],
+                    },
+                },
+                {
+                    $project: {
+                        DiseaseAndSpeciality: {
+                            $setUnion: ["$bySpeciality", "$byDisease"],
+                        },
+                    },
+                },
+                { $unwind: "$DiseaseAndSpeciality" },
+                { $replaceRoot: { newRoot: "$DiseaseAndSpeciality" } },
+            ]),
+            SpecialityDoctorType_Model_1.default.aggregate([
+                {
+                    $facet: {
+                        bySpeciality: [
+                            {
+                                $lookup: {
+                                    from: schemaNames_1.specialization,
+                                    localField: "speciality",
+                                    foreignField: "_id",
+                                    as: "byspeciality",
+                                },
+                            },
+                            {
+                                $match: {
+                                    "byspeciality.specialityName": {
+                                        $regex: term,
+                                        $options: "i",
+                                    },
+                                },
+                            },
+                            {
+                                $project: {
+                                    speciality: 1,
+                                    _id: 0,
+                                },
+                            },
+                        ],
+                        byDoctorType: [
+                            {
+                                $lookup: {
+                                    from: schemaNames_1.doctorType,
+                                    localField: "doctorType",
+                                    foreignField: "_id",
+                                    as: "doctorType",
+                                },
+                            },
+                            {
+                                $match: {
+                                    "doctorType.doctorType": { $regex: term, $options: "i" },
+                                },
+                            },
+                            {
+                                $project: {
+                                    speciality: 1,
+                                    _id: 0,
+                                },
+                            },
+                        ],
+                    },
+                },
+                {
+                    $project: {
+                        DoctorTypeAndSpeciality: {
+                            $setUnion: ["$bySpeciality", "$byDoctorType"],
+                        },
+                    },
+                },
+                { $unwind: "$DoctorTypeAndSpeciality" },
+                { $replaceRoot: { newRoot: "$DoctorTypeAndSpeciality" } },
+            ]),
+        ];
+        Promise.all(promiseArray)
+            .then((specialityArray) => __awaiter(void 0, void 0, void 0, function* () {
+            specialityArray = specialityArray.flat();
+            specialityArray = underscore_1.default.map(specialityArray, (e) => {
+                return e.speciality;
+            });
+            const doctorArray = yield Doctors_Model_1.default
+                .find({
+                deleted: false,
+                active: true,
+                specialization: { $in: specialityArray },
+            }, excludeDoctorFields)
+                .populate("specialization")
+                .populate("hospitalDetails.hospital");
+            return (0, response_1.successResponse)(doctorArray, "Success", res);
+        }))
+            .catch((error) => {
+            return (0, response_1.errorResponse)(error, res);
+        });
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);
     }
 });
-exports.findDoctorBySpecialityOrBodyPart = findDoctorBySpecialityOrBodyPart;
+exports.searchDoctor = searchDoctor;
