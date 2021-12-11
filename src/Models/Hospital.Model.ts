@@ -6,11 +6,15 @@ import
 } 
  from "../Services/schemaNames";
 const hospitalSchema = new Schema({
+  name:{
+    type: String,
+    required: true
+  },
   address:{
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: address
-  },
+    },
   doctors:[
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -45,13 +49,12 @@ const hospitalSchema = new Schema({
       message: "value not supported"
     }
   },
-  payment:[
-    {
+  payment:
+    [{
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: payment
-    }
-  ],
+    }],
 
   deleted:{
     type: Boolean,
@@ -70,8 +73,37 @@ const hospitalSchema = new Schema({
   numberOfBed:{
       type: Number,
       required: true,
-  }
+  },
+  // location:{
+  //     "type":"Point",
+  //     "coordinates":['lat','lng']
+  //   }
 
+});
+
+
+hospitalSchema.pre("save", async function (next) {
+  const hospitalExist = await hospitalModel.findOne({
+    $and: [
+      {
+        $or: [
+          { contactNumber: this.contactNumber },
+        ],
+      },
+      { deleted: false },
+    ],
+  });
+  if (/^[0]?[789]\d{9}$/.test(this.contactNumber)) {
+    if (!hospitalExist) {
+      return next();
+    } else {
+      throw new Error(
+        "Hospital already exist. Select a different phone number"
+      );
+    }
+  } else {
+    throw new Error("Invalid phone number");
+  }
 });
 
 const hospitalModel = model(hospital, hospitalSchema);

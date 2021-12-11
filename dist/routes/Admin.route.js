@@ -40,4 +40,5 @@ adminRouter.post("/city", adminController.addCity);
 adminRouter.post("/state", adminController.addState);
 adminRouter.post("/locality", adminController.addLocality);
 adminRouter.post("/country", adminController.addCountry);
+adminRouter.post("/payment", adminController.addPayment);
 exports.default = adminRouter;

@@ -10,7 +10,12 @@ export const getAllHospitalsList = async (req: Request, res: Response) => {
   try {
     const hospitalList = await hospitalModel.find(
       {deleted: false}
-    );
+    ).populate([{
+      path: 'address',
+      populate:{
+        path: 'city state locality country',
+      }
+    },{path:'anemity'},{path:'payment'}]);
     return successResponse(hospitalList, "Successfully fetched Hospital's list", res);
   } catch (error: any) {
     return errorResponse(error, res);
@@ -20,6 +25,8 @@ export const getAllHospitalsList = async (req: Request, res: Response) => {
 export const createHospital = async (req: Request, res: Response) => {
   try {
    let body=req.body;
+   let addressObj=await new addressModel(body.address).save();
+   body["address"]=addressObj._id;
    let hospitalObj= await new hospitalModel(body).save();
     return successResponse(hospitalObj,"Hospital created successfully", res);
   }
@@ -52,14 +59,20 @@ export const addHospitalSpeciality= async(req:Request, res:Response)=>{
   }
 };
 
-//add address
-export const addAddress= async(req:Request, res:Response)=>{
+export const deleteHospital=async(req:Request,res:Response)=>{
   try{
-    let body=req.body;
-    let addressObj=await new addressModel(body).save();
-    return successResponse(addressObj, "Address has been successfully added",res);
-  }
-  catch(error: any){
+    const HospitalDel = await hospitalModel.findOneAndUpdate(
+      { _id: req.params.id, deleted: false },
+      { $set: { deleted: true } }
+    );
+    if (HospitalDel) {
+      return successResponse({}, "Hospital deleted successfully", res);
+    } else {
+      let error = new Error("Hospital doesn't exist");
+      error.name = "Not found";
+      return errorResponse(error, res, 404);
+    }
+  } catch (error) {
     return errorResponse(error, res);
   }
-};
+  };

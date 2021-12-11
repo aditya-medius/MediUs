@@ -8,9 +8,13 @@ import stateModel from "./State.Model";
 import countryModel from "./Country.Model";
 import { errorResponse, successResponse } from "../Services/response";
 import LocalityModel from "./Locality.Model";
+
 import diseaseModel from "./Disease.Model";
 import doctorTypeModel from "./DoctorType.Model";
 import specialityDoctorTypeModel from "./SpecialityDoctorType.Model";
+
+import paymentModel from "./Payment.Model";
+
 
 export const addSpeciality = async (req: Request, res: Response) => {
   try {
@@ -180,6 +184,7 @@ export const addCity = async (req: Request, res: Response) => {
   }
 };
 
+
 //add state
 export const addState = async (req: Request, res: Response) => {
   try {
@@ -218,3 +223,17 @@ export const addCountry = async (req: Request, res: Response) => {
     return errorResponse(error, res);
   }
 };
+//add payment options
+export const addPayment= async(req:Request, res:Response)=>{
+  try{
+    let body=req.body;
+    let paymentObj=await new paymentModel(body).save();
+    return successResponse(paymentObj, "Payment Options has been successfully added",res);
+
+  }
+  catch(error: any){
+    return errorResponse(error, res);
+  }
+};
+
+
