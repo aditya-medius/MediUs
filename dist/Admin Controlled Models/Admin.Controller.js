@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
+exports.addPayment = exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
 const BodyPart_Model_1 = __importDefault(require("./BodyPart.Model"));
 const SpecialityBody_Model_1 = __importDefault(require("./SpecialityBody.Model"));
 const Specialization_Model_1 = __importDefault(require("./Specialization.Model"));
@@ -21,6 +21,7 @@ const State_Model_1 = __importDefault(require("./State.Model"));
 const Country_Model_1 = __importDefault(require("./Country.Model"));
 const response_1 = require("../Services/response");
 const Locality_Model_1 = __importDefault(require("./Locality.Model"));
+const Payment_Model_1 = __importDefault(require("./Payment.Model"));
 const addSpeciality = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const body = req.body;
@@ -118,3 +119,15 @@ const addCountry = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.addCountry = addCountry;
+//add payment options
+const addPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.body;
+        let paymentObj = yield new Payment_Model_1.default(body).save();
+        return (0, response_1.successResponse)(paymentObj, "Payment Options has been successfully added", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.addPayment = addPayment;
