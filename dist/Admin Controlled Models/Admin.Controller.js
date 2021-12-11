@@ -12,15 +12,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
+exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityDisease = exports.addSpecialityDisease = exports.addDisease = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
 const BodyPart_Model_1 = __importDefault(require("./BodyPart.Model"));
 const SpecialityBody_Model_1 = __importDefault(require("./SpecialityBody.Model"));
+const SpecialityDisease_Model_1 = __importDefault(require("./SpecialityDisease.Model"));
 const Specialization_Model_1 = __importDefault(require("./Specialization.Model"));
 const City_Model_1 = __importDefault(require("./City.Model"));
 const State_Model_1 = __importDefault(require("./State.Model"));
 const Country_Model_1 = __importDefault(require("./Country.Model"));
 const response_1 = require("../Services/response");
 const Locality_Model_1 = __importDefault(require("./Locality.Model"));
+const Disease_Model_1 = __importDefault(require("./Disease.Model"));
 const addSpeciality = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const body = req.body;
@@ -32,6 +34,10 @@ const addSpeciality = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.addSpeciality = addSpeciality;
+/*
+  Body parts - START
+*/
+// Add body part
 const addBodyPart = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const body = req.body;
@@ -43,6 +49,7 @@ const addBodyPart = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.addBodyPart = addBodyPart;
+// Add Speciality and body record
 const addSpecialityBody = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
@@ -58,6 +65,7 @@ const addSpecialityBody = (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.addSpecialityBody = addSpecialityBody;
+// Update speciality Body Model
 const addToSpecialityBody = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
@@ -70,7 +78,57 @@ const addToSpecialityBody = (req, res) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.addToSpecialityBody = addToSpecialityBody;
-//add city 
+/*
+  Body Part - END
+*/
+/*
+  Disease - START
+*/
+// Add disease
+const addDisease = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.body;
+        const data = yield new Disease_Model_1.default(body).save();
+        return (0, response_1.successResponse)(data, "Successfully added disease", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.addDisease = addDisease;
+// Add Speciality and Disease record
+const addSpecialityDisease = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.body;
+        body.disease = [...new Set(body.disease)];
+        const data = yield new SpecialityDisease_Model_1.default({
+            speciality: body.speciality,
+            disease: body.disease,
+        }).save();
+        return (0, response_1.successResponse)(data, "Successfully created data", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.addSpecialityDisease = addSpecialityDisease;
+// Update speciality Body Model
+const addToSpecialityDisease = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.body;
+        body.disease = [...new Set(body.disease)];
+        const data = yield SpecialityDisease_Model_1.default.findOneAndUpdate({ _id: req.params.id }, { $addToSet: { disease: body.disease } }, { new: true });
+        return (0, response_1.successResponse)(data, "Successfully created data", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.addToSpecialityDisease = addToSpecialityDisease;
+/*
+  Disease - END
+*/
+//add city
 const addCity = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
@@ -82,7 +140,7 @@ const addCity = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.addCity = addCity;
-//add state 
+//add state
 const addState = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;

@@ -43,7 +43,7 @@ doctorRouter.delete(
 
 doctorRouter.post(
   "/findDoctorBySpecialityOrBodyPart/:term",
-  doctorController.findDoctorBySpecialityOrBodyPart
+  doctorController.searchDoctor
 );
 
 export default doctorRouter;

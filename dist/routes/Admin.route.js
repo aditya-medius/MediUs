@@ -23,9 +23,14 @@ const express_1 = require("express");
 const adminController = __importStar(require("../Admin Controlled Models/Admin.Controller"));
 const adminRouter = (0, express_1.Router)();
 adminRouter.post("/addSpeciality", adminController.addSpeciality);
+// Body part
 adminRouter.post("/addBodyPart", adminController.addBodyPart);
 adminRouter.post("/addSpecialityBody", adminController.addSpecialityBody);
 adminRouter.post("/addToSpecialityBody/:id", adminController.addToSpecialityBody);
+// Disease
+adminRouter.post("/addDisease", adminController.addDisease);
+adminRouter.post("/addSpecialityDisease", adminController.addSpecialityDisease);
+adminRouter.post("/addToSpecialityDisease/:id", adminController.addToSpecialityDisease);
 //routes for city anemity address state country
 adminRouter.post("/city", adminController.addCity);
 adminRouter.post("/state", adminController.addState);
