@@ -5,7 +5,8 @@ import { state } from "../Services/schemaNames";
 const stateSchema=new Schema({
     name:{
         type: String,
-        required: true
+        required: true,
+        unique: true
     }
 });
 

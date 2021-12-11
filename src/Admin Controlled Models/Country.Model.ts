@@ -5,7 +5,8 @@ import { country } from "../Services/schemaNames";
 const countrySchema=new Schema({
     name:{
         type: String,
-        required: true
+        required: true,
+        unique: true
     }
 });
 
