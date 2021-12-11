@@ -16,30 +16,42 @@ const doctorSchema = new Schema(
     ...schemaOptions,
     hospitalDetails: [
       {
-        hospital: {
-          type: mongoose.Schema.Types.ObjectId,
-          required: true,
-          ref: hospital,
-        },
-        workingHours: {
-          type: mongoose.Schema.Types.ObjectId,
-          required: true,
-          ref: workingHour,
-        },
-        consultationFee: {
-          min: {
-            required: true,
-            type: Number,
+        type: {
+          hospital: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: [true, "Hospital is required"],
+            ref: hospital,
           },
-          max: {
-            required: true,
-            type: Number,
+          workingHours: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: [true, "working hours is required"],
+            ref: workingHour,
+          },
+          consultationFee: {
+            min: {
+              required: [true, "Minimum consultation fee is required"],
+              type: Number,
+            },
+            max: {
+              required: [true, "Maximum consultation fee is required"],
+              type: Number,
+            },
           },
         },
       },
     ],
-    registrationDate: {
-      type: Date,
+    registration: {
+      type: {
+        registrationNumber: {
+          type: String,
+        },
+        registrationCouncil: {
+          type: String,
+        },
+        registrationDate: {
+          type: Date,
+        },
+      },
       required: true,
     },
     specialization: [
@@ -48,14 +60,30 @@ const doctorSchema = new Schema(
         ref: specialization,
       },
     ],
-    panCard: {
-      type: String,
-      required: true,
-    },
-    adhaarCard: {
-      type: String,
-      required: true,
-      minlength: 12,
+    KYCDetails: {
+      type: {
+        panCard: {
+          type: String,
+          required: true,
+          unique: true,
+        },
+        bankName: {
+          type: String,
+        },
+        bankAccountNumber: {
+          type: String,
+        },
+        IFSC: {
+          type: String,
+        },
+        adhaarCard: {
+          type: String,
+          required: true,
+          minlength: 12,
+          unique: true,
+        },
+      },
+      required: [true, "KYC details are required"],
     },
     qualification: [
       {
@@ -63,7 +91,6 @@ const doctorSchema = new Schema(
         ref: qualification,
       },
     ],
-
     liked: {
       type: mongoose.Schema.Types.ObjectId,
       ref: like,
@@ -136,6 +163,30 @@ doctorSchema.pre("findOneAndUpdate", async function (next) {
   }
   return next();
 });
+
+// Hospital details validation
+doctorSchema.path("hospitalDetails").validate(function (hospital: any) {
+  if (hospital.length < 1) {
+    return false;
+  }
+  return true;
+}, "Hospital details are required");
+
+// Specialization validation
+doctorSchema.path("specialization").validate(function (specialization: any) {
+  if (specialization.length < 1) {
+    return false;
+  }
+  return true;
+}, "specialization details are required");
+
+// Qualification Validation
+doctorSchema.path("qualification").validate(function (qualification: any) {
+  if (qualification.length < 1) {
+    return false;
+  }
+  return true;
+}, "qualification details are required");
 
 // For later
 // doctorSchema.virtual("bodyPart", {

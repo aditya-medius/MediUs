@@ -36,42 +36,71 @@ const schemaOptions_1 = __importDefault(require("../Services/schemaOptions"));
 const schemaNames_1 = require("../Services/schemaNames");
 const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schemaOptions_1.default), { hospitalDetails: [
         {
-            hospital: {
-                type: mongoose_1.default.Schema.Types.ObjectId,
-                required: true,
-                ref: schemaNames_1.hospital,
-            },
-            workingHours: {
-                type: mongoose_1.default.Schema.Types.ObjectId,
-                required: true,
-                ref: schemaNames_1.workingHour,
-            },
-            consultationFee: {
-                min: {
-                    required: true,
-                    type: Number,
+            type: {
+                hospital: {
+                    type: mongoose_1.default.Schema.Types.ObjectId,
+                    required: [true, "Hospital is required"],
+                    ref: schemaNames_1.hospital,
                 },
-                max: {
-                    required: true,
-                    type: Number,
+                workingHours: {
+                    type: mongoose_1.default.Schema.Types.ObjectId,
+                    required: [true, "working hours is required"],
+                    ref: schemaNames_1.workingHour,
+                },
+                consultationFee: {
+                    min: {
+                        required: [true, "Minimum consultation fee is required"],
+                        type: Number,
+                    },
+                    max: {
+                        required: [true, "Maximum consultation fee is required"],
+                        type: Number,
+                    },
                 },
             },
         },
-    ], registrationDate: {
-        type: Date,
+    ], registration: {
+        type: {
+            registrationNumber: {
+                type: String,
+            },
+            registrationCouncil: {
+                type: String,
+            },
+            registrationDate: {
+                type: Date,
+            },
+        },
         required: true,
     }, specialization: [
         {
             type: mongoose_1.Schema.Types.ObjectId,
             ref: schemaNames_1.specialization,
         },
-    ], panCard: {
-        type: String,
-        required: true,
-    }, adhaarCard: {
-        type: String,
-        required: true,
-        minlength: 12,
+    ], KYCDetails: {
+        type: {
+            panCard: {
+                type: String,
+                required: true,
+                unique: true,
+            },
+            bankName: {
+                type: String,
+            },
+            bankAccountNumber: {
+                type: String,
+            },
+            IFSC: {
+                type: String,
+            },
+            adhaarCard: {
+                type: String,
+                required: true,
+                minlength: 12,
+                unique: true,
+            },
+        },
+        required: [true, "KYC details are required"],
     }, qualification: [
         {
             type: mongoose_1.default.Schema.Types.ObjectId,
@@ -143,6 +172,27 @@ doctorSchema.pre("findOneAndUpdate", function (next) {
         return next();
     });
 });
+// Hospital details validation
+doctorSchema.path("hospitalDetails").validate(function (hospital) {
+    if (hospital.length < 1) {
+        return false;
+    }
+    return true;
+}, "Hospital details are required");
+// Specialization validation
+doctorSchema.path("specialization").validate(function (specialization) {
+    if (specialization.length < 1) {
+        return false;
+    }
+    return true;
+}, "specialization details are required");
+// Qualification Validation
+doctorSchema.path("qualification").validate(function (qualification) {
+    if (qualification.length < 1) {
+        return false;
+    }
+    return true;
+}, "qualification details are required");
 // For later
 // doctorSchema.virtual("bodyPart", {
 //   ref: "specialities",
