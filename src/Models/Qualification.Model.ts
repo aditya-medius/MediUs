@@ -1,6 +1,6 @@
 import mongoose, { Schema, model } from "mongoose";
 import { qualification } from "../Services/schemaNames";
-
+import validator from "validator";
 const qualificationSchema = new Schema({
   qualificationName: {
     type: String,
@@ -8,18 +8,26 @@ const qualificationSchema = new Schema({
   },
   certificationOrganisation: {
     type: String,
-    required: true,
+    required: [true, "Certification Organisation is required"],
   },
   duration: {
-    from: {
-      type: Date,
-      required: true,
+    type: {
+      from: {
+        type: Date,
+        required: true,
+      },
+      till: {
+        type: Date,
+        required: true,
+      },
     },
-    till: {
-      type: Date,
-      required: true,
-    },
-    required: true,
+    required: [true, "Duration is required"],
+  },
+  email: {
+    type: String,
+    required: [true, "Email is required"],
+    validate: [validator.isEmail, "Email isn't valid"],
+    unique: true,
   },
 });
 
