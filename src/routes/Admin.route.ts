@@ -20,6 +20,17 @@ adminRouter.post(
   adminController.addToSpecialityDisease
 );
 
+// Doctor Type
+adminRouter.post("/addDoctorType", adminController.addDoctorType);
+adminRouter.post(
+  "/addSpecialityDoctorType",
+  adminController.addSpecialityDoctorType
+);
+adminRouter.post(
+  "/addToSpecialityDoctorType/:id",
+  adminController.addToSpecialityDoctorType
+);
+
 //routes for city anemity address state country
 
 adminRouter.post("/city", adminController.addCity);

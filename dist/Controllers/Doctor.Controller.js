@@ -53,8 +53,9 @@ const SpecialityBody_Model_1 = __importDefault(require("../Admin Controlled Mode
 const underscore_1 = __importDefault(require("underscore"));
 const SpecialityDisease_Model_1 = __importDefault(require("../Admin Controlled Models/SpecialityDisease.Model"));
 const schemaNames_1 = require("../Services/schemaNames");
+const SpecialityDoctorType_Model_1 = __importDefault(require("../Admin Controlled Models/SpecialityDoctorType.Model"));
 const excludeDoctorFields = {
-    // password: 0,
+    password: 0,
     // panCard: 0,
     // adhaarCard: 0,
     verified: 0,
@@ -363,6 +364,66 @@ const searchDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                 },
                 { $unwind: "$DiseaseAndSpeciality" },
                 { $replaceRoot: { newRoot: "$DiseaseAndSpeciality" } },
+            ]),
+            SpecialityDoctorType_Model_1.default.aggregate([
+                {
+                    $facet: {
+                        bySpeciality: [
+                            {
+                                $lookup: {
+                                    from: schemaNames_1.specialization,
+                                    localField: "speciality",
+                                    foreignField: "_id",
+                                    as: "byspeciality",
+                                },
+                            },
+                            {
+                                $match: {
+                                    "byspeciality.specialityName": {
+                                        $regex: term,
+                                        $options: "i",
+                                    },
+                                },
+                            },
+                            {
+                                $project: {
+                                    speciality: 1,
+                                    _id: 0,
+                                },
+                            },
+                        ],
+                        byDoctorType: [
+                            {
+                                $lookup: {
+                                    from: schemaNames_1.doctorType,
+                                    localField: "doctorType",
+                                    foreignField: "_id",
+                                    as: "doctorType",
+                                },
+                            },
+                            {
+                                $match: {
+                                    "doctorType.doctorType": { $regex: term, $options: "i" },
+                                },
+                            },
+                            {
+                                $project: {
+                                    speciality: 1,
+                                    _id: 0,
+                                },
+                            },
+                        ],
+                    },
+                },
+                {
+                    $project: {
+                        DoctorTypeAndSpeciality: {
+                            $setUnion: ["$bySpeciality", "$byDoctorType"],
+                        },
+                    },
+                },
+                { $unwind: "$DoctorTypeAndSpeciality" },
+                { $replaceRoot: { newRoot: "$DoctorTypeAndSpeciality" } },
             ]),
         ];
         Promise.all(promiseArray)

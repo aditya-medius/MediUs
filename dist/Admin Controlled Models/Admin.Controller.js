@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityDisease = exports.addSpecialityDisease = exports.addDisease = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
+exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityDoctorType = exports.addSpecialityDoctorType = exports.addDoctorType = exports.addToSpecialityDisease = exports.addSpecialityDisease = exports.addDisease = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
 const BodyPart_Model_1 = __importDefault(require("./BodyPart.Model"));
 const SpecialityBody_Model_1 = __importDefault(require("./SpecialityBody.Model"));
 const SpecialityDisease_Model_1 = __importDefault(require("./SpecialityDisease.Model"));
@@ -23,6 +23,8 @@ const Country_Model_1 = __importDefault(require("./Country.Model"));
 const response_1 = require("../Services/response");
 const Locality_Model_1 = __importDefault(require("./Locality.Model"));
 const Disease_Model_1 = __importDefault(require("./Disease.Model"));
+const DoctorType_Model_1 = __importDefault(require("./DoctorType.Model"));
+const SpecialityDoctorType_Model_1 = __importDefault(require("./SpecialityDoctorType.Model"));
 const addSpeciality = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const body = req.body;
@@ -127,6 +129,53 @@ const addToSpecialityDisease = (req, res) => __awaiter(void 0, void 0, void 0, f
 exports.addToSpecialityDisease = addToSpecialityDisease;
 /*
   Disease - END
+*/
+/*
+  Doctor Type - START
+*/
+// Add Doctor Type
+const addDoctorType = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.body;
+        const data = yield new DoctorType_Model_1.default(body).save();
+        return (0, response_1.successResponse)(data, "Successfully added doctor type", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.addDoctorType = addDoctorType;
+// Add Speciality and Doctor type record
+const addSpecialityDoctorType = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.body;
+        body.doctorType = [...new Set(body.doctorType)];
+        const data = yield new SpecialityDoctorType_Model_1.default({
+            speciality: body.speciality,
+            doctorType: body.doctorType,
+        }).save();
+        return (0, response_1.successResponse)(data, "Successfully created data", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.addSpecialityDoctorType = addSpecialityDoctorType;
+// Update speciality Body Model
+const addToSpecialityDoctorType = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.body;
+        body.doctorType = [...new Set(body.doctorType)];
+        const data = yield SpecialityDoctorType_Model_1.default.findOneAndUpdate({ _id: req.params.id }, { $addToSet: { doctorType: body.doctorType } }, { new: true });
+        return (0, response_1.successResponse)(data, "Successfully updated data", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.addToSpecialityDoctorType = addToSpecialityDoctorType;
+/*
+  Doctor Type - END
 */
 //add city
 const addCity = (req, res) => __awaiter(void 0, void 0, void 0, function* () {

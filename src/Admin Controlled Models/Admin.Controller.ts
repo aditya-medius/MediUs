@@ -9,6 +9,8 @@ import countryModel from "./Country.Model";
 import { errorResponse, successResponse } from "../Services/response";
 import LocalityModel from "./Locality.Model";
 import diseaseModel from "./Disease.Model";
+import doctorTypeModel from "./DoctorType.Model";
+import specialityDoctorTypeModel from "./SpecialityDoctorType.Model";
 
 export const addSpeciality = async (req: Request, res: Response) => {
   try {
@@ -114,6 +116,57 @@ export const addToSpecialityDisease = async (req: Request, res: Response) => {
 };
 /*
   Disease - END
+*/
+
+/*
+  Doctor Type - START
+*/
+// Add Doctor Type
+export const addDoctorType = async (req: Request, res: Response) => {
+  try {
+    let body = req.body;
+    const data = await new doctorTypeModel(body).save();
+    return successResponse(data, "Successfully added doctor type", res);
+  } catch (error) {
+    return errorResponse(error, res);
+  }
+};
+
+// Add Speciality and Doctor type record
+export const addSpecialityDoctorType = async (req: Request, res: Response) => {
+  try {
+    let body = req.body;
+    body.doctorType = [...new Set(body.doctorType)];
+    const data = await new specialityDoctorTypeModel({
+      speciality: body.speciality,
+      doctorType: body.doctorType,
+    }).save();
+    return successResponse(data, "Successfully created data", res);
+  } catch (error) {
+    return errorResponse(error, res);
+  }
+};
+
+// Update speciality Body Model
+export const addToSpecialityDoctorType = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    let body = req.body;
+    body.doctorType = [...new Set(body.doctorType)];
+    const data = await specialityDoctorTypeModel.findOneAndUpdate(
+      { _id: req.params.id },
+      { $addToSet: { doctorType: body.doctorType } },
+      { new: true }
+    );
+    return successResponse(data, "Successfully updated data", res);
+  } catch (error) {
+    return errorResponse(error, res);
+  }
+};
+/*
+  Doctor Type - END
 */
 
 //add city

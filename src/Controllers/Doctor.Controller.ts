@@ -9,9 +9,10 @@ import specialityBodyModel from "../Admin Controlled Models/SpecialityBody.Model
 import bodyPartModel from "../Admin Controlled Models/BodyPart.Model";
 import _ from "underscore";
 import specialityDiseaseModel from "../Admin Controlled Models/SpecialityDisease.Model";
-import { disease, specialization } from "../Services/schemaNames";
+import { disease, doctorType, specialization } from "../Services/schemaNames";
+import specialityDoctorTypeModel from "../Admin Controlled Models/SpecialityDoctorType.Model";
 const excludeDoctorFields = {
-  // password: 0,
+  password: 0,
   // panCard: 0,
   // adhaarCard: 0,
   verified: 0,
@@ -358,6 +359,66 @@ export const searchDoctor = async (req: Request, res: Response) => {
         },
         { $unwind: "$DiseaseAndSpeciality" },
         { $replaceRoot: { newRoot: "$DiseaseAndSpeciality" } },
+      ]),
+      specialityDoctorTypeModel.aggregate([
+        {
+          $facet: {
+            bySpeciality: [
+              {
+                $lookup: {
+                  from: specialization,
+                  localField: "speciality",
+                  foreignField: "_id",
+                  as: "byspeciality",
+                },
+              },
+              {
+                $match: {
+                  "byspeciality.specialityName": {
+                    $regex: term,
+                    $options: "i",
+                  },
+                },
+              },
+              {
+                $project: {
+                  speciality: 1,
+                  _id: 0,
+                },
+              },
+            ],
+            byDoctorType: [
+              {
+                $lookup: {
+                  from: doctorType,
+                  localField: "doctorType",
+                  foreignField: "_id",
+                  as: "doctorType",
+                },
+              },
+              {
+                $match: {
+                  "doctorType.doctorType": { $regex: term, $options: "i" },
+                },
+              },
+              {
+                $project: {
+                  speciality: 1,
+                  _id: 0,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $project: {
+            DoctorTypeAndSpeciality: {
+              $setUnion: ["$bySpeciality", "$byDoctorType"],
+            },
+          },
+        },
+        { $unwind: "$DoctorTypeAndSpeciality" },
+        { $replaceRoot: { newRoot: "$DoctorTypeAndSpeciality" } },
       ]),
     ];
 
