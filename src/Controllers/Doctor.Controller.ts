@@ -5,14 +5,21 @@ import * as jwt from "jsonwebtoken";
 import * as bcrypt from "bcrypt";
 import { errorResponse, successResponse } from "../Services/response";
 import { sendMessage } from "../Services/message.service";
-
+import specialityBodyModel from "../Admin Controlled Models/SpecialityBody.Model";
+import bodyPartModel from "../Admin Controlled Models/BodyPart.Model";
+import _ from "underscore";
+import specialityDiseaseModel from "../Admin Controlled Models/SpecialityDisease.Model";
+import { disease, doctorType, specialization } from "../Services/schemaNames";
+import specialityDoctorTypeModel from "../Admin Controlled Models/SpecialityDoctorType.Model";
 const excludeDoctorFields = {
   password: 0,
-  panCard: 0,
-  adhaarCard: 0,
+  // panCard: 0,
+  // adhaarCard: 0,
   verified: 0,
   registrationDate: 0,
   DOB: 0,
+  registration: 0,
+  KYCDetails: 0,
 };
 
 // Get All Doctors
@@ -172,15 +179,17 @@ export const getDoctorByHospitalId = async (req: Request, res: Response) => {
 
 export const updateDoctorProfile = async (req: Request, res: Response) => {
   try {
-    let body = req.body;
+    let { hospitalDetails, specialization, qualification, ...body } = req.body;
+    const updateQuery = {
+      $set: body,
+      $addToSet: { hospitalDetails, specialization, qualification },
+    };
     const updatedDoctorObj = await doctorModel.findOneAndUpdate(
       {
         _id: req.currentDoctor,
         deleted: false,
       },
-      {
-        $set: body,
-      },
+      updateQuery,
       {
         fields: excludeDoctorFields,
         new: true,
@@ -202,6 +211,12 @@ export const updateDoctorProfile = async (req: Request, res: Response) => {
   }
 };
 
+/*
+  Agar yeh doctor kissi hospital array me hai
+  to isko waha se hatane k zaroorat nhi, uski vjhaye
+  jab uss hospital k doctors ko GET kre to ek filter lagaye jisse
+  k soft deleted doctors return na ho.
+*/
 export const deleteProfile = async (req: Request, res: Response) => {
   try {
     const doctorProfile = await doctorModel.findOneAndUpdate(
@@ -215,6 +230,221 @@ export const deleteProfile = async (req: Request, res: Response) => {
       error.name = "Not found";
       return errorResponse(error, res, 404);
     }
+  } catch (error) {
+    return errorResponse(error, res);
+  }
+};
+
+// Get doctor by speciality or body parts
+export const searchDoctor = async (req: Request, res: Response) => {
+  try {
+    const term = req.params.term;
+    const promiseArray: Array<any> = [
+      specialityBodyModel.aggregate([
+        {
+          $facet: {
+            bySpeciality: [
+              {
+                $lookup: {
+                  from: "specializations",
+                  localField: "speciality",
+                  foreignField: "_id",
+                  as: "byspeciality",
+                },
+              },
+              {
+                $match: {
+                  "byspeciality.specialityName": {
+                    $regex: term,
+                    $options: "i",
+                  },
+                },
+              },
+              {
+                $project: {
+                  speciality: 1,
+                  _id: 0,
+                },
+              },
+            ],
+            byBodyPart: [
+              {
+                $lookup: {
+                  from: "bodyparts",
+                  localField: "bodyParts",
+                  foreignField: "_id",
+                  as: "bodyPart",
+                },
+              },
+              {
+                $match: {
+                  "bodyPart.bodyPart": { $regex: term, $options: "i" },
+                },
+              },
+              {
+                $project: {
+                  speciality: 1,
+                  _id: 0,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $project: {
+            BodyAndSpeciality: {
+              $setUnion: ["$bySpeciality", "$byBodyPart"],
+            },
+          },
+        },
+        { $unwind: "$BodyAndSpeciality" },
+        { $replaceRoot: { newRoot: "$BodyAndSpeciality" } },
+      ]),
+      specialityDiseaseModel.aggregate([
+        {
+          $facet: {
+            bySpeciality: [
+              {
+                $lookup: {
+                  from: specialization,
+                  localField: "speciality",
+                  foreignField: "_id",
+                  as: "byspeciality",
+                },
+              },
+              {
+                $match: {
+                  "byspeciality.specialityName": {
+                    $regex: term,
+                    $options: "i",
+                  },
+                },
+              },
+              {
+                $project: {
+                  speciality: 1,
+                  _id: 0,
+                },
+              },
+            ],
+            byDisease: [
+              {
+                $lookup: {
+                  from: disease,
+                  localField: "disease",
+                  foreignField: "_id",
+                  as: "disease",
+                },
+              },
+              {
+                $match: {
+                  "disease.disease": { $regex: term, $options: "i" },
+                },
+              },
+              {
+                $project: {
+                  speciality: 1,
+                  _id: 0,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $project: {
+            DiseaseAndSpeciality: {
+              $setUnion: ["$bySpeciality", "$byDisease"],
+            },
+          },
+        },
+        { $unwind: "$DiseaseAndSpeciality" },
+        { $replaceRoot: { newRoot: "$DiseaseAndSpeciality" } },
+      ]),
+      specialityDoctorTypeModel.aggregate([
+        {
+          $facet: {
+            bySpeciality: [
+              {
+                $lookup: {
+                  from: specialization,
+                  localField: "speciality",
+                  foreignField: "_id",
+                  as: "byspeciality",
+                },
+              },
+              {
+                $match: {
+                  "byspeciality.specialityName": {
+                    $regex: term,
+                    $options: "i",
+                  },
+                },
+              },
+              {
+                $project: {
+                  speciality: 1,
+                  _id: 0,
+                },
+              },
+            ],
+            byDoctorType: [
+              {
+                $lookup: {
+                  from: doctorType,
+                  localField: "doctorType",
+                  foreignField: "_id",
+                  as: "doctorType",
+                },
+              },
+              {
+                $match: {
+                  "doctorType.doctorType": { $regex: term, $options: "i" },
+                },
+              },
+              {
+                $project: {
+                  speciality: 1,
+                  _id: 0,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $project: {
+            DoctorTypeAndSpeciality: {
+              $setUnion: ["$bySpeciality", "$byDoctorType"],
+            },
+          },
+        },
+        { $unwind: "$DoctorTypeAndSpeciality" },
+        { $replaceRoot: { newRoot: "$DoctorTypeAndSpeciality" } },
+      ]),
+    ];
+
+    Promise.all(promiseArray)
+      .then(async (specialityArray: Array<any>) => {
+        specialityArray = specialityArray.flat();
+        specialityArray = _.map(specialityArray, (e) => {
+          return e.speciality;
+        });
+
+        const doctorArray = await doctorModel
+          .find(
+            {
+              deleted: false,
+              active: true,
+              specialization: { $in: specialityArray },
+            },
+            excludeDoctorFields
+          )
+          .populate("specialization")
+          .populate("hospitalDetails.hospital");
+        return successResponse(doctorArray, "Success", res);
+      })
+      .catch((error) => {
+        return errorResponse(error, res);
+      });
   } catch (error) {
     return errorResponse(error, res);
   }

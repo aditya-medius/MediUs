@@ -33,45 +33,73 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const schemaOptions_1 = __importDefault(require("../Services/schemaOptions"));
+const lodash_1 = __importDefault(require("lodash"));
 const schemaNames_1 = require("../Services/schemaNames");
 const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schemaOptions_1.default), { hospitalDetails: [
         {
-            hospital: {
-                type: mongoose_1.default.Schema.Types.ObjectId,
-                required: true,
-                ref: schemaNames_1.hospital,
-            },
-            workingHours: {
-                type: mongoose_1.default.Schema.Types.ObjectId,
-                required: true,
-                ref: schemaNames_1.workingHour,
-            },
-            consultationFee: {
-                min: {
-                    required: true,
-                    type: Number,
+            type: {
+                hospital: {
+                    type: mongoose_1.default.Schema.Types.ObjectId,
+                    required: [true, "Hospital is required"],
+                    ref: schemaNames_1.hospital,
                 },
-                max: {
-                    required: true,
-                    type: Number,
+                workingHours: {
+                    type: mongoose_1.default.Schema.Types.ObjectId,
+                    required: [true, "working hours is required"],
+                    ref: schemaNames_1.workingHour,
+                },
+                consultationFee: {
+                    min: {
+                        required: [true, "Minimum consultation fee is required"],
+                        type: Number,
+                    },
+                    max: {
+                        required: [true, "Maximum consultation fee is required"],
+                        type: Number,
+                    },
                 },
             },
         },
-    ], registrationDate: {
-        type: Date,
+    ], registration: {
+        type: {
+            registrationNumber: {
+                type: String,
+            },
+            registrationCouncil: {
+                type: String,
+            },
+            registrationDate: {
+                type: Date,
+            },
+        },
         required: true,
     }, specialization: [
         {
             type: mongoose_1.Schema.Types.ObjectId,
-            ref: schemaNames_1.speciality,
+            ref: schemaNames_1.specialization,
         },
-    ], panCard: {
-        type: String,
-        required: true,
-    }, adhaarCard: {
-        type: String,
-        required: true,
-        minlength: 12,
+    ], KYCDetails: {
+        type: {
+            panCard: {
+                type: String,
+                required: true,
+            },
+            bankName: {
+                type: String,
+            },
+            bankAccountNumber: {
+                type: String,
+            },
+            IFSC: {
+                type: String,
+            },
+            adhaarCard: {
+                type: String,
+                required: true,
+                minlength: 12,
+            },
+        },
+        required: [true, "KYC details are required"],
     }, qualification: [
         {
             type: mongoose_1.default.Schema.Types.ObjectId,
@@ -83,7 +111,10 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
     }, treatmentType: {
         type: mongoose_1.default.Schema.Types.ObjectId,
         ref: schemaNames_1.treatmentType,
-    } }));
+    } }), {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+});
 doctorSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         const profileExist = yield doctorModel.findOne({
@@ -128,6 +159,8 @@ doctorSchema.pre("findOneAndUpdate", function (next) {
                         email: updateQuery.email,
                     },
                     { phoneNumber: updateQuery.phoneNumber },
+                    { panCard: updateQuery.panCard },
+                    { adhaarCard: updateQuery.panCard },
                 ],
             });
             if (profileExist) {
@@ -140,19 +173,73 @@ doctorSchema.pre("findOneAndUpdate", function (next) {
         return next();
     });
 });
-// const mongooseEventList = ["find", "findOne"];
-// mongooseEventList.forEach((event: any) => {
-//   doctorSchema.pre(event, async function (next) {
-//     this.select({
-//       password: 0,
-//       panCard: 0,
-//       adhaarCard: 0,
-//       verified: 0,
-//       registrationDate: 0,
-//       DOB: 0,
-//     });
-//     return next();
-//   });
+doctorSchema.pre("findOneAndUpdate", function (next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let updateQuery = this.getUpdate();
+        updateQuery = updateQuery["$addToSet"];
+        if ("hospitalDetails" in updateQuery) {
+            const currentDoc = yield this.model.findOne({ _id: this.getQuery()._id });
+            const incomingHospitals = lodash_1.default.map(updateQuery.hospitalDetails, (e) => e.hospital.toString());
+            const currentHospitals = lodash_1.default.map(currentDoc.hospitalDetails, (e) => e.hospital.toString());
+            const combinedHospitals = [
+                ...incomingHospitals,
+                ...currentHospitals,
+            ];
+            if (combinedHospitals.length != new Set(combinedHospitals).size) {
+                throw new Error("Cannot add same hospital twice");
+            }
+        }
+        next();
+    });
+});
+// Hospital details validation
+doctorSchema.path("hospitalDetails").validate(function (hospital) {
+    if (hospital.length < 1) {
+        return false;
+    }
+    return true;
+}, "Hospital details are required");
+doctorSchema.path("hospitalDetails").validate(function (hospital) {
+    // if (hospital.lenght) {
+    // }let element
+    let element;
+    if (hospital.length > 1) {
+        for (let index = 0; index < hospital.length; index++) {
+            for (let i = index + 1; i < hospital.length; i++) {
+                if (hospital[i]) {
+                    if (hospital[index].hospital.toString() ==
+                        hospital[i].hospital.toString()) {
+                        return false;
+                    }
+                }
+                else {
+                    return true;
+                }
+            }
+        }
+    }
+    return true;
+}, "Cannot enter same hospital twice");
+// Specialization validation
+doctorSchema.path("specialization").validate(function (specialization) {
+    if (specialization.length < 1) {
+        return false;
+    }
+    return true;
+}, "specialization details are required");
+// Qualification Validation
+doctorSchema.path("qualification").validate(function (qualification) {
+    if (qualification.length < 1) {
+        return false;
+    }
+    return true;
+}, "qualification details are required");
+// For later
+// doctorSchema.virtual("bodyPart", {
+//   ref: "specialities",
+//   localField: "specialization",
+//   foreignField: "speciality",
+//   justOne: false,
 // });
 const doctorModel = (0, mongoose_1.model)(schemaNames_1.doctor, doctorSchema);
 exports.default = doctorModel;
