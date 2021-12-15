@@ -51,7 +51,7 @@ const hospitalSchema = new mongoose_1.Schema({
         {
             type: mongoose_1.default.Schema.Types.ObjectId,
             required: true,
-            ref: schemaNames_1.speciality
+            ref: schemaNames_1.specialization
         }
     ],
     anemity: [{
@@ -124,6 +124,28 @@ hospitalSchema.pre("save", function (next) {
         else {
             throw new Error("Invalid phone number");
         }
+    });
+});
+hospitalSchema.pre("findOneAndUpdate", function (next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let updateQuery = this.getUpdate();
+        updateQuery = updateQuery["$set"];
+        if ("contactNumber" in updateQuery) {
+            const query = this.getQuery();
+            const hospitalExist = yield this.model.findOne({
+                _id: { $ne: query._id },
+                $or: [
+                    { contactNumber: updateQuery.contactNumber },
+                ],
+            });
+            if (hospitalExist) {
+                throw new Error("Hospital alredy exist. Select a different contact number");
+            }
+            else {
+                return next();
+            }
+        }
+        return next();
     });
 });
 const hospitalModel = (0, mongoose_1.model)(schemaNames_1.hospital, hospitalSchema);
