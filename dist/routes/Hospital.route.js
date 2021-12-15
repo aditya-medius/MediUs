@@ -23,11 +23,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const Hospital_auth_1 = require("../authentication/Hospital.auth");
 const hospitalController = __importStar(require("../Controllers/Hospital.Controller"));
 const hospitalRouter = express_1.default.Router();
-hospitalRouter.get("/", hospitalController.getAllHospitalsList);
+hospitalRouter.get("/", Hospital_auth_1.authenticateHospital, hospitalController.getAllHospitalsList);
 hospitalRouter.post("/", hospitalController.createHospital);
-hospitalRouter.post("/deleteHospital", hospitalController.deleteHospital);
-hospitalRouter.post("/anemity", hospitalController.createHospitalAnemity);
-hospitalRouter.post("/speciality", hospitalController.addHospitalSpeciality);
+hospitalRouter.post("/deleteHospital", Hospital_auth_1.authenticateHospital, hospitalController.deleteHospital);
+hospitalRouter.post("/updateHospital", Hospital_auth_1.authenticateHospital, hospitalController.updateHospital);
+hospitalRouter.post("/anemity", Hospital_auth_1.authenticateHospital, hospitalController.createHospitalAnemity);
+// hospitalRouter.post("/speciality",authenticateHospital,hospitalController.addHospitalSpeciality);
+hospitalRouter.post("/findHospitalBySpecialityOrBodyPart/:term", hospitalController.searchHospital);
 exports.default = hospitalRouter;
