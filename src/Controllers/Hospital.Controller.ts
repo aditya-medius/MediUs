@@ -10,6 +10,8 @@ import specialityDiseaseModel from "../Admin Controlled Models/SpecialityDisease
 import specialityDoctorTypeModel from "../Admin Controlled Models/SpecialityDoctorType.Model";
 import { disease, doctorType, specialization } from "../Services/schemaNames";
 import _ from "underscore";
+import doctorModel from "../Models/Doctors.Model";
+import { Mongoose } from "mongoose";
 const excludeDoctorFields = {
   password: 0,
   // panCard: 0,
@@ -99,27 +101,32 @@ export const deleteHospital=async(req:Request,res:Response)=>{
   };
 export const updateHospital=async(req:Request,res:Response)=>{
   try{
-    let {doctors, anemity, payment, contactNumber, ...body}=req.body;
+    let {doctors, anemity, payment, contactNumber, numberOfBed,type, ...body}=req.body;
     const updateQuery={
-      $set: body,
+      $set: {body,numberOfBed,type},
       $addToSet: {
          doctors, anemity, payment
       },
     };
-    const HospitalUpdateObj = await hospitalModel.findOneAndUpdate(
-      { _id: req.currentHospital, deleted: false },
-      updateQuery,
-      {
-        new: true,
+    const DoctorObj =await doctorModel.find({deleted: false,_id:doctors});
+    // console.log(doctors.length);
+    if(DoctorObj.length==doctors.length)
+    {
+      const HospitalUpdateObj = await hospitalModel.findOneAndUpdate({_id: req.currentHospital, deleted: false},
+      updateQuery,{new: true,});
+      if (HospitalUpdateObj) {
+        return successResponse(HospitalUpdateObj, "Hospital updated successfully", res);
+      } else {
+        let error = new Error("Hospital doesn't exist");
+        error.name = "Not found";
+        return errorResponse(error, res, 404);
       }
-      );
-    if (HospitalUpdateObj) {
-      return successResponse(HospitalUpdateObj, "Hospital updated successfully", res);
-    } else {
-      let error = new Error("Hospital doesn't exist");
-      error.name = "Not found";
-      return errorResponse(error, res, 404);
     }
+    else{
+    let error=new Error("Doctor doesn't exist"); 
+    error.name="Not Found";
+    return errorResponse(error,res,404);
+  }
   } catch (error) {
     return errorResponse(error, res);
   }
@@ -320,15 +327,21 @@ export const searchHospital = async (req: Request, res: Response) => {
         specialityArray = _.map(specialityArray, (e) => {
           return e.speciality;
         });
-
         const hospitalArray = await hospitalModel
           .find(
-            {
-              deleted: false,
-              active: true,
-              specialisedIn: { $in: specialityArray },
-              // doctors: {specialization: {$in: specialityArray}}
-            }          
+            {$or:
+            [
+              {
+                deleted: false,
+                active: true,
+                specialisedIn: { $in: specialityArray },
+                // doctors: {specialization: {$in: specialityArray}}
+              },
+              {
+                type: term
+              }   
+            ]
+          }   
             ).populate({path: 'specialisedIn'});
           return successResponse(hospitalArray, "Success", res);
       })
@@ -339,3 +352,18 @@ export const searchHospital = async (req: Request, res: Response) => {
     return errorResponse(error, res);
   }
 };
+
+export const removeDoctor= async (req: Request, res: Response) =>{
+  try{
+    let {doctors} = req.body;
+    const doctorProfile= await doctorModel.findOne({deleted: false, _id: doctors});
+    if(doctorProfile){const hospitalDoctor=await hospitalModel.findOneAndUpdate({_id: req.currentHospital,doctors:{$in:doctors}},{$pull:{doctors:doctors}});
+    return successResponse(hospitalDoctor,"Doctor Removed Successfully",res);}
+    let error= new Error("Doctor doesnot exist");
+    error.name="Not Found";
+    return errorResponse(error, res, 404);
+  }
+  catch(error){
+    return errorResponse(error,res);
+  }
+}

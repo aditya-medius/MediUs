@@ -27,9 +27,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const schemaNames_1 = require("../Services/schemaNames");
+const Doctors_Model_1 = __importDefault(require("./Doctors.Model"));
 const hospitalSchema = new mongoose_1.Schema({
     name: {
         type: String,
@@ -146,6 +150,39 @@ hospitalSchema.pre("findOneAndUpdate", function (next) {
             }
         }
         return next();
+    });
+});
+//check for number of bed
+hospitalSchema.pre("findOneAndUpdate", function (next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let UpdateQuery = this.getUpdate();
+        UpdateQuery = UpdateQuery["$set"];
+        if (UpdateQuery.numberOfBed <= 0)
+            throw new Error("Number of beds can't equal or less than zero");
+        else
+            return next();
+    });
+});
+//check for add a doctor
+hospitalSchema.pre("findOneAndUpdate", function (next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let UpdateQuery = this.getUpdate();
+        UpdateQuery = UpdateQuery["$addToSet"];
+        if ("doctors" in UpdateQuery) {
+            const doctorArray = yield Doctors_Model_1.default.find({
+                deleted: false,
+                _id: UpdateQuery.doctors
+            });
+            // const doctorExist=await doctorArray.find({
+            //   _id: UpdateQuery.doctors[i]
+            // })
+            console.log(doctorArray);
+            if (true)
+                next();
+        }
+        else {
+            throw new Error("Cannot find doctor");
+        }
     });
 });
 const hospitalModel = (0, mongoose_1.model)(schemaNames_1.hospital, hospitalSchema);

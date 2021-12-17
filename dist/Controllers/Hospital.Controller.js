@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.createHospitalAnemity = exports.createHospital = exports.getAllHospitalsList = void 0;
+exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.createHospitalAnemity = exports.createHospital = exports.getAllHospitalsList = void 0;
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Anemities_Model_1 = __importDefault(require("../Models/Anemities.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
@@ -138,9 +138,9 @@ const deleteHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
 exports.deleteHospital = deleteHospital;
 const updateHospital = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let _a = req.body, { doctors, anemity, payment, contactNumber } = _a, body = __rest(_a, ["doctors", "anemity", "payment", "contactNumber"]);
+        let _a = req.body, { doctors, anemity, payment, contactNumber, numberOfBed, type } = _a, body = __rest(_a, ["doctors", "anemity", "payment", "contactNumber", "numberOfBed", "type"]);
         const updateQuery = {
-            $set: body,
+            $set: { body, numberOfBed, type },
             $addToSet: {
                 doctors, anemity, payment
             },
@@ -355,11 +355,17 @@ const searchHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 return e.speciality;
             });
             const hospitalArray = yield Hospital_Model_1.default
-                .find({
-                deleted: false,
-                active: true,
-                specialisedIn: { $in: specialityArray },
-                // doctors: {specialization: {$in: specialityArray}}
+                .find({ $or: [
+                    {
+                        deleted: false,
+                        active: true,
+                        specialisedIn: { $in: specialityArray },
+                        // doctors: {specialization: {$in: specialityArray}}
+                    },
+                    {
+                        type: term
+                    }
+                ]
             }).populate({ path: 'specialisedIn' });
             return (0, response_1.successResponse)(hospitalArray, "Success", res);
         }))
@@ -372,3 +378,26 @@ const searchHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.searchHospital = searchHospital;
+const removeDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let { doctors } = req.body;
+        const UpdateQuery = {
+            $pull: { doctors }
+        };
+        const doctorProfile = yield Hospital_Model_1.default.findOneAndUpdate({
+            deleted: false,
+            _id: req.currentHospital
+        });
+        // console.log(body.doctors);
+        if (doctorProfile) {
+            return (0, response_1.successResponse)(doctorProfile, "Doctor added Successfully", res);
+        }
+        let error = new Error("Doctor doesnot exist");
+        error.name = "Not Found";
+        return (0, response_1.errorResponse)(error, res, 404);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.removeDoctor = removeDoctor;
