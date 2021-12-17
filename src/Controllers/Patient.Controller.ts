@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import patientModel from "../Models/Patient.Model";
 import otpModel from "../Models/OTP.Model";
+import appointmentModel from "../Models/Appointment.Model"
 import * as jwt from "jsonwebtoken";
 import * as bcrypt from "bcrypt";
 import { errorResponse, successResponse } from "../Services/response";
@@ -216,3 +217,64 @@ export const deleteProfile = async (req: Request, res: Response) => {
     return errorResponse(error, res);
   }
 };
+//Book an apponitment 
+export const BookAppointment = async (req: Request, res: Response) => {
+try{
+    let body = req.body;
+    let appointmentBook = await new appointmentModel(body).save();
+    return successResponse(appointmentBook, "Appoinment has been successfully booked",res);
+      }
+  catch(error: any){
+    return errorResponse(error, res);
+  }
+};
+    
+//Done Appointment
+export const doneAppointment = async (req: Request, res: Response) => {
+  try {
+    const appointmentDone: any = await appointmentModel.findOne(
+      { _id: req.body.id},
+        //  { $set: { done: true } }
+    );
+    // console.log(appointmentDone);
+    if(appointmentDone.cancelled){
+      return successResponse({},"Appointment has already been cancelled",res);
+    }
+    if (appointmentDone) {
+      appointmentDone.done=true;
+      await appointmentDone.save();
+      return successResponse({}, "Appointment done successfully", res);
+    } else {
+      let error = new Error("Appointment already done.");
+      error.name = "Not found";
+      return errorResponse(error, res, 404);
+    }
+  } catch (error) {
+    return errorResponse(error, res);
+  }
+};
+
+//Cancel appoinment
+export const CancelAppointment = async (req: Request, res: Response) => {
+  try {
+    const appointmentCancel: any = await appointmentModel.findOne(
+      { _id: req.body.id },
+        //  { $set: { cancelled: true } } 
+    );
+    if(appointmentCancel.done){
+      return successResponse({},"Appointment has already done",res);
+    }
+    if (appointmentCancel) {
+       appointmentCancel.cancelled=true;
+      await appointmentCancel.save();
+      return successResponse({}, "Appoinment cancelled successfully", res);
+    } else {
+      let error = new Error(" This Appoinement doesn't exist");
+      error.name = "Not found";
+      return errorResponse(error, res, 404);
+    }
+  } catch (error) {
+    return errorResponse(error, res);
+  }
+};
+
