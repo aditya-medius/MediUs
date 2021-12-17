@@ -27,13 +27,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const schemaNames_1 = require("../Services/schemaNames");
-const Doctors_Model_1 = __importDefault(require("./Doctors.Model"));
 const hospitalSchema = new mongoose_1.Schema({
     name: {
         type: String,
@@ -132,14 +128,15 @@ hospitalSchema.pre("save", function (next) {
 });
 hospitalSchema.pre("findOneAndUpdate", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
-        let updateQuery = this.getUpdate();
-        updateQuery = updateQuery["$set"];
-        if ("contactNumber" in updateQuery) {
+        let UpdateQuery = this.getUpdate();
+        // console.log(UpdateQuery);
+        if ("contactNumber" in UpdateQuery) {
+            UpdateQuery = UpdateQuery["$set"];
             const query = this.getQuery();
             const hospitalExist = yield this.model.findOne({
                 _id: { $ne: query._id },
                 $or: [
-                    { contactNumber: updateQuery.contactNumber },
+                    { contactNumber: UpdateQuery.contactNumber },
                 ],
             });
             if (hospitalExist) {
@@ -149,39 +146,24 @@ hospitalSchema.pre("findOneAndUpdate", function (next) {
                 return next();
             }
         }
-        return next();
+        else {
+            return next();
+        }
     });
 });
 //check for number of bed
 hospitalSchema.pre("findOneAndUpdate", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         let UpdateQuery = this.getUpdate();
-        UpdateQuery = UpdateQuery["$set"];
-        if (UpdateQuery.numberOfBed <= 0)
-            throw new Error("Number of beds can't equal or less than zero");
-        else
-            return next();
-    });
-});
-//check for add a doctor
-hospitalSchema.pre("findOneAndUpdate", function (next) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let UpdateQuery = this.getUpdate();
-        UpdateQuery = UpdateQuery["$addToSet"];
-        if ("doctors" in UpdateQuery) {
-            const doctorArray = yield Doctors_Model_1.default.find({
-                deleted: false,
-                _id: UpdateQuery.doctors
-            });
-            // const doctorExist=await doctorArray.find({
-            //   _id: UpdateQuery.doctors[i]
-            // })
-            console.log(doctorArray);
-            if (true)
-                next();
+        if ("numberOfBed" in UpdateQuery) {
+            UpdateQuery = UpdateQuery["$set"];
+            if (UpdateQuery.numberOfBed <= 0)
+                throw new Error("Number of beds can't equal or less than zero");
+            else
+                return next();
         }
         else {
-            throw new Error("Cannot find doctor");
+            return next();
         }
     });
 });

@@ -53,6 +53,7 @@ const SpecialityDisease_Model_1 = __importDefault(require("../Admin Controlled M
 const SpecialityDoctorType_Model_1 = __importDefault(require("../Admin Controlled Models/SpecialityDoctorType.Model"));
 const schemaNames_1 = require("../Services/schemaNames");
 const underscore_1 = __importDefault(require("underscore"));
+const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -145,15 +146,22 @@ const updateHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 doctors, anemity, payment
             },
         };
-        const HospitalUpdateObj = yield Hospital_Model_1.default.findOneAndUpdate({ _id: req.currentHospital, deleted: false }, updateQuery, {
-            new: true,
-        });
-        if (HospitalUpdateObj) {
-            return (0, response_1.successResponse)(HospitalUpdateObj, "Hospital updated successfully", res);
+        const DoctorObj = yield Doctors_Model_1.default.find({ deleted: false, _id: doctors });
+        // console.log(doctors.length);
+        if (DoctorObj.length == doctors.length) {
+            const HospitalUpdateObj = yield Hospital_Model_1.default.findOneAndUpdate({ _id: req.currentHospital, deleted: false }, updateQuery, { new: true, });
+            if (HospitalUpdateObj) {
+                return (0, response_1.successResponse)(HospitalUpdateObj, "Hospital updated successfully", res);
+            }
+            else {
+                let error = new Error("Hospital doesn't exist");
+                error.name = "Not found";
+                return (0, response_1.errorResponse)(error, res, 404);
+            }
         }
         else {
-            let error = new Error("Hospital doesn't exist");
-            error.name = "Not found";
+            let error = new Error("Doctor doesn't exist");
+            error.name = "Not Found";
             return (0, response_1.errorResponse)(error, res, 404);
         }
     }
@@ -381,16 +389,10 @@ exports.searchHospital = searchHospital;
 const removeDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { doctors } = req.body;
-        const UpdateQuery = {
-            $pull: { doctors }
-        };
-        const doctorProfile = yield Hospital_Model_1.default.findOneAndUpdate({
-            deleted: false,
-            _id: req.currentHospital
-        });
-        // console.log(body.doctors);
+        const doctorProfile = yield Doctors_Model_1.default.findOne({ deleted: false, _id: doctors });
         if (doctorProfile) {
-            return (0, response_1.successResponse)(doctorProfile, "Doctor added Successfully", res);
+            const hospitalDoctor = yield Hospital_Model_1.default.findOneAndUpdate({ _id: req.currentHospital, doctors: { $in: doctors } }, { $pull: { doctors: doctors } });
+            return (0, response_1.successResponse)(hospitalDoctor, "Doctor Removed Successfully", res);
         }
         let error = new Error("Doctor doesnot exist");
         error.name = "Not Found";
