@@ -33,4 +33,6 @@ hospitalRouter.post("/updateHospital", Hospital_auth_1.authenticateHospital, hos
 hospitalRouter.post("/anemity", Hospital_auth_1.authenticateHospital, hospitalController.createHospitalAnemity);
 // hospitalRouter.post("/speciality",authenticateHospital,hospitalController.addHospitalSpeciality);
 hospitalRouter.post("/findHospitalBySpecialityOrBodyPart/:term", hospitalController.searchHospital);
+//ADD DOCTOR TO THE HOSPITAL
+hospitalRouter.post("/addDoctor", hospitalController.removeDoctor);
 exports.default = hospitalRouter;
