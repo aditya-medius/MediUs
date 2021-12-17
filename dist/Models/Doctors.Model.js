@@ -58,6 +58,10 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
                         type: Number,
                     },
                 },
+                capacity: {
+                    type: Number,
+                    required: true,
+                },
             },
         },
     ], registration: {

@@ -44,4 +44,5 @@ doctorRouter.post("/getDoctorById/:id", Doctor_auth_1.authenticateDoctor, doctor
 doctorRouter.post("/updateProfile", Doctor_auth_1.authenticateDoctor, doctorController.updateDoctorProfile);
 doctorRouter.delete("/deleteProfile", Doctor_auth_1.authenticateDoctor, doctorController.deleteProfile);
 doctorRouter.post("/findDoctorBySpecialityOrBodyPart/:term", doctorController.searchDoctor);
+doctorRouter.put("/setSchedule", Doctor_auth_1.authenticateDoctor, doctorController.setSchedule);
 exports.default = doctorRouter;

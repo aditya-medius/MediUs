@@ -12,11 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-
-exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityDoctorType = exports.addSpecialityDoctorType = exports.addDoctorType = exports.addToSpecialityDisease = exports.addSpecialityDisease = exports.addDisease = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
-
-exports.addPayment = exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
-
+exports.addPayment = exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityDoctorType = exports.addSpecialityDoctorType = exports.addDoctorType = exports.addToSpecialityDisease = exports.addSpecialityDisease = exports.addDisease = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
 const BodyPart_Model_1 = __importDefault(require("./BodyPart.Model"));
 const SpecialityBody_Model_1 = __importDefault(require("./SpecialityBody.Model"));
 const SpecialityDisease_Model_1 = __importDefault(require("./SpecialityDisease.Model"));
@@ -26,13 +22,10 @@ const State_Model_1 = __importDefault(require("./State.Model"));
 const Country_Model_1 = __importDefault(require("./Country.Model"));
 const response_1 = require("../Services/response");
 const Locality_Model_1 = __importDefault(require("./Locality.Model"));
-
 const Disease_Model_1 = __importDefault(require("./Disease.Model"));
 const DoctorType_Model_1 = __importDefault(require("./DoctorType.Model"));
 const SpecialityDoctorType_Model_1 = __importDefault(require("./SpecialityDoctorType.Model"));
-
 const Payment_Model_1 = __importDefault(require("./Payment.Model"));
-
 const addSpeciality = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const body = req.body;

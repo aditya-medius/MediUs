@@ -46,4 +46,10 @@ doctorRouter.post(
   doctorController.searchDoctor
 );
 
+doctorRouter.put(
+  "/setSchedule",
+  authenticateDoctor,
+  doctorController.setSchedule
+);
+
 export default doctorRouter;

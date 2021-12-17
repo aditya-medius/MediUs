@@ -38,6 +38,10 @@ const doctorSchema = new Schema(
               type: Number,
             },
           },
+          capacity: {
+            type: Number,
+            required: true,
+          },
         },
       },
     ],

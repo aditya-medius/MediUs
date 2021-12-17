@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = void 0;
+exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -54,6 +54,7 @@ const underscore_1 = __importDefault(require("underscore"));
 const SpecialityDisease_Model_1 = __importDefault(require("../Admin Controlled Models/SpecialityDisease.Model"));
 const schemaNames_1 = require("../Services/schemaNames");
 const SpecialityDoctorType_Model_1 = __importDefault(require("../Admin Controlled Models/SpecialityDoctorType.Model"));
+const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
 const excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -451,3 +452,27 @@ const searchDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.searchDoctor = searchDoctor;
+const setSchedule = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.body;
+        let { workingHour } = req.body;
+        const updateQuery = { $set: workingHour };
+        let doctorProfile = yield Doctors_Model_1.default
+            .findOne({
+            "hospitalDetails.hospital": body.hospitalId,
+            _id: req.currentDoctor,
+        })
+            .select({
+            hospitalDetails: { $elemMatch: { hospital: body.hospitalId } },
+        });
+        const workingHourId = doctorProfile.hospitalDetails[0].workingHours;
+        yield WorkingHours_Model_1.default.findOneAndUpdate({ _id: workingHourId.toString() }, updateQuery, { new: true });
+        yield doctorProfile.populate("hospitalDetails.hospital");
+        yield doctorProfile.populate("hospitalDetails.workingHours");
+        return (0, response_1.successResponse)(doctorProfile, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.setSchedule = setSchedule;
