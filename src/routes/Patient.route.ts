@@ -21,4 +21,19 @@ patientRouter.post(
   authenticatePatient,
   patientController.deleteProfile
 );
+patientRouter.post(
+  "/BookAppointment",
+  authenticatePatient,
+  patientController.BookAppointment
+)
+patientRouter.post(
+  "/CancelAppointment",
+  authenticatePatient,
+  patientController.CancelAppointment
+)
+patientRouter.post(
+  "/doneAppointment",
+  authenticatePatient,
+  patientController.doneAppointment
+)
 export default patientRouter;
