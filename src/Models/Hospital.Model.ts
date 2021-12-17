@@ -2,9 +2,12 @@ import mongoose, { Schema, model } from "mongoose";
 import schemaOptions from "../Services/schemaOptions";
 import 
 { 
-  speciality, doctor, address, payment, anemity, hospital, treatmentType, openingHour
+  speciality, doctor, address, payment, anemity, hospital, treatmentType, openingHour, specialization
 } 
  from "../Services/schemaNames";
+import { errorResponse, successResponse } from "../Services/response";
+import { query } from "express";
+import doctorModel from "./Doctors.Model";
 const hospitalSchema = new Schema({
   name:{
     type: String,
@@ -26,7 +29,7 @@ const hospitalSchema = new Schema({
     {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: speciality
+      ref: specialization
     }
   ],
   anemity:[{
@@ -106,6 +109,45 @@ hospitalSchema.pre("save", async function (next) {
   }
 });
 
+
+hospitalSchema.pre("findOneAndUpdate", async function (next) {
+  let UpdateQuery: any = this.getUpdate();
+  // console.log(UpdateQuery);
+  if ("contactNumber" in UpdateQuery) {
+  UpdateQuery = UpdateQuery["$set"];
+    const query = this.getQuery();
+
+    const hospitalExist = await this.model.findOne({
+      _id: { $ne: query._id },
+      $or: [
+        { contactNumber: UpdateQuery.contactNumber },
+      ],
+    });
+    if (hospitalExist) {
+      throw new Error(
+        "Hospital alredy exist. Select a different contact number"
+      );
+    } else {
+      return next();
+    }
+  }
+  else{return next();}
+});
+
+//check for number of bed
+
+hospitalSchema.pre("findOneAndUpdate", async function(next){
+  let UpdateQuery: any =this.getUpdate();
+  if("numberOfBed" in UpdateQuery)
+  {
+  UpdateQuery=UpdateQuery["$set"];
+  if(UpdateQuery.numberOfBed<=0)
+  throw new Error("Number of beds can't equal or less than zero");
+  else
+  return next();
+  }
+  else{return next();}
+});
 const hospitalModel = model(hospital, hospitalSchema);
 
 export default hospitalModel;

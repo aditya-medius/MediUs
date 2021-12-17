@@ -1,12 +1,19 @@
 import express, { Request, Response } from "express";
+import { authenticateHospital } from "../authentication/Hospital.auth";
 import * as hospitalController from "../Controllers/Hospital.Controller";
 const hospitalRouter = express.Router();
 
-hospitalRouter.get("/", hospitalController.getAllHospitalsList);
+hospitalRouter.get("/", authenticateHospital, hospitalController.getAllHospitalsList);
 hospitalRouter.post("/", hospitalController.createHospital);
-hospitalRouter.post("/deleteHospital", hospitalController.deleteHospital);
+hospitalRouter.post("/deleteHospital",authenticateHospital, hospitalController.deleteHospital);
+hospitalRouter.post("/updateHospital",authenticateHospital, hospitalController.updateHospital);
 
-hospitalRouter.post("/anemity",hospitalController.createHospitalAnemity);
-hospitalRouter.post("/speciality",hospitalController.addHospitalSpeciality);
+hospitalRouter.post("/anemity",authenticateHospital,hospitalController.createHospitalAnemity);
+// hospitalRouter.post("/speciality",authenticateHospital,hospitalController.addHospitalSpeciality);
+
+hospitalRouter.post("/findHospitalBySpecialityOrBodyPart/:term", hospitalController.searchHospital);
+
+//ADD DOCTOR TO THE HOSPITAL
+ hospitalRouter.post("/removeDoctor",authenticateHospital,hospitalController.removeDoctor);
 
 export default hospitalRouter;
