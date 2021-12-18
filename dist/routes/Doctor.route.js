@@ -34,7 +34,7 @@ doctorRouter.post("/login", doctorController.doctorLogin);
   Doctor profile creation routes - START
 */
 doctorRouter.put("/addDoctorQualification", qualificationController.addDoctorQualification);
-doctorRouter.put("/addDoctorWorkignHour", workingHoursController.createWorkingHours);
+doctorRouter.put("/addDoctorWorkingHour", Doctor_auth_1.authenticateDoctor, workingHoursController.createWorkingHours);
 doctorRouter.post("/", doctorController.createDoctor);
 /*
   Doctor profile creation routes - END

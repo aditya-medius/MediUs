@@ -16,7 +16,8 @@ doctorRouter.put(
   qualificationController.addDoctorQualification
 );
 doctorRouter.put(
-  "/addDoctorWorkignHour",
+  "/addDoctorWorkingHour",
+  authenticateDoctor,
   workingHoursController.createWorkingHours
 );
 doctorRouter.post("/", doctorController.createDoctor);

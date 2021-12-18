@@ -9,6 +9,8 @@ import { errorResponse, successResponse } from "../Services/response";
 import { sendMessage } from "../Services/message.service";
 import doctorModel from "../Models/Doctors.Model";
 import { excludeDoctorFields } from "./Doctor.Controller";
+import workingHourModel from "../Models/WorkingHours.Model";
+import { isIfStatement } from "typescript";
 
 const excludePatientFields = {
   password: 0,
@@ -223,6 +225,53 @@ export const deleteProfile = async (req: Request, res: Response) => {
 export const BookAppointment = async (req: Request, res: Response) => {
   try {
     let body = req.body;
+    let capacity = await workingHourModel.findOne({
+      doctorDetails: body.doctors,
+      hospitalDetails: body.hospital,
+    });
+
+    const requestDate: Date = new Date(body.time.date);
+    const day = requestDate.getDay();
+    if (day == 0) {
+      capacity = capacity.sunday;
+    } else if (day == 1) {
+      capacity = capacity.monday;
+    } else if (day == 2) {
+      capacity = capacity.tuesday;
+    } else if (day == 3) {
+      capacity = capacity.wednesday;
+    } else if (day == 4) {
+      capacity = capacity.thursday;
+    } else if (day == 5) {
+      capacity = capacity.friday;
+    } else if (day == 6) {
+      capacity = capacity.saturday;
+    }
+    let appointmentCount = await appointmentModel.find({
+      doctors: body.doctors,
+      hospital: body.hospital,
+      "time.from.time": capacity.from.time,
+      "time.till.time": capacity.till.time,
+    });
+
+    let appCount = 0;
+    appointmentCount = appointmentCount.map((e: any) => {
+      if (
+        new Date(e.time.date).getDate() == new Date(requestDate).getDate() &&
+        new Date(e.time.date).getFullYear() ==
+          new Date(requestDate).getFullYear() &&
+        new Date(e.time.date).getMonth() == new Date(requestDate).getMonth()
+      ) {
+        appCount++;
+      }
+    });
+
+    if (appCount == capacity.capacity) {
+      return errorResponse(
+        new Error("Doctor cannot take any more appointments"),
+        res
+      );
+    }
     let appointmentBook = await new appointmentModel(body).save();
     return successResponse(
       appointmentBook,
@@ -237,11 +286,9 @@ export const BookAppointment = async (req: Request, res: Response) => {
 //Done Appointment
 export const doneAppointment = async (req: Request, res: Response) => {
   try {
-    const appointmentDone: any = await appointmentModel.findOne(
-      { _id: req.body.id }
-      //  { $set: { done: true } }
-    );
-    // console.log(appointmentDone);
+    const appointmentDone: any = await appointmentModel.findOne({
+      _id: req.body.id,
+    });
     if (appointmentDone.cancelled) {
       return successResponse({}, "Appointment has already been cancelled", res);
     }
@@ -286,20 +333,33 @@ export const CancelAppointment = async (req: Request, res: Response) => {
 // Get doctor list
 export const getDoctorByDay = async (req: Request, res: Response) => {
   try {
-    const body = req.body;
-    const doctorList = await doctorModel
-      .find({ deleted: false }, excludeDoctorFields)
-      .populate("hospitalDetails.workingHours")
-      .select({
-        "hospitalDetails.workingHours": {
-          $elemMatch: { "monday.working": true },
-        },
-      });
-    return successResponse(
-      doctorList,
-      "Successfully fetched doctor's list",
-      res
+    const body: any = req.body;
+    const day = `${body.day}.working`;
+    let query: Object = {};
+    if (body.day == "monday") {
+      query = { "monday.working": true };
+    } else if (body.day == "tuesday") {
+      query = { "tuesday.working": true };
+    } else if (body.day == "wednesday") {
+      query = { "wednesday.working": true };
+    } else if (body.day == "thursday") {
+      query = { "thursday.working": true };
+    } else if (body.day == "friday") {
+      query = { "friday.working": true };
+    } else if (body.day == "saturday") {
+      query = { "saturday.working": true };
+    } else if (body.day == "sunday") {
+      query = { "sunday.working": true };
+    }
+    const data = await workingHourModel
+      .find(query, "doctorDetails")
+      .distinct("doctorDetails");
+
+    const doctorData = await doctorModel.find(
+      { _id: { $in: data } },
+      excludeDoctorFields
     );
+    return successResponse(doctorData, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }
