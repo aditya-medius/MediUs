@@ -32,4 +32,8 @@ patientRouter.get("/", Patient_auth_1.authenticatePatient, patientController.get
 patientRouter.post("/getPatientById/:id", Patient_auth_1.authenticatePatient, patientController.getPatientById);
 patientRouter.post("/updateProfile", Patient_auth_1.authenticatePatient, patientController.updatePatientProfile);
 patientRouter.post("/deleteProfile", Patient_auth_1.authenticatePatient, patientController.deleteProfile);
+patientRouter.post("/BookAppointment", Patient_auth_1.authenticatePatient, patientController.BookAppointment);
+patientRouter.post("/CancelAppointment", Patient_auth_1.authenticatePatient, patientController.CancelAppointment);
+patientRouter.post("/doneAppointment", Patient_auth_1.authenticatePatient, patientController.doneAppointment);
+patientRouter.post("/getDoctorByDay", Patient_auth_1.authenticatePatient, patientController.getDoctorByDay);
 exports.default = patientRouter;

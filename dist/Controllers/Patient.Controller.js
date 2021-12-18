@@ -31,14 +31,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = void 0;
+exports.getDoctorByDay = exports.CancelAppointment = exports.doneAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = void 0;
 const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
+const Appointment_Model_1 = __importDefault(require("../Models/Appointment.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
 const bcrypt = __importStar(require("bcrypt"));
 const response_1 = require("../Services/response");
 // import { sendMessage } from "../Services/message.service";
 const message_service_1 = require("../Services/message.service");
+const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
+const Doctor_Controller_1 = require("./Doctor.Controller");
+const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
 const excludePatientFields = {
     password: 0,
     verified: 0,
@@ -213,3 +217,148 @@ const deleteProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.deleteProfile = deleteProfile;
+//Book an apponitment
+const BookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.body;
+        let capacity = yield WorkingHours_Model_1.default.findOne({
+            doctorDetails: body.doctors,
+            hospitalDetails: body.hospital,
+        });
+        const requestDate = new Date(body.time.date);
+        const day = requestDate.getDay();
+        if (day == 0) {
+            capacity = capacity.sunday;
+        }
+        else if (day == 1) {
+            capacity = capacity.monday;
+        }
+        else if (day == 2) {
+            capacity = capacity.tuesday;
+        }
+        else if (day == 3) {
+            capacity = capacity.wednesday;
+        }
+        else if (day == 4) {
+            capacity = capacity.thursday;
+        }
+        else if (day == 5) {
+            capacity = capacity.friday;
+        }
+        else if (day == 6) {
+            capacity = capacity.saturday;
+        }
+        let appointmentCount = yield Appointment_Model_1.default.find({
+            doctors: body.doctors,
+            hospital: body.hospital,
+            "time.from.time": capacity.from.time,
+            "time.till.time": capacity.till.time,
+        });
+        let appCount = 0;
+        appointmentCount = appointmentCount.map((e) => {
+            if (new Date(e.time.date).getDate() == new Date(requestDate).getDate() &&
+                new Date(e.time.date).getFullYear() ==
+                    new Date(requestDate).getFullYear() &&
+                new Date(e.time.date).getMonth() == new Date(requestDate).getMonth()) {
+                appCount++;
+            }
+        });
+        if (appCount == capacity.capacity) {
+            return (0, response_1.errorResponse)(new Error("Doctor cannot take any more appointments"), res);
+        }
+        let appointmentBook = yield new Appointment_Model_1.default(body).save();
+        return (0, response_1.successResponse)(appointmentBook, "Appoinment has been successfully booked", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.BookAppointment = BookAppointment;
+//Done Appointment
+const doneAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const appointmentDone = yield Appointment_Model_1.default.findOne({
+            _id: req.body.id,
+        });
+        if (appointmentDone.cancelled) {
+            return (0, response_1.successResponse)({}, "Appointment has already been cancelled", res);
+        }
+        if (appointmentDone) {
+            appointmentDone.done = true;
+            yield appointmentDone.save();
+            return (0, response_1.successResponse)({}, "Appointment done successfully", res);
+        }
+        else {
+            let error = new Error("Appointment already done.");
+            error.name = "Not found";
+            return (0, response_1.errorResponse)(error, res, 404);
+        }
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.doneAppointment = doneAppointment;
+//Cancel appoinment
+const CancelAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const appointmentCancel = yield Appointment_Model_1.default.findOne({ _id: req.body.id }
+        //  { $set: { cancelled: true } }
+        );
+        if (appointmentCancel.done) {
+            return (0, response_1.successResponse)({}, "Appointment has already done", res);
+        }
+        if (appointmentCancel) {
+            appointmentCancel.cancelled = true;
+            yield appointmentCancel.save();
+            return (0, response_1.successResponse)({}, "Appoinment cancelled successfully", res);
+        }
+        else {
+            let error = new Error(" This Appoinement doesn't exist");
+            error.name = "Not found";
+            return (0, response_1.errorResponse)(error, res, 404);
+        }
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.CancelAppointment = CancelAppointment;
+// Get doctor list
+const getDoctorByDay = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const body = req.body;
+        const day = `${body.day}.working`;
+        let query = {};
+        if (body.day == "monday") {
+            query = { "monday.working": true };
+        }
+        else if (body.day == "tuesday") {
+            query = { "tuesday.working": true };
+        }
+        else if (body.day == "wednesday") {
+            query = { "wednesday.working": true };
+        }
+        else if (body.day == "thursday") {
+            query = { "thursday.working": true };
+        }
+        else if (body.day == "friday") {
+            query = { "friday.working": true };
+        }
+        else if (body.day == "saturday") {
+            query = { "saturday.working": true };
+        }
+        else if (body.day == "sunday") {
+            query = { "sunday.working": true };
+        }
+        const data = yield WorkingHours_Model_1.default
+            .find(query, "doctorDetails")
+            .distinct("doctorDetails");
+        const doctorData = yield Doctors_Model_1.default.find({ _id: { $in: data } }, Doctor_Controller_1.excludeDoctorFields);
+        return (0, response_1.successResponse)(doctorData, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getDoctorByDay = getDoctorByDay;

@@ -11,7 +11,9 @@ import _ from "underscore";
 import specialityDiseaseModel from "../Admin Controlled Models/SpecialityDisease.Model";
 import { disease, doctorType, specialization } from "../Services/schemaNames";
 import specialityDoctorTypeModel from "../Admin Controlled Models/SpecialityDoctorType.Model";
-const excludeDoctorFields = {
+import workingHourModel from "../Models/WorkingHours.Model";
+import mongoose from "mongoose";
+export const excludeDoctorFields = {
   password: 0,
   // panCard: 0,
   // adhaarCard: 0,
@@ -446,6 +448,36 @@ export const searchDoctor = async (req: Request, res: Response) => {
         return errorResponse(error, res);
       });
   } catch (error) {
+    return errorResponse(error, res);
+  }
+};
+
+export const setSchedule = async (req: Request, res: Response) => {
+  try {
+    let body = req.body;
+    let { workingHour } = req.body;
+    const updateQuery = { $set: workingHour };
+    let doctorProfile = await doctorModel
+      .findOne({
+        "hospitalDetails.hospital": body.hospitalId,
+        _id: req.currentDoctor,
+      })
+      .select({
+        hospitalDetails: { $elemMatch: { hospital: body.hospitalId } },
+      });
+
+    const workingHourId = doctorProfile.hospitalDetails[0].workingHours;
+
+    await workingHourModel.findOneAndUpdate(
+      { _id: workingHourId.toString() },
+      updateQuery,
+      { new: true }
+    );
+
+    await doctorProfile.populate("hospitalDetails.hospital");
+    await doctorProfile.populate("hospitalDetails.workingHours");
+    return successResponse(doctorProfile, "Success", res);
+  } catch (error: any) {
     return errorResponse(error, res);
   }
 };

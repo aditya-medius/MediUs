@@ -1,7 +1,16 @@
 import mongoose, { Schema, model } from "mongoose";
-import { workingHour } from "../Services/schemaNames";
-import * as Joi from "joi";
+import { doctor, hospital, workingHour } from "../Services/schemaNames";
 const workingHoursSchema = new Schema({
+  doctorDetails: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: doctor,
+    required: true,
+  },
+  hospitalDetails: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: hospital,
+    required: true,
+  },
   monday: {
     type: {
       working: {
@@ -12,14 +21,26 @@ const workingHoursSchema = new Schema({
           time: {
             type: Number,
             // Time of day, like 1AM, 12PM, 10PM
-            enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-          },
-          division: {
-            type: Number,
-            // 0 = AM, 1 = PM
-            enum: [0, 1],
+            enum: [
+              0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+              19, 20, 21, 22, 23, 24,
+            ],
           },
         },
+      },
+      till: {
+        time: {
+          type: Number,
+          // Time of day, like 1AM, 12PM, 10PM
+          enum: [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+            19, 20, 21, 22, 23, 24,
+          ],
+        },
+      },
+      capacity: {
+        type: Number,
+        required: true,
       },
     },
     required: true,
@@ -33,13 +54,25 @@ const workingHoursSchema = new Schema({
         time: {
           type: Number,
           // Time of day, like 1AM, 12PM, 10PM
-          enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+          enum: [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+            19, 20, 21, 22, 23, 24,
+          ],
         },
-        division: {
+      },
+      till: {
+        time: {
           type: Number,
-          // 0 = AM, 1 = PM
-          enum: [0, 1],
+          // Time of day, like 1AM, 12PM, 10PM
+          enum: [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+            19, 20, 21, 22, 23, 24,
+          ],
         },
+      },
+      capacity: {
+        type: Number,
+        required: true,
       },
     },
     required: true,
@@ -53,13 +86,25 @@ const workingHoursSchema = new Schema({
         time: {
           type: Number,
           // Time of day, like 1AM, 12PM, 10PM
-          enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+          enum: [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+            19, 20, 21, 22, 23, 24,
+          ],
         },
-        division: {
+      },
+      till: {
+        time: {
           type: Number,
-          // 0 = AM, 1 = PM
-          enum: [0, 1],
+          // Time of day, like 1AM, 12PM, 10PM
+          enum: [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+            19, 20, 21, 22, 23, 24,
+          ],
         },
+      },
+      capacity: {
+        type: Number,
+        required: true,
       },
     },
     required: true,
@@ -73,13 +118,25 @@ const workingHoursSchema = new Schema({
         time: {
           type: Number,
           // Time of day, like 1AM, 12PM, 10PM
-          enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+          enum: [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+            19, 20, 21, 22, 23, 24,
+          ],
         },
-        division: {
+      },
+      till: {
+        time: {
           type: Number,
-          // 0 = AM, 1 = PM
-          enum: [0, 1],
+          // Time of day, like 1AM, 12PM, 10PM
+          enum: [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+            19, 20, 21, 22, 23, 24,
+          ],
         },
+      },
+      capacity: {
+        type: Number,
+        required: true,
       },
     },
     required: true,
@@ -93,13 +150,25 @@ const workingHoursSchema = new Schema({
         time: {
           type: Number,
           // Time of day, like 1AM, 12PM, 10PM
-          enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+          enum: [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+            19, 20, 21, 22, 23, 24,
+          ],
         },
-        division: {
+      },
+      till: {
+        time: {
           type: Number,
-          // 0 = AM, 1 = PM
-          enum: [0, 1],
+          // Time of day, like 1AM, 12PM, 10PM
+          enum: [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+            19, 20, 21, 22, 23, 24,
+          ],
         },
+      },
+      capacity: {
+        type: Number,
+        required: true,
       },
     },
     required: true,
@@ -113,13 +182,25 @@ const workingHoursSchema = new Schema({
         time: {
           type: Number,
           // Time of day, like 1AM, 12PM, 10PM
-          enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+          enum: [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+            19, 20, 21, 22, 23, 24,
+          ],
         },
-        division: {
+      },
+      till: {
+        time: {
           type: Number,
-          // 0 = AM, 1 = PM
-          enum: [0, 1],
+          // Time of day, like 1AM, 12PM, 10PM
+          enum: [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+            19, 20, 21, 22, 23, 24,
+          ],
         },
+      },
+      capacity: {
+        type: Number,
+        required: true,
       },
     },
     required: true,
@@ -133,13 +214,25 @@ const workingHoursSchema = new Schema({
         time: {
           type: Number,
           // Time of day, like 1AM, 12PM, 10PM
-          enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+          enum: [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+            19, 20, 21, 22, 23, 24,
+          ],
         },
-        division: {
+      },
+      till: {
+        time: {
           type: Number,
-          // 0 = AM, 1 = PM
-          enum: [0, 1],
+          // Time of day, like 1AM, 12PM, 10PM
+          enum: [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+            19, 20, 21, 22, 23, 24,
+          ],
         },
+      },
+      capacity: {
+        type: Number,
+        required: true,
       },
     },
     required: true,

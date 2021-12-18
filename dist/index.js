@@ -24,6 +24,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const dotenv = __importStar(require("dotenv"));
+const cors_1 = __importDefault(require("cors"));
 // import bodyParser from "body-parser";
 require("./Services/db");
 const Doctor_route_1 = __importDefault(require("./routes/Doctor.route"));
@@ -33,11 +34,15 @@ const Patient_route_1 = __importDefault(require("./routes/Patient.route"));
 dotenv.config();
 const port = process.env.PORT;
 const app = (0, express_1.default)();
+app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.use("/doctor", Doctor_route_1.default);
 app.use("/hospital", Hospital_route_1.default);
 app.use("/admin", Admin_route_1.default);
 app.use("/patient", Patient_route_1.default);
+app.get("test", (req, res) => {
+    res.send("Hello");
+});
 app.listen(port, () => {
     console.log(`Running on port ${port}`);
 });

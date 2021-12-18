@@ -16,7 +16,8 @@ doctorRouter.put(
   qualificationController.addDoctorQualification
 );
 doctorRouter.put(
-  "/addDoctorWorkignHour",
+  "/addDoctorWorkingHour",
+  authenticateDoctor,
   workingHoursController.createWorkingHours
 );
 doctorRouter.post("/", doctorController.createDoctor);
@@ -44,6 +45,12 @@ doctorRouter.delete(
 doctorRouter.post(
   "/findDoctorBySpecialityOrBodyPart/:term",
   doctorController.searchDoctor
+);
+
+doctorRouter.put(
+  "/setSchedule",
+  authenticateDoctor,
+  doctorController.setSchedule
 );
 
 export default doctorRouter;

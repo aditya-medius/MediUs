@@ -5,7 +5,11 @@ const patientRouter = express.Router();
 
 patientRouter.post("/login", patientController.patientLogin);
 patientRouter.post("/", patientController.createPatient);
-patientRouter.get("/", authenticatePatient, patientController.getAllPatientsList);
+patientRouter.get(
+  "/",
+  authenticatePatient,
+  patientController.getAllPatientsList
+);
 patientRouter.post(
   "/getPatientById/:id",
   authenticatePatient,
@@ -25,15 +29,20 @@ patientRouter.post(
   "/BookAppointment",
   authenticatePatient,
   patientController.BookAppointment
-)
+);
 patientRouter.post(
   "/CancelAppointment",
   authenticatePatient,
   patientController.CancelAppointment
-)
+);
 patientRouter.post(
   "/doneAppointment",
   authenticatePatient,
   patientController.doneAppointment
-)
+);
+patientRouter.post(
+  "/getDoctorByDay",
+  authenticatePatient,
+  patientController.getDoctorByDay
+);
 export default patientRouter;
