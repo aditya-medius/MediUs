@@ -1,12 +1,14 @@
 import { Request, Response } from "express";
 import patientModel from "../Models/Patient.Model";
 import otpModel from "../Models/OTP.Model";
-import appointmentModel from "../Models/Appointment.Model"
+import appointmentModel from "../Models/Appointment.Model";
 import * as jwt from "jsonwebtoken";
 import * as bcrypt from "bcrypt";
 import { errorResponse, successResponse } from "../Services/response";
 // import { sendMessage } from "../Services/message.service";
 import { sendMessage } from "../Services/message.service";
+import doctorModel from "../Models/Doctors.Model";
+import { excludeDoctorFields } from "./Doctor.Controller";
 
 const excludePatientFields = {
   password: 0,
@@ -18,9 +20,9 @@ const excludePatientFields = {
 export const getAllPatientsList = async (req: Request, res: Response) => {
   try {
     const patientList = await patientModel.find(
-      {deleted: false}, 
+      { deleted: false },
       excludePatientFields
-      );
+    );
     return successResponse(
       patientList,
       "Successfully fetched patient's list",
@@ -204,7 +206,7 @@ export const deleteProfile = async (req: Request, res: Response) => {
   try {
     const patientProfile = await patientModel.findOneAndUpdate(
       { _id: req.currentPatient, deleted: false },
-         { $set: { deleted: true } }
+      { $set: { deleted: true } }
     );
     if (patientProfile) {
       return successResponse({}, "Patient Profile deleted successfully", res);
@@ -217,31 +219,34 @@ export const deleteProfile = async (req: Request, res: Response) => {
     return errorResponse(error, res);
   }
 };
-//Book an apponitment 
+//Book an apponitment
 export const BookAppointment = async (req: Request, res: Response) => {
-try{
+  try {
     let body = req.body;
     let appointmentBook = await new appointmentModel(body).save();
-    return successResponse(appointmentBook, "Appoinment has been successfully booked",res);
-      }
-  catch(error: any){
+    return successResponse(
+      appointmentBook,
+      "Appoinment has been successfully booked",
+      res
+    );
+  } catch (error: any) {
     return errorResponse(error, res);
   }
 };
-    
+
 //Done Appointment
 export const doneAppointment = async (req: Request, res: Response) => {
   try {
     const appointmentDone: any = await appointmentModel.findOne(
-      { _id: req.body.id},
-        //  { $set: { done: true } }
+      { _id: req.body.id }
+      //  { $set: { done: true } }
     );
     // console.log(appointmentDone);
-    if(appointmentDone.cancelled){
-      return successResponse({},"Appointment has already been cancelled",res);
+    if (appointmentDone.cancelled) {
+      return successResponse({}, "Appointment has already been cancelled", res);
     }
     if (appointmentDone) {
-      appointmentDone.done=true;
+      appointmentDone.done = true;
       await appointmentDone.save();
       return successResponse({}, "Appointment done successfully", res);
     } else {
@@ -258,14 +263,14 @@ export const doneAppointment = async (req: Request, res: Response) => {
 export const CancelAppointment = async (req: Request, res: Response) => {
   try {
     const appointmentCancel: any = await appointmentModel.findOne(
-      { _id: req.body.id },
-        //  { $set: { cancelled: true } } 
+      { _id: req.body.id }
+      //  { $set: { cancelled: true } }
     );
-    if(appointmentCancel.done){
-      return successResponse({},"Appointment has already done",res);
+    if (appointmentCancel.done) {
+      return successResponse({}, "Appointment has already done", res);
     }
     if (appointmentCancel) {
-       appointmentCancel.cancelled=true;
+      appointmentCancel.cancelled = true;
       await appointmentCancel.save();
       return successResponse({}, "Appoinment cancelled successfully", res);
     } else {
@@ -278,3 +283,24 @@ export const CancelAppointment = async (req: Request, res: Response) => {
   }
 };
 
+// Get doctor list
+export const getDoctorByDay = async (req: Request, res: Response) => {
+  try {
+    const body = req.body;
+    const doctorList = await doctorModel
+      .find({ deleted: false }, excludeDoctorFields)
+      .populate("hospitalDetails.workingHours")
+      .select({
+        "hospitalDetails.workingHours": {
+          $elemMatch: { "monday.working": true },
+        },
+      });
+    return successResponse(
+      doctorList,
+      "Successfully fetched doctor's list",
+      res
+    );
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};

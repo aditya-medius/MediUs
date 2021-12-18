@@ -13,7 +13,7 @@ import { disease, doctorType, specialization } from "../Services/schemaNames";
 import specialityDoctorTypeModel from "../Admin Controlled Models/SpecialityDoctorType.Model";
 import workingHourModel from "../Models/WorkingHours.Model";
 import mongoose from "mongoose";
-const excludeDoctorFields = {
+export const excludeDoctorFields = {
   password: 0,
   // panCard: 0,
   // adhaarCard: 0,

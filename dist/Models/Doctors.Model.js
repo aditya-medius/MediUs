@@ -34,6 +34,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const schemaOptions_1 = __importDefault(require("../Services/schemaOptions"));
 const lodash_1 = __importDefault(require("lodash"));
+const WorkingHours_Model_1 = __importDefault(require("./WorkingHours.Model"));
 const schemaNames_1 = require("../Services/schemaNames");
 const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schemaOptions_1.default), { hospitalDetails: [
         {
@@ -145,6 +146,31 @@ doctorSchema.pre("save", function (next) {
         else {
             throw new Error("Invalid phone number");
         }
+    });
+});
+doctorSchema.pre("save", function (next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        console.log("this: ", this.hospitalDetails);
+        const hospitalIdArray = this.hospitalDetails.map((e) => e.workingHours.toString());
+        if (hospitalIdArray.length > 1) {
+            const workingHourObj = yield WorkingHours_Model_1.default.find({
+                _id: { $in: hospitalIdArray },
+            });
+            for (let index = 0; index < workingHourObj.length; index++) {
+                for (let i = index + 1; i < workingHourObj.length; i++) {
+                    if (workingHourObj[i]) {
+                        if (workingHourObj[index].monday.from.division ==
+                            workingHourObj[i].monday.from.division) {
+                            if (workingHourObj[index].monday.from.time <
+                                workingHourObj[i].monday.from.time) {
+                                throw new Error("Error!");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        next();
     });
 });
 doctorSchema.pre("findOneAndUpdate", function (next) {

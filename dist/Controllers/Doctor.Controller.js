@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = void 0;
+exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -55,7 +55,7 @@ const SpecialityDisease_Model_1 = __importDefault(require("../Admin Controlled M
 const schemaNames_1 = require("../Services/schemaNames");
 const SpecialityDoctorType_Model_1 = __importDefault(require("../Admin Controlled Models/SpecialityDoctorType.Model"));
 const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
-const excludeDoctorFields = {
+exports.excludeDoctorFields = {
     password: 0,
     // panCard: 0,
     // adhaarCard: 0,
@@ -68,7 +68,7 @@ const excludeDoctorFields = {
 // Get All Doctors
 const getAllDoctorsList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const doctorList = yield Doctors_Model_1.default.find({ deleted: false }, excludeDoctorFields);
+        const doctorList = yield Doctors_Model_1.default.find({ deleted: false }, exports.excludeDoctorFields);
         return (0, response_1.successResponse)(doctorList, "Successfully fetched doctor's list", res);
     }
     catch (error) {
@@ -131,7 +131,7 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                     const profile = yield Doctors_Model_1.default.findOne({
                         phoneNumber: body.phoneNumber,
                         deleted: false,
-                    }, excludeDoctorFields);
+                    }, exports.excludeDoctorFields);
                     if (profile) {
                         const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_DOCTOR_KEY);
                         otpData.remove();
@@ -166,7 +166,7 @@ exports.doctorLogin = doctorLogin;
 // Get Doctor By Doctor Id
 const getDoctorById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const doctorData = yield Doctors_Model_1.default.findOne({ _id: req.params.id, deleted: false }, excludeDoctorFields);
+        const doctorData = yield Doctors_Model_1.default.findOne({ _id: req.params.id, deleted: false }, exports.excludeDoctorFields);
         if (doctorData) {
             return (0, response_1.successResponse)(doctorData, "Successfully fetched doctor details", res);
         }
@@ -201,7 +201,7 @@ const updateDoctorProfile = (req, res) => __awaiter(void 0, void 0, void 0, func
             _id: req.currentDoctor,
             deleted: false,
         }, updateQuery, {
-            fields: excludeDoctorFields,
+            fields: exports.excludeDoctorFields,
             new: true,
         });
         if (updatedDoctorObj) {
@@ -438,7 +438,7 @@ const searchDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                 deleted: false,
                 active: true,
                 specialization: { $in: specialityArray },
-            }, excludeDoctorFields)
+            }, exports.excludeDoctorFields)
                 .populate("specialization")
                 .populate("hospitalDetails.hospital");
             return (0, response_1.successResponse)(doctorArray, "Success", res);
