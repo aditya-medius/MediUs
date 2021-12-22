@@ -13,6 +13,7 @@ import { disease, doctorType, specialization } from "../Services/schemaNames";
 import specialityDoctorTypeModel from "../Admin Controlled Models/SpecialityDoctorType.Model";
 import workingHourModel from "../Models/WorkingHours.Model";
 import mongoose from "mongoose";
+import appointmentModel from "../Models/Appointment.Model";
 export const excludeDoctorFields = {
   password: 0,
   // panCard: 0,
@@ -477,6 +478,58 @@ export const setSchedule = async (req: Request, res: Response) => {
     await doctorProfile.populate("hospitalDetails.hospital");
     await doctorProfile.populate("hospitalDetails.workingHours");
     return successResponse(doctorProfile, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const viewAppointments = async (req: Request, res: Response) => {
+  try {
+    const limit: number = 5;
+    const skip: number = parseInt(req.params.page) * limit;
+    const limitSkipSort = [
+      {
+        $sort: {
+          "time.date": -1,
+        },
+      },
+      {
+        $skip: skip,
+      },
+      {
+        $limit: limit,
+      },
+    ];
+    const doctorAppointments = await appointmentModel.aggregate([
+      // {
+      //   $match: {
+      //     doctors: new mongoose.Types.ObjectId(req.currentDoctor),
+      //   },
+      // },
+      {
+        $facet: {
+          past: [
+            {
+              $match: {
+                doctors: new mongoose.Types.ObjectId(req.currentDoctor),
+                "time.date": { $lte: new Date() },
+              },
+            },
+            ...limitSkipSort,
+          ],
+          upcoming: [
+            {
+              $match: {
+                doctors: new mongoose.Types.ObjectId(req.currentDoctor),
+                "time.date": { $gte: new Date() },
+              },
+            },
+            ...limitSkipSort,
+          ],
+        },
+      },
+    ]);
+    return successResponse(doctorAppointments, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
+exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -55,6 +55,8 @@ const SpecialityDisease_Model_1 = __importDefault(require("../Admin Controlled M
 const schemaNames_1 = require("../Services/schemaNames");
 const SpecialityDoctorType_Model_1 = __importDefault(require("../Admin Controlled Models/SpecialityDoctorType.Model"));
 const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
+const mongoose_1 = __importDefault(require("mongoose"));
+const Appointment_Model_1 = __importDefault(require("../Models/Appointment.Model"));
 exports.excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -476,3 +478,56 @@ const setSchedule = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.setSchedule = setSchedule;
+const viewAppointments = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const limit = 5;
+        const skip = parseInt(req.params.page) * limit;
+        const limitSkipSort = [
+            {
+                $sort: {
+                    "time.date": -1,
+                },
+            },
+            {
+                $skip: skip,
+            },
+            {
+                $limit: limit,
+            },
+        ];
+        const doctorAppointments = yield Appointment_Model_1.default.aggregate([
+            // {
+            //   $match: {
+            //     doctors: new mongoose.Types.ObjectId(req.currentDoctor),
+            //   },
+            // },
+            {
+                $facet: {
+                    past: [
+                        {
+                            $match: {
+                                doctors: new mongoose_1.default.Types.ObjectId(req.currentDoctor),
+                                "time.date": { $lte: new Date() },
+                            },
+                        },
+                        ...limitSkipSort,
+                    ],
+                    upcoming: [
+                        {
+                            $match: {
+                                doctors: new mongoose_1.default.Types.ObjectId(req.currentDoctor),
+                                "time.date": { $gte: new Date() },
+                            },
+                        },
+                        ...limitSkipSort,
+                    ],
+                },
+            },
+        ]);
+        return (0, response_1.successResponse)(doctorAppointments, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.viewAppointments = viewAppointments;
