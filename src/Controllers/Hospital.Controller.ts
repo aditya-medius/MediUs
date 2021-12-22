@@ -8,10 +8,11 @@ import * as jwt from "jsonwebtoken";
 import specialityBodyModel from "../Admin Controlled Models/SpecialityBody.Model";
 import specialityDiseaseModel from "../Admin Controlled Models/SpecialityDisease.Model";
 import specialityDoctorTypeModel from "../Admin Controlled Models/SpecialityDoctorType.Model";
-import { disease, doctorType, specialization } from "../Services/schemaNames";
+import { appointment, disease, doctorType, specialization } from "../Services/schemaNames";
 import _ from "underscore";
 import doctorModel from "../Models/Doctors.Model";
 import { Mongoose } from "mongoose";
+import appointmentModel from "../Models/Appointment.Model";
 const excludeDoctorFields = {
   password: 0,
   // panCard: 0,
@@ -362,6 +363,15 @@ export const removeDoctor= async (req: Request, res: Response) =>{
     let error= new Error("Doctor doesnot exist");
     error.name="Not Found";
     return errorResponse(error, res, 404);
+  }
+  catch(error){
+    return errorResponse(error,res);
+  }
+};
+
+export const viewAppointment=async(req: Request, res: Response)=>{
+  try{
+    const apppointmentObj=await appointmentModel.find()
   }
   catch(error){
     return errorResponse(error,res);
