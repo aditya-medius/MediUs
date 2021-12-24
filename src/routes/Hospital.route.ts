@@ -19,6 +19,6 @@ hospitalRouter.post("/findHospitalBySpecialityOrBodyPart/:term", hospitalControl
 
  //View Appointments
 
- hospitalRouter.get("/viewAppointment",authenticateHospital,hospitalController.viewAppointment);
+ hospitalRouter.get("/viewAppointment/:page",authenticateHospital,hospitalController.viewAppointment);
 
 export default hospitalRouter;
