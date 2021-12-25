@@ -330,15 +330,16 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
     try {
         const page = parseInt(req.params.page);
         const appointmentData = yield Appointment_Model_1.default
-            .find({ patient: req.currentPatient, 'time.date': { $gt: Date() } })
+            .find({ patient: req.currentPatient, 'time.date': { $gte: Date() } })
             .sort({ 'time.date': 1 })
             .skip(page > 1 ? ((page - 1) * 2) : 0)
             .limit(2);
+        //  console.log(appointmentData)
         const page2 = (appointmentData.length) / 2;
         const older_apppointmentData = yield Appointment_Model_1.default
             .find({ patient: req.currentPatient, 'time.date': { $lte: Date() } })
             .sort({ 'time.date': 1 })
-            .skip(page > page2 ? (page2 - 1) * 2 : 0)
+            .skip(page > page2 ? (page - 1) * 2 : 0)
             .limit(2);
         const allAppointment = appointmentData.concat(older_apppointmentData);
         if (allAppointment.length > 0)
