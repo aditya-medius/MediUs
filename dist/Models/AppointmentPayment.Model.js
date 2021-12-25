@@ -21,7 +21,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const schemaNames_1 = require("../Services/schemaNames");
-const paymentSchema = new mongoose_1.Schema({
+const appointmentPaymentSchema = new mongoose_1.Schema({
     orderId: {
         type: String,
     },
@@ -37,5 +37,5 @@ const paymentSchema = new mongoose_1.Schema({
         type: String,
     },
 });
-const paymentModel = (0, mongoose_1.model)(schemaNames_1.payment, paymentSchema);
-exports.default = paymentModel;
+const appointmentPaymentModel = (0, mongoose_1.model)(schemaNames_1.appointmentPayment, appointmentPaymentSchema);
+exports.default = appointmentPaymentModel;

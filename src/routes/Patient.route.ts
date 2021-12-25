@@ -45,4 +45,15 @@ patientRouter.post(
   authenticatePatient,
   patientController.getDoctorByDay
 );
+
+patientRouter.post(
+  "/generateOrderId",
+  authenticatePatient,
+  patientController.generateOrderId
+);
+patientRouter.post(
+  "/verifyPayment",
+  authenticatePatient,
+  patientController.verifyPayment
+);
 export default patientRouter;
