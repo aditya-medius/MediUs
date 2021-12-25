@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import patientModel from "../Models/Patient.Model";
+// import { excludePatientFields } from "./Patient.Controller";
 import otpModel from "../Models/OTP.Model";
 import appointmentModel from "../Models/Appointment.Model";
 import * as jwt from "jsonwebtoken";
@@ -328,6 +329,40 @@ export const CancelAppointment = async (req: Request, res: Response) => {
   } catch (error) {
     return errorResponse(error, res);
   }
+};
+
+//View Appointment History
+export const ViewAppointment=async(req: Request, res: Response)=>{
+try{
+    const page=parseInt(req.params.page);
+    const appointmentData: Array<object>=await appointmentModel
+    .find({patient: req.currentPatient,'time.date': {$gt: Date()}})
+    .sort({'time.date':1})
+    .skip(page >1 ? ((page-1)*2) :0)
+    .limit(2);
+
+    const page2=(appointmentData.length)/2;
+
+    const older_apppointmentData: Array<object>=await appointmentModel
+    .find({patient: req.currentPatient,'time.date': {$lte: Date()}})
+    .sort({'time.date':1})
+    .skip(page>page2?(page2-1)*2:0)
+    .limit(2);
+
+    const allAppointment=appointmentData.concat(older_apppointmentData);
+
+
+    if(allAppointment.length>0)
+    return successResponse(allAppointment,"Appointments has been found",res);
+    else{
+      let error=new Error("No appointments is found");
+      return errorResponse(error,res, 404);
+    }
+  }
+  catch(error){
+    return errorResponse(error,res);
+  }
+
 };
 
 // Get doctor list

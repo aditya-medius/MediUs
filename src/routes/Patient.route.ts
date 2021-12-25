@@ -45,4 +45,9 @@ patientRouter.post(
   authenticatePatient,
   patientController.getDoctorByDay
 );
+patientRouter.get(
+  "/viewAppointment/:page",
+  authenticatePatient,
+  patientController.ViewAppointment
+  );
 export default patientRouter;

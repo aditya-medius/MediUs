@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.createHospitalAnemity = exports.createHospital = exports.getAllHospitalsList = void 0;
+exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.createHospitalAnemity = exports.createHospital = exports.getAllHospitalsList = void 0;
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Anemities_Model_1 = __importDefault(require("../Models/Anemities.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
@@ -54,6 +54,7 @@ const SpecialityDoctorType_Model_1 = __importDefault(require("../Admin Controlle
 const schemaNames_1 = require("../Services/schemaNames");
 const underscore_1 = __importDefault(require("underscore"));
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
+const Appointment_Model_1 = __importDefault(require("../Models/Appointment.Model"));
 const excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -403,3 +404,30 @@ const removeDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.removeDoctor = removeDoctor;
+const viewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const page = parseInt(req.params.page);
+        const appointmentObj = yield Appointment_Model_1.default
+            .find({ hospital: req.currentHospital, 'time.date': { $gt: Date() } })
+            .sort({ 'time.date': 1 })
+            .skip(page > 1 ? ((page - 1) * 2) : 0)
+            .limit(2);
+        const page2 = (appointmentObj.length) / 2;
+        const older_apppointmentObj = yield Appointment_Model_1.default
+            .find({ hospital: req.currentHospital, 'time.date': { $lte: Date() } })
+            .sort({ 'time.date': 1 })
+            .skip(page > page2 ? ((page - 1) * 2) : 0)
+            .limit(2);
+        const allAppointment = appointmentObj.concat(older_apppointmentObj);
+        if (allAppointment.length > 0)
+            return (0, response_1.successResponse)(allAppointment, "Appointments found", res);
+        else {
+            let error = new Error("No appointments found");
+            return (0, response_1.errorResponse)(error, res, 404);
+        }
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.viewAppointment = viewAppointment;
