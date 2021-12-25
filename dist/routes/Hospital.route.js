@@ -35,4 +35,6 @@ hospitalRouter.post("/anemity", Hospital_auth_1.authenticateHospital, hospitalCo
 hospitalRouter.post("/findHospitalBySpecialityOrBodyPart/:term", hospitalController.searchHospital);
 //ADD DOCTOR TO THE HOSPITAL
 hospitalRouter.post("/removeDoctor", Hospital_auth_1.authenticateHospital, hospitalController.removeDoctor);
+//View Appointments
+hospitalRouter.get("/viewAppointment/:page", Hospital_auth_1.authenticateHospital, hospitalController.viewAppointment);
 exports.default = hospitalRouter;
