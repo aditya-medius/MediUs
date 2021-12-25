@@ -56,4 +56,9 @@ patientRouter.post(
   authenticatePatient,
   patientController.verifyPayment
 );
+patientRouter.get(
+  "/viewAppointment/:page",
+  authenticatePatient,
+  patientController.ViewAppointment
+  );
 export default patientRouter;
