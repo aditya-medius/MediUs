@@ -11,7 +11,7 @@ export const authenticateHospital = async (
     const authHeader = <string>req.header("auth-header");
     const data: any = jwt.verify(
       authHeader,
-      process.env.SECRET_Hospital_KEY as string
+      process.env.SECRET_HOSPITAL_KEY as string
     );
     req.currentHospital = data._id;
     next();

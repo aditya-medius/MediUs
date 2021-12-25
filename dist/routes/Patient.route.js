@@ -36,5 +36,7 @@ patientRouter.post("/BookAppointment", Patient_auth_1.authenticatePatient, patie
 patientRouter.post("/CancelAppointment", Patient_auth_1.authenticatePatient, patientController.CancelAppointment);
 patientRouter.post("/doneAppointment", Patient_auth_1.authenticatePatient, patientController.doneAppointment);
 patientRouter.post("/getDoctorByDay", Patient_auth_1.authenticatePatient, patientController.getDoctorByDay);
+patientRouter.post("/generateOrderId", Patient_auth_1.authenticatePatient, patientController.generateOrderId);
+patientRouter.post("/verifyPayment", Patient_auth_1.authenticatePatient, patientController.verifyPayment);
 patientRouter.get("/viewAppointment/:page", Patient_auth_1.authenticatePatient, patientController.ViewAppointment);
 exports.default = patientRouter;
