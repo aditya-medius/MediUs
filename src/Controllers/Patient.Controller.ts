@@ -227,6 +227,8 @@ export const deleteProfile = async (req: Request, res: Response) => {
 export const BookAppointment = async (req: Request, res: Response) => {
   try {
     let body = req.body;
+
+    // @TODO check if working hour exist first
     let capacity = await workingHourModel.findOne({
       doctorDetails: body.doctors,
       hospitalDetails: body.hospital,

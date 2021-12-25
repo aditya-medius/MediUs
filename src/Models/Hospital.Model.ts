@@ -21,7 +21,7 @@ const hospitalSchema = new Schema({
   doctors:[
     {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
+      // required: true,
       ref: doctor
     }
   ],

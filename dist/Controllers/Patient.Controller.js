@@ -224,6 +224,7 @@ exports.deleteProfile = deleteProfile;
 const BookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
+        // @TODO check if working hour exist first
         let capacity = yield WorkingHours_Model_1.default.findOne({
             doctorDetails: body.doctors,
             hospitalDetails: body.hospital,
