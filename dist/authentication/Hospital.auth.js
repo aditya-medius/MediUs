@@ -18,7 +18,7 @@ const response_1 = require("../Services/response");
 const authenticateHospital = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const authHeader = req.header("auth-header");
-        const data = jsonwebtoken_1.default.verify(authHeader, process.env.SECRET_Hospital_KEY);
+        const data = jsonwebtoken_1.default.verify(authHeader, process.env.SECRET_HOSPITAL_KEY);
         req.currentHospital = data._id;
         next();
     }

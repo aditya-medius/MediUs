@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import * as dotenv from "dotenv";
 import cors from "cors";
+
 // import bodyParser from "body-parser";
 import "./Services/db";
 import doctorRouter from "./routes/Doctor.route";
@@ -23,6 +24,7 @@ app.use("/patient", patientRouter);
 app.get("test", (req: Request, res: Response) => {
   res.send("Hello");
 });
+
 app.listen(port, () => {
   console.log(`Running on port ${port}`);
 });

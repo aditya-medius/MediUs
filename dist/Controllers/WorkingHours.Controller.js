@@ -18,6 +18,7 @@ const response_1 = require("../Services/response");
 const createWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
+        body.doctorDetails = req.currentDoctor;
         const workingHour = yield WorkingHours_Model_1.default.find({
             doctorDetails: req.currentDoctor,
             // hospitalDetails: body.hospitalId,

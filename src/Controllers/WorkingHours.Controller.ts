@@ -5,7 +5,8 @@ import { addBodyPart } from "../Admin Controlled Models/Admin.Controller";
 
 export const createWorkingHours = async (req: Request, res: Response) => {
   try {
-    let body = req.body;
+    let body: any = req.body;
+    body.doctorDetails = req.currentDoctor;
     const workingHour: Array<any> = await workingHourModel.find(
       {
         doctorDetails: req.currentDoctor,
