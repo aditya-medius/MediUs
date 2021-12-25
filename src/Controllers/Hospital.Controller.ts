@@ -372,24 +372,26 @@ export const removeDoctor= async (req: Request, res: Response) =>{
 
 export const viewAppointment=async(req: Request, res: Response)=>{
   try{
-    const page=parseInt(req.params.page) || 1;
-    const apppointmentObj: Array<object>=await appointmentModel
+    const page=parseInt(req.params.page);
+    const appointmentObj: Array<object>=await appointmentModel
     .find({hospital: req.currentHospital,'time.date': {$gt: Date()}})
     .sort({'time.date':1})
     .skip(page >1 ? ((page-1)*2) :0)
     .limit(2);
 
-    // const page2=(apppointmentObj.length)/2;
-    // const older_apppointmentObj: Array<object>=await appointmentModel
-    // .find({hospital: req.currentHospital,'time.date': {$lte: Date()}})
-    // .sort({'time.date':1})
-    // .skip(page >=page2 ? ((page-1)*2) :0)
-    // .limit(2);
+    const page2=(appointmentObj.length)/2;
 
-    // const allAppointment=apppointmentObj.concat(older_apppointmentObj);
+    const older_apppointmentObj: Array<object>=await appointmentModel
+    .find({hospital: req.currentHospital,'time.date': {$lte: Date()}})
+    .sort({'time.date':1})
+    .skip(page>page2?((page-1)*2):0)
+    .limit(2);
 
-    if(appointment)
-    return successResponse(appointment,"Appointments found",res);
+    const allAppointment=appointmentObj.concat(older_apppointmentObj);
+
+
+    if(allAppointment.length>0)
+    return successResponse(allAppointment,"Appointments found",res);
     else{
       let error=new Error("No appointments found");
       return errorResponse(error,res, 404);
