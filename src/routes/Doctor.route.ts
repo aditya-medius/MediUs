@@ -60,4 +60,10 @@ doctorRouter.get(
   doctorController.viewAppointments
 );
 
+// Cancel doctor's appointments
+doctorRouter.put(
+  "/cancelAppointments",
+  authenticateDoctor,
+  doctorController.cancelAppointments
+);
 export default doctorRouter;

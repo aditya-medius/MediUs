@@ -534,3 +534,39 @@ export const viewAppointments = async (req: Request, res: Response) => {
     return errorResponse(error, res);
   }
 };
+
+export const cancelAppointments = async (req: Request, res: Response) => {
+  try {
+    let body = req.body;
+
+    // Check is appointment is already cancelled or is already done
+    const appointmentCancelledOrDone = await appointmentModel.exists({
+      _id: body.appointmentId,
+      $or: [{ cancelled: true }, { done: true }],
+    });
+
+    // If appointment is done or cancelled, return an error response
+    if (appointmentCancelledOrDone) {
+      let error: Error = new Error(
+        "Cannot cancel appointment, most likely beacuse appointment is already cancelled or is done"
+      );
+      error.name = "Error cancelling appointment";
+      return errorResponse(error, res);
+    } else {
+      // If not, cancel the appointment and return the success response
+      const updatedAppointment = await appointmentModel.findOneAndUpdate(
+        { _id: body.appointmentId },
+        { $set: { cancelled: true } },
+        { new: true }
+      );
+
+      return successResponse(
+        updatedAppointment,
+        "Successfully cancelled appointment",
+        res
+      );
+    }
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};

@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
+exports.cancelAppointments = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -531,3 +531,28 @@ const viewAppointments = (req, res) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.viewAppointments = viewAppointments;
+const cancelAppointments = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.body;
+        // Check is appointment is already cancelled or is already done
+        const appointmentCancelledOrDone = yield Appointment_Model_1.default.exists({
+            _id: body.appointmentId,
+            $or: [{ cancelled: true }, { done: true }],
+        });
+        // If appointment is done or cancelled, return an error response
+        if (appointmentCancelledOrDone) {
+            let error = new Error("Cannot cancel appointment, most likely beacuse appointment is already cancelled or is done");
+            error.name = "Error cancelling appointment";
+            return (0, response_1.errorResponse)(error, res);
+        }
+        else {
+            // If not, cancel the appointment and return the success response
+            const updatedAppointment = yield Appointment_Model_1.default.findOneAndUpdate({ _id: body.appointmentId }, { $set: { cancelled: true } }, { new: true });
+            return (0, response_1.successResponse)(updatedAppointment, "Successfully cancelled appointment", res);
+        }
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.cancelAppointments = cancelAppointments;
