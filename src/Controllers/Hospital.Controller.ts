@@ -8,10 +8,12 @@ import * as jwt from "jsonwebtoken";
 import specialityBodyModel from "../Admin Controlled Models/SpecialityBody.Model";
 import specialityDiseaseModel from "../Admin Controlled Models/SpecialityDisease.Model";
 import specialityDoctorTypeModel from "../Admin Controlled Models/SpecialityDoctorType.Model";
-import { disease, doctorType, specialization } from "../Services/schemaNames";
+import { appointment, disease, doctorType, specialization } from "../Services/schemaNames";
 import _ from "underscore";
 import doctorModel from "../Models/Doctors.Model";
 import { Mongoose } from "mongoose";
+import appointmentModel from "../Models/Appointment.Model";
+import { date } from "joi";
 const excludeDoctorFields = {
   password: 0,
   // panCard: 0,
@@ -362,6 +364,38 @@ export const removeDoctor= async (req: Request, res: Response) =>{
     let error= new Error("Doctor doesnot exist");
     error.name="Not Found";
     return errorResponse(error, res, 404);
+  }
+  catch(error){
+    return errorResponse(error,res);
+  }
+};
+
+export const viewAppointment=async(req: Request, res: Response)=>{
+  try{
+    const page=parseInt(req.params.page);
+    const appointmentObj: Array<object>=await appointmentModel
+    .find({hospital: req.currentHospital,'time.date': {$gt: Date()}})
+    .sort({'time.date':1})
+    .skip(page >1 ? ((page-1)*2) :0)
+    .limit(2);
+
+    const page2=(appointmentObj.length)/2;
+
+    const older_apppointmentObj: Array<object>=await appointmentModel
+    .find({hospital: req.currentHospital,'time.date': {$lte: Date()}})
+    .sort({'time.date':1})
+    .skip(page>page2?((page-1)*2):0)
+    .limit(2);
+
+    const allAppointment=appointmentObj.concat(older_apppointmentObj);
+
+
+    if(allAppointment.length>0)
+    return successResponse(allAppointment,"Appointments found",res);
+    else{
+      let error=new Error("No appointments found");
+      return errorResponse(error,res, 404);
+    }
   }
   catch(error){
     return errorResponse(error,res);

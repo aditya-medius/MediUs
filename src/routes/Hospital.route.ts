@@ -16,4 +16,9 @@ hospitalRouter.post("/findHospitalBySpecialityOrBodyPart/:term", hospitalControl
 //ADD DOCTOR TO THE HOSPITAL
  hospitalRouter.post("/removeDoctor",authenticateHospital,hospitalController.removeDoctor);
 
+
+ //View Appointments
+
+ hospitalRouter.get("/viewAppointment/:page",authenticateHospital,hospitalController.viewAppointment);
+
 export default hospitalRouter;
