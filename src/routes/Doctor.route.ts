@@ -53,4 +53,17 @@ doctorRouter.put(
   doctorController.setSchedule
 );
 
+// Get Doctor's appointment
+doctorRouter.get(
+  "/viewAppointments/:page",
+  authenticateDoctor,
+  doctorController.viewAppointments
+);
+
+// Cancel doctor's appointments
+doctorRouter.put(
+  "/cancelAppointments",
+  authenticateDoctor,
+  doctorController.cancelAppointments
+);
 export default doctorRouter;

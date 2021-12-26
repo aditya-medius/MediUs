@@ -31,10 +31,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDoctorByDay = exports.CancelAppointment = exports.doneAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = void 0;
+exports.verifyPayment = exports.generateOrderId = exports.getDoctorByDay = exports.ViewAppointment = exports.CancelAppointment = exports.doneAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = void 0;
 const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
+// import { excludePatientFields } from "./Patient.Controller";
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const Appointment_Model_1 = __importDefault(require("../Models/Appointment.Model"));
+const AppointmentPayment_Model_1 = __importDefault(require("../Models/AppointmentPayment.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
 const bcrypt = __importStar(require("bcrypt"));
 const response_1 = require("../Services/response");
@@ -43,6 +45,8 @@ const message_service_1 = require("../Services/message.service");
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const Doctor_Controller_1 = require("./Doctor.Controller");
 const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
+const razorpay_1 = __importDefault(require("razorpay"));
+const crypto_1 = __importDefault(require("crypto"));
 const excludePatientFields = {
     password: 0,
     verified: 0,
@@ -221,6 +225,7 @@ exports.deleteProfile = deleteProfile;
 const BookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
+        // @TODO check if working hour exist first
         let capacity = yield WorkingHours_Model_1.default.findOne({
             doctorDetails: body.doctors,
             hospitalDetails: body.hospital,
@@ -324,6 +329,34 @@ const CancelAppointment = (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.CancelAppointment = CancelAppointment;
+//View Appointment History
+const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const page = parseInt(req.params.page);
+        const appointmentData = yield Appointment_Model_1.default
+            .find({ patient: req.currentPatient, 'time.date': { $gt: Date() } })
+            .sort({ 'time.date': 1 })
+            .skip(page > 1 ? ((page - 1) * 2) : 0)
+            .limit(2);
+        const page2 = (appointmentData.length) / 2;
+        const older_apppointmentData = yield Appointment_Model_1.default
+            .find({ patient: req.currentPatient, 'time.date': { $lte: Date() } })
+            .sort({ 'time.date': 1 })
+            .skip(page > page2 ? (page2 - 1) * 2 : 0)
+            .limit(2);
+        const allAppointment = appointmentData.concat(older_apppointmentData);
+        if (allAppointment.length > 0)
+            return (0, response_1.successResponse)(allAppointment, "Appointments has been found", res);
+        else {
+            let error = new Error("No appointments is found");
+            return (0, response_1.errorResponse)(error, res, 404);
+        }
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.ViewAppointment = ViewAppointment;
 // Get doctor list
 const getDoctorByDay = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -362,3 +395,54 @@ const getDoctorByDay = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.getDoctorByDay = getDoctorByDay;
+const generateOrderId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const body = req.body;
+        let instance = new razorpay_1.default({
+            key_id: process.env.RAZOR_PAY_TEST_ID,
+            key_secret: process.env.RAZOR_PAY_TEST_SECRET,
+        });
+        const receiptNumber = Math.floor(100000 + Math.random() * 900000).toString();
+        var options = {
+            amount: body.amount,
+            currency: body.currency,
+            receipt: `order_rcptid_${receiptNumber}`,
+        };
+        instance.orders.create(options, function (err, order) {
+            // console.log(order);
+            if (err) {
+                return (0, response_1.errorResponse)(err, res);
+            }
+            return (0, response_1.successResponse)({ orderId: order.id }, "Order id generated", res);
+        });
+    }
+    catch (e) {
+        return (0, response_1.errorResponse)(e, res);
+    }
+});
+exports.generateOrderId = generateOrderId;
+const verifyPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.body.response.razorpay_order_id +
+            "|" +
+            req.body.response.razorpay_payment_id;
+        var expectedSignature = crypto_1.default
+            .createHmac("sha256", process.env.RAZOR_PAY_TEST_SECRET)
+            .update(body.toString())
+            .digest("hex");
+        var response = { signatureIsValid: "false" };
+        if (expectedSignature === req.body.response.razorpay_signature) {
+            response = { signatureIsValid: "true" };
+            const paymentObj = yield new AppointmentPayment_Model_1.default(req.body);
+            response.paymentDetails = paymentObj;
+            return (0, response_1.successResponse)(response, "Signature is valid", res);
+        }
+        let error = new Error("Signature is invalid");
+        error.name = "INvalid signature";
+        return (0, response_1.errorResponse)(error, res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.verifyPayment = verifyPayment;

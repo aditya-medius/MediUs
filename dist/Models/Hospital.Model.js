@@ -43,7 +43,7 @@ const hospitalSchema = new mongoose_1.Schema({
     doctors: [
         {
             type: mongoose_1.default.Schema.Types.ObjectId,
-            required: true,
+            // required: true,
             ref: schemaNames_1.doctor
         }
     ],
@@ -96,10 +96,15 @@ const hospitalSchema = new mongoose_1.Schema({
         type: Number,
         required: true,
     },
-    // location:{
-    //     "type":"Point",
-    //     "coordinates":['lat','lng']
-    //   }
+    location: {
+        type: {
+            enum: ['Point'],
+        },
+        coordinates: {
+            type: [Number],
+        },
+        required: true
+    }
 });
 hospitalSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
