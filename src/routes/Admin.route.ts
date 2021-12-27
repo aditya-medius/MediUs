@@ -33,11 +33,16 @@ adminRouter.post(
 
 //routes for city anemity address state country
 
+adminRouter.post("/city", adminController.addCity);
+adminRouter.post("/state", adminController.addState);
+adminRouter.post("/locality", adminController.addLocality);
+adminRouter.post("/country", adminController.addCountry);
+adminRouter.post("/payment", adminController.addPayment);
 
-adminRouter.post("/city",adminController.addCity);
-adminRouter.post("/state",adminController.addState);
-adminRouter.post("/locality",adminController.addLocality);
-adminRouter.post("/country",adminController.addCountry);
-adminRouter.post("/payment",adminController.addPayment);
+// Get cities, states, locality and country
+adminRouter.get(
+  "/getCityStateLocalityCountry",
+  adminController.getCityStateLocalityCountry
+);
 
 export default adminRouter;

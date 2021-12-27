@@ -15,7 +15,6 @@ import specialityDoctorTypeModel from "./SpecialityDoctorType.Model";
 
 import paymentModel from "./Payment.Model";
 
-
 export const addSpeciality = async (req: Request, res: Response) => {
   try {
     const body = req.body;
@@ -184,7 +183,6 @@ export const addCity = async (req: Request, res: Response) => {
   }
 };
 
-
 //add state
 export const addState = async (req: Request, res: Response) => {
   try {
@@ -224,16 +222,36 @@ export const addCountry = async (req: Request, res: Response) => {
   }
 };
 //add payment options
-export const addPayment= async(req:Request, res:Response)=>{
-  try{
-    let body=req.body;
-    let paymentObj=await new paymentModel(body).save();
-    return successResponse(paymentObj, "Payment Options has been successfully added",res);
-
-  }
-  catch(error: any){
+export const addPayment = async (req: Request, res: Response) => {
+  try {
+    let body = req.body;
+    let paymentObj = await new paymentModel(body).save();
+    return successResponse(
+      paymentObj,
+      "Payment Options has been successfully added",
+      res
+    );
+  } catch (error: any) {
     return errorResponse(error, res);
   }
 };
 
+// Get cities, states, locality and country
+export const getCityStateLocalityCountry = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const city = await cityModel.find();
+    const state = await stateModel.find();
+    const locality = await LocalityModel.find();
+    const country = await countryModel.find();
 
+    const [Ci, S, L, Co] = await Promise.all([city, state, locality, country]);
+    return successResponse(
+      { city: Ci, state: S, locality: L, country: Co },
+      "Success",
+      res
+    );
+  } catch (error: any) {}
+};
