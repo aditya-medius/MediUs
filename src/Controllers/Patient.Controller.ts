@@ -12,8 +12,16 @@ import { sendMessage } from "../Services/message.service";
 import doctorModel from "../Models/Doctors.Model";
 import { excludeDoctorFields } from "./Doctor.Controller";
 import workingHourModel from "../Models/WorkingHours.Model";
+// import specialityBodyModel from "./SpecialityBody.Model";
+// import diseaseModel from "./Disease.Model";
+
 import RazorPay from "razorpay";
 import crypto from "crypto";
+import specialityModel from "../Admin Controlled Models/Specialization.Model";
+import bodyPartModel from "../Admin Controlled Models/BodyPart.Model";
+import diseaseModel from "../Admin Controlled Models/Disease.Model";
+import addressModel from "../Models/Address.Model";
+import hospitalModel from "../Models/Hospital.Model";
 
 const excludePatientFields = {
   password: 0,
@@ -336,6 +344,7 @@ export const CancelAppointment = async (req: Request, res: Response) => {
 };
 
 //View Appointment History
+<<<<<<< HEAD
 export const ViewAppointment=async(req: Request, res: Response)=>{
 try{
     const page=parseInt(req.params.page);
@@ -352,21 +361,40 @@ try{
     .sort({'time.date':1})
     .skip(page>page2?(page-1)*2:0)
     .limit(2);
+=======
+export const ViewAppointment = async (req: Request, res: Response) => {
+  try {
+    const page = parseInt(req.params.page);
+    const appointmentData: Array<object> = await appointmentModel
+      .find({ patient: req.currentPatient, "time.date": { $gt: Date() } })
+      .sort({ "time.date": 1 })
+      .skip(page > 1 ? (page - 1) * 2 : 0)
+      .limit(2);
 
-    const allAppointment=appointmentData.concat(older_apppointmentData);
+    const page2 = appointmentData.length / 2;
 
+    const older_apppointmentData: Array<object> = await appointmentModel
+      .find({ patient: req.currentPatient, "time.date": { $lte: Date() } })
+      .sort({ "time.date": 1 })
+      .skip(page > page2 ? (page2 - 1) * 2 : 0)
+      .limit(2);
+>>>>>>> fd73cfbdd7a50de833ae43fd7f468202f184e097
 
-    if(allAppointment.length>0)
-    return successResponse(allAppointment,"Appointments has been found",res);
-    else{
-      let error=new Error("No appointments is found");
-      return errorResponse(error,res, 404);
+    const allAppointment = appointmentData.concat(older_apppointmentData);
+
+    if (allAppointment.length > 0)
+      return successResponse(
+        allAppointment,
+        "Appointments has been found",
+        res
+      );
+    else {
+      let error = new Error("No appointments is found");
+      return errorResponse(error, res, 404);
     }
+  } catch (error) {
+    return errorResponse(error, res);
   }
-  catch(error){
-    return errorResponse(error,res);
-  }
-
 };
 //view the schedule of a doctor working for a specific Hospital for a given day and date
 export const ViewSchedule = async (req : Request, res: Response) => {
@@ -444,58 +472,92 @@ export const getDoctorByDay = async (req: Request, res: Response) => {
   }
 };
 
-export const generateOrderId = async (req: Request, res: Response) => {
+// Get speciality, body part and disease
+export const getSpecialityBodyPartAndDisease = async (
+  req: Request,
+  res: Response
+) => {
   try {
-    const body = req.body;
-    let instance = new RazorPay({
-      key_id: process.env.RAZOR_PAY_TEST_ID as string,
-      key_secret: process.env.RAZOR_PAY_TEST_SECRET as string,
-    });
+    const speciality = specialityModel.find();
+    const bodyParts = bodyPartModel.find();
+    const disease = diseaseModel.find();
 
-    const receiptNumber = Math.floor(
-      100000 + Math.random() * 900000
-    ).toString();
+    const SBD = await Promise.all([speciality, bodyParts, disease]);
+    const [S, B, D] = SBD;
 
-    var options = {
-      amount: body.amount, // amount in the smallest currency unit
-      currency: body.currency,
-      receipt: `order_rcptid_${receiptNumber}`,
-    };
-
-    instance.orders.create(options, function (err: any, order: any) {
-      // console.log(order);
-      if (err) {
-        return errorResponse(err, res);
-      }
-      return successResponse({ orderId: order.id }, "Order id generated", res);
-    });
-  } catch (e) {
-    return errorResponse(e, res);
+    return successResponse(
+      { Speciality: S, BodyPart: B, Disease: D },
+      "Success",
+      res
+    );
+  } catch (error: any) {
+    return errorResponse(error, res);
   }
 };
 
-export const verifyPayment = async (req: Request, res: Response) => {
+// Get Hospitals by city
+export const getHospitalsByCity = async (req: Request, res: Response) => {
   try {
-    let body =
-      req.body.response.razorpay_order_id +
-      "|" +
-      req.body.response.razorpay_payment_id;
+    const addressById: Array<any> = await addressModel.find(
+      { city: req.body.cityId },
+      { _id: 1 }
+    );
+    let addressIds: Array<string> = addressById.map((e: any) => {
+      return e._id;
+    });
 
-    var expectedSignature = crypto
-      .createHmac("sha256", process.env.RAZOR_PAY_TEST_SECRET as string)
-      .update(body.toString())
-      .digest("hex");
-    var response: any = { signatureIsValid: "false" };
-    if (expectedSignature === req.body.response.razorpay_signature) {
-      response = { signatureIsValid: "true" };
-      const paymentObj = await new appointmentPayment(req.body);
-      response.paymentDetails = paymentObj;
-      return successResponse(response, "Signature is valid", res);
-    }
-    let error = new Error("Signature is invalid");
-    error.name = "INvalid signature";
+    const hospitalsInThatCity = await hospitalModel.find({
+      address: { $in: addressIds },
+    });
+    return successResponse(hospitalsInThatCity, "Success", res);
+  } catch (error: any) {
     return errorResponse(error, res);
-  } catch (error) {
+  }
+};
+
+// Get doctors by city
+export const getDoctorsByCity = async (req: Request, res: Response) => {
+  try {
+    const addressById: Array<any> = await addressModel.find(
+      { city: req.body.cityId },
+      { _id: 1 }
+    );
+    let addressIds: Array<string> = addressById.map((e: any) => {
+      return e._id;
+    });
+
+    let hospitalsInThatCity: Array<any> = await hospitalModel
+      .find(
+        {
+          address: { $in: addressIds },
+        },
+        { doctors: 1 }
+      )
+      .populate({ path: "doctors", select: excludeDoctorFields });
+
+    hospitalsInThatCity = hospitalsInThatCity.filter(
+      (e: any) => e.doctors.length > 0
+    );
+
+    // Isme ek particular hospital k liye consultation fee dikhani hai.
+    // Match krna padega k kissi city k liye kissi hospital me kissi doctor ki
+    // fee kya hai
+    let doctorsInThatCity: Array<any> = [];
+    hospitalsInThatCity.map((e: any) => {
+      doctorsInThatCity.push(...e.doctors.map((e: any) => e._id));
+    });
+
+    doctorsInThatCity = await doctorModel
+      .find(
+        {
+          _id: { $in: doctorsInThatCity },
+        },
+        excludeDoctorFields
+      )
+      .populate("specialization qualification");
+    // .populate("hospitalDetails.hospital");
+    return successResponse(doctorsInThatCity, "Success", res);
+  } catch (error: any) {
     return errorResponse(error, res);
   }
 };

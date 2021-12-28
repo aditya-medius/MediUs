@@ -31,12 +31,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+<<<<<<< HEAD
 exports.verifyPayment = exports.generateOrderId = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.CancelAppointment = exports.doneAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = void 0;
+=======
+exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewAppointment = exports.CancelAppointment = exports.doneAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = void 0;
+>>>>>>> fd73cfbdd7a50de833ae43fd7f468202f184e097
 const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
 // import { excludePatientFields } from "./Patient.Controller";
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const Appointment_Model_1 = __importDefault(require("../Models/Appointment.Model"));
-const AppointmentPayment_Model_1 = __importDefault(require("../Models/AppointmentPayment.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
 const bcrypt = __importStar(require("bcrypt"));
 const response_1 = require("../Services/response");
@@ -45,8 +48,11 @@ const message_service_1 = require("../Services/message.service");
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const Doctor_Controller_1 = require("./Doctor.Controller");
 const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
-const razorpay_1 = __importDefault(require("razorpay"));
-const crypto_1 = __importDefault(require("crypto"));
+const Specialization_Model_1 = __importDefault(require("../Admin Controlled Models/Specialization.Model"));
+const BodyPart_Model_1 = __importDefault(require("../Admin Controlled Models/BodyPart.Model"));
+const Disease_Model_1 = __importDefault(require("../Admin Controlled Models/Disease.Model"));
+const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
+const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
 const excludePatientFields = {
     password: 0,
     verified: 0,
@@ -334,6 +340,7 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
     try {
         const page = parseInt(req.params.page);
         const appointmentData = yield Appointment_Model_1.default
+<<<<<<< HEAD
             .find({ patient: req.currentPatient, 'time.date': { $gte: Date() } })
             .sort({ 'time.date': 1 })
             .skip(page > 1 ? ((page - 1) * 2) : 0)
@@ -344,6 +351,17 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
             .find({ patient: req.currentPatient, 'time.date': { $lte: Date() } })
             .sort({ 'time.date': 1 })
             .skip(page > page2 ? (page - 1) * 2 : 0)
+=======
+            .find({ patient: req.currentPatient, "time.date": { $gt: Date() } })
+            .sort({ "time.date": 1 })
+            .skip(page > 1 ? (page - 1) * 2 : 0)
+            .limit(2);
+        const page2 = appointmentData.length / 2;
+        const older_apppointmentData = yield Appointment_Model_1.default
+            .find({ patient: req.currentPatient, "time.date": { $lte: Date() } })
+            .sort({ "time.date": 1 })
+            .skip(page > page2 ? (page2 - 1) * 2 : 0)
+>>>>>>> fd73cfbdd7a50de833ae43fd7f468202f184e097
             .limit(2);
         const allAppointment = appointmentData.concat(older_apppointmentData);
         if (allAppointment.length > 0)
@@ -440,54 +458,68 @@ const getDoctorByDay = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.getDoctorByDay = getDoctorByDay;
-const generateOrderId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// Get speciality, body part and disease
+const getSpecialityBodyPartAndDisease = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const body = req.body;
-        let instance = new razorpay_1.default({
-            key_id: process.env.RAZOR_PAY_TEST_ID,
-            key_secret: process.env.RAZOR_PAY_TEST_SECRET,
-        });
-        const receiptNumber = Math.floor(100000 + Math.random() * 900000).toString();
-        var options = {
-            amount: body.amount,
-            currency: body.currency,
-            receipt: `order_rcptid_${receiptNumber}`,
-        };
-        instance.orders.create(options, function (err, order) {
-            // console.log(order);
-            if (err) {
-                return (0, response_1.errorResponse)(err, res);
-            }
-            return (0, response_1.successResponse)({ orderId: order.id }, "Order id generated", res);
-        });
-    }
-    catch (e) {
-        return (0, response_1.errorResponse)(e, res);
-    }
-});
-exports.generateOrderId = generateOrderId;
-const verifyPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        let body = req.body.response.razorpay_order_id +
-            "|" +
-            req.body.response.razorpay_payment_id;
-        var expectedSignature = crypto_1.default
-            .createHmac("sha256", process.env.RAZOR_PAY_TEST_SECRET)
-            .update(body.toString())
-            .digest("hex");
-        var response = { signatureIsValid: "false" };
-        if (expectedSignature === req.body.response.razorpay_signature) {
-            response = { signatureIsValid: "true" };
-            const paymentObj = yield new AppointmentPayment_Model_1.default(req.body);
-            response.paymentDetails = paymentObj;
-            return (0, response_1.successResponse)(response, "Signature is valid", res);
-        }
-        let error = new Error("Signature is invalid");
-        error.name = "INvalid signature";
-        return (0, response_1.errorResponse)(error, res);
+        const speciality = Specialization_Model_1.default.find();
+        const bodyParts = BodyPart_Model_1.default.find();
+        const disease = Disease_Model_1.default.find();
+        const SBD = yield Promise.all([speciality, bodyParts, disease]);
+        const [S, B, D] = SBD;
+        return (0, response_1.successResponse)({ Speciality: S, BodyPart: B, Disease: D }, "Success", res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);
     }
 });
-exports.verifyPayment = verifyPayment;
+exports.getSpecialityBodyPartAndDisease = getSpecialityBodyPartAndDisease;
+// Get Hospitals by city
+const getHospitalsByCity = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const addressById = yield Address_Model_1.default.find({ city: req.body.cityId }, { _id: 1 });
+        let addressIds = addressById.map((e) => {
+            return e._id;
+        });
+        const hospitalsInThatCity = yield Hospital_Model_1.default.find({
+            address: { $in: addressIds },
+        });
+        return (0, response_1.successResponse)(hospitalsInThatCity, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getHospitalsByCity = getHospitalsByCity;
+// Get doctors by city
+const getDoctorsByCity = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const addressById = yield Address_Model_1.default.find({ city: req.body.cityId }, { _id: 1 });
+        let addressIds = addressById.map((e) => {
+            return e._id;
+        });
+        let hospitalsInThatCity = yield Hospital_Model_1.default
+            .find({
+            address: { $in: addressIds },
+        }, { doctors: 1 })
+            .populate({ path: "doctors", select: Doctor_Controller_1.excludeDoctorFields });
+        hospitalsInThatCity = hospitalsInThatCity.filter((e) => e.doctors.length > 0);
+        // Isme ek particular hospital k liye consultation fee dikhani hai.
+        // Match krna padega k kissi city k liye kissi hospital me kissi doctor ki
+        // fee kya hai
+        let doctorsInThatCity = [];
+        hospitalsInThatCity.map((e) => {
+            doctorsInThatCity.push(...e.doctors.map((e) => e._id));
+        });
+        doctorsInThatCity = yield Doctors_Model_1.default
+            .find({
+            _id: { $in: doctorsInThatCity },
+        }, Doctor_Controller_1.excludeDoctorFields)
+            .populate("specialization qualification");
+        // .populate("hospitalDetails.hospital");
+        return (0, response_1.successResponse)(doctorsInThatCity, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getDoctorsByCity = getDoctorsByCity;

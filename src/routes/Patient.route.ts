@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import { authenticatePatient } from "../authentication/Patient.auth";
 import * as patientController from "../Controllers/Patient.Controller";
+import * as paymentController from "../Controllers/AppointmentPayment.Controller";
 const patientRouter = express.Router();
 
 patientRouter.post("/login", patientController.patientLogin);
@@ -49,17 +50,18 @@ patientRouter.post(
 patientRouter.post(
   "/generateOrderId",
   authenticatePatient,
-  patientController.generateOrderId
+  paymentController.generateOrderId
 );
 patientRouter.post(
   "/verifyPayment",
   authenticatePatient,
-  patientController.verifyPayment
+  paymentController.verifyPayment
 );
 patientRouter.get(
   "/viewAppointment/:page",
   authenticatePatient,
   patientController.ViewAppointment
+<<<<<<< HEAD
   );
 patientRouter.post(
   "/viewSchedule",
@@ -67,4 +69,28 @@ patientRouter.post(
   patientController.ViewSchedule
   );
 
+=======
+);
+
+// Get all the entities of filter
+patientRouter.get(
+  "/getSpecialityBodyPartAndDisease",
+  authenticatePatient,
+  patientController.getSpecialityBodyPartAndDisease
+);
+
+// Get hospitals by city
+patientRouter.get(
+  "/getHospitalsByCity",
+  authenticatePatient,
+  patientController.getHospitalsByCity
+);
+
+// Get doctors by city
+patientRouter.get(
+  "/getDoctorsByCity",
+  authenticatePatient,
+  patientController.getDoctorsByCity
+);
+>>>>>>> fd73cfbdd7a50de833ae43fd7f468202f184e097
 export default patientRouter;
