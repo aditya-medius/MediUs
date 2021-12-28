@@ -39,4 +39,5 @@ patientRouter.post("/getDoctorByDay", Patient_auth_1.authenticatePatient, patien
 patientRouter.post("/generateOrderId", Patient_auth_1.authenticatePatient, patientController.generateOrderId);
 patientRouter.post("/verifyPayment", Patient_auth_1.authenticatePatient, patientController.verifyPayment);
 patientRouter.get("/viewAppointment/:page", Patient_auth_1.authenticatePatient, patientController.ViewAppointment);
+patientRouter.post("/viewSchedule", Patient_auth_1.authenticatePatient, patientController.ViewSchedule);
 exports.default = patientRouter;

@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { query, Request, Response } from "express";
 import patientModel from "../Models/Patient.Model";
 // import { excludePatientFields } from "./Patient.Controller";
 import otpModel from "../Models/OTP.Model";
@@ -367,6 +367,46 @@ try{
     return errorResponse(error,res);
   }
 
+};
+//view the schedule of a doctor working for a specific Hospital for a given day and date
+export const ViewSchedule = async (req : Request, res: Response) => {
+try {
+    let body = req.body;
+    let schedule = await workingHourModel.findOne({
+      doctorDetails: body.doctors,
+      hospitalDetails: body.hospital,
+    });
+    // console.log(schedule)
+    const requestDate: Date = new Date(body.time);
+    let query: Object = {};
+    if (body.day == "monday") {
+      query = { "monday.working": true };
+    } else if (body.day == "tuesday") {
+      query = { "tuesday.working": true };
+    } else if (body.day == "wednesday") {
+      query = { "wednesday.working": true };
+    } else if (body.day == "thursday") {
+      query = { "thursday.working": true };
+    } else if (body.day == "friday") {
+      query = { "friday.working": true };
+    } else if (body.day == "saturday") {
+      query = { "saturday.working": true };
+    } else if (body.day == "sunday") {
+      query = { "sunday.working": true };
+    }
+     let appointmentCount = await workingHourModel.find({
+      doctors: body.doctors,
+      hospital: body.hospital,
+      // "schedule.working":true
+     });
+    return successResponse(
+      schedule,
+      "All Appoinments are succssfully shown  ",
+      res
+    );
+} catch (error: any) {
+    return errorResponse(error, res);
+  }
 };
 
 // Get doctor list

@@ -61,4 +61,10 @@ patientRouter.get(
   authenticatePatient,
   patientController.ViewAppointment
   );
+patientRouter.post(
+  "/viewSchedule",
+  authenticatePatient,
+  patientController.ViewSchedule
+  );
+
 export default patientRouter;

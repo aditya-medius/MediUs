@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifyPayment = exports.generateOrderId = exports.getDoctorByDay = exports.ViewAppointment = exports.CancelAppointment = exports.doneAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = void 0;
+exports.verifyPayment = exports.generateOrderId = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.CancelAppointment = exports.doneAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = void 0;
 const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
 // import { excludePatientFields } from "./Patient.Controller";
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
@@ -358,6 +358,50 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.ViewAppointment = ViewAppointment;
+//view the schedule of a doctor working for a specific Hospital for a given day and date
+const ViewSchedule = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.body;
+        let schedule = yield WorkingHours_Model_1.default.findOne({
+            doctorDetails: body.doctors,
+            hospitalDetails: body.hospital,
+        });
+        // console.log(schedule)
+        const requestDate = new Date(body.time);
+        let query = {};
+        if (body.day == "monday") {
+            query = { "monday.working": true };
+        }
+        else if (body.day == "tuesday") {
+            query = { "tuesday.working": true };
+        }
+        else if (body.day == "wednesday") {
+            query = { "wednesday.working": true };
+        }
+        else if (body.day == "thursday") {
+            query = { "thursday.working": true };
+        }
+        else if (body.day == "friday") {
+            query = { "friday.working": true };
+        }
+        else if (body.day == "saturday") {
+            query = { "saturday.working": true };
+        }
+        else if (body.day == "sunday") {
+            query = { "sunday.working": true };
+        }
+        let appointmentCount = yield WorkingHours_Model_1.default.find({
+            doctors: body.doctors,
+            hospital: body.hospital,
+            // "schedule.working":true
+        });
+        return (0, response_1.successResponse)(schedule, "All Appoinments are succssfully shown  ", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.ViewSchedule = ViewSchedule;
 // Get doctor list
 const getDoctorByDay = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
