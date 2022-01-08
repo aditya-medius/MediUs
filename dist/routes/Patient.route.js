@@ -25,6 +25,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const Patient_auth_1 = require("../authentication/Patient.auth");
 const patientController = __importStar(require("../Controllers/Patient.Controller"));
+const paymentController = __importStar(require("../Controllers/AppointmentPayment.Controller"));
 const patientRouter = express_1.default.Router();
 patientRouter.post("/login", patientController.patientLogin);
 patientRouter.post("/", patientController.createPatient);
@@ -36,7 +37,13 @@ patientRouter.post("/BookAppointment", Patient_auth_1.authenticatePatient, patie
 patientRouter.post("/CancelAppointment", Patient_auth_1.authenticatePatient, patientController.CancelAppointment);
 patientRouter.post("/doneAppointment", Patient_auth_1.authenticatePatient, patientController.doneAppointment);
 patientRouter.post("/getDoctorByDay", Patient_auth_1.authenticatePatient, patientController.getDoctorByDay);
-patientRouter.post("/generateOrderId", Patient_auth_1.authenticatePatient, patientController.generateOrderId);
-patientRouter.post("/verifyPayment", Patient_auth_1.authenticatePatient, patientController.verifyPayment);
+patientRouter.post("/generateOrderId", Patient_auth_1.authenticatePatient, paymentController.generateOrderId);
+patientRouter.post("/verifyPayment", Patient_auth_1.authenticatePatient, paymentController.verifyPayment);
 patientRouter.get("/viewAppointment/:page", Patient_auth_1.authenticatePatient, patientController.ViewAppointment);
+// Get all the entities of filter
+patientRouter.get("/getSpecialityBodyPartAndDisease", Patient_auth_1.authenticatePatient, patientController.getSpecialityBodyPartAndDisease);
+// Get hospitals by city
+patientRouter.get("/getHospitalsByCity", Patient_auth_1.authenticatePatient, patientController.getHospitalsByCity);
+// Get doctors by city
+patientRouter.get("/getDoctorsByCity", Patient_auth_1.authenticatePatient, patientController.getDoctorsByCity);
 exports.default = patientRouter;

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addPayment = exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityDoctorType = exports.addSpecialityDoctorType = exports.addDoctorType = exports.addToSpecialityDisease = exports.addSpecialityDisease = exports.addDisease = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
+exports.getCityStateLocalityCountry = exports.addPayment = exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityDoctorType = exports.addSpecialityDoctorType = exports.addDoctorType = exports.addToSpecialityDisease = exports.addSpecialityDisease = exports.addDisease = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
 const BodyPart_Model_1 = __importDefault(require("./BodyPart.Model"));
 const SpecialityBody_Model_1 = __importDefault(require("./SpecialityBody.Model"));
 const SpecialityDisease_Model_1 = __importDefault(require("./SpecialityDisease.Model"));
@@ -238,3 +238,16 @@ const addPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.addPayment = addPayment;
+// Get cities, states, locality and country
+const getCityStateLocalityCountry = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const city = yield City_Model_1.default.find();
+        const state = yield State_Model_1.default.find();
+        const locality = yield Locality_Model_1.default.find();
+        const country = yield Country_Model_1.default.find();
+        const [Ci, S, L, Co] = yield Promise.all([city, state, locality, country]);
+        return (0, response_1.successResponse)({ city: Ci, state: S, locality: L, country: Co }, "Success", res);
+    }
+    catch (error) { }
+});
+exports.getCityStateLocalityCountry = getCityStateLocalityCountry;
