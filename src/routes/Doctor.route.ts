@@ -4,6 +4,7 @@ import { authenticateDoctor } from "../authentication/Doctor.auth";
 import * as doctorController from "../Controllers/Doctor.Controller";
 import * as qualificationController from "../Controllers/Qualification.Controller";
 import * as workingHoursController from "../Controllers/WorkingHours.Controller";
+import * as preferredPharmaController from "../Controllers/Pharma.Cotroller";
 const doctorRouter = express.Router();
 
 doctorRouter.post("/login", doctorController.doctorLogin);
@@ -66,4 +67,18 @@ doctorRouter.put(
   authenticateDoctor,
   doctorController.cancelAppointments
 );
+
+
+//Preferred Pharma Routes
+//add the preferred pharma
+doctorRouter.post("/addPharma",authenticateDoctor,preferredPharmaController.addPharma);
+
+//get all Pharma
+doctorRouter.get("/getPharma",preferredPharmaController.getPharma);
+
+//delete the pharma using id
+doctorRouter.post("/delPharma/:id",authenticateDoctor,preferredPharmaController.delPharma);
+
+//update the pharma
+doctorRouter.post("/updatePharma/:id",authenticateDoctor,preferredPharmaController.updatePharma);
 export default doctorRouter;

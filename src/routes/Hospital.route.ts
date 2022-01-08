@@ -3,6 +3,10 @@ import { authenticateHospital } from "../authentication/Hospital.auth";
 import * as hospitalController from "../Controllers/Hospital.Controller";
 const hospitalRouter = express.Router();
 
+hospitalRouter.post("/login",hospitalController.login);
+
+hospitalRouter.get("/myHospital",authenticateHospital,hospitalController.myHospital);
+
 hospitalRouter.get("/", authenticateHospital, hospitalController.getAllHospitalsList);
 hospitalRouter.post("/", hospitalController.createHospital);
 hospitalRouter.post("/deleteHospital",authenticateHospital, hospitalController.deleteHospital);
