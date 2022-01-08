@@ -98,14 +98,18 @@ const hospitalSchema = new mongoose_1.Schema({
     },
     location: {
         type: {
+            type: String,
             enum: ['Point'],
+            required: true
         },
         coordinates: {
             type: [Number],
         },
         // required: true
+        required: true
     }
 });
+;
 hospitalSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         const hospitalExist = yield hospitalModel.findOne({

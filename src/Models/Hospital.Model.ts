@@ -79,14 +79,17 @@ const hospitalSchema = new Schema({
   },
   location:{
     type:{
-      enum: ['Point'],
+      type: String,
+      enum:['Point'],
+      required: true
     },
     coordinates:{
       type:[Number],
     },
     // required: true
+      required: true
+    }
   }
-
 });
 
 

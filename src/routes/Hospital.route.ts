@@ -10,6 +10,11 @@ hospitalRouter.get(
   oneOf(authenticateHospital),
   hospitalController.getAllHospitalsList
 );
+hospitalRouter.post("/login",hospitalController.login);
+
+hospitalRouter.get("/myHospital",authenticateHospital,hospitalController.myHospital);
+
+// hospitalRouter.get("/", authenticateHospital, hospitalController.getAllHospitalsList);
 hospitalRouter.post("/", hospitalController.createHospital);
 hospitalRouter.post(
   "/deleteHospital",

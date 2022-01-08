@@ -19,6 +19,9 @@ import doctorModel from "../Models/Doctors.Model";
 import { Mongoose } from "mongoose";
 import appointmentModel from "../Models/Appointment.Model";
 import { date } from "joi";
+import otpModel from "../Models/OTP.Model";
+import { sendMessage } from "../Services/message.service";
+import { GeoJSON } from "geojson";
 const excludeDoctorFields = {
   password: 0,
   // panCard: 0,
@@ -29,6 +32,89 @@ const excludeDoctorFields = {
   registration: 0,
   KYCDetails: 0,
 };
+
+export const login = async (req: Request, res: Response) => {
+  try {
+    let body: any = req.query;
+    if (!("OTP" in body)) {
+      if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
+        const OTP = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // Implement message service API
+        sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
+          .then(async (message) => {
+            const otpToken = jwt.sign(
+              { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
+              OTP
+            );
+            // Add OTP and phone number to temporary collection
+            await otpModel.findOneAndUpdate(
+              { phoneNumber: body.phoneNumber },
+              { $set: { phoneNumber: body.phoneNumber, otp: otpToken } },
+              { upsert: true }
+            );
+          })
+          .catch((error) => {
+            throw error;
+          });
+
+        return successResponse({}, "OTP sent successfully", res);
+      } else {
+        let error = new Error("Invalid phone number");
+        error.name = "Invalid input";
+        return errorResponse(error, res);
+      }
+    } else {
+      const otpData = await otpModel.findOne({
+        phoneNumber: body.phoneNumber,
+      });
+      try {
+        const data: any = await jwt.verify(otpData.otp, body.OTP);
+        if (Date.now() > data.expiresIn)
+          return errorResponse(new Error("OTP expired"), res);
+        if (body.OTP === data.otp) {
+          const profile = await hospitalModel.findOne(
+            {
+              contactNumber: body.phoneNumber,
+              deleted: false,
+            }          
+            );
+          if (profile) {
+            const token = await jwt.sign(
+              profile.toJSON(),
+              process.env.HOSPITAL_LOGIN_KEY as string
+            );
+            otpData.remove();
+            return successResponse(token, "Successfully logged in", res);
+          } else {
+            otpData.remove();
+            return successResponse(
+              { message: "No Data found" },
+              "Create a new Hospital",
+              res,
+              201
+            );
+          }
+        } else {
+          const error = new Error("Invalid OTP");
+          error.name = "Invalid";
+          return errorResponse(error, res);
+        }
+      } catch (err) {
+        if (err instanceof jwt.JsonWebTokenError) {
+          const error = new Error("OTP isn't valid");
+          error.name = "Invalid OTP";
+          return errorResponse(error, res);
+        }
+        return errorResponse(err, res);
+      }
+    }
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+//get all hospitals
 export const getAllHospitalsList = async (req: Request, res: Response) => {
   try {
     const hospitalList = await hospitalModel.find({ deleted: false }).populate([
@@ -53,6 +139,21 @@ export const getAllHospitalsList = async (req: Request, res: Response) => {
     return errorResponse(error, res);
   }
 };
+
+//get myHospital
+export const myHospital=async (req: Request, res: Response)=>{
+  try{
+    const hospital=await hospitalModel.find({
+      deleted: false,
+      _id: req.currentHospital
+    });
+  return successResponse(hospital, "Successfully fetched Hospital", res);
+  }
+   catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
 //create a hospital
 export const createHospital = async (req: Request, res: Response) => {
   try {
