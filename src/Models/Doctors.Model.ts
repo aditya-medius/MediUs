@@ -221,12 +221,12 @@ doctorSchema.pre("findOneAndUpdate", async function (next) {
 });
 
 // Hospital details validation
-doctorSchema.path("hospitalDetails").validate(function (hospital: any) {
-  if (hospital.length < 1) {
-    return false;
-  }
-  return true;
-}, "Hospital details are required");
+// doctorSchema.path("hospitalDetails").validate(function (hospital: any) {
+//   if (hospital.length < 1) {
+//     return false;
+//   }
+//   return true;
+// }, "Hospital details are required");
 
 doctorSchema.path("hospitalDetails").validate(function (hospital: any) {
   // if (hospital.lenght) {

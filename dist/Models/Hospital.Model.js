@@ -50,19 +50,19 @@ const hospitalSchema = new mongoose_1.Schema({
     specialisedIn: [
         {
             type: mongoose_1.default.Schema.Types.ObjectId,
-            required: true,
+            // required: true,
             ref: schemaNames_1.specialization
         }
     ],
     anemity: [{
             type: mongoose_1.default.Schema.Types.ObjectId,
-            required: true,
+            // required: true,
             ref: schemaNames_1.anemity
         }],
     treatmentType: [
         {
             type: mongoose_1.default.Schema.Types.ObjectId,
-            required: true,
+            // required: true,
             ref: schemaNames_1.treatmentType
         }
     ],
@@ -76,7 +76,7 @@ const hospitalSchema = new mongoose_1.Schema({
     },
     payment: [{
             type: mongoose_1.default.Schema.Types.ObjectId,
-            required: true,
+            // required: true,
             ref: schemaNames_1.payment
         }],
     deleted: {
@@ -86,7 +86,7 @@ const hospitalSchema = new mongoose_1.Schema({
     openingHour: {
         type: mongoose_1.default.Schema.Types.ObjectId,
         // required: true,
-        ref: schemaNames_1.openingHour
+        ref: schemaNames_1.workingHour
     },
     contactNumber: {
         type: String,
@@ -94,7 +94,7 @@ const hospitalSchema = new mongoose_1.Schema({
     },
     numberOfBed: {
         type: Number,
-        required: true,
+        // required: true,
     },
     location: {
         type: {
@@ -103,7 +103,7 @@ const hospitalSchema = new mongoose_1.Schema({
         coordinates: {
             type: [Number],
         },
-        required: true
+        // required: true
     }
 });
 hospitalSchema.pre("save", function (next) {

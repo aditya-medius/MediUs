@@ -35,7 +35,7 @@ const generateOrderId = (req, res) => __awaiter(void 0, void 0, void 0, function
             if (err) {
                 return (0, response_1.errorResponse)(err, res);
             }
-            return (0, response_1.successResponse)({ orderId: order.id }, "Order id generated", res);
+            return (0, response_1.successResponse)({ orderId: order.id, orderReceipt: `order_rcptid_${receiptNumber}` }, "Order id generated", res);
         });
     }
     catch (e) {
@@ -45,15 +45,13 @@ const generateOrderId = (req, res) => __awaiter(void 0, void 0, void 0, function
 exports.generateOrderId = generateOrderId;
 const verifyPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let body = req.body.response.razorpay_order_id +
-            "|" +
-            req.body.response.razorpay_payment_id;
+        let body = req.body.orderId + "|" + req.body.paymentId;
         var expectedSignature = crypto_1.default
             .createHmac("sha256", process.env.RAZOR_PAY_TEST_SECRET)
             .update(body.toString())
             .digest("hex");
         var response = { signatureIsValid: "false" };
-        if (expectedSignature === req.body.response.razorpay_signature) {
+        if (expectedSignature === req.body.paymentSignature) {
             response = { signatureIsValid: "true" };
             const paymentObj = yield new AppointmentPayment_Model_1.default(req.body);
             response.paymentDetails = paymentObj;

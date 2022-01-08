@@ -8,7 +8,12 @@ import * as jwt from "jsonwebtoken";
 import specialityBodyModel from "../Admin Controlled Models/SpecialityBody.Model";
 import specialityDiseaseModel from "../Admin Controlled Models/SpecialityDisease.Model";
 import specialityDoctorTypeModel from "../Admin Controlled Models/SpecialityDoctorType.Model";
-import { appointment, disease, doctorType, specialization } from "../Services/schemaNames";
+import {
+  appointment,
+  disease,
+  doctorType,
+  specialization,
+} from "../Services/schemaNames";
 import _ from "underscore";
 import doctorModel from "../Models/Doctors.Model";
 import { Mongoose } from "mongoose";
@@ -26,16 +31,24 @@ const excludeDoctorFields = {
 };
 export const getAllHospitalsList = async (req: Request, res: Response) => {
   try {
-    const hospitalList = await hospitalModel.find(
-      {deleted: false}
-    ).populate([{
-      path: 'address',
-      populate:{
-        path: 'city state locality country',
-      }
-    },{path:'anemity'},{path:'payment'},{path:'specialisedIn'},{path: 'doctors'}]);
-    
-    return successResponse(hospitalList, "Successfully fetched Hospital's list", res);
+    const hospitalList = await hospitalModel.find({ deleted: false }).populate([
+      {
+        path: "address",
+        populate: {
+          path: "city state locality country",
+        },
+      },
+      { path: "anemity" },
+      { path: "payment" },
+      { path: "specialisedIn" },
+      { path: "doctors" },
+    ]);
+
+    return successResponse(
+      hospitalList,
+      "Successfully fetched Hospital's list",
+      res
+    );
   } catch (error: any) {
     return errorResponse(error, res);
   }
@@ -43,31 +56,39 @@ export const getAllHospitalsList = async (req: Request, res: Response) => {
 //create a hospital
 export const createHospital = async (req: Request, res: Response) => {
   try {
-   let body=req.body;
-   let addressObj=await new addressModel(body.address).save();
-   body["address"]=addressObj._id;
-   let hospitalObj= await new hospitalModel(body).save();
-   jwt.sign(
-     hospitalObj.toJSON(), process.env.SECRET_HOSPITAL_KEY as string,
-     (err: any,token: any)=>{
-       if(err) return errorResponse(err,res);
-      return successResponse(token,"Hospital created successfully", res);
-     }
-   );
-  }
-    catch (error: any) {
+    let body = req.body;
+    let addressObj = await new addressModel(body.address).save();
+    body["address"] = addressObj._id;
+    let hospitalObj = await new hospitalModel(body).save();
+    jwt.sign(
+      hospitalObj.toJSON(),
+      process.env.SECRET_HOSPITAL_KEY as string,
+      (err: any, token: any) => {
+        if (err) return errorResponse(err, res);
+        const { name, _id } = hospitalObj;
+        return successResponse(
+          { token, name, _id },
+          "Hospital created successfully",
+          res
+        );
+      }
+    );
+  } catch (error: any) {
     return errorResponse(error, res);
   }
 };
 
 //add anemity
-export const createHospitalAnemity = async(req: Request, res:Response)=>{
-  try{
-    let body=req.body;
-    let anemityObj=await new anemityModel(body).save();
-        return successResponse(anemityObj, "Address has been successfully added",res);
-      }
-  catch(error: any){
+export const createHospitalAnemity = async (req: Request, res: Response) => {
+  try {
+    let body = req.body;
+    let anemityObj = await new anemityModel(body).save();
+    return successResponse(
+      anemityObj,
+      "Address has been successfully added",
+      res
+    );
+  } catch (error: any) {
     return errorResponse(error, res);
   }
 };
@@ -84,8 +105,8 @@ export const createHospitalAnemity = async(req: Request, res:Response)=>{
 //   }
 // };
 
-export const deleteHospital=async(req:Request,res:Response)=>{
-  try{
+export const deleteHospital = async (req: Request, res: Response) => {
+  try {
     const HospitalDel = await hospitalModel.findOneAndUpdate(
       { _id: req.currentHospital, deleted: false },
       { $set: { deleted: true } }
@@ -100,43 +121,56 @@ export const deleteHospital=async(req:Request,res:Response)=>{
   } catch (error) {
     return errorResponse(error, res);
   }
-  };
-export const updateHospital=async(req:Request,res:Response)=>{
-  try{
-    let {doctors, anemity, payment, contactNumber, numberOfBed,type, ...body}=req.body;
-    const updateQuery={
-      $set: {body,numberOfBed,type},
+};
+export const updateHospital = async (req: Request, res: Response) => {
+  try {
+    let {
+      doctors,
+      anemity,
+      payment,
+      contactNumber,
+      numberOfBed,
+      type,
+      ...body
+    } = req.body;
+    const updateQuery = {
+      $set: { body, numberOfBed, type },
       $addToSet: {
-         doctors, anemity, payment
+        doctors,
+        anemity,
+        payment,
       },
     };
-    const DoctorObj =await doctorModel.find({deleted: false,_id:doctors});
+    const DoctorObj = await doctorModel.find({ deleted: false, _id: doctors });
     // console.log(doctors.length);
-    if(DoctorObj.length==doctors.length)
-    {
-      const HospitalUpdateObj = await hospitalModel.findOneAndUpdate({_id: req.currentHospital, deleted: false},
-      updateQuery,{new: true,});
+    if (DoctorObj.length == doctors.length) {
+      const HospitalUpdateObj = await hospitalModel.findOneAndUpdate(
+        { _id: req.currentHospital, deleted: false },
+        updateQuery,
+        { new: true }
+      );
       if (HospitalUpdateObj) {
-        return successResponse(HospitalUpdateObj, "Hospital updated successfully", res);
+        return successResponse(
+          HospitalUpdateObj,
+          "Hospital updated successfully",
+          res
+        );
       } else {
         let error = new Error("Hospital doesn't exist");
         error.name = "Not found";
         return errorResponse(error, res, 404);
       }
+    } else {
+      let error = new Error("Doctor doesn't exist");
+      error.name = "Not Found";
+      return errorResponse(error, res, 404);
     }
-    else{
-    let error=new Error("Doctor doesn't exist"); 
-    error.name="Not Found";
-    return errorResponse(error,res,404);
-  }
   } catch (error) {
     return errorResponse(error, res);
   }
-  };
+};
 
-
-
-  // Get Hospital by speciality or body parts
+// Get Hospital by speciality or body parts
 export const searchHospital = async (req: Request, res: Response) => {
   try {
     const term = req.params.term;
@@ -330,9 +364,8 @@ export const searchHospital = async (req: Request, res: Response) => {
           return e.speciality;
         });
         const hospitalArray = await hospitalModel
-          .find(
-            {$or:
-            [
+          .find({
+            $or: [
               {
                 deleted: false,
                 active: true,
@@ -340,12 +373,21 @@ export const searchHospital = async (req: Request, res: Response) => {
                 // doctors: {specialization: {$in: specialityArray}}
               },
               {
-                type: term
-              }   
-            ]
-          }   
-            ).populate({path: 'specialisedIn'});
-          return successResponse(hospitalArray, "Success", res);
+                type: term,
+              },
+            ],
+          })
+          .populate({ path: "specialisedIn" })
+          .populate({
+            path: "address",
+            populate: {
+              path: "city state country locality",
+            },
+          })
+          .populate("doctors");
+        // .populate("anemity")
+        // .populate("openingHour");
+        return successResponse(hospitalArray, "Success", res);
       })
       .catch((error) => {
         return errorResponse(error, res);
@@ -355,49 +397,58 @@ export const searchHospital = async (req: Request, res: Response) => {
   }
 };
 
-export const removeDoctor= async (req: Request, res: Response) =>{
-  try{
-    let {doctors} = req.body;
-    const doctorProfile= await doctorModel.findOne({deleted: false, _id: doctors});
-    if(doctorProfile){const hospitalDoctor=await hospitalModel.findOneAndUpdate({_id: req.currentHospital,doctors:{$in:doctors}},{$pull:{doctors:doctors}});
-    return successResponse(hospitalDoctor,"Doctor Removed Successfully",res);}
-    let error= new Error("Doctor doesnot exist");
-    error.name="Not Found";
+export const removeDoctor = async (req: Request, res: Response) => {
+  try {
+    let { doctors } = req.body;
+    const doctorProfile = await doctorModel.findOne({
+      deleted: false,
+      _id: doctors,
+    });
+    if (doctorProfile) {
+      const hospitalDoctor = await hospitalModel.findOneAndUpdate(
+        { _id: req.currentHospital, doctors: { $in: doctors } },
+        { $pull: { doctors: doctors } }
+      );
+      return successResponse(
+        hospitalDoctor,
+        "Doctor Removed Successfully",
+        res
+      );
+    }
+    let error = new Error("Doctor doesnot exist");
+    error.name = "Not Found";
     return errorResponse(error, res, 404);
-  }
-  catch(error){
-    return errorResponse(error,res);
+  } catch (error) {
+    return errorResponse(error, res);
   }
 };
 
-export const viewAppointment=async(req: Request, res: Response)=>{
-  try{
-    const page=parseInt(req.params.page);
-    const appointmentObj: Array<object>=await appointmentModel
-    .find({hospital: req.currentHospital,'time.date': {$gt: Date()}})
-    .sort({'time.date':1})
-    .skip(page >1 ? ((page-1)*2) :0)
-    .limit(2);
+export const viewAppointment = async (req: Request, res: Response) => {
+  try {
+    const page = parseInt(req.params.page);
+    const appointmentObj: Array<object> = await appointmentModel
+      .find({ hospital: req.currentHospital, "time.date": { $gt: Date() } })
+      .sort({ "time.date": 1 })
+      .skip(page > 1 ? (page - 1) * 2 : 0)
+      .limit(2);
 
-    const page2=(appointmentObj.length)/2;
+    const page2 = appointmentObj.length / 2;
 
-    const older_apppointmentObj: Array<object>=await appointmentModel
-    .find({hospital: req.currentHospital,'time.date': {$lte: Date()}})
-    .sort({'time.date':1})
-    .skip(page>page2?((page-1)*2):0)
-    .limit(2);
+    const older_apppointmentObj: Array<object> = await appointmentModel
+      .find({ hospital: req.currentHospital, "time.date": { $lte: Date() } })
+      .sort({ "time.date": 1 })
+      .skip(page > page2 ? (page - 1) * 2 : 0)
+      .limit(2);
 
-    const allAppointment=appointmentObj.concat(older_apppointmentObj);
+    const allAppointment = appointmentObj.concat(older_apppointmentObj);
 
-
-    if(allAppointment.length>0)
-    return successResponse(allAppointment,"Appointments found",res);
-    else{
-      let error=new Error("No appointments found");
-      return errorResponse(error,res, 404);
+    if (allAppointment.length > 0)
+      return successResponse(allAppointment, "Appointments found", res);
+    else {
+      let error = new Error("No appointments found");
+      return errorResponse(error, res, 404);
     }
+  } catch (error) {
+    return errorResponse(error, res);
   }
-  catch(error){
-    return errorResponse(error,res);
-  }
-}
+};

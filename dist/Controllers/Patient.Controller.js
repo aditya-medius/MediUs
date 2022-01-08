@@ -93,14 +93,17 @@ const patientLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                 // Implement message service API
                 (0, message_service_1.sendMessage)(`Your OTP is: ${OTP}`, body.phoneNumber)
                     .then((message) => __awaiter(void 0, void 0, void 0, function* () {
+                    console.log("message:", message);
                     const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 }, OTP);
                     // Add OTP and phone number to temporary collection
                     yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: body.phoneNumber }, { $set: { phoneNumber: body.phoneNumber, otp: otpToken } }, { upsert: true });
                 }))
                     .catch((error) => {
-                    throw error;
+                    // throw error;
+                    console.log("error :", error);
+                    // return errorResponse(error, res);
                 });
-                return (0, response_1.successResponse)({}, "OTP sent successfully", res);
+                return (0, response_1.successResponse)({}, `OTP sent successfully`, res);
             }
             else {
                 let error = new Error("Invalid phone number");
@@ -124,7 +127,7 @@ const patientLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                     if (profile) {
                         const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_PATIENT_KEY);
                         otpData.remove();
-                        return (0, response_1.successResponse)(token, "Successfully logged in", res);
+                        return (0, response_1.successResponse)({ token, profileInfo: profile }, "Successfully logged in", res);
                     }
                     else {
                         otpData.remove();

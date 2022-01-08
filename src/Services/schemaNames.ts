@@ -9,6 +9,7 @@ export const hospital: string = "hospitals";
 export const workingHour: string = "workinghours";
 export const doctor: string = "doctors";
 export const patient: string = "patients";
+export const admin: string = "admins";
 export const anemity: string = "anemitys";
 export const address: string = "addresses";
 export const payment: string = "payments";

@@ -9,11 +9,17 @@ import specialityBodyModel from "../Admin Controlled Models/SpecialityBody.Model
 import bodyPartModel from "../Admin Controlled Models/BodyPart.Model";
 import _ from "underscore";
 import specialityDiseaseModel from "../Admin Controlled Models/SpecialityDisease.Model";
-import { disease, doctorType, specialization } from "../Services/schemaNames";
+import {
+  disease,
+  doctorType,
+  specialization,
+  workingHour,
+} from "../Services/schemaNames";
 import specialityDoctorTypeModel from "../Admin Controlled Models/SpecialityDoctorType.Model";
 import workingHourModel from "../Models/WorkingHours.Model";
 import mongoose from "mongoose";
 import appointmentModel from "../Models/Appointment.Model";
+import hospitalModel from "../Models/Hospital.Model";
 export const excludeDoctorFields = {
   password: 0,
   // panCard: 0,
@@ -54,8 +60,9 @@ export const createDoctor = async (req: Request, res: Response) => {
       process.env.SECRET_DOCTOR_KEY as string,
       (err: any, token: any) => {
         if (err) return errorResponse(err, res);
+        const { firstName, lastName, gender, phoneNumber, _id } = doctorObj;
         return successResponse(
-          token,
+          { token, firstName, lastName, gender, phoneNumber, _id },
           "Doctor profile successfully created",
           res
         );
@@ -120,7 +127,13 @@ export const doctorLogin = async (req: Request, res: Response) => {
               process.env.SECRET_DOCTOR_KEY as string
             );
             otpData.remove();
-            return successResponse(token, "Successfully logged in", res);
+            const { firstName, lastName, gender, phoneNumber, email } =
+              profile.toJSON();
+            return successResponse(
+              { token, firstName, lastName, gender, phoneNumber, email },
+              "Successfully logged in",
+              res
+            );
           } else {
             otpData.remove();
             return successResponse(
@@ -152,10 +165,19 @@ export const doctorLogin = async (req: Request, res: Response) => {
 // Get Doctor By Doctor Id
 export const getDoctorById = async (req: Request, res: Response) => {
   try {
-    const doctorData = await doctorModel.findOne(
-      { _id: req.params.id, deleted: false },
-      excludeDoctorFields
-    );
+    const doctorData = await doctorModel
+      .findOne({ _id: req.params.id, deleted: false }, excludeDoctorFields)
+      .populate({
+        path: "hospitalDetails.hospital",
+        populate: {
+          path: "address",
+          populate: {
+            path: "city state locality country",
+          },
+        },
+      })
+      .populate("hospitalDetails.workingHours")
+      .populate("specialization");
     if (doctorData) {
       return successResponse(
         doctorData,
@@ -515,6 +537,120 @@ export const viewAppointments = async (req: Request, res: Response) => {
                 "time.date": { $lte: new Date() },
               },
             },
+            {
+              $lookup: {
+                from: "hospitals",
+                localField: "hospital",
+                foreignField: "_id",
+                as: "hospital",
+              },
+            },
+            {
+              $unwind: "$hospital",
+            },
+            {
+              $lookup: {
+                from: "addresses",
+                localField: "hospital.address",
+                foreignField: "_id",
+                as: "hospital.address",
+              },
+            },
+            {
+              $unwind: "$hospital.address",
+            },
+            {
+              $lookup: {
+                from: "cities",
+                localField: "hospital.address.city",
+                foreignField: "_id",
+                as: "hospital.address.city",
+              },
+            },
+            {
+              $lookup: {
+                from: "states",
+                localField: "hospital.address.state",
+                foreignField: "_id",
+                as: "hospital.address.state",
+              },
+            },
+            {
+              $lookup: {
+                from: "localities",
+                localField: "hospital.address.locality",
+                foreignField: "_id",
+                as: "hospital.address.locality",
+              },
+            },
+            {
+              $lookup: {
+                from: "countries",
+                localField: "hospital.address.country",
+                foreignField: "_id",
+                as: "hospital.address.country",
+              },
+            },
+            {
+              $unwind: "$hospital.address.city",
+            },
+            {
+              $unwind: "$hospital.address.country",
+            },
+            {
+              $unwind: "$hospital.address.state",
+            },
+            {
+              $unwind: "$hospital.address.locality",
+            },
+            {
+              $project: {
+                "hospital.doctors": 0,
+                "hospital.contactNumber": 0,
+                "hospital.payment": 0,
+                "hospital.anemity": 0,
+                "hospital.specialisedIn": 0,
+                "hospital.treatmentType": 0,
+                // "hospital.address": 0,
+              },
+            },
+            {
+              $lookup: {
+                from: "patients",
+                localField: "patient",
+                foreignField: "_id",
+                as: "patient",
+              },
+            },
+            {
+              $project: {
+                "patient.password": 0,
+                "patient.DOB": 0,
+              },
+            },
+            {
+              $lookup: {
+                from: "doctors",
+                localField: "doctors",
+                foreignField: "_id",
+                as: "doctors",
+              },
+            },
+            {
+              $project: {
+                "doctors.password": 0,
+                "doctors.hospitalDetails": 0,
+                "doctors.registration": 0,
+                "doctors.specialization": 0,
+                "doctors.KYCDetails": 0,
+                "doctors.qualification": 0,
+                "doctors.DOB": 0,
+                "doctors.phoneNumber": 0,
+              },
+            },
+            {
+              $unwind: "$hospital",
+            },
             ...limitSkipSort,
           ],
           upcoming: [
@@ -566,6 +702,102 @@ export const cancelAppointments = async (req: Request, res: Response) => {
         res
       );
     }
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getDoctorWorkingInHospitals = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    let doctorDetails = await doctorModel
+      .findOne(
+        { _id: req.params.id },
+        { ...excludeDoctorFields, hospitalDetails: 0 }
+      )
+      .populate("specialization qualification");
+
+    let workingHourObj = await workingHourModel
+      .find({
+        doctorDetails: req.params.id,
+      })
+      .distinct("hospitalDetails");
+
+    let hospitals = await hospitalModel
+      .find({ _id: { $in: workingHourObj } })
+      .populate({
+        path: "address anemity",
+        populate: {
+          path: "city state locality country",
+        },
+      });
+
+    const doctorObj = await workingHourModel.aggregate([
+      {
+        $match: {
+          doctorDetails: new mongoose.Types.ObjectId(req.params.id),
+        },
+      },
+      {
+        $project: {
+          hospitalDetails: 1,
+          monday: 1,
+          tuesday: 1,
+          wednesday: 1,
+          thursday: 1,
+          friday: 1,
+          saturday: 1,
+          sunday: 1,
+        },
+      },
+      {
+        $group: {
+          _id: "$hospitalDetails",
+          workingHours: {
+            $push: {
+              monday: "$monday",
+              tuesday: "$tuesday",
+              wednesday: "$wednesday",
+              thursday: "$thursday",
+              friday: "$friday",
+              saturday: "$saturday",
+              sunday: "$sunday",
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "hospitals",
+          localField: "_id",
+          foreignField: "_id",
+          as: "hospital",
+        },
+      },
+      {
+        $project: {
+          workingHours: 1,
+        },
+      },
+    ]);
+
+    let index: number;
+    let doctorsWorkingInHospital: Array<any> = hospitals.map((element: any) => {
+      index = doctorObj.findIndex((e: any) => {
+        return e._id.toString() == element._id.toString();
+      });
+      return {
+        hospital: element,
+        ...doctorObj[index],
+      };
+    });
+    return successResponse(
+      { doctorDetails, doctorsWorkingInHospital },
+      "Success",
+      res
+    );
   } catch (error: any) {
     return errorResponse(error, res);
   }

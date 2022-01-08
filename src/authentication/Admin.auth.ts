@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { errorResponse } from "../Services/response";
 
-export const authenticatePatient = (
+export const authenticateAdmin = (
   req: Request,
   res: Response,
   next: NextFunction
@@ -11,9 +11,9 @@ export const authenticatePatient = (
     const authHeader = <string>req.header("auth-header");
     const data: any = jwt.verify(
       authHeader,
-      process.env.SECRET_PATIENT_KEY as string
+      process.env.SECRET_ADMIN_KEY as string
     );
-    req.currentPatient = data._id;
+    req.currentAdmin = data._id;
     return true;
   } catch (error: any) {
     return false;

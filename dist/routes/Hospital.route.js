@@ -25,16 +25,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const Hospital_auth_1 = require("../authentication/Hospital.auth");
 const hospitalController = __importStar(require("../Controllers/Hospital.Controller"));
+const middlewareHelper_1 = require("../Services/middlewareHelper");
 const hospitalRouter = express_1.default.Router();
-hospitalRouter.get("/", Hospital_auth_1.authenticateHospital, hospitalController.getAllHospitalsList);
+hospitalRouter.get("/", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getAllHospitalsList);
 hospitalRouter.post("/", hospitalController.createHospital);
-hospitalRouter.post("/deleteHospital", Hospital_auth_1.authenticateHospital, hospitalController.deleteHospital);
-hospitalRouter.post("/updateHospital", Hospital_auth_1.authenticateHospital, hospitalController.updateHospital);
-hospitalRouter.post("/anemity", Hospital_auth_1.authenticateHospital, hospitalController.createHospitalAnemity);
-// hospitalRouter.post("/speciality",authenticateHospital,hospitalController.addHospitalSpeciality);
+hospitalRouter.post("/deleteHospital", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.deleteHospital);
+hospitalRouter.post("/updateHospital", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.updateHospital);
+hospitalRouter.post("/anemity", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.createHospitalAnemity);
+// hospitalRouter.post("/speciality",oneOf(authenticateHospital),hospitalController.addHospitalSpeciality);
 hospitalRouter.post("/findHospitalBySpecialityOrBodyPart/:term", hospitalController.searchHospital);
 //ADD DOCTOR TO THE HOSPITAL
-hospitalRouter.post("/removeDoctor", Hospital_auth_1.authenticateHospital, hospitalController.removeDoctor);
+hospitalRouter.post("/removeDoctor", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.removeDoctor);
 //View Appointments
-hospitalRouter.get("/viewAppointment/:page", Hospital_auth_1.authenticateHospital, hospitalController.viewAppointment);
+hospitalRouter.get("/viewAppointment/:page", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.viewAppointment);
 exports.default = hospitalRouter;

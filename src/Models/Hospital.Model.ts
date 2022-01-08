@@ -2,7 +2,7 @@ import mongoose, { Schema, model } from "mongoose";
 import schemaOptions from "../Services/schemaOptions";
 import 
 { 
-  speciality, doctor, address, payment, anemity, hospital, treatmentType, openingHour, specialization
+  speciality, doctor, address, payment, anemity, hospital, treatmentType, openingHour, specialization, workingHour
 } 
  from "../Services/schemaNames";
 import { errorResponse, successResponse } from "../Services/response";
@@ -28,19 +28,19 @@ const hospitalSchema = new Schema({
   specialisedIn:[
     {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
+      // required: true,
       ref: specialization
     }
   ],
   anemity:[{
     type: mongoose.Schema.Types.ObjectId,
-    required: true,
+    // required: true,
     ref: anemity
   }],
   treatmentType:[
     {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
+      // required: true,
       ref: treatmentType
     }
   ],
@@ -55,7 +55,7 @@ const hospitalSchema = new Schema({
   payment:
     [{
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
+      // required: true,
       ref: payment
     }],
 
@@ -67,7 +67,7 @@ const hospitalSchema = new Schema({
   {
       type: mongoose.Schema.Types.ObjectId,
       // required: true,
-      ref: openingHour
+      ref: workingHour
   },
   contactNumber:{
       type: String,
@@ -75,7 +75,7 @@ const hospitalSchema = new Schema({
   },
   numberOfBed:{
       type: Number,
-      required: true,
+      // required: true,
   },
   location:{
     type:{
@@ -84,7 +84,7 @@ const hospitalSchema = new Schema({
     coordinates:{
       type:[Number],
     },
-    required: true
+    // required: true
   }
 
 });

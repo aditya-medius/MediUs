@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.appointmentPayment = exports.doctorType = exports.disease = exports.openingHour = exports.country = exports.BodyPart = exports.OTP = exports.treatmentType = exports.locality = exports.state = exports.city = exports.payment = exports.address = exports.anemity = exports.patient = exports.doctor = exports.workingHour = exports.hospital = exports.like = exports.specialization = exports.specialityDoctorType = exports.specialityDisease = exports.speciality = exports.qualification = exports.appointment = void 0;
+exports.appointmentPayment = exports.doctorType = exports.disease = exports.openingHour = exports.country = exports.BodyPart = exports.OTP = exports.treatmentType = exports.locality = exports.state = exports.city = exports.payment = exports.address = exports.anemity = exports.admin = exports.patient = exports.doctor = exports.workingHour = exports.hospital = exports.like = exports.specialization = exports.specialityDoctorType = exports.specialityDisease = exports.speciality = exports.qualification = exports.appointment = void 0;
 exports.appointment = "appointments";
 exports.qualification = "qualifications";
 exports.speciality = "specialities";
@@ -12,6 +12,7 @@ exports.hospital = "hospitals";
 exports.workingHour = "workinghours";
 exports.doctor = "doctors";
 exports.patient = "patients";
+exports.admin = "admins";
 exports.anemity = "anemitys";
 exports.address = "addresses";
 exports.payment = "payments";

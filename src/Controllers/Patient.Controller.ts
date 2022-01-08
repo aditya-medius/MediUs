@@ -81,6 +81,7 @@ export const patientLogin = async (req: Request, res: Response) => {
         // Implement message service API
         sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
           .then(async (message) => {
+            console.log("message:", message);
             const otpToken = jwt.sign(
               { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
               OTP
@@ -93,10 +94,12 @@ export const patientLogin = async (req: Request, res: Response) => {
             );
           })
           .catch((error) => {
-            throw error;
+            // throw error;
+            console.log("error :", error);
+            // return errorResponse(error, res);
           });
 
-        return successResponse({}, "OTP sent successfully", res);
+        return successResponse({}, `OTP sent successfully`, res);
       } else {
         let error = new Error("Invalid phone number");
         error.name = "Invalid input";
@@ -124,7 +127,11 @@ export const patientLogin = async (req: Request, res: Response) => {
               process.env.SECRET_PATIENT_KEY as string
             );
             otpData.remove();
-            return successResponse(token, "Successfully logged in", res);
+            return successResponse(
+              { token, profileInfo: profile },
+              "Successfully logged in",
+              res
+            );
           } else {
             otpData.remove();
             return successResponse(

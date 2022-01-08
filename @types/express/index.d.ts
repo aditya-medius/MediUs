@@ -3,5 +3,6 @@ declare namespace Express {
     currentDoctor: Object<any>;
     currentPatient: Object<any>;
     currentHospital: Object<any>;
-    }
+    currentAdmin: Object<any>;
+  }
 }

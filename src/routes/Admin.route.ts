@@ -1,5 +1,8 @@
 import { Router } from "express";
 import * as adminController from "../Admin Controlled Models/Admin.Controller";
+import { oneOf } from "../Services/middlewareHelper";
+import { authenticateAdmin } from "../authentication/Admin.auth";
+
 const adminRouter = Router();
 
 adminRouter.post("/addSpeciality", adminController.addSpeciality);
@@ -37,7 +40,10 @@ adminRouter.post("/city", adminController.addCity);
 adminRouter.post("/state", adminController.addState);
 adminRouter.post("/locality", adminController.addLocality);
 adminRouter.post("/country", adminController.addCountry);
-adminRouter.post("/payment", adminController.addPayment);
+adminRouter.post(
+  "/payment",
+  adminController.addPayment
+);
 
 // Get cities, states, locality and country
 adminRouter.get(
@@ -45,4 +51,9 @@ adminRouter.get(
   adminController.getCityStateLocalityCountry
 );
 
+// Create admin profile
+adminRouter.post("/create", adminController.create);
+
+// Get admin profile
+adminRouter.get("/login", adminController.login);
 export default adminRouter;

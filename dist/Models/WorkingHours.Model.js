@@ -47,6 +47,9 @@ const workingHoursSchema = new mongoose_1.Schema({
                             19, 20, 21, 22, 23, 24,
                         ],
                     },
+                    division: {
+                        type: Number,
+                    },
                 },
             },
             till: {
@@ -57,6 +60,9 @@ const workingHoursSchema = new mongoose_1.Schema({
                         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
                         19, 20, 21, 22, 23, 24,
                     ],
+                },
+                division: {
+                    type: Number,
                 },
             },
             capacity: {
@@ -80,6 +86,9 @@ const workingHoursSchema = new mongoose_1.Schema({
                         19, 20, 21, 22, 23, 24,
                     ],
                 },
+                division: {
+                    type: Number,
+                },
             },
             till: {
                 time: {
@@ -89,6 +98,9 @@ const workingHoursSchema = new mongoose_1.Schema({
                         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
                         19, 20, 21, 22, 23, 24,
                     ],
+                },
+                division: {
+                    type: Number,
                 },
             },
             capacity: {
@@ -112,6 +124,9 @@ const workingHoursSchema = new mongoose_1.Schema({
                         19, 20, 21, 22, 23, 24,
                     ],
                 },
+                division: {
+                    type: Number,
+                },
             },
             till: {
                 time: {
@@ -121,6 +136,9 @@ const workingHoursSchema = new mongoose_1.Schema({
                         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
                         19, 20, 21, 22, 23, 24,
                     ],
+                },
+                division: {
+                    type: Number,
                 },
             },
             capacity: {
@@ -144,6 +162,9 @@ const workingHoursSchema = new mongoose_1.Schema({
                         19, 20, 21, 22, 23, 24,
                     ],
                 },
+                division: {
+                    type: Number,
+                },
             },
             till: {
                 time: {
@@ -153,6 +174,9 @@ const workingHoursSchema = new mongoose_1.Schema({
                         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
                         19, 20, 21, 22, 23, 24,
                     ],
+                },
+                division: {
+                    type: Number,
                 },
             },
             capacity: {
@@ -176,6 +200,9 @@ const workingHoursSchema = new mongoose_1.Schema({
                         19, 20, 21, 22, 23, 24,
                     ],
                 },
+                division: {
+                    type: Number,
+                },
             },
             till: {
                 time: {
@@ -185,6 +212,9 @@ const workingHoursSchema = new mongoose_1.Schema({
                         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
                         19, 20, 21, 22, 23, 24,
                     ],
+                },
+                division: {
+                    type: Number,
                 },
             },
             capacity: {
@@ -208,6 +238,9 @@ const workingHoursSchema = new mongoose_1.Schema({
                         19, 20, 21, 22, 23, 24,
                     ],
                 },
+                division: {
+                    type: Number,
+                },
             },
             till: {
                 time: {
@@ -217,6 +250,9 @@ const workingHoursSchema = new mongoose_1.Schema({
                         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
                         19, 20, 21, 22, 23, 24,
                     ],
+                },
+                division: {
+                    type: Number,
                 },
             },
             capacity: {
@@ -240,6 +276,9 @@ const workingHoursSchema = new mongoose_1.Schema({
                         19, 20, 21, 22, 23, 24,
                     ],
                 },
+                division: {
+                    type: Number,
+                },
             },
             till: {
                 time: {
@@ -249,6 +288,9 @@ const workingHoursSchema = new mongoose_1.Schema({
                         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
                         19, 20, 21, 22, 23, 24,
                     ],
+                },
+                division: {
+                    type: Number,
                 },
             },
             capacity: {

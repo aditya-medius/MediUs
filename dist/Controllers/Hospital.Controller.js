@@ -67,12 +67,18 @@ const excludeDoctorFields = {
 };
 const getAllHospitalsList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const hospitalList = yield Hospital_Model_1.default.find({ deleted: false }).populate([{
-                path: 'address',
+        const hospitalList = yield Hospital_Model_1.default.find({ deleted: false }).populate([
+            {
+                path: "address",
                 populate: {
-                    path: 'city state locality country',
-                }
-            }, { path: 'anemity' }, { path: 'payment' }, { path: 'specialisedIn' }, { path: 'doctors' }]);
+                    path: "city state locality country",
+                },
+            },
+            { path: "anemity" },
+            { path: "payment" },
+            { path: "specialisedIn" },
+            { path: "doctors" },
+        ]);
         return (0, response_1.successResponse)(hospitalList, "Successfully fetched Hospital's list", res);
     }
     catch (error) {
@@ -90,7 +96,8 @@ const createHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
         jwt.sign(hospitalObj.toJSON(), process.env.SECRET_HOSPITAL_KEY, (err, token) => {
             if (err)
                 return (0, response_1.errorResponse)(err, res);
-            return (0, response_1.successResponse)(token, "Hospital created successfully", res);
+            const { name, _id } = hospitalObj;
+            return (0, response_1.successResponse)({ token, name, _id }, "Hospital created successfully", res);
         });
     }
     catch (error) {
@@ -144,13 +151,15 @@ const updateHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
         const updateQuery = {
             $set: { body, numberOfBed, type },
             $addToSet: {
-                doctors, anemity, payment
+                doctors,
+                anemity,
+                payment,
             },
         };
         const DoctorObj = yield Doctors_Model_1.default.find({ deleted: false, _id: doctors });
         // console.log(doctors.length);
         if (DoctorObj.length == doctors.length) {
-            const HospitalUpdateObj = yield Hospital_Model_1.default.findOneAndUpdate({ _id: req.currentHospital, deleted: false }, updateQuery, { new: true, });
+            const HospitalUpdateObj = yield Hospital_Model_1.default.findOneAndUpdate({ _id: req.currentHospital, deleted: false }, updateQuery, { new: true });
             if (HospitalUpdateObj) {
                 return (0, response_1.successResponse)(HospitalUpdateObj, "Hospital updated successfully", res);
             }
@@ -364,7 +373,8 @@ const searchHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 return e.speciality;
             });
             const hospitalArray = yield Hospital_Model_1.default
-                .find({ $or: [
+                .find({
+                $or: [
                     {
                         deleted: false,
                         active: true,
@@ -372,10 +382,20 @@ const searchHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
                         // doctors: {specialization: {$in: specialityArray}}
                     },
                     {
-                        type: term
-                    }
-                ]
-            }).populate({ path: 'specialisedIn' });
+                        type: term,
+                    },
+                ],
+            })
+                .populate({ path: "specialisedIn" })
+                .populate({
+                path: "address",
+                populate: {
+                    path: "city state country locality",
+                },
+            })
+                .populate("doctors");
+            // .populate("anemity")
+            // .populate("openingHour");
             return (0, response_1.successResponse)(hospitalArray, "Success", res);
         }))
             .catch((error) => {
@@ -390,7 +410,10 @@ exports.searchHospital = searchHospital;
 const removeDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { doctors } = req.body;
-        const doctorProfile = yield Doctors_Model_1.default.findOne({ deleted: false, _id: doctors });
+        const doctorProfile = yield Doctors_Model_1.default.findOne({
+            deleted: false,
+            _id: doctors,
+        });
         if (doctorProfile) {
             const hospitalDoctor = yield Hospital_Model_1.default.findOneAndUpdate({ _id: req.currentHospital, doctors: { $in: doctors } }, { $pull: { doctors: doctors } });
             return (0, response_1.successResponse)(hospitalDoctor, "Doctor Removed Successfully", res);
@@ -408,15 +431,15 @@ const viewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
     try {
         const page = parseInt(req.params.page);
         const appointmentObj = yield Appointment_Model_1.default
-            .find({ hospital: req.currentHospital, 'time.date': { $gt: Date() } })
-            .sort({ 'time.date': 1 })
-            .skip(page > 1 ? ((page - 1) * 2) : 0)
+            .find({ hospital: req.currentHospital, "time.date": { $gt: Date() } })
+            .sort({ "time.date": 1 })
+            .skip(page > 1 ? (page - 1) * 2 : 0)
             .limit(2);
-        const page2 = (appointmentObj.length) / 2;
+        const page2 = appointmentObj.length / 2;
         const older_apppointmentObj = yield Appointment_Model_1.default
-            .find({ hospital: req.currentHospital, 'time.date': { $lte: Date() } })
-            .sort({ 'time.date': 1 })
-            .skip(page > page2 ? ((page - 1) * 2) : 0)
+            .find({ hospital: req.currentHospital, "time.date": { $lte: Date() } })
+            .sort({ "time.date": 1 })
+            .skip(page > page2 ? (page - 1) * 2 : 0)
             .limit(2);
         const allAppointment = appointmentObj.concat(older_apppointmentObj);
         if (allAppointment.length > 0)

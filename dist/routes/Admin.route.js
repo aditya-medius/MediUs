@@ -43,4 +43,8 @@ adminRouter.post("/country", adminController.addCountry);
 adminRouter.post("/payment", adminController.addPayment);
 // Get cities, states, locality and country
 adminRouter.get("/getCityStateLocalityCountry", adminController.getCityStateLocalityCountry);
+// Create admin profile
+adminRouter.post("/create", adminController.create);
+// Get admin profile
+adminRouter.get("/login", adminController.login);
 exports.default = adminRouter;
