@@ -40,14 +40,12 @@ patientRouter.post("/getDoctorByDay", Patient_auth_1.authenticatePatient, patien
 patientRouter.post("/generateOrderId", Patient_auth_1.authenticatePatient, paymentController.generateOrderId);
 patientRouter.post("/verifyPayment", Patient_auth_1.authenticatePatient, paymentController.verifyPayment);
 patientRouter.get("/viewAppointment/:page", Patient_auth_1.authenticatePatient, patientController.ViewAppointment);
-<<<<<<< HEAD
-patientRouter.post("/viewSchedule", Patient_auth_1.authenticatePatient, patientController.ViewSchedule);
-=======
 // Get all the entities of filter
 patientRouter.get("/getSpecialityBodyPartAndDisease", Patient_auth_1.authenticatePatient, patientController.getSpecialityBodyPartAndDisease);
 // Get hospitals by city
 patientRouter.get("/getHospitalsByCity", Patient_auth_1.authenticatePatient, patientController.getHospitalsByCity);
 // Get doctors by city
 patientRouter.get("/getDoctorsByCity", Patient_auth_1.authenticatePatient, patientController.getDoctorsByCity);
->>>>>>> fd73cfbdd7a50de833ae43fd7f468202f184e097
+//upload prescription
+patientRouter.post("/uploadPrescription", Patient_auth_1.authenticatePatient, patientController.uploadPrescription);
 exports.default = patientRouter;

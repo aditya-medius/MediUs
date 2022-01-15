@@ -31,11 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-<<<<<<< HEAD
-exports.verifyPayment = exports.generateOrderId = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.CancelAppointment = exports.doneAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = void 0;
-=======
-exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewAppointment = exports.CancelAppointment = exports.doneAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = void 0;
->>>>>>> fd73cfbdd7a50de833ae43fd7f468202f184e097
+exports.uploadPrescription = exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.CancelAppointment = exports.doneAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = void 0;
 const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
 // import { excludePatientFields } from "./Patient.Controller";
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
@@ -48,18 +44,19 @@ const message_service_1 = require("../Services/message.service");
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const Doctor_Controller_1 = require("./Doctor.Controller");
 const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
-const Specialization_Model_1 = __importDefault(require("../Admin Controlled Models/Specialization.Model"));
+const path_1 = __importDefault(require("path"));
 const BodyPart_Model_1 = __importDefault(require("../Admin Controlled Models/BodyPart.Model"));
 const Disease_Model_1 = __importDefault(require("../Admin Controlled Models/Disease.Model"));
-const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
+const Specialization_Model_1 = __importDefault(require("../Admin Controlled Models/Specialization.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
+const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const excludePatientFields = {
     password: 0,
     verified: 0,
     DOB: 0,
 };
 // Get All Patients
-const getAllPatientsList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getAllPatientsList = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const patientList = yield Patient_Model_1.default.find({ deleted: false }, excludePatientFields);
         return (0, response_1.successResponse)(patientList, "Successfully fetched patient's list", res);
@@ -96,7 +93,7 @@ const patientLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                 const OTP = Math.floor(100000 + Math.random() * 900000).toString();
                 // Implement message service API
                 (0, message_service_1.sendMessage)(`Your OTP is: ${OTP}`, body.phoneNumber)
-                    .then((message) => __awaiter(void 0, void 0, void 0, function* () {
+                    .then((_message) => __awaiter(void 0, void 0, void 0, function* () {
                     const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 }, OTP);
                     // Add OTP and phone number to temporary collection
                     yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: body.phoneNumber }, { $set: { phoneNumber: body.phoneNumber, otp: otpToken } }, { upsert: true });
@@ -175,7 +172,7 @@ const getPatientById = (req, res) => __awaiter(void 0, void 0, void 0, function*
 });
 exports.getPatientById = getPatientById;
 // Get patient By Hospital(UPDATE)
-const getPatientByHospitalId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getPatientByHospitalId = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
     }
     catch (error) {
@@ -340,18 +337,6 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
     try {
         const page = parseInt(req.params.page);
         const appointmentData = yield Appointment_Model_1.default
-<<<<<<< HEAD
-            .find({ patient: req.currentPatient, 'time.date': { $gte: Date() } })
-            .sort({ 'time.date': 1 })
-            .skip(page > 1 ? ((page - 1) * 2) : 0)
-            .limit(2);
-        //  console.log(appointmentData)
-        const page2 = (appointmentData.length) / 2;
-        const older_apppointmentData = yield Appointment_Model_1.default
-            .find({ patient: req.currentPatient, 'time.date': { $lte: Date() } })
-            .sort({ 'time.date': 1 })
-            .skip(page > page2 ? (page - 1) * 2 : 0)
-=======
             .find({ patient: req.currentPatient, "time.date": { $gt: Date() } })
             .sort({ "time.date": 1 })
             .skip(page > 1 ? (page - 1) * 2 : 0)
@@ -361,7 +346,6 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
             .find({ patient: req.currentPatient, "time.date": { $lte: Date() } })
             .sort({ "time.date": 1 })
             .skip(page > page2 ? (page2 - 1) * 2 : 0)
->>>>>>> fd73cfbdd7a50de833ae43fd7f468202f184e097
             .limit(2);
         const allAppointment = appointmentData.concat(older_apppointmentData);
         if (allAppointment.length > 0)
@@ -392,8 +376,6 @@ const ViewSchedule = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         }
         else if (body.day == "tuesday") {
             query = { "tuesday.working": true };
-        }
-        else if (body.day == "wednesday") {
             query = { "wednesday.working": true };
         }
         else if (body.day == "thursday") {
@@ -401,15 +383,12 @@ const ViewSchedule = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         }
         else if (body.day == "friday") {
             query = { "friday.working": true };
-        }
-        else if (body.day == "saturday") {
             query = { "saturday.working": true };
         }
         else if (body.day == "sunday") {
             query = { "sunday.working": true };
         }
         let appointmentCount = yield WorkingHours_Model_1.default.find({
-            doctors: body.doctors,
             hospital: body.hospital,
             // "schedule.working":true
         });
@@ -442,7 +421,6 @@ const getDoctorByDay = (req, res) => __awaiter(void 0, void 0, void 0, function*
             query = { "friday.working": true };
         }
         else if (body.day == "saturday") {
-            query = { "saturday.working": true };
         }
         else if (body.day == "sunday") {
             query = { "sunday.working": true };
@@ -459,7 +437,7 @@ const getDoctorByDay = (req, res) => __awaiter(void 0, void 0, void 0, function*
 });
 exports.getDoctorByDay = getDoctorByDay;
 // Get speciality, body part and disease
-const getSpecialityBodyPartAndDisease = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getSpecialityBodyPartAndDisease = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const speciality = Specialization_Model_1.default.find();
         const bodyParts = BodyPart_Model_1.default.find();
@@ -523,3 +501,52 @@ const getDoctorsByCity = (req, res) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.getDoctorsByCity = getDoctorsByCity;
+//Upload prescription for the preffered medical centre
+const uploadPrescription = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const express = require('express');
+        const app = express();
+        const multer = require('multer');
+        //     function cb(file: any, cb: any) {
+        //     throw new Error("Function is not implemented.");
+        // }
+        const storage = multer.diskStorage({
+            destination: './uploads/',
+            filename: function (req, file, cb) {
+                cb(null, file.fieldname + '-' + Date.now() +
+                    path_1.default.extname(file.originalname));
+            }
+        });
+        const upload = multer({
+            storage: storage,
+            limits: { filesize: 1000000 },
+            fileFilter: function (req, file, cb) {
+                checkFileType(file, cb);
+            }
+        }).single('image');
+        //check function
+        function checkFileType(file, cb) {
+            const filetypes = /jpg|jpeg|png|gif/;
+            const extname = filetypes.test(path_1.default.extname(file.originalname).toLowerCase());
+            const mimetype = filetypes.test(file.mimetype);
+            if (extname && mimetype) {
+                return cb(null, true);
+            }
+            else {
+                cb('Error: Images only!');
+            }
+        }
+        return (0, response_1.successResponse)(upload, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.uploadPrescription = uploadPrescription;
+//console.log(req.file);
+// app.post('/profile', upload.none(), function (req: any, res: any, next: any) {  
+// })
+// app.post('/', upload.single('image'), (req: any, res: any) => {
+// res.send(`/${req.file.path}`)
+// })
+//console.log(upload);

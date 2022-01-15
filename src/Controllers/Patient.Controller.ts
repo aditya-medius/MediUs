@@ -1,4 +1,4 @@
-import { query, Request, Response } from "express";
+import express, { query, Request, Response } from "express";
 import patientModel from "../Models/Patient.Model";
 // import { excludePatientFields } from "./Patient.Controller";
 import otpModel from "../Models/OTP.Model";
@@ -12,25 +12,23 @@ import { sendMessage } from "../Services/message.service";
 import doctorModel from "../Models/Doctors.Model";
 import { excludeDoctorFields } from "./Doctor.Controller";
 import workingHourModel from "../Models/WorkingHours.Model";
-// import specialityBodyModel from "./SpecialityBody.Model";
-// import diseaseModel from "./Disease.Model";
-
 import RazorPay from "razorpay";
 import crypto from "crypto";
-import specialityModel from "../Admin Controlled Models/Specialization.Model";
+import multer from 'multer';
+import path from 'path';
 import bodyPartModel from "../Admin Controlled Models/BodyPart.Model";
 import diseaseModel from "../Admin Controlled Models/Disease.Model";
-import addressModel from "../Models/Address.Model";
+import specialityModel from "../Admin Controlled Models/Specialization.Model";
 import hospitalModel from "../Models/Hospital.Model";
-
+import addressModel from "../Models/Address.Model";
+import { any } from "underscore";
 const excludePatientFields = {
   password: 0,
   verified: 0,
   DOB: 0,
 };
-
 // Get All Patients
-export const getAllPatientsList = async (req: Request, res: Response) => {
+export const getAllPatientsList = async (_req: Request, res: Response) => {
   try {
     const patientList = await patientModel.find(
       { deleted: false },
@@ -80,7 +78,7 @@ export const patientLogin = async (req: Request, res: Response) => {
 
         // Implement message service API
         sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
-          .then(async (message) => {
+          .then(async (_message) => {
             const otpToken = jwt.sign(
               { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
               OTP
@@ -176,7 +174,7 @@ export const getPatientById = async (req: Request, res: Response) => {
 };
 
 // Get patient By Hospital(UPDATE)
-export const getPatientByHospitalId = async (req: Request, res: Response) => {
+export const getPatientByHospitalId = async (_req: Request, res: Response) => {
   try {
   } catch (error) {
     return errorResponse(error, res);
@@ -344,24 +342,6 @@ export const CancelAppointment = async (req: Request, res: Response) => {
 };
 
 //View Appointment History
-<<<<<<< HEAD
-export const ViewAppointment=async(req: Request, res: Response)=>{
-try{
-    const page=parseInt(req.params.page);
-    const appointmentData: Array<object>=await appointmentModel
-    .find({patient: req.currentPatient,'time.date': {$gte: Date()}})
-    .sort({'time.date':1})
-    .skip(page >1 ? ((page-1)*2) :0)
-    .limit(2);
-    //  console.log(appointmentData)
-    const page2=(appointmentData.length)/2;
-
-    const older_apppointmentData: Array<object>=await appointmentModel
-    .find({patient: req.currentPatient,'time.date': {$lte: Date()}})
-    .sort({'time.date':1})
-    .skip(page>page2?(page-1)*2:0)
-    .limit(2);
-=======
 export const ViewAppointment = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.params.page);
@@ -378,7 +358,6 @@ export const ViewAppointment = async (req: Request, res: Response) => {
       .sort({ "time.date": 1 })
       .skip(page > page2 ? (page2 - 1) * 2 : 0)
       .limit(2);
->>>>>>> fd73cfbdd7a50de833ae43fd7f468202f184e097
 
     const allAppointment = appointmentData.concat(older_apppointmentData);
 
@@ -411,19 +390,16 @@ try {
       query = { "monday.working": true };
     } else if (body.day == "tuesday") {
       query = { "tuesday.working": true };
-    } else if (body.day == "wednesday") {
       query = { "wednesday.working": true };
     } else if (body.day == "thursday") {
       query = { "thursday.working": true };
     } else if (body.day == "friday") {
       query = { "friday.working": true };
-    } else if (body.day == "saturday") {
       query = { "saturday.working": true };
     } else if (body.day == "sunday") {
       query = { "sunday.working": true };
     }
      let appointmentCount = await workingHourModel.find({
-      doctors: body.doctors,
       hospital: body.hospital,
       // "schedule.working":true
      });
@@ -454,7 +430,6 @@ export const getDoctorByDay = async (req: Request, res: Response) => {
     } else if (body.day == "friday") {
       query = { "friday.working": true };
     } else if (body.day == "saturday") {
-      query = { "saturday.working": true };
     } else if (body.day == "sunday") {
       query = { "sunday.working": true };
     }
@@ -474,7 +449,7 @@ export const getDoctorByDay = async (req: Request, res: Response) => {
 
 // Get speciality, body part and disease
 export const getSpecialityBodyPartAndDisease = async (
-  req: Request,
+  _req: Request,
   res: Response
 ) => {
   try {
@@ -561,3 +536,50 @@ export const getDoctorsByCity = async (req: Request, res: Response) => {
     return errorResponse(error, res);
   }
 };
+//Upload prescription for the preffered medical centre
+export const uploadPrescription = async (_req: Request, res: Response) => {
+  try {
+    const express = require('express')
+    const app = express()
+    const multer  = require('multer')
+//     function cb(file: any, cb: any) {
+//     throw new Error("Function is not implemented.");
+// }
+    const storage = multer.diskStorage({
+    destination: './uploads/',
+    filename: function(req: any, file: any, cb:any){
+    cb(null, file.fieldname + '-' + Date.now() +
+    path.extname(file.originalname));
+  }
+});
+    const upload = multer({
+      storage: storage,
+      limits: {filesize: 1000000},
+      fileFilter: function (req: any, file: any, cb: any){
+      checkFileType(file, cb);
+    }
+    }).single('image');
+    //check function
+   function checkFileType(file: any, cb: any) {
+  const filetypes = /jpg|jpeg|png|gif/ 
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = filetypes.test(file.mimetype);
+  if (extname && mimetype) {
+    return cb(null, true)
+  } else {
+    cb('Error: Images only!') 
+  }
+}
+    return successResponse( upload, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+  //console.log(req.file);
+    // app.post('/profile', upload.none(), function (req: any, res: any, next: any) {  
+    // })
+    // app.post('/', upload.single('image'), (req: any, res: any) => {
+    // res.send(`/${req.file.path}`)
+    // })
+    //console.log(upload);

@@ -61,15 +61,6 @@ patientRouter.get(
   "/viewAppointment/:page",
   authenticatePatient,
   patientController.ViewAppointment
-<<<<<<< HEAD
-  );
-patientRouter.post(
-  "/viewSchedule",
-  authenticatePatient,
-  patientController.ViewSchedule
-  );
-
-=======
 );
 
 // Get all the entities of filter
@@ -92,5 +83,10 @@ patientRouter.get(
   authenticatePatient,
   patientController.getDoctorsByCity
 );
->>>>>>> fd73cfbdd7a50de833ae43fd7f468202f184e097
+//upload prescription
+patientRouter.post(
+  "/uploadPrescription",
+   authenticatePatient,
+  patientController.uploadPrescription
+)
 export default patientRouter;
