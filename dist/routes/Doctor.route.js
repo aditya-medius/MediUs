@@ -28,6 +28,7 @@ const Doctor_auth_1 = require("../authentication/Doctor.auth");
 const doctorController = __importStar(require("../Controllers/Doctor.Controller"));
 const qualificationController = __importStar(require("../Controllers/Qualification.Controller"));
 const workingHoursController = __importStar(require("../Controllers/WorkingHours.Controller"));
+const preferredPharmaController = __importStar(require("../Controllers/Pharma.Cotroller"));
 const doctorRouter = express_1.default.Router();
 doctorRouter.post("/login", doctorController.doctorLogin);
 /*
@@ -49,4 +50,13 @@ doctorRouter.put("/setSchedule", Doctor_auth_1.authenticateDoctor, doctorControl
 doctorRouter.get("/viewAppointments/:page", Doctor_auth_1.authenticateDoctor, doctorController.viewAppointments);
 // Cancel doctor's appointments
 doctorRouter.put("/cancelAppointments", Doctor_auth_1.authenticateDoctor, doctorController.cancelAppointments);
+//Preferred Pharma Routes
+//add the preferred pharma
+doctorRouter.post("/addPharma", Doctor_auth_1.authenticateDoctor, preferredPharmaController.addPharma);
+//get all Pharma
+doctorRouter.get("/getPharma", preferredPharmaController.getPharma);
+//delete the pharma using id
+doctorRouter.post("/delPharma/:id", Doctor_auth_1.authenticateDoctor, preferredPharmaController.delPharma);
+//update the pharma
+doctorRouter.post("/updatePharma/:id", Doctor_auth_1.authenticateDoctor, preferredPharmaController.updatePharma);
 exports.default = doctorRouter;

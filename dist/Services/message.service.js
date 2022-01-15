@@ -20,6 +20,7 @@ const sendMessage = (body, phoneNumber) => __awaiter(void 0, void 0, void 0, fun
         messagingServiceSid: "MGc3fa1b1bb213ef12045067e46202e44b",
         to: `+91${phoneNumber}`,
     });
-    // .then((message) => console.log(message.sid));
+    // .then(message => console.log(message.sid))
+    // .catch(error=> console.log(error))
 });
 exports.sendMessage = sendMessage;

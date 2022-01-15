@@ -26,6 +26,8 @@ const express_1 = __importDefault(require("express"));
 const Hospital_auth_1 = require("../authentication/Hospital.auth");
 const hospitalController = __importStar(require("../Controllers/Hospital.Controller"));
 const hospitalRouter = express_1.default.Router();
+hospitalRouter.post("/login", hospitalController.login);
+hospitalRouter.get("/myHospital", Hospital_auth_1.authenticateHospital, hospitalController.myHospital);
 hospitalRouter.get("/", Hospital_auth_1.authenticateHospital, hospitalController.getAllHospitalsList);
 hospitalRouter.post("/", hospitalController.createHospital);
 hospitalRouter.post("/deleteHospital", Hospital_auth_1.authenticateHospital, hospitalController.deleteHospital);

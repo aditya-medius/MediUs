@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.createHospitalAnemity = exports.createHospital = exports.getAllHospitalsList = void 0;
+exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.login = void 0;
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Anemities_Model_1 = __importDefault(require("../Models/Anemities.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
@@ -55,6 +55,8 @@ const schemaNames_1 = require("../Services/schemaNames");
 const underscore_1 = __importDefault(require("underscore"));
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const Appointment_Model_1 = __importDefault(require("../Models/Appointment.Model"));
+const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
+const message_service_1 = require("../Services/message.service");
 const excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -65,6 +67,75 @@ const excludeDoctorFields = {
     registration: 0,
     KYCDetails: 0,
 };
+const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.query;
+        if (!("OTP" in body)) {
+            if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
+                const OTP = Math.floor(100000 + Math.random() * 900000).toString();
+                // Implement message service API
+                (0, message_service_1.sendMessage)(`Your OTP is: ${OTP}`, body.phoneNumber)
+                    .then((message) => __awaiter(void 0, void 0, void 0, function* () {
+                    const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 }, OTP);
+                    // Add OTP and phone number to temporary collection
+                    yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: body.phoneNumber }, { $set: { phoneNumber: body.phoneNumber, otp: otpToken } }, { upsert: true });
+                }))
+                    .catch((error) => {
+                    throw error;
+                });
+                return (0, response_1.successResponse)({}, "OTP sent successfully", res);
+            }
+            else {
+                let error = new Error("Invalid phone number");
+                error.name = "Invalid input";
+                return (0, response_1.errorResponse)(error, res);
+            }
+        }
+        else {
+            const otpData = yield OTP_Model_1.default.findOne({
+                phoneNumber: body.phoneNumber,
+            });
+            try {
+                const data = yield jwt.verify(otpData.otp, body.OTP);
+                if (Date.now() > data.expiresIn)
+                    return (0, response_1.errorResponse)(new Error("OTP expired"), res);
+                if (body.OTP === data.otp) {
+                    const profile = yield Hospital_Model_1.default.findOne({
+                        contactNumber: body.phoneNumber,
+                        deleted: false,
+                    });
+                    if (profile) {
+                        const token = yield jwt.sign(profile.toJSON(), process.env.HOSPITAL_LOGIN_KEY);
+                        otpData.remove();
+                        return (0, response_1.successResponse)(token, "Successfully logged in", res);
+                    }
+                    else {
+                        otpData.remove();
+                        return (0, response_1.successResponse)({ message: "No Data found" }, "Create a new Hospital", res, 201);
+                    }
+                }
+                else {
+                    const error = new Error("Invalid OTP");
+                    error.name = "Invalid";
+                    return (0, response_1.errorResponse)(error, res);
+                }
+            }
+            catch (err) {
+                if (err instanceof jwt.JsonWebTokenError) {
+                    const error = new Error("OTP isn't valid");
+                    error.name = "Invalid OTP";
+                    return (0, response_1.errorResponse)(error, res);
+                }
+                return (0, response_1.errorResponse)(err, res);
+            }
+        }
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.login = login;
+//get all hospitals
 const getAllHospitalsList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const hospitalList = yield Hospital_Model_1.default.find({ deleted: false }).populate([{
@@ -80,6 +151,20 @@ const getAllHospitalsList = (req, res) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.getAllHospitalsList = getAllHospitalsList;
+//get myHospital
+const myHospital = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const hospital = yield Hospital_Model_1.default.find({
+            deleted: false,
+            _id: req.currentHospital
+        });
+        return (0, response_1.successResponse)(hospital, "Successfully fetched Hospital", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.myHospital = myHospital;
 //create a hospital
 const createHospital = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {

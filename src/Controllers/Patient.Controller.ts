@@ -575,11 +575,3 @@ export const uploadPrescription = async (_req: Request, res: Response) => {
     return errorResponse(error, res);
   }
 };
-
-  //console.log(req.file);
-    // app.post('/profile', upload.none(), function (req: any, res: any, next: any) {  
-    // })
-    // app.post('/', upload.single('image'), (req: any, res: any) => {
-    // res.send(`/${req.file.path}`)
-    // })
-    //console.log(upload);

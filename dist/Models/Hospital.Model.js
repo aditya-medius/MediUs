@@ -98,12 +98,14 @@ const hospitalSchema = new mongoose_1.Schema({
     },
     location: {
         type: {
+            type: String,
             enum: ['Point'],
+            required: true
         },
         coordinates: {
             type: [Number],
-        },
-        required: true
+            required: true
+        }
     }
 });
 hospitalSchema.pre("save", function (next) {
