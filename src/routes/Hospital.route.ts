@@ -1,6 +1,12 @@
 import express, { Request, Response } from "express";
+import { authenticateDoctor } from "../authentication/Doctor.auth";
 import { authenticateHospital } from "../authentication/Hospital.auth";
+import { authenticatePatient } from "../authentication/Patient.auth";
 import * as hospitalController from "../Controllers/Hospital.Controller";
+import {
+  createWorkingHours,
+  createOpeningHours,
+} from "../Controllers/WorkingHours.Controller";
 import { oneOf } from "../Services/middlewareHelper";
 
 const hospitalRouter = express.Router();
@@ -10,9 +16,13 @@ hospitalRouter.get(
   oneOf(authenticateHospital),
   hospitalController.getAllHospitalsList
 );
-hospitalRouter.post("/login",hospitalController.login);
+hospitalRouter.post("/login", hospitalController.login);
 
-hospitalRouter.get("/myHospital",authenticateHospital,hospitalController.myHospital);
+hospitalRouter.get(
+  "/myHospital",
+  authenticateHospital,
+  hospitalController.myHospital
+);
 
 // hospitalRouter.get("/", authenticateHospital, hospitalController.getAllHospitalsList);
 hospitalRouter.post("/", hospitalController.createHospital);
@@ -32,6 +42,7 @@ hospitalRouter.post(
   oneOf(authenticateHospital),
   hospitalController.createHospitalAnemity
 );
+hospitalRouter.get("/getAnemities", hospitalController.getAnemities);
 // hospitalRouter.post("/speciality",oneOf(authenticateHospital),hospitalController.addHospitalSpeciality);
 
 hospitalRouter.post(
@@ -53,5 +64,15 @@ hospitalRouter.get(
   oneOf(authenticateHospital),
   hospitalController.viewAppointment
 );
+
+// Get hospital by id
+hospitalRouter.get(
+  "/getHospitalById/:id",
+  oneOf(authenticatePatient, authenticateDoctor, authenticateHospital),
+  hospitalController.getHospitalById
+);
+
+// Hospital opening hours
+hospitalRouter.post("/createOpeningHours", createOpeningHours);
 
 export default hospitalRouter;

@@ -4,6 +4,7 @@ import {
   doctor,
   patient,
   hospital,
+  subPatient,
 } from "../Services/schemaNames";
 // import schemaOptions from "../Services/schemaOptions";
 const appointmentSchema = new Schema({
@@ -70,6 +71,14 @@ const appointmentSchema = new Schema({
   cancelled: {
     type: Boolean,
     default: false,
+  },
+  subPatient: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: subPatient,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
   },
 });
 

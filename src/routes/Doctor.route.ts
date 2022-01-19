@@ -28,11 +28,7 @@ doctorRouter.post("/", doctorController.createDoctor);
   Doctor profile creation routes - END
 */
 
-doctorRouter.get(
-  "/",
-  oneOf(authenticateDoctor),
-  doctorController.getAllDoctorsList
-);
+doctorRouter.get("/", doctorController.getAllDoctorsList);
 doctorRouter.post(
   "/getDoctorById/:id",
   oneOf(authenticateDoctor, authenticatePatient),
@@ -83,14 +79,26 @@ doctorRouter.get(
 
 //Preferred Pharma Routes
 //add the preferred pharma
-doctorRouter.post("/addPharma",authenticateDoctor,preferredPharmaController.addPharma);
+doctorRouter.post(
+  "/addPharma",
+  authenticateDoctor,
+  preferredPharmaController.addPharma
+);
 
 //get all Pharma
-doctorRouter.get("/getPharma",preferredPharmaController.getPharma);
+doctorRouter.get("/getPharma", preferredPharmaController.getPharma);
 
 //delete the pharma using id
-doctorRouter.post("/delPharma/:id",authenticateDoctor,preferredPharmaController.delPharma);
+doctorRouter.post(
+  "/delPharma/:id",
+  authenticateDoctor,
+  preferredPharmaController.delPharma
+);
 
 //update the pharma
-doctorRouter.post("/updatePharma/:id",authenticateDoctor,preferredPharmaController.updatePharma);
+doctorRouter.post(
+  "/updatePharma/:id",
+  authenticateDoctor,
+  preferredPharmaController.updatePharma
+);
 export default doctorRouter;

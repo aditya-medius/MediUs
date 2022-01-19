@@ -4,6 +4,8 @@ import * as patientController from "../Controllers/Patient.Controller";
 import * as paymentController from "../Controllers/AppointmentPayment.Controller";
 import { oneOf } from "../Services/middlewareHelper";
 import { authenticateDoctor } from "../authentication/Doctor.auth";
+import * as subPatientController from "../Controllers/SubPatient.Controller";
+import { patient, subPatient } from "../Services/schemaNames";
 const patientRouter = express.Router();
 
 patientRouter.post("/login", patientController.patientLogin);
@@ -68,7 +70,6 @@ patientRouter.get(
 // Get all the entities of filter
 patientRouter.get(
   "/getSpecialityBodyPartAndDisease",
-  oneOf(authenticatePatient, authenticateDoctor),
   patientController.getSpecialityBodyPartAndDisease
 );
 
@@ -85,4 +86,36 @@ patientRouter.get(
   oneOf(authenticatePatient),
   patientController.getDoctorsByCity
 );
+
+// Sub Patient
+patientRouter.post(
+  "/addSubPatient",
+  oneOf(authenticatePatient),
+  subPatientController.addSubPatient
+);
+
+patientRouter.get(
+  "/getSubPatientList",
+  oneOf(authenticatePatient),
+  subPatientController.getSubPatientList
+);
+
+patientRouter.put(
+  "/deleteSubPatient/:id",
+  oneOf(authenticatePatient),
+  subPatientController.deleteSubPatient
+);
+
+patientRouter.get(
+  "/getSubPatientById/:id",
+  oneOf(authenticatePatient),
+  subPatientController.getSubPatientById
+);
+
+patientRouter.put(
+  "/updateSubPatient/:id",
+  oneOf(authenticatePatient),
+  subPatientController.updateSubPatient
+);
+
 export default patientRouter;

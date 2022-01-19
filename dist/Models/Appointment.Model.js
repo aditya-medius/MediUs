@@ -87,6 +87,14 @@ const appointmentSchema = new mongoose_1.Schema({
         type: Boolean,
         default: false,
     },
+    subPatient: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        ref: schemaNames_1.subPatient,
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now(),
+    },
 });
 const appointmentModel = (0, mongoose_1.model)(schemaNames_1.appointment, appointmentSchema);
 exports.default = appointmentModel;

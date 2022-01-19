@@ -242,6 +242,15 @@ export const addPayment = async (req: Request, res: Response) => {
   }
 };
 
+// get payment options
+export const getPayments = async (req: Request, res: Response) => {
+  try {
+    let body = req.body;
+    let paymentObj = await paymentModel.find({});
+    return successResponse(paymentObj, "Success", res);
+  } catch (error: any) {}
+};
+
 // Get cities, states, locality and country
 export const getCityStateLocalityCountry = async (
   req: Request,
@@ -362,3 +371,6 @@ export const create = async (req: Request, res: Response) => {
     return errorResponse(error, res);
   }
 };
+
+// Country, State, City ki mapping
+// export const setCountryMap

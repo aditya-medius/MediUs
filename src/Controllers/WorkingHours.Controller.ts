@@ -4,6 +4,7 @@ import { errorResponse, successResponse } from "../Services/response";
 import { addBodyPart } from "../Admin Controlled Models/Admin.Controller";
 import { time } from "../Services/time.class";
 
+// For Doctors
 export const createWorkingHours = async (req: Request, res: Response) => {
   try {
     let body: any = req.body;
@@ -48,8 +49,19 @@ export const createWorkingHours = async (req: Request, res: Response) => {
   }
 };
 
+// For Hospitals
+export const createOpeningHours = async (req: Request, res: Response) => {
+  try {
+    let body: any = req.body;
+    body["byHospital"] = true;
+    const WHObj = await new workingHourModel(body).save();
+    return successResponse(WHObj, "Successfully created", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
 function timeLessThan(t1: any, t2: any) {
-  console.log("t1: ", t1, "\nt2: ", t2);
   if (t1.division == 1 && t2.division == 0) {
     return false;
   }

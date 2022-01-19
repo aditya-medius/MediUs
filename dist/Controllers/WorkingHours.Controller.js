@@ -23,10 +23,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createWorkingHours = void 0;
+exports.createOpeningHours = exports.createWorkingHours = void 0;
 const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
 const response_1 = require("../Services/response");
 const time_class_1 = require("../Services/time.class");
+// For Doctors
 const createWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
@@ -61,8 +62,20 @@ const createWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.createWorkingHours = createWorkingHours;
+// For Hospitals
+const createOpeningHours = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.body;
+        body["byHospital"] = true;
+        const WHObj = yield new WorkingHours_Model_1.default(body).save();
+        return (0, response_1.successResponse)(WHObj, "Successfully created", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.createOpeningHours = createOpeningHours;
 function timeLessThan(t1, t2) {
-    console.log("t1: ", t1, "\nt2: ", t2);
     if (t1.division == 1 && t2.division == 0) {
         return false;
     }

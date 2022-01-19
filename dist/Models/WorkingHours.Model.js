@@ -18,19 +18,29 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const schemaNames_1 = require("../Services/schemaNames");
+let divisionArray = Array.from(Array(60).keys());
 const workingHoursSchema = new mongoose_1.Schema({
     doctorDetails: {
         type: mongoose_1.default.Schema.Types.ObjectId,
         ref: schemaNames_1.doctor,
-        required: true,
+        // required: true,
     },
     hospitalDetails: {
         type: mongoose_1.default.Schema.Types.ObjectId,
         ref: schemaNames_1.hospital,
-        required: true,
+        // required: true,
     },
     monday: {
         type: {
@@ -49,6 +59,7 @@ const workingHoursSchema = new mongoose_1.Schema({
                     },
                     division: {
                         type: Number,
+                        enum: divisionArray,
                     },
                 },
             },
@@ -63,6 +74,7 @@ const workingHoursSchema = new mongoose_1.Schema({
                 },
                 division: {
                     type: Number,
+                    enum: divisionArray,
                 },
             },
             capacity: {
@@ -88,6 +100,7 @@ const workingHoursSchema = new mongoose_1.Schema({
                 },
                 division: {
                     type: Number,
+                    enum: divisionArray,
                 },
             },
             till: {
@@ -101,6 +114,7 @@ const workingHoursSchema = new mongoose_1.Schema({
                 },
                 division: {
                     type: Number,
+                    enum: divisionArray,
                 },
             },
             capacity: {
@@ -126,6 +140,7 @@ const workingHoursSchema = new mongoose_1.Schema({
                 },
                 division: {
                     type: Number,
+                    enum: divisionArray,
                 },
             },
             till: {
@@ -139,6 +154,7 @@ const workingHoursSchema = new mongoose_1.Schema({
                 },
                 division: {
                     type: Number,
+                    enum: divisionArray,
                 },
             },
             capacity: {
@@ -164,6 +180,7 @@ const workingHoursSchema = new mongoose_1.Schema({
                 },
                 division: {
                     type: Number,
+                    enum: divisionArray,
                 },
             },
             till: {
@@ -177,6 +194,7 @@ const workingHoursSchema = new mongoose_1.Schema({
                 },
                 division: {
                     type: Number,
+                    enum: divisionArray,
                 },
             },
             capacity: {
@@ -202,6 +220,7 @@ const workingHoursSchema = new mongoose_1.Schema({
                 },
                 division: {
                     type: Number,
+                    enum: divisionArray,
                 },
             },
             till: {
@@ -215,6 +234,7 @@ const workingHoursSchema = new mongoose_1.Schema({
                 },
                 division: {
                     type: Number,
+                    enum: divisionArray,
                 },
             },
             capacity: {
@@ -240,6 +260,7 @@ const workingHoursSchema = new mongoose_1.Schema({
                 },
                 division: {
                     type: Number,
+                    enum: divisionArray,
                 },
             },
             till: {
@@ -253,6 +274,7 @@ const workingHoursSchema = new mongoose_1.Schema({
                 },
                 division: {
                     type: Number,
+                    enum: divisionArray,
                 },
             },
             capacity: {
@@ -278,6 +300,7 @@ const workingHoursSchema = new mongoose_1.Schema({
                 },
                 division: {
                     type: Number,
+                    enum: divisionArray,
                 },
             },
             till: {
@@ -291,6 +314,7 @@ const workingHoursSchema = new mongoose_1.Schema({
                 },
                 division: {
                     type: Number,
+                    enum: divisionArray,
                 },
             },
             capacity: {
@@ -300,6 +324,23 @@ const workingHoursSchema = new mongoose_1.Schema({
         },
         required: true,
     },
+    byHospital: {
+        type: Boolean,
+        default: false,
+    },
+});
+workingHoursSchema.pre("save", function (next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (this.byHospital) {
+            next();
+        }
+        else {
+            console.log("thid: ", this);
+            if (!this.hospitalDetails || !this.doctorDetails) {
+                throw new Error("Doctor and Hospital details are required");
+            }
+        }
+    });
 });
 const workingHourModel = (0, mongoose_1.model)(schemaNames_1.workingHour, workingHoursSchema);
 exports.default = workingHourModel;

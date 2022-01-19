@@ -2,6 +2,7 @@ import mongoose, { Schema, model } from "mongoose";
 import schemaOptions from "../Services/schemaOptions";
 import _ from "lodash";
 import workingHourModel from "./WorkingHours.Model";
+import moment from "moment";
 import {
   doctor,
   hospital,
@@ -99,12 +100,54 @@ const doctorSchema = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: treatmentType,
     },
+    overallExperience: {
+      type: mongoose.Schema.Types.Mixed,
+      required: true,
+    },
   },
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   }
 );
+
+// doctorSchema.pre("find", async function)
+// ["find", "findOne"].forEach((e: string) => {
+//   doctorSchema.pre(e, async function (next) {
+//     console.log("this: ", this);
+//   });
+// });
+
+doctorSchema.post("findOne", async function (result) {
+  if (result && result.overallExperience) {
+    const exp = moment(new Date(result.overallExperience));
+    const currentDate = moment(new Date());
+
+    let overExp: any = currentDate.diff(exp, "years", true);
+    if (overExp < 1) {
+      overExp = `${currentDate.diff(exp, "months")} months`;
+    } else {
+      overExp = `${overExp} years`;
+    }
+    result.overallExperience = overExp;
+  }
+});
+doctorSchema.post("find", async function (res) {
+  res.forEach((result: any) => {
+    if (result && result.overallExperience) {
+      const exp = moment(new Date(result.overallExperience));
+      const currentDate = moment(new Date());
+
+      let overExp: any = currentDate.diff(exp, "years", true);
+      if (overExp < 1) {
+        overExp = `${currentDate.diff(exp, "months")} months`;
+      } else {
+        overExp = `${overExp} years`;
+      }
+      result.overallExperience = overExp;
+    }
+  });
+});
 
 doctorSchema.pre("save", async function (next) {
   const profileExist = await doctorModel.findOne({
@@ -121,7 +164,7 @@ doctorSchema.pre("save", async function (next) {
     ],
   });
   if (/^[0]?[789]\d{9}$/.test(this.phoneNumber)) {
-    if (!profileExist) {
+    if (!profileExist || this.phoneNumber == "9999999999") {
       return next();
     } else {
       throw new Error(

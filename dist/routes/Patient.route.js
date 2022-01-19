@@ -27,7 +27,7 @@ const Patient_auth_1 = require("../authentication/Patient.auth");
 const patientController = __importStar(require("../Controllers/Patient.Controller"));
 const paymentController = __importStar(require("../Controllers/AppointmentPayment.Controller"));
 const middlewareHelper_1 = require("../Services/middlewareHelper");
-const Doctor_auth_1 = require("../authentication/Doctor.auth");
+const subPatientController = __importStar(require("../Controllers/SubPatient.Controller"));
 const patientRouter = express_1.default.Router();
 patientRouter.post("/login", patientController.patientLogin);
 patientRouter.post("/", patientController.createPatient);
@@ -43,9 +43,15 @@ patientRouter.post("/generateOrderId", (0, middlewareHelper_1.oneOf)(Patient_aut
 patientRouter.post("/verifyPayment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), paymentController.verifyPayment);
 patientRouter.get("/viewAppointment/:page", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.ViewAppointment);
 // Get all the entities of filter
-patientRouter.get("/getSpecialityBodyPartAndDisease", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Doctor_auth_1.authenticateDoctor), patientController.getSpecialityBodyPartAndDisease);
+patientRouter.get("/getSpecialityBodyPartAndDisease", patientController.getSpecialityBodyPartAndDisease);
 // Get hospitals by city
 patientRouter.get("/getHospitalsByCity", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.getHospitalsByCity);
 // Get doctors by city
 patientRouter.get("/getDoctorsByCity", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.getDoctorsByCity);
+// Sub Patient
+patientRouter.post("/addSubPatient", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), subPatientController.addSubPatient);
+patientRouter.get("/getSubPatientList", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), subPatientController.getSubPatientList);
+patientRouter.put("/deleteSubPatient/:id", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), subPatientController.deleteSubPatient);
+patientRouter.get("/getSubPatientById/:id", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), subPatientController.getSubPatientById);
+patientRouter.put("/updateSubPatient/:id", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), subPatientController.updateSubPatient);
 exports.default = patientRouter;

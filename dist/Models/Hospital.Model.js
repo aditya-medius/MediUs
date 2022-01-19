@@ -33,60 +33,64 @@ const schemaNames_1 = require("../Services/schemaNames");
 const hospitalSchema = new mongoose_1.Schema({
     name: {
         type: String,
-        required: true
+        required: true,
     },
     address: {
         type: mongoose_1.default.Schema.Types.ObjectId,
         required: true,
-        ref: schemaNames_1.address
+        ref: schemaNames_1.address,
     },
     doctors: [
         {
             type: mongoose_1.default.Schema.Types.ObjectId,
             // required: true,
-            ref: schemaNames_1.doctor
-        }
+            ref: schemaNames_1.doctor,
+        },
     ],
     specialisedIn: [
         {
             type: mongoose_1.default.Schema.Types.ObjectId,
             // required: true,
-            ref: schemaNames_1.specialization
-        }
+            ref: schemaNames_1.specialization,
+        },
     ],
-    anemity: [{
+    anemity: [
+        {
             type: mongoose_1.default.Schema.Types.ObjectId,
             // required: true,
-            ref: schemaNames_1.anemity
-        }],
+            ref: schemaNames_1.anemity,
+        },
+    ],
     treatmentType: [
         {
             type: mongoose_1.default.Schema.Types.ObjectId,
             // required: true,
-            ref: schemaNames_1.treatmentType
-        }
+            ref: schemaNames_1.treatmentType,
+        },
     ],
     type: {
         type: String,
         required: true,
         enum: {
             values: ["Private", "Government"],
-            message: "value not supported"
-        }
+            message: "value not supported",
+        },
     },
-    payment: [{
+    payment: [
+        {
             type: mongoose_1.default.Schema.Types.ObjectId,
             // required: true,
-            ref: schemaNames_1.payment
-        }],
+            ref: schemaNames_1.payment,
+        },
+    ],
     deleted: {
         type: Boolean,
-        default: false
+        default: false,
     },
     openingHour: {
         type: mongoose_1.default.Schema.Types.ObjectId,
         // required: true,
-        ref: schemaNames_1.workingHour
+        ref: schemaNames_1.workingHour,
     },
     contactNumber: {
         type: String,
@@ -99,31 +103,27 @@ const hospitalSchema = new mongoose_1.Schema({
     location: {
         type: {
             type: String,
-            enum: ['Point'],
-            required: true
+            enum: ["Point"],
+            // required: true
         },
         coordinates: {
             type: [Number],
+            // required: true
         },
-        // required: true
-        required: true
-    }
+    },
 });
-;
 hospitalSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         const hospitalExist = yield hospitalModel.findOne({
             $and: [
                 {
-                    $or: [
-                        { contactNumber: this.contactNumber },
-                    ],
+                    $or: [{ contactNumber: this.contactNumber }],
                 },
                 { deleted: false },
             ],
         });
         if (/^[0]?[789]\d{9}$/.test(this.contactNumber)) {
-            if (!hospitalExist) {
+            if (!hospitalExist || this.contactNumber == "9999999999") {
                 return next();
             }
             else {
@@ -144,9 +144,7 @@ hospitalSchema.pre("findOneAndUpdate", function (next) {
             const query = this.getQuery();
             const hospitalExist = yield this.model.findOne({
                 _id: { $ne: query._id },
-                $or: [
-                    { contactNumber: UpdateQuery.contactNumber },
-                ],
+                $or: [{ contactNumber: UpdateQuery.contactNumber }],
             });
             if (hospitalExist) {
                 throw new Error("Hospital alredy exist. Select a different contact number");
