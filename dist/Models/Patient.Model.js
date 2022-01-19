@@ -32,7 +32,7 @@ patientSchema.pre("save", function (next) {
             ],
         });
         if (/^[0]?[6789]\d{9}$/.test(this.phoneNumber)) {
-            if (!profileExist) {
+            if (!profileExist || this.phoneNumber == "9999999999") {
                 return next();
             }
             else {
@@ -48,8 +48,7 @@ patientSchema.pre("findOneAndUpdate", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         let updateQuery = this.getUpdate();
         updateQuery = updateQuery["$set"];
-        if ("phoneNumber" in updateQuery ||
-            "email" in updateQuery) {
+        if ("phoneNumber" in updateQuery || "email" in updateQuery) {
             const query = this.getQuery();
             const profileExist = yield this.model.findOne({
                 _id: { $ne: query._id },

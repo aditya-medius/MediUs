@@ -25,9 +25,9 @@ const qualificationSchema = new Schema({
   },
   email: {
     type: String,
-    required: [true, "Email is required"],
+    // required: [true, "Email is required"],
     validate: [validator.isEmail, "Email isn't valid"],
-    unique: true,
+    // unique: true,
   },
 });
 

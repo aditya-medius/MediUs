@@ -14,6 +14,12 @@ import doctorTypeModel from "./DoctorType.Model";
 import specialityDoctorTypeModel from "./SpecialityDoctorType.Model";
 
 import paymentModel from "./Payment.Model";
+import adminModel from "./Admin.Model";
+
+import * as jwt from "jsonwebtoken";
+import * as bcrypt from "bcrypt";
+import { sendMessage } from "../Services/message.service";
+import otpModel from "../Models/OTP.Model";
 
 export const addSpeciality = async (req: Request, res: Response) => {
   try {
@@ -236,6 +242,15 @@ export const addPayment = async (req: Request, res: Response) => {
   }
 };
 
+// get payment options
+export const getPayments = async (req: Request, res: Response) => {
+  try {
+    let body = req.body;
+    let paymentObj = await paymentModel.find({});
+    return successResponse(paymentObj, "Success", res);
+  } catch (error: any) {}
+};
+
 // Get cities, states, locality and country
 export const getCityStateLocalityCountry = async (
   req: Request,
@@ -255,3 +270,107 @@ export const getCityStateLocalityCountry = async (
     );
   } catch (error: any) {}
 };
+
+export const login = async (req: Request, res: Response) => {
+  try {
+    let body: any = req.query;
+    if (!("OTP" in body)) {
+      if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
+        const OTP = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // Implement message service API
+        sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
+          .then(async (message: any) => {
+            const otpToken = jwt.sign(
+              { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
+              OTP
+            );
+            // Add OTP and phone number to temporary collection
+            await otpModel.findOneAndUpdate(
+              { phoneNumber: body.phoneNumber },
+              { $set: { phoneNumber: body.phoneNumber, otp: otpToken } },
+              { upsert: true }
+            );
+          })
+          .catch((error) => {
+            throw error;
+          });
+
+        return successResponse({}, "OTP sent successfully", res);
+      } else {
+        let error = new Error("Invalid phone number");
+        error.name = "Invalid input";
+        return errorResponse(error, res);
+      }
+    } else {
+      const otpData = await otpModel.findOne({
+        phoneNumber: body.phoneNumber,
+      });
+      try {
+        const data: any = await jwt.verify(otpData.otp, body.OTP);
+        if (Date.now() > data.expiresIn)
+          return errorResponse(new Error("OTP expired"), res);
+        if (body.OTP === data.otp) {
+          const profile = await adminModel.findOne({
+            phoneNumber: body.phoneNumber,
+          });
+          if (profile) {
+            const token = await jwt.sign(
+              profile.toJSON(),
+              process.env.SECRET_ADMIN_KEY as string
+            );
+            otpData.remove();
+            return successResponse(token, "Successfully logged in", res);
+          } else {
+            otpData.remove();
+            return successResponse(
+              { message: "No Data found" },
+              "Create a new profile",
+              res,
+              201
+            );
+          }
+        } else {
+          const error = new Error("Invalid OTP");
+          error.name = "Invalid";
+          return errorResponse(error, res);
+        }
+      } catch (err) {
+        if (err instanceof jwt.JsonWebTokenError) {
+          const error = new Error("OTP isn't valid");
+          error.name = "Invalid OTP";
+          return errorResponse(error, res);
+        }
+        return errorResponse(err, res);
+      }
+    }
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const create = async (req: Request, res: Response) => {
+  try {
+    let body = req.body;
+    let cryptSalt = await bcrypt.genSalt(10);
+    body.password = await bcrypt.hash(body.password, cryptSalt);
+    let adminObj = await new adminModel(body).save();
+    jwt.sign(
+      adminObj.toJSON(),
+      process.env.SECRET_ADMIN_KEY as string,
+      (err: any, token: any) => {
+        if (err) return errorResponse(err, res);
+        return successResponse(
+          token,
+          "Admin profile successfully created",
+          res
+        );
+      }
+    );
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+// Country, State, City ki mapping
+// export const setCountryMap

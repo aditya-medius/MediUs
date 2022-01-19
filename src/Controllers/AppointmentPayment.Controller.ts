@@ -26,7 +26,11 @@ export const generateOrderId = async (req: Request, res: Response) => {
       if (err) {
         return errorResponse(err, res);
       }
-      return successResponse({ orderId: order.id }, "Order id generated", res);
+      return successResponse(
+        { orderId: order.id, orderReceipt: `order_rcptid_${receiptNumber}` },
+        "Order id generated",
+        res
+      );
     });
   } catch (e) {
     return errorResponse(e, res);
@@ -35,19 +39,17 @@ export const generateOrderId = async (req: Request, res: Response) => {
 
 export const verifyPayment = async (req: Request, res: Response) => {
   try {
-    let body =
-      req.body.response.razorpay_order_id +
-      "|" +
-      req.body.response.razorpay_payment_id;
+    let body = req.body.orderId + "|" + req.body.paymentId;
 
     var expectedSignature = crypto
       .createHmac("sha256", process.env.RAZOR_PAY_TEST_SECRET as string)
       .update(body.toString())
       .digest("hex");
     var response: any = { signatureIsValid: "false" };
-    if (expectedSignature === req.body.response.razorpay_signature) {
+    if (expectedSignature === req.body.paymentSignature) {
       response = { signatureIsValid: "true" };
       const paymentObj = await new appointmentPayment(req.body);
+
       response.paymentDetails = paymentObj;
       return successResponse(response, "Signature is valid", res);
     }

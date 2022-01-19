@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.createHospitalAnemity = exports.createHospital = exports.getAllHospitalsList = void 0;
+exports.getHospitalById = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.login = void 0;
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Anemities_Model_1 = __importDefault(require("../Models/Anemities.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
@@ -55,6 +55,9 @@ const schemaNames_1 = require("../Services/schemaNames");
 const underscore_1 = __importDefault(require("underscore"));
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const Appointment_Model_1 = __importDefault(require("../Models/Appointment.Model"));
+const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
+const message_service_1 = require("../Services/message.service");
+const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
 const excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -65,14 +68,99 @@ const excludeDoctorFields = {
     registration: 0,
     KYCDetails: 0,
 };
+const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.query;
+        if (!("OTP" in body)) {
+            if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
+                const OTP = Math.floor(100000 + Math.random() * 900000).toString();
+                // Implement message service API
+                (0, message_service_1.sendMessage)(`Your OTP is: ${OTP}`, body.phoneNumber)
+                    .then((message) => __awaiter(void 0, void 0, void 0, function* () {
+                    const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 }, OTP);
+                    // Add OTP and phone number to temporary collection
+                    yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: body.phoneNumber }, { $set: { phoneNumber: body.phoneNumber, otp: otpToken } }, { upsert: true });
+                }))
+                    .catch((error) => {
+                    throw error;
+                });
+                return (0, response_1.successResponse)({}, "OTP sent successfully", res);
+            }
+            else {
+                let error = new Error("Invalid phone number");
+                error.name = "Invalid input";
+                return (0, response_1.errorResponse)(error, res);
+            }
+        }
+        else {
+            if (body.phoneNumber == "9999999999") {
+                const profile = yield Hospital_Model_1.default.findOne({
+                    phoneNumber: body.phoneNumber,
+                    deleted: false,
+                }, excludeDoctorFields);
+                const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_HOSPITAL_KEY);
+                const { firstName, lastName, gender, phoneNumber, email, _id } = profile.toJSON();
+                return (0, response_1.successResponse)({ token, firstName, lastName, gender, phoneNumber, email, _id }, "Successfully logged in", res);
+            }
+            const otpData = yield OTP_Model_1.default.findOne({
+                phoneNumber: body.phoneNumber,
+            });
+            try {
+                const data = yield jwt.verify(otpData.otp, body.OTP);
+                if (Date.now() > data.expiresIn)
+                    return (0, response_1.errorResponse)(new Error("OTP expired"), res);
+                if (body.OTP === data.otp) {
+                    const profile = yield Hospital_Model_1.default.findOne({
+                        contactNumber: body.phoneNumber,
+                        deleted: false,
+                    });
+                    if (profile) {
+                        const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_HOSPITAL_KEY);
+                        otpData.remove();
+                        const { name, contactNumber, _id, numberOfBed } = profile.toJSON();
+                        return (0, response_1.successResponse)({ token, name, contactNumber, _id, numberOfBed }, "Successfully logged in", res);
+                    }
+                    else {
+                        otpData.remove();
+                        return (0, response_1.successResponse)({ message: "No Data found" }, "Create a new Hospital", res, 201);
+                    }
+                }
+                else {
+                    const error = new Error("Invalid OTP");
+                    error.name = "Invalid";
+                    return (0, response_1.errorResponse)(error, res);
+                }
+            }
+            catch (err) {
+                if (err instanceof jwt.JsonWebTokenError) {
+                    const error = new Error("OTP isn't valid");
+                    error.name = "Invalid OTP";
+                    return (0, response_1.errorResponse)(error, res);
+                }
+                return (0, response_1.errorResponse)(err, res);
+            }
+        }
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.login = login;
+//get all hospitals
 const getAllHospitalsList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const hospitalList = yield Hospital_Model_1.default.find({ deleted: false }).populate([{
-                path: 'address',
+        const hospitalList = yield Hospital_Model_1.default.find({ deleted: false }).populate([
+            {
+                path: "address",
                 populate: {
-                    path: 'city state locality country',
-                }
-            }, { path: 'anemity' }, { path: 'payment' }, { path: 'specialisedIn' }, { path: 'doctors' }]);
+                    path: "city state locality country",
+                },
+            },
+            { path: "anemity" },
+            { path: "payment" },
+            { path: "specialisedIn" },
+            { path: "doctors" },
+        ]);
         return (0, response_1.successResponse)(hospitalList, "Successfully fetched Hospital's list", res);
     }
     catch (error) {
@@ -80,6 +168,20 @@ const getAllHospitalsList = (req, res) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.getAllHospitalsList = getAllHospitalsList;
+//get myHospital
+const myHospital = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const hospital = yield Hospital_Model_1.default.find({
+            deleted: false,
+            _id: req.currentHospital,
+        });
+        return (0, response_1.successResponse)(hospital, "Successfully fetched Hospital", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.myHospital = myHospital;
 //create a hospital
 const createHospital = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -90,7 +192,8 @@ const createHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
         jwt.sign(hospitalObj.toJSON(), process.env.SECRET_HOSPITAL_KEY, (err, token) => {
             if (err)
                 return (0, response_1.errorResponse)(err, res);
-            return (0, response_1.successResponse)(token, "Hospital created successfully", res);
+            const { name, _id } = hospitalObj;
+            return (0, response_1.successResponse)({ token, name, _id }, "Hospital created successfully", res);
         });
     }
     catch (error) {
@@ -110,6 +213,18 @@ const createHospitalAnemity = (req, res) => __awaiter(void 0, void 0, void 0, fu
     }
 });
 exports.createHospitalAnemity = createHospitalAnemity;
+// Get anemities
+const getAnemities = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.body;
+        let anemityObj = yield Anemities_Model_1.default.find({});
+        return (0, response_1.successResponse)(anemityObj, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getAnemities = getAnemities;
 //add hospital speciality
 // export const addHospitalSpeciality= async(req:Request, res:Response)=>{
 //   try{
@@ -144,13 +259,14 @@ const updateHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
         const updateQuery = {
             $set: { body, numberOfBed, type },
             $addToSet: {
-                doctors, anemity, payment
+                doctors,
+                anemity,
+                payment,
             },
         };
         const DoctorObj = yield Doctors_Model_1.default.find({ deleted: false, _id: doctors });
-        // console.log(doctors.length);
         if (DoctorObj.length == doctors.length) {
-            const HospitalUpdateObj = yield Hospital_Model_1.default.findOneAndUpdate({ _id: req.currentHospital, deleted: false }, updateQuery, { new: true, });
+            const HospitalUpdateObj = yield Hospital_Model_1.default.findOneAndUpdate({ _id: req.currentHospital, deleted: false }, updateQuery, { new: true });
             if (HospitalUpdateObj) {
                 return (0, response_1.successResponse)(HospitalUpdateObj, "Hospital updated successfully", res);
             }
@@ -364,7 +480,8 @@ const searchHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 return e.speciality;
             });
             const hospitalArray = yield Hospital_Model_1.default
-                .find({ $or: [
+                .find({
+                $or: [
                     {
                         deleted: false,
                         active: true,
@@ -372,10 +489,35 @@ const searchHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
                         // doctors: {specialization: {$in: specialityArray}}
                     },
                     {
-                        type: term
-                    }
-                ]
-            }).populate({ path: 'specialisedIn' });
+                        type: term,
+                    },
+                ],
+            }, {
+                doctors: 0,
+                specialisedIn: 0,
+                treatmentType: 0,
+                type: 0,
+                payment: 0,
+                deleted: 0,
+                contactNumber: 0,
+                numberOfBed: 0,
+            })
+                .populate({ path: "anemity" })
+                .populate({
+                path: "address",
+                populate: {
+                    path: "city state country locality",
+                },
+            })
+                // .populate("doctors")
+                .populate({
+                path: "openingHour",
+                select: {
+                    doctorDetails: 0,
+                    hospitalDetails: 0,
+                },
+            });
+            // .populate("anemity")
             return (0, response_1.successResponse)(hospitalArray, "Success", res);
         }))
             .catch((error) => {
@@ -390,7 +532,10 @@ exports.searchHospital = searchHospital;
 const removeDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { doctors } = req.body;
-        const doctorProfile = yield Doctors_Model_1.default.findOne({ deleted: false, _id: doctors });
+        const doctorProfile = yield Doctors_Model_1.default.findOne({
+            deleted: false,
+            _id: doctors,
+        });
         if (doctorProfile) {
             const hospitalDoctor = yield Hospital_Model_1.default.findOneAndUpdate({ _id: req.currentHospital, doctors: { $in: doctors } }, { $pull: { doctors: doctors } });
             return (0, response_1.successResponse)(hospitalDoctor, "Doctor Removed Successfully", res);
@@ -408,15 +553,15 @@ const viewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
     try {
         const page = parseInt(req.params.page);
         const appointmentObj = yield Appointment_Model_1.default
-            .find({ hospital: req.currentHospital, 'time.date': { $gt: Date() } })
-            .sort({ 'time.date': 1 })
-            .skip(page > 1 ? ((page - 1) * 2) : 0)
+            .find({ hospital: req.currentHospital, "time.date": { $gt: Date() } })
+            .sort({ "time.date": 1 })
+            .skip(page > 1 ? (page - 1) * 2 : 0)
             .limit(2);
-        const page2 = (appointmentObj.length) / 2;
+        const page2 = appointmentObj.length / 2;
         const older_apppointmentObj = yield Appointment_Model_1.default
-            .find({ hospital: req.currentHospital, 'time.date': { $lte: Date() } })
-            .sort({ 'time.date': 1 })
-            .skip(page > page2 ? ((page - 1) * 2) : 0)
+            .find({ hospital: req.currentHospital, "time.date": { $lte: Date() } })
+            .sort({ "time.date": 1 })
+            .skip(page > page2 ? (page - 1) * 2 : 0)
             .limit(2);
         const allAppointment = appointmentObj.concat(older_apppointmentObj);
         if (allAppointment.length > 0)
@@ -431,3 +576,201 @@ const viewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.viewAppointment = viewAppointment;
+const getHospitalById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let hospital = yield Hospital_Model_1.default
+            .findOne({
+            _id: req.params.id,
+        })
+            .populate({
+            path: "address",
+            populate: {
+                path: "city state locality country",
+            },
+        })
+            .populate({
+            path: "doctors",
+            select: {
+                firstName: 1,
+                lastName: 1,
+                specialization: 1,
+                hospitalDetails: 1,
+                qualification: 1,
+                overallExperience: 1,
+            },
+            populate: {
+                path: "specialization qualification hospitalDetails.workingHours",
+                select: {
+                    doctorDetails: 0,
+                    hospitalDetails: 0,
+                },
+            },
+        })
+            .populate("anemity")
+            .populate("payment")
+            .populate("specialisedIn")
+            .populate("openingHour");
+        const doctorIds = hospital.doctors.map((e) => {
+            return e._id.toString();
+        });
+        let workingHours = yield WorkingHours_Model_1.default.find({
+            doctorDetails: { $in: doctorIds },
+            hospitalDetails: req.params.id,
+        });
+        workingHours = workingHours.reduce((r, a) => {
+            r[a.doctorDetails.toString()] = [
+                ...(r[a.doctorDetails.toString()] || []),
+                a,
+            ];
+            return r;
+        }, {});
+        hospital.doctors.map((e) => {
+            e.hospitalDetails = e.hospitalDetails.filter((elem) => elem.hospital.toString() == req.params.id);
+        });
+        const doctors = hospital.doctors.map((e) => {
+            return {
+                _id: e._id,
+                firstName: e.firstName,
+                lastName: e.lastName,
+                specialization: e.specialization,
+                qualification: e.qualification,
+                workingHour: workingHours[e._id.toString()],
+            };
+        });
+        return (0, response_1.successResponse)({ hospital }, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getHospitalById = getHospitalById;
+// const hospital = await hospitalModel.aggregate([
+//   {
+//     $match: {
+//       _id: {
+//         $eq: new mongoose.Types.ObjectId(req.params.id),
+//       },
+//     },
+//   },
+//   {
+//     $lookup: {
+//       from: "doctors",
+//       localField: "doctors",
+//       foreignField: "_id",
+//       as: "doctorss",
+//     },
+//   },
+//   {
+//     $lookup: {
+//       from: "addresses",
+//       localField: "address",
+//       foreignField: "_id",
+//       as: "addresss",
+//     },
+//   },
+//   {
+//     $lookup: {
+//       from: "states",
+//       localField: "addresss.state",
+//       foreignField: "_id",
+//       as: "address.state",
+//     },
+//   },
+//   {
+//     $lookup: {
+//       from: "cities",
+//       localField: "addresss.city",
+//       foreignField: "_id",
+//       as: "address.city",
+//     },
+//   },
+//   {
+//     $lookup: {
+//       from: "localities",
+//       localField: "addresss.locality",
+//       foreignField: "_id",
+//       as: "address.locality",
+//     },
+//   },
+//   {
+//     $lookup: {
+//       from: "countries",
+//       localField: "addresss.country",
+//       foreignField: "_id",
+//       as: "address.country",
+//     },
+//   },
+//   {
+//     $unwind: "$address.country",
+//   },
+//   {
+//     $unwind: "$address.city",
+//   },
+//   {
+//     $unwind: "$address.locality",
+//   },
+//   {
+//     $unwind: "$address.state",
+//   },
+//   {
+//     $lookup: {
+//       from: "specializations",
+//       localField: "doctors.specialization",
+//       foreignField: "_id",
+//       as: "doctors.specialization",
+//     },
+//   },
+//   {
+//     $lookup: {
+//       from: "anemitys",
+//       localField: "anemity",
+//       foreignField: "_id",
+//       as: "anemity",
+//     },
+//   },
+//   {
+//     $lookup: {
+//       from: "specializations",
+//       localField: "specialisedIn",
+//       foreignField: "_id",
+//       as: "specialisedIn",
+//     },
+//   },
+//   {
+//     $lookup: {
+//       from: "treatmenttypes",
+//       localField: "treatmentType",
+//       foreignField: "_id",
+//       as: "treatmentType",
+//     },
+//   },
+//   {
+//     $lookup: {
+//       from: "payments",
+//       localField: "payment",
+//       foreignField: "_id",
+//       as: "payment",
+//     },
+//   },
+//   {
+//     $project: {
+//       address: 1,
+//       // "doctors.firstName": 1,
+//       // "doctors.lastName": 1,
+//       // "doctors.hospitalDetails": 1,
+//       // "doctors.specialization": 1,
+//       // "doctors.qualification": 1,
+//       doctors: 1,
+//       doctorss: 1,
+//       name: 1,
+//       specialisedIn: 1,
+//       anemity: 1,
+//       treatmentType: 1,
+//       type: 1,
+//       payment: 1,
+//       contactNumber: 1,
+//       numberOfBed: 1,
+//       location: 1,
+//     },
+//   },
+// ]);

@@ -8,67 +8,53 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createWorkingHours = void 0;
+exports.createOpeningHours = exports.createWorkingHours = void 0;
 const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
 const response_1 = require("../Services/response");
+const time_class_1 = require("../Services/time.class");
+// For Doctors
 const createWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
         body.doctorDetails = req.currentDoctor;
-        const workingHour = yield WorkingHours_Model_1.default.find({
+        let workingHour = yield WorkingHours_Model_1.default.find({
             doctorDetails: req.currentDoctor,
-            // hospitalDetails: body.hospitalId,
-        }, { doctorDetails: 0 });
-        // Yeh poora delete ho skta hai...shayad
+            hospitalDetails: body.hospitalDetails,
+        }, { doctorDetails: 0, hospitalDetails: 0 });
+        const { doctorDetails, hospitalDetails } = body, tempBody = __rest(body, ["doctorDetails", "hospitalDetails"]);
         workingHour.forEach((e) => {
-            if (!((body.monday.from.time < e.monday.from.time &&
-                body.monday.till.time < e.monday.from.time) ||
-                (body.monday.from.time > e.monday.till.time &&
-                    body.monday.till.time > e.monday.till.time))) {
-                throw new Error("Invalid timings");
-            }
-            else if (!((body.tuesday.from.time < e.tuesday.from.time &&
-                body.tuesday.till.time < e.tuesday.from.time) ||
-                (body.tuesday.from.time > e.tuesday.till.time &&
-                    body.tuesday.till.time > e.tuesday.till.time))) {
-                throw new Error("Invalid timings");
-            }
-            else if (!((body.wednesday.from.time < e.wednesday.from.time &&
-                body.wednesday.till.time < e.wednesday.from.time) ||
-                (body.wednesday.from.time > e.wednesday.till.time &&
-                    body.wednesday.till.time > e.wednesday.till.time))) {
-                throw new Error("Invalid timings");
-            }
-            else if (!((body.thursday.from.time < e.thursday.from.time &&
-                body.thursday.till.time < e.thursday.from.time) ||
-                (body.thursday.from.time > e.thursday.till.time &&
-                    body.thursday.till.time > e.thursday.till.time))) {
-                throw new Error("Invalid timings");
-            }
-            else if (!((body.friday.from.time < e.friday.from.time &&
-                body.friday.till.time < e.friday.from.time) ||
-                (body.friday.from.time > e.friday.till.time &&
-                    body.friday.till.time > e.friday.till.time))) {
-                throw new Error("Invalid timings");
-            }
-            else if (!((body.saturday.from.time < e.saturday.from.time &&
-                body.saturday.till.time < e.saturday.from.time) ||
-                (body.saturday.from.time > e.saturday.till.time &&
-                    body.saturday.till.time > e.saturday.till.time))) {
-                throw new Error("Invalid timings");
-            }
-            else if (!((body.sunday.from.time < e.sunday.from.time &&
-                body.sunday.till.time < e.sunday.from.time) ||
-                (body.sunday.from.time > e.sunday.till.time &&
-                    body.sunday.till.time > e.sunday.till.time))) {
-                throw new Error("Invalid timings");
-            }
+            Object.keys(e.toJSON()).forEach((elem) => {
+                if (elem != "_id" && elem != "__v") {
+                    const element = e[elem];
+                    const e2 = tempBody[elem];
+                    const t1_from = new time_class_1.time(e2.from.time, e2.from.division);
+                    const t1_till = new time_class_1.time(e2.till.time, e2.till.division);
+                    const t2_from = new time_class_1.time(element.from.time, element.from.division);
+                    const t2_till = new time_class_1.time(element.till.time, element.till.division);
+                    if (!((t2_from.lessThan(t1_from) && t2_till.lessThan(t1_from)) ||
+                        (t2_from.greaterThan(t1_till) && t2_till.greaterThan(t1_till)))) {
+                        throw new Error("Invalid timings");
+                    }
+                }
+            });
         });
         const WHObj = yield new WorkingHours_Model_1.default(body).save();
+        // return successResponse({}, "Successfully created", res);
         return (0, response_1.successResponse)(WHObj, "Successfully created", res);
     }
     catch (error) {
@@ -76,8 +62,20 @@ const createWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.createWorkingHours = createWorkingHours;
+// For Hospitals
+const createOpeningHours = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.body;
+        body["byHospital"] = true;
+        const WHObj = yield new WorkingHours_Model_1.default(body).save();
+        return (0, response_1.successResponse)(WHObj, "Successfully created", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.createOpeningHours = createOpeningHours;
 function timeLessThan(t1, t2) {
-    console.log("t1: ", t1, "\nt2: ", t2);
     if (t1.division == 1 && t2.division == 0) {
         return false;
     }

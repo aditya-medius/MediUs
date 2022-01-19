@@ -2,96 +2,66 @@ import workingHourModel from "../Models/WorkingHours.Model";
 import { Request, Response, Router } from "express";
 import { errorResponse, successResponse } from "../Services/response";
 import { addBodyPart } from "../Admin Controlled Models/Admin.Controller";
+import { time } from "../Services/time.class";
 
+// For Doctors
 export const createWorkingHours = async (req: Request, res: Response) => {
   try {
     let body: any = req.body;
     body.doctorDetails = req.currentDoctor;
-    const workingHour: Array<any> = await workingHourModel.find(
+    let workingHour = await workingHourModel.find(
       {
         doctorDetails: req.currentDoctor,
-        // hospitalDetails: body.hospitalId,
+        hospitalDetails: body.hospitalDetails,
       },
-      { doctorDetails: 0 }
+      { doctorDetails: 0, hospitalDetails: 0 }
     );
 
-    // Yeh poora delete ho skta hai...shayad
+    const { doctorDetails, hospitalDetails, ...tempBody } = body;
     workingHour.forEach((e: any) => {
-      if (
-        !(
-          (body.monday.from.time < e.monday.from.time &&
-            body.monday.till.time < e.monday.from.time) ||
-          (body.monday.from.time > e.monday.till.time &&
-            body.monday.till.time > e.monday.till.time)
-        )
-      ) {
-        throw new Error("Invalid timings");
-      } else if (
-        !(
-          (body.tuesday.from.time < e.tuesday.from.time &&
-            body.tuesday.till.time < e.tuesday.from.time) ||
-          (body.tuesday.from.time > e.tuesday.till.time &&
-            body.tuesday.till.time > e.tuesday.till.time)
-        )
-      ) {
-        throw new Error("Invalid timings");
-      } else if (
-        !(
-          (body.wednesday.from.time < e.wednesday.from.time &&
-            body.wednesday.till.time < e.wednesday.from.time) ||
-          (body.wednesday.from.time > e.wednesday.till.time &&
-            body.wednesday.till.time > e.wednesday.till.time)
-        )
-      ) {
-        throw new Error("Invalid timings");
-      } else if (
-        !(
-          (body.thursday.from.time < e.thursday.from.time &&
-            body.thursday.till.time < e.thursday.from.time) ||
-          (body.thursday.from.time > e.thursday.till.time &&
-            body.thursday.till.time > e.thursday.till.time)
-        )
-      ) {
-        throw new Error("Invalid timings");
-      } else if (
-        !(
-          (body.friday.from.time < e.friday.from.time &&
-            body.friday.till.time < e.friday.from.time) ||
-          (body.friday.from.time > e.friday.till.time &&
-            body.friday.till.time > e.friday.till.time)
-        )
-      ) {
-        throw new Error("Invalid timings");
-      } else if (
-        !(
-          (body.saturday.from.time < e.saturday.from.time &&
-            body.saturday.till.time < e.saturday.from.time) ||
-          (body.saturday.from.time > e.saturday.till.time &&
-            body.saturday.till.time > e.saturday.till.time)
-        )
-      ) {
-        throw new Error("Invalid timings");
-      } else if (
-        !(
-          (body.sunday.from.time < e.sunday.from.time &&
-            body.sunday.till.time < e.sunday.from.time) ||
-          (body.sunday.from.time > e.sunday.till.time &&
-            body.sunday.till.time > e.sunday.till.time)
-        )
-      ) {
-        throw new Error("Invalid timings");
-      }
+      Object.keys(e.toJSON()).forEach((elem: any) => {
+        if (elem != "_id" && elem != "__v") {
+          const element = e[elem];
+          const e2 = tempBody[elem];
+          const t1_from = new time(e2.from.time, e2.from.division);
+          const t1_till = new time(e2.till.time, e2.till.division);
+
+          const t2_from = new time(element.from.time, element.from.division);
+          const t2_till = new time(element.till.time, element.till.division);
+
+          if (
+            !(
+              (t2_from.lessThan(t1_from) && t2_till.lessThan(t1_from)) ||
+              (t2_from.greaterThan(t1_till) && t2_till.greaterThan(t1_till))
+            )
+          ) {
+            throw new Error("Invalid timings");
+          }
+        }
+      });
     });
 
     const WHObj = await new workingHourModel(body).save();
+    // return successResponse({}, "Successfully created", res);
     return successResponse(WHObj, "Successfully created", res);
   } catch (error) {
     return errorResponse(error, res);
   }
 };
 
+// For Hospitals
+export const createOpeningHours = async (req: Request, res: Response) => {
+  try {
+    let body: any = req.body;
+    body["byHospital"] = true;
+    const WHObj = await new workingHourModel(body).save();
+    return successResponse(WHObj, "Successfully created", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
 function timeLessThan(t1: any, t2: any) {
-  console.log("t1: ", t1, "\nt2: ", t2);
   if (t1.division == 1 && t2.division == 0) {
     return false;
   }

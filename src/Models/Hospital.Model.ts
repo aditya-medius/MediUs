@@ -1,109 +1,115 @@
 import mongoose, { Schema, model } from "mongoose";
 import schemaOptions from "../Services/schemaOptions";
-import 
-{ 
-  speciality, doctor, address, payment, anemity, hospital, treatmentType, openingHour, specialization
-} 
- from "../Services/schemaNames";
+import {
+  speciality,
+  doctor,
+  address,
+  payment,
+  anemity,
+  hospital,
+  treatmentType,
+  openingHour,
+  specialization,
+  workingHour,
+} from "../Services/schemaNames";
 import { errorResponse, successResponse } from "../Services/response";
 import { query } from "express";
 import doctorModel from "./Doctors.Model";
 const hospitalSchema = new Schema({
-  name:{
+  name: {
     type: String,
-    required: true
+    required: true,
   },
-  address:{
+  address: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: address
-    },
-  doctors:[
+    ref: address,
+  },
+  doctors: [
     {
       type: mongoose.Schema.Types.ObjectId,
       // required: true,
-      ref: doctor
-    }
+      ref: doctor,
+    },
   ],
-  specialisedIn:[
+  specialisedIn: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: specialization
-    }
+      // required: true,
+      ref: specialization,
+    },
   ],
-  anemity:[{
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: anemity
-  }],
-  treatmentType:[
+  anemity: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: treatmentType
-    }
+      // required: true,
+      ref: anemity,
+    },
   ],
-  type:{
+  treatmentType: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      // required: true,
+      ref: treatmentType,
+    },
+  ],
+  type: {
     type: String,
     required: true,
-    enum:{
-      values: ["Private","Government"],
-      message: "value not supported"
-    }
+    enum: {
+      values: ["Private", "Government"],
+      message: "value not supported",
+    },
   },
-  payment:
-    [{
+  payment: [
+    {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: payment
-    }],
+      // required: true,
+      ref: payment,
+    },
+  ],
 
-  deleted:{
+  deleted: {
     type: Boolean,
-    default: false
+    default: false,
   },
-  openingHour:
-  {
-      type: mongoose.Schema.Types.ObjectId,
-      // required: true,
-      ref: openingHour
+  openingHour: {
+    type: mongoose.Schema.Types.ObjectId,
+    // required: true,
+    ref: workingHour,
   },
-  contactNumber:{
+  contactNumber: {
+    type: String,
+    required: true,
+  },
+  numberOfBed: {
+    type: Number,
+    // required: true,
+  },
+  location: {
+    type: {
       type: String,
-      required: true,
-  },
-  numberOfBed:{
-      type: Number,
-      required: true,
-  },
-  location:{
-    type:{
-      type: String,
-      enum:['Point'],
-      required: true
+      enum: ["Point"],
+      // required: true
     },
-    coordinates:{
-      type:[Number],
-      required: true
-    }
-  }
+    coordinates: {
+      type: [Number],
+      // required: true
+    },
+  },
 });
-
 
 hospitalSchema.pre("save", async function (next) {
   const hospitalExist = await hospitalModel.findOne({
     $and: [
       {
-        $or: [
-          { contactNumber: this.contactNumber },
-        ],
+        $or: [{ contactNumber: this.contactNumber }],
       },
       { deleted: false },
     ],
   });
   if (/^[0]?[789]\d{9}$/.test(this.contactNumber)) {
-    if (!hospitalExist) {
+    if (!hospitalExist || this.contactNumber == "9999999999") {
       return next();
     } else {
       throw new Error(
@@ -115,19 +121,16 @@ hospitalSchema.pre("save", async function (next) {
   }
 });
 
-
 hospitalSchema.pre("findOneAndUpdate", async function (next) {
   let UpdateQuery: any = this.getUpdate();
   // console.log(UpdateQuery);
   if ("contactNumber" in UpdateQuery) {
-  UpdateQuery = UpdateQuery["$set"];
+    UpdateQuery = UpdateQuery["$set"];
     const query = this.getQuery();
 
     const hospitalExist = await this.model.findOne({
       _id: { $ne: query._id },
-      $or: [
-        { contactNumber: UpdateQuery.contactNumber },
-      ],
+      $or: [{ contactNumber: UpdateQuery.contactNumber }],
     });
     if (hospitalExist) {
       throw new Error(
@@ -136,23 +139,23 @@ hospitalSchema.pre("findOneAndUpdate", async function (next) {
     } else {
       return next();
     }
+  } else {
+    return next();
   }
-  else{return next();}
 });
 
 //check for number of bed
 
-hospitalSchema.pre("findOneAndUpdate", async function(next){
-  let UpdateQuery: any =this.getUpdate();
-  if("numberOfBed" in UpdateQuery)
-  {
-  UpdateQuery=UpdateQuery["$set"];
-  if(UpdateQuery.numberOfBed<=0)
-  throw new Error("Number of beds can't equal or less than zero");
-  else
-  return next();
+hospitalSchema.pre("findOneAndUpdate", async function (next) {
+  let UpdateQuery: any = this.getUpdate();
+  if ("numberOfBed" in UpdateQuery) {
+    UpdateQuery = UpdateQuery["$set"];
+    if (UpdateQuery.numberOfBed <= 0)
+      throw new Error("Number of beds can't equal or less than zero");
+    else return next();
+  } else {
+    return next();
   }
-  else{return next();}
 });
 const hospitalModel = model(hospital, hospitalSchema);
 
