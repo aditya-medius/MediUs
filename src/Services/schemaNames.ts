@@ -24,3 +24,4 @@ export const disease: string = "diseases";
 export const doctorType: string = "doctortypes";
 export const appointmentPayment: string = "appointmentPayments";
 export const preferredPharma: string = "preferredPharmas";
+export const prescription: string = "prescription";

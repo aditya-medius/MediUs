@@ -26,7 +26,9 @@ const express_1 = __importDefault(require("express"));
 const Patient_auth_1 = require("../authentication/Patient.auth");
 const patientController = __importStar(require("../Controllers/Patient.Controller"));
 const paymentController = __importStar(require("../Controllers/AppointmentPayment.Controller"));
+const multer_1 = __importDefault(require("multer"));
 const patientRouter = express_1.default.Router();
+const upload = (0, multer_1.default)({ dest: './src/uploads' });
 patientRouter.post("/login", patientController.patientLogin);
 patientRouter.post("/", patientController.createPatient);
 patientRouter.get("/", Patient_auth_1.authenticatePatient, patientController.getAllPatientsList);
@@ -47,5 +49,5 @@ patientRouter.get("/getHospitalsByCity", Patient_auth_1.authenticatePatient, pat
 // Get doctors by city
 patientRouter.get("/getDoctorsByCity", Patient_auth_1.authenticatePatient, patientController.getDoctorsByCity);
 //upload prescription
-patientRouter.post("/uploadPrescription", Patient_auth_1.authenticatePatient, patientController.uploadPrescription);
+patientRouter.post("/uploadPrescription", upload.single("prescription"), Patient_auth_1.authenticatePatient, patientController.uploadPrescription);
 exports.default = patientRouter;

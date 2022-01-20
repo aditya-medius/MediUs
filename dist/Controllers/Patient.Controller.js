@@ -44,12 +44,15 @@ const message_service_1 = require("../Services/message.service");
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const Doctor_Controller_1 = require("./Doctor.Controller");
 const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
-const path_1 = __importDefault(require("path"));
 const BodyPart_Model_1 = __importDefault(require("../Admin Controlled Models/BodyPart.Model"));
 const Disease_Model_1 = __importDefault(require("../Admin Controlled Models/Disease.Model"));
 const Specialization_Model_1 = __importDefault(require("../Admin Controlled Models/Specialization.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
+const Prescription_Model_1 = __importDefault(require("../Models/Prescription.Model"));
+// const util = require("util");
+// const {GridFsStorage} = require('multer-gridfs-storage');
+// const dbConfig = require("../Services/db");
 const excludePatientFields = {
     password: 0,
     verified: 0,
@@ -502,51 +505,18 @@ const getDoctorsByCity = (req, res) => __awaiter(void 0, void 0, void 0, functio
 });
 exports.getDoctorsByCity = getDoctorsByCity;
 //Upload prescription for the preffered medical centre
-const uploadPrescription = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const uploadPrescription = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
     try {
-        const express = require('express');
-        const app = express();
-        const multer = require('multer');
-        //     function cb(file: any, cb: any) {
-        //     throw new Error("Function is not implemented.");
-        // }
-        const storage = multer.diskStorage({
-            destination: './uploads/',
-            filename: function (req, file, cb) {
-                cb(null, file.fieldname + '-' + Date.now() +
-                    path_1.default.extname(file.originalname));
-            }
-        });
-        const upload = multer({
-            storage: storage,
-            limits: { filesize: 1000000 },
-            fileFilter: function (req, file, cb) {
-                checkFileType(file, cb);
-            }
-        }).single('image');
-        //check function
-        function checkFileType(file, cb) {
-            const filetypes = /jpg|jpeg|png|gif/;
-            const extname = filetypes.test(path_1.default.extname(file.originalname).toLowerCase());
-            const mimetype = filetypes.test(file.mimetype);
-            if (extname && mimetype) {
-                return cb(null, true);
-            }
-            else {
-                cb('Error: Images only!');
-            }
-        }
-        return (0, response_1.successResponse)(upload, "Success", res);
+        const image = new Prescription_Model_1.default(req.body);
+        image.prescription.data = (_a = req.file) === null || _a === void 0 ? void 0 : _a.filename;
+        image.prescription.contentType = (_b = req.file) === null || _b === void 0 ? void 0 : _b.mimetype;
+        //  let medicineBook = await new prescriptionModel(req.body,image).save();
+        let medicineBook = yield image.save(req.body);
+        return (0, response_1.successResponse)(medicineBook, "Medicine has been successfully booked", res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);
     }
 });
 exports.uploadPrescription = uploadPrescription;
-//console.log(req.file);
-// app.post('/profile', upload.none(), function (req: any, res: any, next: any) {  
-// })
-// app.post('/', upload.single('image'), (req: any, res: any) => {
-// res.send(`/${req.file.path}`)
-// })
-//console.log(upload);

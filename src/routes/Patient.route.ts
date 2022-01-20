@@ -2,8 +2,9 @@ import express, { Request, Response } from "express";
 import { authenticatePatient } from "../authentication/Patient.auth";
 import * as patientController from "../Controllers/Patient.Controller";
 import * as paymentController from "../Controllers/AppointmentPayment.Controller";
+import multer from "multer";
 const patientRouter = express.Router();
-
+const upload = multer({ dest: './src/uploads'});
 patientRouter.post("/login", patientController.patientLogin);
 patientRouter.post("/", patientController.createPatient);
 patientRouter.get(
@@ -85,8 +86,10 @@ patientRouter.get(
 );
 //upload prescription
 patientRouter.post(
-  "/uploadPrescription",
+  "/uploadPrescription", 
+   upload.single("prescription"), 
    authenticatePatient,
-  patientController.uploadPrescription
+   patientController.uploadPrescription
 )
 export default patientRouter;
+

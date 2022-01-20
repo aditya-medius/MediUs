@@ -21,7 +21,15 @@ import diseaseModel from "../Admin Controlled Models/Disease.Model";
 import specialityModel from "../Admin Controlled Models/Specialization.Model";
 import hospitalModel from "../Models/Hospital.Model";
 import addressModel from "../Models/Address.Model";
+import prescriptionModel from "../Models/Prescription.Model";
+import preferredPharmaModel from "../Models/PreferredPharma.Model";
+import mongoose from "mongoose";
 import { any } from "underscore";
+import { prescription } from "../Services/schemaNames";
+import fs from 'fs';
+// const util = require("util");
+// const {GridFsStorage} = require('multer-gridfs-storage');
+// const dbConfig = require("../Services/db");
 const excludePatientFields = {
   password: 0,
   verified: 0,
@@ -537,40 +545,18 @@ export const getDoctorsByCity = async (req: Request, res: Response) => {
   }
 };
 //Upload prescription for the preffered medical centre
-export const uploadPrescription = async (_req: Request, res: Response) => {
-  try {
-    const express = require('express')
-    const app = express()
-    const multer  = require('multer')
-//     function cb(file: any, cb: any) {
-//     throw new Error("Function is not implemented.");
-// }
-    const storage = multer.diskStorage({
-    destination: './uploads/',
-    filename: function(req: any, file: any, cb:any){
-    cb(null, file.fieldname + '-' + Date.now() +
-    path.extname(file.originalname));
-  }
-});
-    const upload = multer({
-      storage: storage,
-      limits: {filesize: 1000000},
-      fileFilter: function (req: any, file: any, cb: any){
-      checkFileType(file, cb);
-    }
-    }).single('image');
-    //check function
-   function checkFileType(file: any, cb: any) {
-  const filetypes = /jpg|jpeg|png|gif/ 
-  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = filetypes.test(file.mimetype);
-  if (extname && mimetype) {
-    return cb(null, true)
-  } else {
-    cb('Error: Images only!') 
-  }
-}
-    return successResponse( upload, "Success", res);
+export const uploadPrescription = async (req: Request, res: Response) => {
+  try {  
+  const image = new prescriptionModel(req.body)
+  image.prescription.data = req.file?.filename;
+  image.prescription.contentType = req.file?.mimetype;
+  //  let medicineBook = await new prescriptionModel(req.body,image).save();
+  let medicineBook = await image.save(req.body);
+    return successResponse(
+      medicineBook,
+      "Medicine has been successfully booked",
+      res
+    );
   } catch (error: any) {
     return errorResponse(error, res);
   }
