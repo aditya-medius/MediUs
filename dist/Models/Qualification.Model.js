@@ -30,9 +30,9 @@ const qualificationSchema = new mongoose_1.Schema({
     },
     email: {
         type: String,
-        required: [true, "Email is required"],
+        // required: [true, "Email is required"],
         validate: [validator_1.default.isEmail, "Email isn't valid"],
-        unique: true,
+        // unique: true,
     },
 });
 const qualificationModel = (0, mongoose_1.model)(schemaNames_1.qualification, qualificationSchema);

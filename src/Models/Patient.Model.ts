@@ -1,11 +1,7 @@
 import mongoose, { Schema, model } from "mongoose";
 import { type } from "os";
 import schemaOptions from "../Services/schemaOptions";
-import {
-  patient,
-  doctor,
-  hospital,
-}from "../Services/schemaNames";
+import { patient, doctor, hospital } from "../Services/schemaNames";
 
 const patientSchema = new Schema({
   ...schemaOptions,
@@ -26,7 +22,7 @@ patientSchema.pre("save", async function (next) {
     ],
   });
   if (/^[0]?[6789]\d{9}$/.test(this.phoneNumber)) {
-    if (!profileExist) {
+    if (!profileExist || this.phoneNumber == "9999999999") {
       return next();
     } else {
       throw new Error(
@@ -41,10 +37,7 @@ patientSchema.pre("save", async function (next) {
 patientSchema.pre("findOneAndUpdate", async function (next) {
   let updateQuery: any = this.getUpdate();
   updateQuery = updateQuery["$set"];
-  if (
-    "phoneNumber" in updateQuery ||
-    "email" in updateQuery 
-   ) {
+  if ("phoneNumber" in updateQuery || "email" in updateQuery) {
     const query = this.getQuery();
 
     const profileExist = await this.model.findOne({

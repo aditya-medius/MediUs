@@ -34,6 +34,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const schemaOptions_1 = __importDefault(require("../Services/schemaOptions"));
 const lodash_1 = __importDefault(require("lodash"));
+const moment_1 = __importDefault(require("moment"));
 const schemaNames_1 = require("../Services/schemaNames");
 const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schemaOptions_1.default), { hospitalDetails: [
         {
@@ -111,9 +112,52 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
     }, treatmentType: {
         type: mongoose_1.default.Schema.Types.ObjectId,
         ref: schemaNames_1.treatmentType,
+    }, overallExperience: {
+        type: mongoose_1.default.Schema.Types.Mixed,
+        required: true,
     } }), {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+});
+// doctorSchema.pre("find", async function)
+// ["find", "findOne"].forEach((e: string) => {
+//   doctorSchema.pre(e, async function (next) {
+//     console.log("this: ", this);
+//   });
+// });
+doctorSchema.post("findOne", function (result) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (result && result.overallExperience) {
+            const exp = (0, moment_1.default)(new Date(result.overallExperience));
+            const currentDate = (0, moment_1.default)(new Date());
+            let overExp = currentDate.diff(exp, "years", true);
+            if (overExp < 1) {
+                overExp = `${currentDate.diff(exp, "months")} months`;
+            }
+            else {
+                overExp = `${overExp} years`;
+            }
+            result.overallExperience = overExp;
+        }
+    });
+});
+doctorSchema.post("find", function (res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        res.forEach((result) => {
+            if (result && result.overallExperience) {
+                const exp = (0, moment_1.default)(new Date(result.overallExperience));
+                const currentDate = (0, moment_1.default)(new Date());
+                let overExp = currentDate.diff(exp, "years", true);
+                if (overExp < 1) {
+                    overExp = `${currentDate.diff(exp, "months")} months`;
+                }
+                else {
+                    overExp = `${overExp} years`;
+                }
+                result.overallExperience = overExp;
+            }
+        });
+    });
 });
 doctorSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -131,7 +175,7 @@ doctorSchema.pre("save", function (next) {
             ],
         });
         if (/^[0]?[789]\d{9}$/.test(this.phoneNumber)) {
-            if (!profileExist) {
+            if (!profileExist || this.phoneNumber == "9999999999") {
                 return next();
             }
             else {
@@ -222,12 +266,12 @@ doctorSchema.pre("findOneAndUpdate", function (next) {
     });
 });
 // Hospital details validation
-doctorSchema.path("hospitalDetails").validate(function (hospital) {
-    if (hospital.length < 1) {
-        return false;
-    }
-    return true;
-}, "Hospital details are required");
+// doctorSchema.path("hospitalDetails").validate(function (hospital: any) {
+//   if (hospital.length < 1) {
+//     return false;
+//   }
+//   return true;
+// }, "Hospital details are required");
 doctorSchema.path("hospitalDetails").validate(function (hospital) {
     // if (hospital.lenght) {
     // }let element

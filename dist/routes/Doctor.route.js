@@ -28,6 +28,11 @@ const Doctor_auth_1 = require("../authentication/Doctor.auth");
 const doctorController = __importStar(require("../Controllers/Doctor.Controller"));
 const qualificationController = __importStar(require("../Controllers/Qualification.Controller"));
 const workingHoursController = __importStar(require("../Controllers/WorkingHours.Controller"));
+<<<<<<< HEAD
+=======
+const Patient_auth_1 = require("../authentication/Patient.auth");
+const middlewareHelper_1 = require("../Services/middlewareHelper");
+>>>>>>> 113b476190ab7e51a4c8ac2932498ea61e66b77d
 const preferredPharmaController = __importStar(require("../Controllers/Pharma.Cotroller"));
 const doctorRouter = express_1.default.Router();
 doctorRouter.post("/login", doctorController.doctorLogin);
@@ -35,21 +40,26 @@ doctorRouter.post("/login", doctorController.doctorLogin);
   Doctor profile creation routes - START
 */
 doctorRouter.put("/addDoctorQualification", qualificationController.addDoctorQualification);
-doctorRouter.put("/addDoctorWorkingHour", Doctor_auth_1.authenticateDoctor, workingHoursController.createWorkingHours);
+doctorRouter.put("/addDoctorWorkingHour", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), workingHoursController.createWorkingHours);
 doctorRouter.post("/", doctorController.createDoctor);
 /*
   Doctor profile creation routes - END
 */
-doctorRouter.get("/", Doctor_auth_1.authenticateDoctor, doctorController.getAllDoctorsList);
-doctorRouter.post("/getDoctorById/:id", Doctor_auth_1.authenticateDoctor, doctorController.getDoctorById);
-doctorRouter.post("/updateProfile", Doctor_auth_1.authenticateDoctor, doctorController.updateDoctorProfile);
-doctorRouter.delete("/deleteProfile", Doctor_auth_1.authenticateDoctor, doctorController.deleteProfile);
-doctorRouter.post("/findDoctorBySpecialityOrBodyPart/:term", doctorController.searchDoctor);
-doctorRouter.put("/setSchedule", Doctor_auth_1.authenticateDoctor, doctorController.setSchedule);
+doctorRouter.get("/", doctorController.getAllDoctorsList);
+doctorRouter.post("/getDoctorById/:id", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.getDoctorById);
+doctorRouter.post("/updateProfile", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.updateDoctorProfile);
+doctorRouter.delete("/deleteProfile", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.deleteProfile);
+doctorRouter.post("/findDoctorBySpecialityOrBodyPart/:term", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.searchDoctor);
+doctorRouter.put("/setSchedule", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.setSchedule);
 // Get Doctor's appointment
-doctorRouter.get("/viewAppointments/:page", Doctor_auth_1.authenticateDoctor, doctorController.viewAppointments);
+doctorRouter.get("/viewAppointments/:page", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.viewAppointments);
 // Cancel doctor's appointments
+<<<<<<< HEAD
 doctorRouter.put("/cancelAppointments", Doctor_auth_1.authenticateDoctor, doctorController.cancelAppointments);
+=======
+doctorRouter.put("/cancelAppointments", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.cancelAppointments);
+doctorRouter.get("/getDoctorWorkingInHospitals/:id", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.getDoctorWorkingInHospitals);
+>>>>>>> 113b476190ab7e51a4c8ac2932498ea61e66b77d
 //Preferred Pharma Routes
 //add the preferred pharma
 doctorRouter.post("/addPharma", Doctor_auth_1.authenticateDoctor, preferredPharmaController.addPharma);

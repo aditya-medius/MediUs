@@ -9,6 +9,8 @@ export const hospital: string = "hospitals";
 export const workingHour: string = "workinghours";
 export const doctor: string = "doctors";
 export const patient: string = "patients";
+export const subPatient: string = "subpatients";
+export const admin: string = "admins";
 export const anemity: string = "anemitys";
 export const address: string = "addresses";
 export const payment: string = "payments";
@@ -24,4 +26,10 @@ export const disease: string = "diseases";
 export const doctorType: string = "doctortypes";
 export const appointmentPayment: string = "appointmentPayments";
 export const preferredPharma: string = "preferredPharmas";
+<<<<<<< HEAD
 export const prescription: string = "prescription";
+=======
+export const CountryMap: string = "countryMap";
+export const stateMap: string = "stateMap";
+export const cityMap: string = "cityMap";
+>>>>>>> 113b476190ab7e51a4c8ac2932498ea61e66b77d

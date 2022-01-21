@@ -25,6 +25,9 @@ const appointmentPaymentSchema = new mongoose_1.Schema({
     orderId: {
         type: String,
     },
+    orderReceipt: {
+        type: String,
+    },
     paymentId: {
         type: String,
     },

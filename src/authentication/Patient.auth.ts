@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { errorResponse } from "../Services/response";
 
-export const authenticatePatient = async (
+export const authenticatePatient = (
   req: Request,
   res: Response,
   next: NextFunction
@@ -14,9 +14,8 @@ export const authenticatePatient = async (
       process.env.SECRET_PATIENT_KEY as string
     );
     req.currentPatient = data._id;
-    next();
+    return true;
   } catch (error: any) {
-    error.message = "Forbidden";
-    return errorResponse(error, res, 403);
+    return false;
   }
 };

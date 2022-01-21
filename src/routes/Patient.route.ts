@@ -3,85 +3,88 @@ import { authenticatePatient } from "../authentication/Patient.auth";
 import * as patientController from "../Controllers/Patient.Controller";
 import * as paymentController from "../Controllers/AppointmentPayment.Controller";
 import multer from "multer";
+import { oneOf } from "../Services/middlewareHelper";
+import { authenticateDoctor } from "../authentication/Doctor.auth";
+import * as subPatientController from "../Controllers/SubPatient.Controller";
+import { patient, subPatient } from "../Services/schemaNames";
 const patientRouter = express.Router();
 const upload = multer({ dest: './src/uploads'});
 patientRouter.post("/login", patientController.patientLogin);
 patientRouter.post("/", patientController.createPatient);
 patientRouter.get(
   "/",
-  authenticatePatient,
+  oneOf(authenticatePatient),
   patientController.getAllPatientsList
 );
 patientRouter.post(
   "/getPatientById/:id",
-  authenticatePatient,
+  oneOf(authenticatePatient),
   patientController.getPatientById
 );
 patientRouter.post(
   "/updateProfile",
-  authenticatePatient,
+  oneOf(authenticatePatient),
   patientController.updatePatientProfile
 );
 patientRouter.post(
   "/deleteProfile",
-  authenticatePatient,
+  oneOf(authenticatePatient),
   patientController.deleteProfile
 );
 patientRouter.post(
   "/BookAppointment",
-  authenticatePatient,
+  oneOf(authenticatePatient),
   patientController.BookAppointment
 );
 patientRouter.post(
   "/CancelAppointment",
-  authenticatePatient,
+  oneOf(authenticatePatient),
   patientController.CancelAppointment
 );
 patientRouter.post(
   "/doneAppointment",
-  authenticatePatient,
+  oneOf(authenticatePatient),
   patientController.doneAppointment
 );
 patientRouter.post(
   "/getDoctorByDay",
-  authenticatePatient,
+  oneOf(authenticatePatient),
   patientController.getDoctorByDay
 );
 
 patientRouter.post(
   "/generateOrderId",
-  authenticatePatient,
+  oneOf(authenticatePatient),
   paymentController.generateOrderId
 );
 patientRouter.post(
   "/verifyPayment",
-  authenticatePatient,
+  oneOf(authenticatePatient),
   paymentController.verifyPayment
 );
 patientRouter.get(
   "/viewAppointment/:page",
-  authenticatePatient,
+  oneOf(authenticatePatient),
   patientController.ViewAppointment
 );
 
 // Get all the entities of filter
 patientRouter.get(
   "/getSpecialityBodyPartAndDisease",
-  authenticatePatient,
   patientController.getSpecialityBodyPartAndDisease
 );
 
 // Get hospitals by city
 patientRouter.get(
   "/getHospitalsByCity",
-  authenticatePatient,
+  oneOf(authenticatePatient),
   patientController.getHospitalsByCity
 );
 
 // Get doctors by city
 patientRouter.get(
   "/getDoctorsByCity",
-  authenticatePatient,
+  oneOf(authenticatePatient),
   patientController.getDoctorsByCity
 );
 //upload prescription
@@ -91,5 +94,37 @@ patientRouter.post(
    authenticatePatient,
    patientController.uploadPrescription
 )
+
+// Sub Patient
+patientRouter.post(
+  "/addSubPatient",
+  oneOf(authenticatePatient),
+  subPatientController.addSubPatient
+);
+
+patientRouter.get(
+  "/getSubPatientList",
+  oneOf(authenticatePatient),
+  subPatientController.getSubPatientList
+);
+
+patientRouter.put(
+  "/deleteSubPatient/:id",
+  oneOf(authenticatePatient),
+  subPatientController.deleteSubPatient
+);
+
+patientRouter.get(
+  "/getSubPatientById/:id",
+  oneOf(authenticatePatient),
+  subPatientController.getSubPatientById
+);
+
+patientRouter.put(
+  "/updateSubPatient/:id",
+  oneOf(authenticatePatient),
+  subPatientController.updateSubPatient
+);
+
 export default patientRouter;
 

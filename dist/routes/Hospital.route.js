@@ -23,20 +23,36 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const Doctor_auth_1 = require("../authentication/Doctor.auth");
 const Hospital_auth_1 = require("../authentication/Hospital.auth");
+const Patient_auth_1 = require("../authentication/Patient.auth");
 const hospitalController = __importStar(require("../Controllers/Hospital.Controller"));
+const WorkingHours_Controller_1 = require("../Controllers/WorkingHours.Controller");
+const middlewareHelper_1 = require("../Services/middlewareHelper");
 const hospitalRouter = express_1.default.Router();
+<<<<<<< HEAD
 hospitalRouter.post("/login", hospitalController.login);
 hospitalRouter.get("/myHospital", Hospital_auth_1.authenticateHospital, hospitalController.myHospital);
 hospitalRouter.get("/", Hospital_auth_1.authenticateHospital, hospitalController.getAllHospitalsList);
+=======
+hospitalRouter.get("/", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getAllHospitalsList);
+hospitalRouter.post("/login", hospitalController.login);
+hospitalRouter.get("/myHospital", Hospital_auth_1.authenticateHospital, hospitalController.myHospital);
+// hospitalRouter.get("/", authenticateHospital, hospitalController.getAllHospitalsList);
+>>>>>>> 113b476190ab7e51a4c8ac2932498ea61e66b77d
 hospitalRouter.post("/", hospitalController.createHospital);
-hospitalRouter.post("/deleteHospital", Hospital_auth_1.authenticateHospital, hospitalController.deleteHospital);
-hospitalRouter.post("/updateHospital", Hospital_auth_1.authenticateHospital, hospitalController.updateHospital);
-hospitalRouter.post("/anemity", Hospital_auth_1.authenticateHospital, hospitalController.createHospitalAnemity);
-// hospitalRouter.post("/speciality",authenticateHospital,hospitalController.addHospitalSpeciality);
+hospitalRouter.post("/deleteHospital", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.deleteHospital);
+hospitalRouter.post("/updateHospital", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.updateHospital);
+hospitalRouter.post("/anemity", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.createHospitalAnemity);
+hospitalRouter.get("/getAnemities", hospitalController.getAnemities);
+// hospitalRouter.post("/speciality",oneOf(authenticateHospital),hospitalController.addHospitalSpeciality);
 hospitalRouter.post("/findHospitalBySpecialityOrBodyPart/:term", hospitalController.searchHospital);
 //ADD DOCTOR TO THE HOSPITAL
-hospitalRouter.post("/removeDoctor", Hospital_auth_1.authenticateHospital, hospitalController.removeDoctor);
+hospitalRouter.post("/removeDoctor", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.removeDoctor);
 //View Appointments
-hospitalRouter.get("/viewAppointment/:page", Hospital_auth_1.authenticateHospital, hospitalController.viewAppointment);
+hospitalRouter.get("/viewAppointment/:page", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.viewAppointment);
+// Get hospital by id
+hospitalRouter.get("/getHospitalById/:id", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), hospitalController.getHospitalById);
+// Hospital opening hours
+hospitalRouter.post("/createOpeningHours", WorkingHours_Controller_1.createOpeningHours);
 exports.default = hospitalRouter;

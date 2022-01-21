@@ -5,6 +5,9 @@ const appointmentPaymentSchema = new Schema({
   orderId: {
     type: String,
   },
+  orderReceipt: {
+    type: String,
+  },
   paymentId: {
     type: String,
   },
