@@ -23,13 +23,13 @@ import diseaseModel from "../Admin Controlled Models/Disease.Model";
 import addressModel from "../Models/Address.Model";
 import hospitalModel from "../Models/Hospital.Model";
 
-const excludePatientFields = {
+export const excludePatientFields = {
   password: 0,
   verified: 0,
   DOB: 0,
 };
 
-const excludeHospitalFields = {
+export const excludeHospitalFields = {
   location: 0,
   doctors: 0,
   specialisedIn: 0,
@@ -91,7 +91,6 @@ export const patientLogin = async (req: Request, res: Response) => {
         // Implement message service API
         sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
           .then(async (message) => {
-            console.log("message:", message);
             const otpToken = jwt.sign(
               { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
               OTP
@@ -304,6 +303,11 @@ export const BookAppointment = async (req: Request, res: Response) => {
       capacity = capacity.friday;
     } else if (day == 6) {
       capacity = capacity.saturday;
+    }
+    if (!capacity) {
+      const error: Error = new Error("Doctor not available on this day");
+      error.name = "Not available";
+      return errorResponse(error, res);
     }
     let appointmentCount = await appointmentModel.find({
       doctors: body.doctors,

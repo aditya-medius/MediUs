@@ -58,6 +58,7 @@ const Appointment_Model_1 = __importDefault(require("../Models/Appointment.Model
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const message_service_1 = require("../Services/message.service");
 const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
+const Patient_Controller_1 = require("./Patient.Controller");
 const excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -554,12 +555,16 @@ const viewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
         const page = parseInt(req.params.page);
         const appointmentObj = yield Appointment_Model_1.default
             .find({ hospital: req.currentHospital, "time.date": { $gt: Date() } })
+            .populate({ path: "patient", select: Patient_Controller_1.excludePatientFields })
+            .populate({ path: "doctors", select: excludeDoctorFields })
             .sort({ "time.date": 1 })
             .skip(page > 1 ? (page - 1) * 2 : 0)
             .limit(2);
         const page2 = appointmentObj.length / 2;
         const older_apppointmentObj = yield Appointment_Model_1.default
             .find({ hospital: req.currentHospital, "time.date": { $lte: Date() } })
+            .populate({ path: "patient", select: Patient_Controller_1.excludePatientFields })
+            .populate({ path: "doctors", select: excludeDoctorFields })
             .sort({ "time.date": 1 })
             .skip(page > page2 ? (page - 1) * 2 : 0)
             .limit(2);

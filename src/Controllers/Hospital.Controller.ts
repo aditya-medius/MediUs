@@ -24,6 +24,7 @@ import { sendMessage } from "../Services/message.service";
 import { GeoJSON } from "geojson";
 import mongoose from "mongoose";
 import workingHourModel from "../Models/WorkingHours.Model";
+import { excludePatientFields } from "./Patient.Controller";
 
 const excludeDoctorFields = {
   password: 0,
@@ -582,6 +583,8 @@ export const viewAppointment = async (req: Request, res: Response) => {
     const page = parseInt(req.params.page);
     const appointmentObj: Array<object> = await appointmentModel
       .find({ hospital: req.currentHospital, "time.date": { $gt: Date() } })
+      .populate({ path: "patient", select: excludePatientFields })
+      .populate({ path: "doctors", select: excludeDoctorFields })
       .sort({ "time.date": 1 })
       .skip(page > 1 ? (page - 1) * 2 : 0)
       .limit(2);
@@ -590,6 +593,8 @@ export const viewAppointment = async (req: Request, res: Response) => {
 
     const older_apppointmentObj: Array<object> = await appointmentModel
       .find({ hospital: req.currentHospital, "time.date": { $lte: Date() } })
+      .populate({ path: "patient", select: excludePatientFields })
+      .populate({ path: "doctors", select: excludeDoctorFields })
       .sort({ "time.date": 1 })
       .skip(page > page2 ? (page - 1) * 2 : 0)
       .limit(2);
