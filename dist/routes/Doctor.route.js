@@ -28,8 +28,11 @@ const Doctor_auth_1 = require("../authentication/Doctor.auth");
 const doctorController = __importStar(require("../Controllers/Doctor.Controller"));
 const qualificationController = __importStar(require("../Controllers/Qualification.Controller"));
 const workingHoursController = __importStar(require("../Controllers/WorkingHours.Controller"));
+<<<<<<< HEAD
+=======
 const Patient_auth_1 = require("../authentication/Patient.auth");
 const middlewareHelper_1 = require("../Services/middlewareHelper");
+>>>>>>> 113b476190ab7e51a4c8ac2932498ea61e66b77d
 const preferredPharmaController = __importStar(require("../Controllers/Pharma.Cotroller"));
 const doctorRouter = express_1.default.Router();
 doctorRouter.post("/login", doctorController.doctorLogin);
@@ -51,8 +54,12 @@ doctorRouter.put("/setSchedule", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.aut
 // Get Doctor's appointment
 doctorRouter.get("/viewAppointments/:page", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.viewAppointments);
 // Cancel doctor's appointments
+<<<<<<< HEAD
+doctorRouter.put("/cancelAppointments", Doctor_auth_1.authenticateDoctor, doctorController.cancelAppointments);
+=======
 doctorRouter.put("/cancelAppointments", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.cancelAppointments);
 doctorRouter.get("/getDoctorWorkingInHospitals/:id", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.getDoctorWorkingInHospitals);
+>>>>>>> 113b476190ab7e51a4c8ac2932498ea61e66b77d
 //Preferred Pharma Routes
 //add the preferred pharma
 doctorRouter.post("/addPharma", Doctor_auth_1.authenticateDoctor, preferredPharmaController.addPharma);

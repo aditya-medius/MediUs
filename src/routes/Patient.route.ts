@@ -2,12 +2,13 @@ import express, { Request, Response } from "express";
 import { authenticatePatient } from "../authentication/Patient.auth";
 import * as patientController from "../Controllers/Patient.Controller";
 import * as paymentController from "../Controllers/AppointmentPayment.Controller";
+import multer from "multer";
 import { oneOf } from "../Services/middlewareHelper";
 import { authenticateDoctor } from "../authentication/Doctor.auth";
 import * as subPatientController from "../Controllers/SubPatient.Controller";
 import { patient, subPatient } from "../Services/schemaNames";
 const patientRouter = express.Router();
-
+const upload = multer({ dest: './src/uploads'});
 patientRouter.post("/login", patientController.patientLogin);
 patientRouter.post("/", patientController.createPatient);
 patientRouter.get(
@@ -86,6 +87,13 @@ patientRouter.get(
   oneOf(authenticatePatient),
   patientController.getDoctorsByCity
 );
+//upload prescription
+patientRouter.post(
+  "/uploadPrescription", 
+   upload.single("prescription"), 
+   authenticatePatient,
+   patientController.uploadPrescription
+)
 
 // Sub Patient
 patientRouter.post(
@@ -119,3 +127,4 @@ patientRouter.put(
 );
 
 export default patientRouter;
+

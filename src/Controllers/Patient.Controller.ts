@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import express, { query, Request, Response } from "express";
 import patientModel from "../Models/Patient.Model";
 // import { excludePatientFields } from "./Patient.Controller";
 import otpModel from "../Models/OTP.Model";
@@ -12,17 +12,24 @@ import { sendMessage } from "../Services/message.service";
 import doctorModel from "../Models/Doctors.Model";
 import { excludeDoctorFields } from "./Doctor.Controller";
 import workingHourModel from "../Models/WorkingHours.Model";
-// import specialityBodyModel from "./SpecialityBody.Model";
-// import diseaseModel from "./Disease.Model";
-
 import RazorPay from "razorpay";
 import crypto from "crypto";
-import specialityModel from "../Admin Controlled Models/Specialization.Model";
+import multer from 'multer';
+import path from 'path';
 import bodyPartModel from "../Admin Controlled Models/BodyPart.Model";
 import diseaseModel from "../Admin Controlled Models/Disease.Model";
-import addressModel from "../Models/Address.Model";
+import specialityModel from "../Admin Controlled Models/Specialization.Model";
 import hospitalModel from "../Models/Hospital.Model";
-
+import addressModel from "../Models/Address.Model";
+import prescriptionModel from "../Models/Prescription.Model";
+import preferredPharmaModel from "../Models/PreferredPharma.Model";
+import mongoose from "mongoose";
+import { any } from "underscore";
+import { prescription } from "../Services/schemaNames";
+import fs from 'fs';
+// const util = require("util");
+// const {GridFsStorage} = require('multer-gridfs-storage');
+// const dbConfig = require("../Services/db");
 const excludePatientFields = {
   password: 0,
   verified: 0,
@@ -40,7 +47,7 @@ const excludeHospitalFields = {
 };
 
 // Get All Patients
-export const getAllPatientsList = async (req: Request, res: Response) => {
+export const getAllPatientsList = async (_req: Request, res: Response) => {
   try {
     const patientList = await patientModel.find(
       { deleted: false },
@@ -90,8 +97,7 @@ export const patientLogin = async (req: Request, res: Response) => {
 
         // Implement message service API
         sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
-          .then(async (message) => {
-            console.log("message:", message);
+          .then(async (_message) => {
             const otpToken = jwt.sign(
               { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
               OTP
@@ -213,7 +219,7 @@ export const getPatientById = async (req: Request, res: Response) => {
 };
 
 // Get patient By Hospital(UPDATE)
-export const getPatientByHospitalId = async (req: Request, res: Response) => {
+export const getPatientByHospitalId = async (_req: Request, res: Response) => {
   try {
   } catch (error) {
     return errorResponse(error, res);
@@ -503,6 +509,43 @@ export const ViewAppointment = async (req: Request, res: Response) => {
     return errorResponse(error, res);
   }
 };
+//view the schedule of a doctor working for a specific Hospital for a given day and date
+export const ViewSchedule = async (req : Request, res: Response) => {
+try {
+    let body = req.body;
+    let schedule = await workingHourModel.findOne({
+      doctorDetails: body.doctors,
+      hospitalDetails: body.hospital,
+    });
+    // console.log(schedule)
+    const requestDate: Date = new Date(body.time);
+    let query: Object = {};
+    if (body.day == "monday") {
+      query = { "monday.working": true };
+    } else if (body.day == "tuesday") {
+      query = { "tuesday.working": true };
+      query = { "wednesday.working": true };
+    } else if (body.day == "thursday") {
+      query = { "thursday.working": true };
+    } else if (body.day == "friday") {
+      query = { "friday.working": true };
+      query = { "saturday.working": true };
+    } else if (body.day == "sunday") {
+      query = { "sunday.working": true };
+    }
+     let appointmentCount = await workingHourModel.find({
+      hospital: body.hospital,
+      // "schedule.working":true
+     });
+    return successResponse(
+      schedule,
+      "All Appoinments are succssfully shown  ",
+      res
+    );
+} catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
 
 // Get doctor list
 export const getDoctorByDay = async (req: Request, res: Response) => {
@@ -521,7 +564,6 @@ export const getDoctorByDay = async (req: Request, res: Response) => {
     } else if (body.day == "friday") {
       query = { "friday.working": true };
     } else if (body.day == "saturday") {
-      query = { "saturday.working": true };
     } else if (body.day == "sunday") {
       query = { "sunday.working": true };
     }
@@ -541,7 +583,7 @@ export const getDoctorByDay = async (req: Request, res: Response) => {
 
 // Get speciality, body part and disease
 export const getSpecialityBodyPartAndDisease = async (
-  req: Request,
+  _req: Request,
   res: Response
 ) => {
   try {
@@ -624,6 +666,23 @@ export const getDoctorsByCity = async (req: Request, res: Response) => {
       .populate("specialization qualification");
     // .populate("hospitalDetails.hospital");
     return successResponse(doctorsInThatCity, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+//Upload prescription for the preffered medical centre
+export const uploadPrescription = async (req: Request, res: Response) => {
+  try {  
+  const image = new prescriptionModel(req.body)
+  image.prescription.data = req.file?.filename;
+  image.prescription.contentType = req.file?.mimetype;
+  //  let medicineBook = await new prescriptionModel(req.body,image).save();
+  let medicineBook = await image.save(req.body);
+    return successResponse(
+      medicineBook,
+      "Medicine has been successfully booked",
+      res
+    );
   } catch (error: any) {
     return errorResponse(error, res);
   }

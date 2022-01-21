@@ -103,6 +103,16 @@ const hospitalSchema = new mongoose_1.Schema({
     location: {
         type: {
             type: String,
+<<<<<<< HEAD
+            enum: ['Point'],
+            required: true
+        },
+        coordinates: {
+            type: [Number],
+            required: true
+        }
+    }
+=======
             enum: ["Point"],
             // required: true
         },
@@ -111,6 +121,7 @@ const hospitalSchema = new mongoose_1.Schema({
             // required: true
         },
     },
+>>>>>>> 113b476190ab7e51a4c8ac2932498ea61e66b77d
 });
 hospitalSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {

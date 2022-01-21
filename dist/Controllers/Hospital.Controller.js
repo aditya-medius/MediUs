@@ -42,7 +42,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+<<<<<<< HEAD
+exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.login = void 0;
+=======
 exports.getHospitalById = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.login = void 0;
+>>>>>>> 113b476190ab7e51a4c8ac2932498ea61e66b77d
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Anemities_Model_1 = __importDefault(require("../Models/Anemities.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
@@ -57,7 +61,10 @@ const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const Appointment_Model_1 = __importDefault(require("../Models/Appointment.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const message_service_1 = require("../Services/message.service");
+<<<<<<< HEAD
+=======
 const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
+>>>>>>> 113b476190ab7e51a4c8ac2932498ea61e66b77d
 const excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -93,6 +100,8 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             }
         }
         else {
+<<<<<<< HEAD
+=======
             if (body.phoneNumber == "9999999999") {
                 const profile = yield Hospital_Model_1.default.findOne({
                     phoneNumber: body.phoneNumber,
@@ -102,6 +111,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 const { firstName, lastName, gender, phoneNumber, email, _id } = profile.toJSON();
                 return (0, response_1.successResponse)({ token, firstName, lastName, gender, phoneNumber, email, _id }, "Successfully logged in", res);
             }
+>>>>>>> 113b476190ab7e51a4c8ac2932498ea61e66b77d
             const otpData = yield OTP_Model_1.default.findOne({
                 phoneNumber: body.phoneNumber,
             });
@@ -115,10 +125,16 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                         deleted: false,
                     });
                     if (profile) {
+<<<<<<< HEAD
+                        const token = yield jwt.sign(profile.toJSON(), process.env.HOSPITAL_LOGIN_KEY);
+                        otpData.remove();
+                        return (0, response_1.successResponse)(token, "Successfully logged in", res);
+=======
                         const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_HOSPITAL_KEY);
                         otpData.remove();
                         const { name, contactNumber, _id, numberOfBed } = profile.toJSON();
                         return (0, response_1.successResponse)({ token, name, contactNumber, _id, numberOfBed }, "Successfully logged in", res);
+>>>>>>> 113b476190ab7e51a4c8ac2932498ea61e66b77d
                     }
                     else {
                         otpData.remove();
@@ -173,7 +189,11 @@ const myHospital = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     try {
         const hospital = yield Hospital_Model_1.default.find({
             deleted: false,
+<<<<<<< HEAD
+            _id: req.currentHospital
+=======
             _id: req.currentHospital,
+>>>>>>> 113b476190ab7e51a4c8ac2932498ea61e66b77d
         });
         return (0, response_1.successResponse)(hospital, "Successfully fetched Hospital", res);
     }
