@@ -69,6 +69,11 @@ doctorRouter.get(
   oneOf(authenticateDoctor),
   doctorController.viewAppointments
 );
+doctorRouter.get(
+  "/viewAppointmentsByDate/:page",
+  oneOf(authenticateDoctor),
+  doctorController.viewAppointmentsByDate
+);
 
 // Cancel doctor's appointments
 doctorRouter.put(
