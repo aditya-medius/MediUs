@@ -936,3 +936,55 @@ export const searchDoctorByPhoneNumberOrEmail = async (
     return errorResponse(error, res);
   }
 };
+
+export const getHospitalListByDoctorId = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const doctorData = await doctorModel
+      .findOne({ _id: req.params.id, deleted: false }, excludeDoctorFields)
+      .select({
+        "hospitalDetails.consultationFee": 0,
+        "hospitalDetails.workingHours": 0,
+      })
+      .populate({
+        path: "hospitalDetails.hospital",
+        populate: {
+          path: "address",
+          populate: {
+            path: "city state locality country",
+          },
+        },
+        select: {
+          doctors: 0,
+          location: 0,
+          specialisedIn: 0,
+          anemity: 0,
+          treatmentType: 0,
+          type: 0,
+          payment: 0,
+          deleted: 0,
+          openingHour: 0,
+          numberOfBed: 0,
+        },
+      });
+
+    if (doctorData) {
+      const hospitalDetails = doctorData.hospitalDetails.map((e: any) => {
+        return e.hospital;
+      });
+      return successResponse(
+        { hospitalDetails },
+        "Successfully fetched doctor details",
+        res
+      );
+    } else {
+      const error: Error = new Error("Doctor not found");
+      error.name = "Not found";
+      return errorResponse(error, res, 404);
+    }
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};

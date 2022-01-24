@@ -31,6 +31,7 @@ const workingHoursController = __importStar(require("../Controllers/WorkingHours
 const Patient_auth_1 = require("../authentication/Patient.auth");
 const middlewareHelper_1 = require("../Services/middlewareHelper");
 const preferredPharmaController = __importStar(require("../Controllers/Pharma.Cotroller"));
+const kycController = __importStar(require("../Controllers/KYC.Controller"));
 const doctorRouter = express_1.default.Router();
 doctorRouter.post("/login", doctorController.doctorLogin);
 /*
@@ -44,6 +45,7 @@ doctorRouter.post("/", doctorController.createDoctor);
 */
 doctorRouter.get("/", doctorController.getAllDoctorsList);
 doctorRouter.post("/getDoctorById/:id", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.getDoctorById);
+doctorRouter.get("/getHospitalListByDoctorId/:id", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.getHospitalListByDoctorId);
 doctorRouter.post("/updateProfile", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.updateDoctorProfile);
 doctorRouter.delete("/deleteProfile", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.deleteProfile);
 doctorRouter.post("/findDoctorBySpecialityOrBodyPart/:term", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.searchDoctor);
@@ -62,4 +64,7 @@ doctorRouter.get("/getPharma", preferredPharmaController.getPharma);
 doctorRouter.post("/delPharma/:id", Doctor_auth_1.authenticateDoctor, preferredPharmaController.delPharma);
 //update the pharma
 doctorRouter.post("/updatePharma/:id", Doctor_auth_1.authenticateDoctor, preferredPharmaController.updatePharma);
+// KYC details
+doctorRouter.post("/setKYC", kycController.addKYC);
+doctorRouter.post("/updateKyc", kycController.updateKyc);
 exports.default = doctorRouter;

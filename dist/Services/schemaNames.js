@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.cityMap = exports.stateMap = exports.CountryMap = exports.preferredPharma = exports.appointmentPayment = exports.doctorType = exports.disease = exports.openingHour = exports.country = exports.BodyPart = exports.OTP = exports.treatmentType = exports.locality = exports.state = exports.city = exports.payment = exports.address = exports.anemity = exports.admin = exports.subPatient = exports.patient = exports.doctor = exports.workingHour = exports.hospital = exports.like = exports.specialization = exports.specialityDoctorType = exports.specialityDisease = exports.speciality = exports.qualification = exports.appointment = void 0;
+exports.kycDetails = exports.cityMap = exports.stateMap = exports.CountryMap = exports.preferredPharma = exports.appointmentPayment = exports.doctorType = exports.disease = exports.openingHour = exports.country = exports.BodyPart = exports.OTP = exports.treatmentType = exports.locality = exports.state = exports.city = exports.payment = exports.address = exports.anemity = exports.admin = exports.subPatient = exports.patient = exports.doctor = exports.workingHour = exports.hospital = exports.like = exports.specialization = exports.specialityDoctorType = exports.specialityDisease = exports.speciality = exports.qualification = exports.appointment = void 0;
 exports.appointment = "appointments";
 exports.qualification = "qualifications";
 exports.speciality = "specialities";
@@ -32,3 +32,4 @@ exports.preferredPharma = "preferredPharmas";
 exports.CountryMap = "countryMap";
 exports.stateMap = "stateMap";
 exports.cityMap = "cityMap";
+exports.kycDetails = "KYCDetails";

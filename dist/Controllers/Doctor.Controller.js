@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
+exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -872,3 +872,49 @@ const searchDoctorByPhoneNumberOrEmail = (req, res) => __awaiter(void 0, void 0,
     }
 });
 exports.searchDoctorByPhoneNumberOrEmail = searchDoctorByPhoneNumberOrEmail;
+const getHospitalListByDoctorId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const doctorData = yield Doctors_Model_1.default
+            .findOne({ _id: req.params.id, deleted: false }, exports.excludeDoctorFields)
+            .select({
+            "hospitalDetails.consultationFee": 0,
+            "hospitalDetails.workingHours": 0,
+        })
+            .populate({
+            path: "hospitalDetails.hospital",
+            populate: {
+                path: "address",
+                populate: {
+                    path: "city state locality country",
+                },
+            },
+            select: {
+                doctors: 0,
+                location: 0,
+                specialisedIn: 0,
+                anemity: 0,
+                treatmentType: 0,
+                type: 0,
+                payment: 0,
+                deleted: 0,
+                openingHour: 0,
+                numberOfBed: 0,
+            },
+        });
+        if (doctorData) {
+            const hospitalDetails = doctorData.hospitalDetails.map((e) => {
+                return e.hospital;
+            });
+            return (0, response_1.successResponse)({ hospitalDetails }, "Successfully fetched doctor details", res);
+        }
+        else {
+            const error = new Error("Doctor not found");
+            error.name = "Not found";
+            return (0, response_1.errorResponse)(error, res, 404);
+        }
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getHospitalListByDoctorId = getHospitalListByDoctorId;

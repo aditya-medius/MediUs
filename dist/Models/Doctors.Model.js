@@ -80,26 +80,8 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
             ref: schemaNames_1.specialization,
         },
     ], KYCDetails: {
-        type: {
-            panCard: {
-                type: String,
-                required: true,
-            },
-            bankName: {
-                type: String,
-            },
-            bankAccountNumber: {
-                type: String,
-            },
-            IFSC: {
-                type: String,
-            },
-            adhaarCard: {
-                type: String,
-                required: true,
-                minlength: 12,
-            },
-        },
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        ref: schemaNames_1.kycDetails,
         required: [true, "KYC details are required"],
     }, qualification: [
         {
@@ -119,12 +101,13 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
 });
-// doctorSchema.pre("find", async function)
-// ["find", "findOne"].forEach((e: string) => {
-//   doctorSchema.pre(e, async function (next) {
-//     console.log("this: ", this);
-//   });
-// });
+["find", "findOne"].forEach((e) => {
+    doctorSchema.pre(e, function (next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.populate("KYCDetails");
+        });
+    });
+});
 doctorSchema.post("findOne", function (result) {
     return __awaiter(this, void 0, void 0, function* () {
         if (result && result.overallExperience) {

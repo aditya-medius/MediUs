@@ -13,6 +13,7 @@ import {
   treatmentType,
   specialization,
   BodyPart,
+  kycDetails,
 } from "../Services/schemaNames";
 const doctorSchema = new Schema(
   {
@@ -64,26 +65,8 @@ const doctorSchema = new Schema(
       },
     ],
     KYCDetails: {
-      type: {
-        panCard: {
-          type: String,
-          required: true,
-        },
-        bankName: {
-          type: String,
-        },
-        bankAccountNumber: {
-          type: String,
-        },
-        IFSC: {
-          type: String,
-        },
-        adhaarCard: {
-          type: String,
-          required: true,
-          minlength: 12,
-        },
-      },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: kycDetails,
       required: [true, "KYC details are required"],
     },
     qualification: [
@@ -111,12 +94,11 @@ const doctorSchema = new Schema(
   }
 );
 
-// doctorSchema.pre("find", async function)
-// ["find", "findOne"].forEach((e: string) => {
-//   doctorSchema.pre(e, async function (next) {
-//     console.log("this: ", this);
-//   });
-// });
+["find", "findOne"].forEach((e: string) => {
+  doctorSchema.pre(e, async function (next) {
+    this.populate("KYCDetails");
+  });
+});
 
 doctorSchema.post("findOne", async function (result) {
   if (result && result.overallExperience) {

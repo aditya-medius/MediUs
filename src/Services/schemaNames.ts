@@ -29,3 +29,4 @@ export const preferredPharma: string = "preferredPharmas";
 export const CountryMap: string = "countryMap";
 export const stateMap: string = "stateMap";
 export const cityMap: string = "cityMap";
+export const kycDetails: string = "KYCDetails";
