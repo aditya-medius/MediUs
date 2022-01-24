@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
+exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -58,6 +58,8 @@ const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Mod
 const mongoose_1 = __importDefault(require("mongoose"));
 const Appointment_Model_1 = __importDefault(require("../Models/Appointment.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
+const Patient_Controller_1 = require("./Patient.Controller");
+const Validation_Service_1 = require("../Services/Validation.Service");
 exports.excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -489,7 +491,9 @@ const setSchedule = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     try {
         let body = req.body;
         let { workingHour } = req.body;
-        const updateQuery = { $set: workingHour };
+        const updateQuery = {
+            $set: Object.assign({ doctorDetails: req.currentDoctor, hospitalDetails: body.hospitalId }, workingHour),
+        };
         let doctorProfile = yield Doctors_Model_1.default
             .findOne({
             "hospitalDetails.hospital": body.hospitalId,
@@ -514,6 +518,7 @@ const setSchedule = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             ],
         }, updateQuery, {
             upsert: true,
+            new: true,
         });
         return (0, response_1.successResponse)(Wh, "Success", res);
     }
@@ -539,6 +544,123 @@ const viewAppointments = (req, res) => __awaiter(void 0, void 0, void 0, functio
                 $limit: limit,
             },
         ];
+        const pipelines = [
+            {
+                $lookup: {
+                    from: "hospitals",
+                    localField: "hospital",
+                    foreignField: "_id",
+                    as: "hospital",
+                },
+            },
+            {
+                $unwind: "$hospital",
+            },
+            {
+                $lookup: {
+                    from: "addresses",
+                    localField: "hospital.address",
+                    foreignField: "_id",
+                    as: "hospital.address",
+                },
+            },
+            {
+                $unwind: "$hospital.address",
+            },
+            {
+                $lookup: {
+                    from: "cities",
+                    localField: "hospital.address.city",
+                    foreignField: "_id",
+                    as: "hospital.address.city",
+                },
+            },
+            {
+                $lookup: {
+                    from: "states",
+                    localField: "hospital.address.state",
+                    foreignField: "_id",
+                    as: "hospital.address.state",
+                },
+            },
+            {
+                $lookup: {
+                    from: "localities",
+                    localField: "hospital.address.locality",
+                    foreignField: "_id",
+                    as: "hospital.address.locality",
+                },
+            },
+            {
+                $lookup: {
+                    from: "countries",
+                    localField: "hospital.address.country",
+                    foreignField: "_id",
+                    as: "hospital.address.country",
+                },
+            },
+            {
+                $unwind: "$hospital.address.city",
+            },
+            {
+                $unwind: "$hospital.address.country",
+            },
+            {
+                $unwind: "$hospital.address.state",
+            },
+            {
+                $unwind: "$hospital.address.locality",
+            },
+            {
+                $project: {
+                    "hospital.doctors": 0,
+                    "hospital.contactNumber": 0,
+                    "hospital.payment": 0,
+                    "hospital.anemity": 0,
+                    "hospital.specialisedIn": 0,
+                    "hospital.treatmentType": 0,
+                    // "hospital.address": 0,
+                },
+            },
+            {
+                $lookup: {
+                    from: "patients",
+                    localField: "patient",
+                    foreignField: "_id",
+                    as: "patient",
+                },
+            },
+            {
+                $project: {
+                    "patient.password": 0,
+                    "patient.DOB": 0,
+                },
+            },
+            {
+                $lookup: {
+                    from: "doctors",
+                    localField: "doctors",
+                    foreignField: "_id",
+                    as: "doctors",
+                },
+            },
+            {
+                $project: {
+                    "doctors.password": 0,
+                    "doctors.hospitalDetails": 0,
+                    "doctors.registration": 0,
+                    "doctors.specialization": 0,
+                    "doctors.KYCDetails": 0,
+                    "doctors.qualification": 0,
+                    "doctors.DOB": 0,
+                    "doctors.phoneNumber": 0,
+                },
+            },
+            {
+                $unwind: "$hospital",
+            },
+            ...limitSkipSort,
+        ];
         const doctorAppointments = yield Appointment_Model_1.default.aggregate([
             // {
             //   $match: {
@@ -554,121 +676,7 @@ const viewAppointments = (req, res) => __awaiter(void 0, void 0, void 0, functio
                                 "time.date": { $lte: new Date() },
                             },
                         },
-                        {
-                            $lookup: {
-                                from: "hospitals",
-                                localField: "hospital",
-                                foreignField: "_id",
-                                as: "hospital",
-                            },
-                        },
-                        {
-                            $unwind: "$hospital",
-                        },
-                        {
-                            $lookup: {
-                                from: "addresses",
-                                localField: "hospital.address",
-                                foreignField: "_id",
-                                as: "hospital.address",
-                            },
-                        },
-                        {
-                            $unwind: "$hospital.address",
-                        },
-                        {
-                            $lookup: {
-                                from: "cities",
-                                localField: "hospital.address.city",
-                                foreignField: "_id",
-                                as: "hospital.address.city",
-                            },
-                        },
-                        {
-                            $lookup: {
-                                from: "states",
-                                localField: "hospital.address.state",
-                                foreignField: "_id",
-                                as: "hospital.address.state",
-                            },
-                        },
-                        {
-                            $lookup: {
-                                from: "localities",
-                                localField: "hospital.address.locality",
-                                foreignField: "_id",
-                                as: "hospital.address.locality",
-                            },
-                        },
-                        {
-                            $lookup: {
-                                from: "countries",
-                                localField: "hospital.address.country",
-                                foreignField: "_id",
-                                as: "hospital.address.country",
-                            },
-                        },
-                        {
-                            $unwind: "$hospital.address.city",
-                        },
-                        {
-                            $unwind: "$hospital.address.country",
-                        },
-                        {
-                            $unwind: "$hospital.address.state",
-                        },
-                        {
-                            $unwind: "$hospital.address.locality",
-                        },
-                        {
-                            $project: {
-                                "hospital.doctors": 0,
-                                "hospital.contactNumber": 0,
-                                "hospital.payment": 0,
-                                "hospital.anemity": 0,
-                                "hospital.specialisedIn": 0,
-                                "hospital.treatmentType": 0,
-                                // "hospital.address": 0,
-                            },
-                        },
-                        {
-                            $lookup: {
-                                from: "patients",
-                                localField: "patient",
-                                foreignField: "_id",
-                                as: "patient",
-                            },
-                        },
-                        {
-                            $project: {
-                                "patient.password": 0,
-                                "patient.DOB": 0,
-                            },
-                        },
-                        {
-                            $lookup: {
-                                from: "doctors",
-                                localField: "doctors",
-                                foreignField: "_id",
-                                as: "doctors",
-                            },
-                        },
-                        {
-                            $project: {
-                                "doctors.password": 0,
-                                "doctors.hospitalDetails": 0,
-                                "doctors.registration": 0,
-                                "doctors.specialization": 0,
-                                "doctors.KYCDetails": 0,
-                                "doctors.qualification": 0,
-                                "doctors.DOB": 0,
-                                "doctors.phoneNumber": 0,
-                            },
-                        },
-                        {
-                            $unwind: "$hospital",
-                        },
-                        ...limitSkipSort,
+                        ...pipelines,
                     ],
                     upcoming: [
                         {
@@ -677,7 +685,7 @@ const viewAppointments = (req, res) => __awaiter(void 0, void 0, void 0, functio
                                 "time.date": { $gte: new Date() },
                             },
                         },
-                        ...limitSkipSort,
+                        ...pipelines,
                     ],
                 },
             },
@@ -689,6 +697,38 @@ const viewAppointments = (req, res) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.viewAppointments = viewAppointments;
+const viewAppointmentsByDate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const limit = 2;
+        const skip = parseInt(req.params.page) * limit;
+        const date = req.body.date;
+        let d = new Date(date);
+        let gtDate = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+        let ltDate = new Date(gtDate);
+        ltDate.setDate(gtDate.getDate() - 1);
+        ltDate.setUTCHours(24, 60, 60, 0);
+        gtDate.setDate(gtDate.getDate() + 1);
+        gtDate.setUTCHours(0, 0, 0, 0);
+        const appointments = yield Appointment_Model_1.default
+            .find({
+            doctors: req.currentDoctor,
+            "time.date": {
+                $gte: ltDate,
+                $lte: gtDate,
+            },
+        })
+            .populate({ path: "patient", select: Patient_Controller_1.excludePatientFields })
+            .populate({ path: "doctors", select: exports.excludeDoctorFields })
+            .populate({ path: "hospital" })
+            .limit(limit)
+            .skip(skip);
+        return (0, response_1.successResponse)(appointments, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.viewAppointmentsByDate = viewAppointmentsByDate;
 const cancelAppointments = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
@@ -725,13 +765,17 @@ const getDoctorWorkingInHospitals = (req, res) => __awaiter(void 0, void 0, void
         })
             .distinct("hospitalDetails");
         let hospitals = yield Hospital_Model_1.default
-            .find({ _id: { $in: workingHourObj } })
+            .find({ _id: { $in: workingHourObj } }, {
+            payment: 0,
+        })
             .populate({
-            path: "address anemity",
+            path: "address",
             populate: {
                 path: "city state locality country",
             },
-        });
+        })
+            .populate("anemity")
+            .populate("openingHour");
         const doctorObj = yield WorkingHours_Model_1.default.aggregate([
             {
                 $match: {
@@ -794,3 +838,83 @@ const getDoctorWorkingInHospitals = (req, res) => __awaiter(void 0, void 0, void
     }
 });
 exports.getDoctorWorkingInHospitals = getDoctorWorkingInHospitals;
+const searchDoctorByPhoneNumberOrEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const term = req.params.term;
+        const phone = (0, Validation_Service_1.phoneNumberValidation)(term);
+        const email = (0, Validation_Service_1.emailValidation)(term);
+        if (!phone && !email) {
+            const error = new Error("Enter a valid phone number or email");
+            error.name = "Invalid Term";
+            return (0, response_1.errorResponse)(error, res);
+        }
+        const doctorObj = yield Doctors_Model_1.default.find({
+            $or: [
+                {
+                    email: term,
+                },
+                {
+                    phoneNumber: term,
+                },
+            ],
+        });
+        if (doctorObj) {
+            return (0, response_1.successResponse)(doctorObj, "Success", res);
+        }
+        return (0, response_1.successResponse)({}, "No data found", res);
+    }
+    catch (error) {
+        if (typeof error == "string") {
+            error = new Error(error);
+            error.name = "Not Found";
+        }
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.searchDoctorByPhoneNumberOrEmail = searchDoctorByPhoneNumberOrEmail;
+const getHospitalListByDoctorId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const doctorData = yield Doctors_Model_1.default
+            .findOne({ _id: req.params.id, deleted: false }, exports.excludeDoctorFields)
+            .select({
+            "hospitalDetails.consultationFee": 0,
+            "hospitalDetails.workingHours": 0,
+        })
+            .populate({
+            path: "hospitalDetails.hospital",
+            populate: {
+                path: "address",
+                populate: {
+                    path: "city state locality country",
+                },
+            },
+            select: {
+                doctors: 0,
+                location: 0,
+                specialisedIn: 0,
+                anemity: 0,
+                treatmentType: 0,
+                type: 0,
+                payment: 0,
+                deleted: 0,
+                openingHour: 0,
+                numberOfBed: 0,
+            },
+        });
+        if (doctorData) {
+            const hospitalDetails = doctorData.hospitalDetails.map((e) => {
+                return e.hospital;
+            });
+            return (0, response_1.successResponse)({ hospitalDetails }, "Successfully fetched doctor details", res);
+        }
+        else {
+            const error = new Error("Doctor not found");
+            error.name = "Not found";
+            return (0, response_1.errorResponse)(error, res, 404);
+        }
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getHospitalListByDoctorId = getHospitalListByDoctorId;

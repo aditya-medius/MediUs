@@ -30,16 +30,10 @@ const hospitalController = __importStar(require("../Controllers/Hospital.Control
 const WorkingHours_Controller_1 = require("../Controllers/WorkingHours.Controller");
 const middlewareHelper_1 = require("../Services/middlewareHelper");
 const hospitalRouter = express_1.default.Router();
-<<<<<<< HEAD
-hospitalRouter.post("/login", hospitalController.login);
-hospitalRouter.get("/myHospital", Hospital_auth_1.authenticateHospital, hospitalController.myHospital);
-hospitalRouter.get("/", Hospital_auth_1.authenticateHospital, hospitalController.getAllHospitalsList);
-=======
 hospitalRouter.get("/", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getAllHospitalsList);
 hospitalRouter.post("/login", hospitalController.login);
 hospitalRouter.get("/myHospital", Hospital_auth_1.authenticateHospital, hospitalController.myHospital);
 // hospitalRouter.get("/", authenticateHospital, hospitalController.getAllHospitalsList);
->>>>>>> 113b476190ab7e51a4c8ac2932498ea61e66b77d
 hospitalRouter.post("/", hospitalController.createHospital);
 hospitalRouter.post("/deleteHospital", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.deleteHospital);
 hospitalRouter.post("/updateHospital", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.updateHospital);

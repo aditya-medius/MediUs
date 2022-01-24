@@ -14,29 +14,21 @@ import { excludeDoctorFields } from "./Doctor.Controller";
 import workingHourModel from "../Models/WorkingHours.Model";
 import RazorPay from "razorpay";
 import crypto from "crypto";
-import multer from 'multer';
-import path from 'path';
+import multer from "multer";
+import path from "path";
 import bodyPartModel from "../Admin Controlled Models/BodyPart.Model";
 import diseaseModel from "../Admin Controlled Models/Disease.Model";
 import specialityModel from "../Admin Controlled Models/Specialization.Model";
 import hospitalModel from "../Models/Hospital.Model";
 import addressModel from "../Models/Address.Model";
 import prescriptionModel from "../Models/Prescription.Model";
-import preferredPharmaModel from "../Models/PreferredPharma.Model";
-import mongoose from "mongoose";
-import { any } from "underscore";
-import { prescription } from "../Services/schemaNames";
-import fs from 'fs';
-// const util = require("util");
-// const {GridFsStorage} = require('multer-gridfs-storage');
-// const dbConfig = require("../Services/db");
-const excludePatientFields = {
+export const excludePatientFields = {
   password: 0,
   verified: 0,
   DOB: 0,
 };
 
-const excludeHospitalFields = {
+export const excludeHospitalFields = {
   location: 0,
   doctors: 0,
   specialisedIn: 0,
@@ -97,7 +89,7 @@ export const patientLogin = async (req: Request, res: Response) => {
 
         // Implement message service API
         sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
-          .then(async (_message) => {
+          .then(async (message) => {
             const otpToken = jwt.sign(
               { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
               OTP
@@ -311,6 +303,11 @@ export const BookAppointment = async (req: Request, res: Response) => {
     } else if (day == 6) {
       capacity = capacity.saturday;
     }
+    if (!capacity) {
+      const error: Error = new Error("Doctor not available on this day");
+      error.name = "Not available";
+      return errorResponse(error, res);
+    }
     let appointmentCount = await appointmentModel.find({
       doctors: body.doctors,
       hospital: body.hospital,
@@ -510,8 +507,8 @@ export const ViewAppointment = async (req: Request, res: Response) => {
   }
 };
 //view the schedule of a doctor working for a specific Hospital for a given day and date
-export const ViewSchedule = async (req : Request, res: Response) => {
-try {
+export const ViewSchedule = async (req: Request, res: Response) => {
+  try {
     let body = req.body;
     let schedule = await workingHourModel.findOne({
       doctorDetails: body.doctors,
@@ -533,16 +530,16 @@ try {
     } else if (body.day == "sunday") {
       query = { "sunday.working": true };
     }
-     let appointmentCount = await workingHourModel.find({
+    let appointmentCount = await workingHourModel.find({
       hospital: body.hospital,
       // "schedule.working":true
-     });
+    });
     return successResponse(
       schedule,
       "All Appoinments are succssfully shown  ",
       res
     );
-} catch (error: any) {
+  } catch (error: any) {
     return errorResponse(error, res);
   }
 };
@@ -672,12 +669,12 @@ export const getDoctorsByCity = async (req: Request, res: Response) => {
 };
 //Upload prescription for the preffered medical centre
 export const uploadPrescription = async (req: Request, res: Response) => {
-  try {  
-  const image = new prescriptionModel(req.body)
-  image.prescription.data = req.file?.filename;
-  image.prescription.contentType = req.file?.mimetype;
-  //  let medicineBook = await new prescriptionModel(req.body,image).save();
-  let medicineBook = await image.save(req.body);
+  try {
+    const image = new prescriptionModel(req.body);
+    image.prescription.data = req.file?.filename;
+    image.prescription.contentType = req.file?.mimetype;
+    //  let medicineBook = await new prescriptionModel(req.body,image).save();
+    let medicineBook = await image.save(req.body);
     return successResponse(
       medicineBook,
       "Medicine has been successfully booked",

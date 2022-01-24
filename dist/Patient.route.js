@@ -26,11 +26,9 @@ const express_1 = __importDefault(require("express"));
 const Patient_auth_1 = require("../authentication/Patient.auth");
 const patientController = __importStar(require("../Controllers/Patient.Controller"));
 const paymentController = __importStar(require("../Controllers/AppointmentPayment.Controller"));
-const multer_1 = __importDefault(require("multer"));
 const middlewareHelper_1 = require("../Services/middlewareHelper");
 const subPatientController = __importStar(require("../Controllers/SubPatient.Controller"));
 const patientRouter = express_1.default.Router();
-const upload = (0, multer_1.default)({ dest: './src/uploads' });
 patientRouter.post("/login", patientController.patientLogin);
 patientRouter.post("/", patientController.createPatient);
 patientRouter.get("/", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.getAllPatientsList);
@@ -50,8 +48,6 @@ patientRouter.get("/getSpecialityBodyPartAndDisease", patientController.getSpeci
 patientRouter.get("/getHospitalsByCity", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.getHospitalsByCity);
 // Get doctors by city
 patientRouter.get("/getDoctorsByCity", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.getDoctorsByCity);
-//upload prescription
-patientRouter.post("/uploadPrescription", upload.single("prescription"), Patient_auth_1.authenticatePatient, patientController.uploadPrescription);
 // Sub Patient
 patientRouter.post("/addSubPatient", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), subPatientController.addSubPatient);
 patientRouter.get("/getSubPatientList", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), subPatientController.getSubPatientList);

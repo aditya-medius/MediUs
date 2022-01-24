@@ -7,6 +7,7 @@ import * as workingHoursController from "../Controllers/WorkingHours.Controller"
 import { authenticatePatient } from "../authentication/Patient.auth";
 import { oneOf } from "../Services/middlewareHelper";
 import * as preferredPharmaController from "../Controllers/Pharma.Cotroller";
+import * as kycController from "../Controllers/KYC.Controller";
 const doctorRouter = express.Router();
 
 doctorRouter.post("/login", doctorController.doctorLogin);
@@ -33,6 +34,11 @@ doctorRouter.post(
   "/getDoctorById/:id",
   oneOf(authenticateDoctor, authenticatePatient),
   doctorController.getDoctorById
+);
+doctorRouter.get(
+  "/getHospitalListByDoctorId/:id",
+  oneOf(authenticateDoctor, authenticatePatient),
+  doctorController.getHospitalListByDoctorId
 );
 doctorRouter.post(
   "/updateProfile",
@@ -62,6 +68,11 @@ doctorRouter.get(
   "/viewAppointments/:page",
   oneOf(authenticateDoctor),
   doctorController.viewAppointments
+);
+doctorRouter.get(
+  "/viewAppointmentsByDate/:page",
+  oneOf(authenticateDoctor),
+  doctorController.viewAppointmentsByDate
 );
 
 // Cancel doctor's appointments
@@ -101,4 +112,8 @@ doctorRouter.post(
   authenticateDoctor,
   preferredPharmaController.updatePharma
 );
+
+// KYC details
+doctorRouter.post("/setKYC", kycController.addKYC);
+doctorRouter.post("/updateKyc", kycController.updateKyc);
 export default doctorRouter;

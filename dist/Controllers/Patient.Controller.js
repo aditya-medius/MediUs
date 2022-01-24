@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uploadPrescription = exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.CancelAppointment = exports.doneAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = void 0;
+exports.uploadPrescription = exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.CancelAppointment = exports.doneAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = exports.excludeHospitalFields = exports.excludePatientFields = void 0;
 const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
 // import { excludePatientFields } from "./Patient.Controller";
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
@@ -50,15 +50,12 @@ const Specialization_Model_1 = __importDefault(require("../Admin Controlled Mode
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Prescription_Model_1 = __importDefault(require("../Models/Prescription.Model"));
-// const util = require("util");
-// const {GridFsStorage} = require('multer-gridfs-storage');
-// const dbConfig = require("../Services/db");
-const excludePatientFields = {
+exports.excludePatientFields = {
     password: 0,
     verified: 0,
     DOB: 0,
 };
-const excludeHospitalFields = {
+exports.excludeHospitalFields = {
     location: 0,
     doctors: 0,
     specialisedIn: 0,
@@ -70,7 +67,7 @@ const excludeHospitalFields = {
 // Get All Patients
 const getAllPatientsList = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const patientList = yield Patient_Model_1.default.find({ deleted: false }, excludePatientFields);
+        const patientList = yield Patient_Model_1.default.find({ deleted: false }, exports.excludePatientFields);
         return (0, response_1.successResponse)(patientList, "Successfully fetched patient's list", res);
     }
     catch (error) {
@@ -105,12 +102,7 @@ const patientLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                 const OTP = Math.floor(100000 + Math.random() * 900000).toString();
                 // Implement message service API
                 (0, message_service_1.sendMessage)(`Your OTP is: ${OTP}`, body.phoneNumber)
-<<<<<<< HEAD
-                    .then((_message) => __awaiter(void 0, void 0, void 0, function* () {
-=======
                     .then((message) => __awaiter(void 0, void 0, void 0, function* () {
-                    console.log("message:", message);
->>>>>>> 113b476190ab7e51a4c8ac2932498ea61e66b77d
                     const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 }, OTP);
                     // Add OTP and phone number to temporary collection
                     yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: body.phoneNumber }, { $set: { phoneNumber: body.phoneNumber, otp: otpToken } }, { upsert: true });
@@ -149,7 +141,7 @@ const patientLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                     const profile = yield Patient_Model_1.default.findOne({
                         phoneNumber: body.phoneNumber,
                         deleted: false,
-                    }, excludePatientFields);
+                    }, exports.excludePatientFields);
                     if (profile) {
                         const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_PATIENT_KEY);
                         otpData.remove();
@@ -184,7 +176,7 @@ exports.patientLogin = patientLogin;
 // Get Patient By Patient Id(READ)
 const getPatientById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const patientData = yield Patient_Model_1.default.findOne({ _id: req.params.id, deleted: false }, excludePatientFields);
+        const patientData = yield Patient_Model_1.default.findOne({ _id: req.params.id, deleted: false }, exports.excludePatientFields);
         if (patientData) {
             return (0, response_1.successResponse)(patientData, "Successfully fetched patient details", res);
         }
@@ -217,7 +209,7 @@ const updatePatientProfile = (req, res) => __awaiter(void 0, void 0, void 0, fun
         }, {
             $set: body,
         }, {
-            fields: excludePatientFields,
+            fields: exports.excludePatientFields,
             new: true,
         });
         if (updatedPatientObj) {
@@ -292,6 +284,11 @@ const BookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
         else if (day == 6) {
             capacity = capacity.saturday;
         }
+        if (!capacity) {
+            const error = new Error("Doctor not available on this day");
+            error.name = "Not available";
+            return (0, response_1.errorResponse)(error, res);
+        }
         let appointmentCount = yield Appointment_Model_1.default.find({
             doctors: body.doctors,
             hospital: body.hospital,
@@ -333,11 +330,11 @@ const doneAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
         })
             .populate({
             path: "patient",
-            select: excludePatientFields,
+            select: exports.excludePatientFields,
         })
             .populate({
             path: "hospital",
-            select: excludeHospitalFields,
+            select: exports.excludeHospitalFields,
         })
             .populate({
             path: "doctors",
@@ -401,18 +398,18 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
             .find({ patient: req.currentPatient, "time.date": { $gt: Date() } })
             .populate({
             path: "patient",
-            select: excludePatientFields,
+            select: exports.excludePatientFields,
         })
             .sort({ "time.date": 1 })
             .skip(page > 1 ? (page - 1) * 2 : 0)
             .limit(2)
             .populate({
             path: "patient",
-            select: excludePatientFields,
+            select: exports.excludePatientFields,
         })
             .populate({
             path: "hospital",
-            select: excludeHospitalFields,
+            select: exports.excludeHospitalFields,
         })
             .populate({
             path: "doctors",
@@ -430,11 +427,11 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
             // .populate("patient subPatient hospital doctors")
             .populate({
             path: "patient",
-            select: excludePatientFields,
+            select: exports.excludePatientFields,
         })
             .populate({
             path: "hospital",
-            select: excludeHospitalFields,
+            select: exports.excludeHospitalFields,
         })
             .populate({
             path: "doctors",
