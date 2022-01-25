@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uploadPrescription = exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.CancelAppointment = exports.doneAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = exports.excludeHospitalFields = exports.excludePatientFields = void 0;
+exports.uploadPrescription = exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.CancelAppointment = exports.doneAppointment = exports.rescheduleAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = exports.excludeHospitalFields = exports.excludePatientFields = void 0;
 const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
 // import { excludePatientFields } from "./Patient.Controller";
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
@@ -322,10 +322,79 @@ const BookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
 });
 exports.BookAppointment = BookAppointment;
 // Re-Schedule appointment
-// export const rescheduleAppointment = async (req: Request, res: Response) => {
-//   try{
-//   }catcyh
-// };
+const rescheduleAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.body;
+        // @TODO check if working hour exist first
+        let capacity = yield WorkingHours_Model_1.default.findOne({
+            doctorDetails: body.doctors,
+            hospitalDetails: body.hospital,
+        });
+        if (!capacity) {
+            let error = new Error("Error");
+            error.message = "Cannot create appointment";
+            // return errorResponse(error, res);
+            throw error;
+        }
+        body.time.date = new Date(body.time.date);
+        // body.time.date = new Date(body.time.date);
+        const requestDate = new Date(body.time.date);
+        const day = requestDate.getDay();
+        if (day == 0) {
+            capacity = capacity.sunday;
+        }
+        else if (day == 1) {
+            capacity = capacity.monday;
+        }
+        else if (day == 2) {
+            capacity = capacity.tuesday;
+        }
+        else if (day == 3) {
+            capacity = capacity.wednesday;
+        }
+        else if (day == 4) {
+            capacity = capacity.thursday;
+        }
+        else if (day == 5) {
+            capacity = capacity.friday;
+        }
+        else if (day == 6) {
+            capacity = capacity.saturday;
+        }
+        if (!capacity) {
+            const error = new Error("Doctor not available on this day");
+            error.name = "Not available";
+            return (0, response_1.errorResponse)(error, res);
+        }
+        let appointmentCount = yield Appointment_Model_1.default.find({
+            doctors: body.doctors,
+            hospital: body.hospital,
+            "time.from.time": capacity.from.time,
+            "time.till.time": capacity.till.time,
+        });
+        let appCount = 0;
+        appointmentCount = appointmentCount.map((e) => {
+            if (new Date(e.time.date).getDate() == new Date(requestDate).getDate() &&
+                new Date(e.time.date).getFullYear() ==
+                    new Date(requestDate).getFullYear() &&
+                new Date(e.time.date).getMonth() == new Date(requestDate).getMonth()) {
+                appCount++;
+            }
+        });
+        if (appCount == capacity.capacity) {
+            return (0, response_1.errorResponse)(new Error("Doctor cannot take any more appointments"), res);
+        }
+        let appointmentBook = yield Appointment_Model_1.default.findOneAndUpdate({
+            _id: body.appointmentId,
+        }, {
+            $set: { time: body.time, reschduled: true },
+        });
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.rescheduleAppointment = rescheduleAppointment;
 //Done Appointment
 const doneAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {

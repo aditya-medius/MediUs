@@ -80,6 +80,10 @@ const appointmentSchema = new Schema({
     type: Date,
     default: Date.now(),
   },
+  reschduled: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const appointmentModel = model(appointment, appointmentSchema);
