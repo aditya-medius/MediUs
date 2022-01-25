@@ -350,6 +350,12 @@ export const BookAppointment = async (req: Request, res: Response) => {
   }
 };
 
+// Re-Schedule appointment
+// export const rescheduleAppointment = async (req: Request, res: Response) => {
+//   try{
+
+//   }catcyh
+// };
 //Done Appointment
 export const doneAppointment = async (req: Request, res: Response) => {
   try {

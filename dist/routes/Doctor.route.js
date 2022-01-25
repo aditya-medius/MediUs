@@ -32,6 +32,7 @@ const Patient_auth_1 = require("../authentication/Patient.auth");
 const middlewareHelper_1 = require("../Services/middlewareHelper");
 const preferredPharmaController = __importStar(require("../Controllers/Pharma.Cotroller"));
 const kycController = __importStar(require("../Controllers/KYC.Controller"));
+const Hospital_auth_1 = require("../authentication/Hospital.auth");
 const doctorRouter = express_1.default.Router();
 doctorRouter.post("/login", doctorController.doctorLogin);
 /*
@@ -56,6 +57,7 @@ doctorRouter.get("/viewAppointmentsByDate/:page", (0, middlewareHelper_1.oneOf)(
 // Cancel doctor's appointments
 doctorRouter.put("/cancelAppointments", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.cancelAppointments);
 doctorRouter.get("/getDoctorWorkingInHospitals/:id", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.getDoctorWorkingInHospitals);
+doctorRouter.post("/getWorkingHours", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital), workingHoursController.getWorkingHours);
 //Preferred Pharma Routes
 //add the preferred pharma
 doctorRouter.post("/addPharma", Doctor_auth_1.authenticateDoctor, preferredPharmaController.addPharma);
