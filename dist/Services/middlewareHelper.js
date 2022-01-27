@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.oneOf = void 0;
+exports.tokenNikalo = exports.oneOf = void 0;
 const response_1 = require("./response");
 const oneOf = (...middlewares) => {
     return (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -29,3 +29,14 @@ const oneOf = (...middlewares) => {
     });
 };
 exports.oneOf = oneOf;
+const tokenNikalo = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    if (req.query.token) {
+        req.headers["auth-header"] = `${req.query.token}`;
+        next();
+    }
+    else {
+        const error = new Error("Token is missing");
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.tokenNikalo = tokenNikalo;

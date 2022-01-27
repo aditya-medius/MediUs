@@ -9,6 +9,25 @@ import { oneOf } from "../Services/middlewareHelper";
 import * as preferredPharmaController from "../Controllers/Pharma.Cotroller";
 import * as kycController from "../Controllers/KYC.Controller";
 import { authenticateHospital } from "../authentication/Hospital.auth";
+import * as mediaController from "../Controllers/Media.Controller";
+import multer from "multer";
+import * as path from "path";
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/user");
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(
+      null,
+      file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname)
+    );
+  },
+});
+
+const upload = multer({ storage });
+
 const doctorRouter = express.Router();
 
 doctorRouter.post("/login", doctorController.doctorLogin);
@@ -70,7 +89,7 @@ doctorRouter.get(
   oneOf(authenticateDoctor),
   doctorController.viewAppointments
 );
-doctorRouter.get(
+doctorRouter.post(
   "/viewAppointmentsByDate/:page",
   oneOf(authenticateDoctor),
   doctorController.viewAppointmentsByDate
@@ -122,4 +141,12 @@ doctorRouter.post(
 // KYC details
 doctorRouter.post("/setKYC", kycController.addKYC);
 doctorRouter.post("/updateKyc", kycController.updateKyc);
+
+// Media
+doctorRouter.post(
+  "/uploadImage",
+  oneOf(authenticateDoctor),
+  upload.single("profileImage"),
+  mediaController.uploadImage
+);
 export default doctorRouter;

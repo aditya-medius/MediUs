@@ -15,6 +15,7 @@ import {
   BodyPart,
   kycDetails,
 } from "../Services/schemaNames";
+import mediaModel from "./Media.model";
 const doctorSchema = new Schema(
   {
     ...schemaOptions,
@@ -87,6 +88,9 @@ const doctorSchema = new Schema(
       type: mongoose.Schema.Types.Mixed,
       required: true,
     },
+    image: {
+      type: mongoose.Schema.Types.Mixed,
+    },
   },
   {
     toJSON: { virtuals: true },
@@ -112,10 +116,11 @@ doctorSchema.post("findOne", async function (result) {
       overExp = `${overExp} years`;
     }
     result.overallExperience = overExp;
+    // result["image"]
   }
 });
 doctorSchema.post("find", async function (res) {
-  res.forEach((result: any) => {
+  res.forEach(async (result: any) => {
     if (result && result.overallExperience) {
       const exp = moment(new Date(result.overallExperience));
       const currentDate = moment(new Date());
@@ -126,7 +131,16 @@ doctorSchema.post("find", async function (res) {
       } else {
         overExp = `${overExp} years`;
       }
+      // const d = await mediaModel
+      //   .findOne({
+      //     user: result._id,
+      //   })
+      //   .sort({ createdAt: -1 })
+      //   .limit(1);
       result.overallExperience = overExp;
+      // result.image = d.image;
+
+      console.log("image:", result);
     }
   });
 });

@@ -97,6 +97,8 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
     }, overallExperience: {
         type: mongoose_1.default.Schema.Types.Mixed,
         required: true,
+    }, image: {
+        type: mongoose_1.default.Schema.Types.Mixed,
     } }), {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
@@ -121,12 +123,13 @@ doctorSchema.post("findOne", function (result) {
                 overExp = `${overExp} years`;
             }
             result.overallExperience = overExp;
+            // result["image"]
         }
     });
 });
 doctorSchema.post("find", function (res) {
     return __awaiter(this, void 0, void 0, function* () {
-        res.forEach((result) => {
+        res.forEach((result) => __awaiter(this, void 0, void 0, function* () {
             if (result && result.overallExperience) {
                 const exp = (0, moment_1.default)(new Date(result.overallExperience));
                 const currentDate = (0, moment_1.default)(new Date());
@@ -137,9 +140,17 @@ doctorSchema.post("find", function (res) {
                 else {
                     overExp = `${overExp} years`;
                 }
+                // const d = await mediaModel
+                //   .findOne({
+                //     user: result._id,
+                //   })
+                //   .sort({ createdAt: -1 })
+                //   .limit(1);
                 result.overallExperience = overExp;
+                // result.image = d.image;
+                console.log("image:", result);
             }
-        });
+        }));
     });
 });
 doctorSchema.pre("save", function (next) {
