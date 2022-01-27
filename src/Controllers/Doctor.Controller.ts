@@ -522,6 +522,15 @@ export const setSchedule = async (req: Request, res: Response) => {
         ...workingHour,
       },
     };
+
+    for (const iterator in workingHour) {
+      if (!Object.keys(workingHour[iterator]).includes("capacity")) {
+        const error: Error = new Error("Invalid body");
+        error.name = "Capacity is missing in the body";
+        return errorResponse(error, res);
+      }
+    }
+
     let doctorProfile = await doctorModel
       .findOne({
         "hospitalDetails.hospital": body.hospitalId,

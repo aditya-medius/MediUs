@@ -409,20 +409,22 @@ export const rescheduleAppointment = async (req: Request, res: Response) => {
       }
     });
 
-    if (appCount == capacity.capacity) {
-      return errorResponse(
-        new Error("Doctor cannot take any more appointments"),
-        res
-      );
-    }
     let appointmentBook = await appointmentModel.findOneAndUpdate(
       {
         _id: body.appointmentId,
       },
       {
-        $set: { time: body.time, reschduled: true },
+        $set: { time: body.time, rescheduled: true },
       }
     );
+    await appointmentBook.populate({
+      path: "subPatient",
+      select: {
+        parentPatient: 0,
+      },
+    });
+
+    return successResponse(appointmentBook, "Success", res);
   } catch (error) {
     return errorResponse(error, res);
   }
@@ -503,7 +505,11 @@ export const ViewAppointment = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.params.page);
     const appointmentData: Array<object> = await appointmentModel
-      .find({ patient: req.currentPatient, "time.date": { $gt: Date() } })
+      .find({
+        patient: req.currentPatient,
+        cancelled: false,
+        "time.date": { $gt: Date() },
+      })
       .populate({
         path: "patient",
         select: excludePatientFields,
@@ -538,7 +544,11 @@ export const ViewAppointment = async (req: Request, res: Response) => {
     const page2 = appointmentData.length / 2;
 
     const older_apppointmentData: Array<object> = await appointmentModel
-      .find({ patient: req.currentPatient, "time.date": { $lte: Date() } })
+      .find({
+        patient: req.currentPatient,
+        cancelled: false,
+        "time.date": { $lte: Date() },
+      })
       // .populate("patient subPatient hospital doctors")
       .populate({
         path: "patient",

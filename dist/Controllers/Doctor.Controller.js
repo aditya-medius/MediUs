@@ -476,7 +476,16 @@ const searchDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             }, Object.assign(Object.assign({}, exports.excludeDoctorFields), { "hospitalDetails.hospital": 0, "hospitalDetails.workingHours": 0 }))
                 .populate("specialization")
                 // .populate("hospitalDetails.hospital")
+<<<<<<< HEAD
+                .populate({
+                path: "qualification",
+                select: {
+                    duration: 0,
+                },
+            });
+=======
                 .populate({ path: "qualification", select: { duration: 0 } });
+>>>>>>> 03ac35e3b173eb0140559ee3e3e4620b8fe3909c
             return (0, response_1.successResponse)(doctorArray, "Success", res);
         }))
             .catch((error) => {
@@ -495,6 +504,13 @@ const setSchedule = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         const updateQuery = {
             $set: Object.assign({ doctorDetails: req.currentDoctor, hospitalDetails: body.hospitalId }, workingHour),
         };
+        for (const iterator in workingHour) {
+            if (!Object.keys(workingHour[iterator]).includes("capacity")) {
+                const error = new Error("Invalid body");
+                error.name = "Capacity is missing in the body";
+                return (0, response_1.errorResponse)(error, res);
+            }
+        }
         let doctorProfile = yield Doctors_Model_1.default
             .findOne({
             "hospitalDetails.hospital": body.hospitalId,

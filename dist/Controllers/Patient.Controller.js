@@ -381,14 +381,18 @@ const rescheduleAppointment = (req, res) => __awaiter(void 0, void 0, void 0, fu
                 appCount++;
             }
         });
-        if (appCount == capacity.capacity) {
-            return (0, response_1.errorResponse)(new Error("Doctor cannot take any more appointments"), res);
-        }
         let appointmentBook = yield Appointment_Model_1.default.findOneAndUpdate({
             _id: body.appointmentId,
         }, {
-            $set: { time: body.time, reschduled: true },
+            $set: { time: body.time, rescheduled: true },
         });
+        yield appointmentBook.populate({
+            path: "subPatient",
+            select: {
+                parentPatient: 0,
+            },
+        });
+        return (0, response_1.successResponse)(appointmentBook, "Success", res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);
@@ -469,7 +473,11 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
     try {
         const page = parseInt(req.params.page);
         const appointmentData = yield Appointment_Model_1.default
-            .find({ patient: req.currentPatient, "time.date": { $gt: Date() } })
+            .find({
+            patient: req.currentPatient,
+            cancelled: false,
+            "time.date": { $gt: Date() },
+        })
             .populate({
             path: "patient",
             select: exports.excludePatientFields,
@@ -497,7 +505,11 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
         });
         const page2 = appointmentData.length / 2;
         const older_apppointmentData = yield Appointment_Model_1.default
-            .find({ patient: req.currentPatient, "time.date": { $lte: Date() } })
+            .find({
+            patient: req.currentPatient,
+            cancelled: false,
+            "time.date": { $lte: Date() },
+        })
             // .populate("patient subPatient hospital doctors")
             .populate({
             path: "patient",
@@ -522,7 +534,14 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
             .limit(2);
         const allAppointment = appointmentData.concat(older_apppointmentData);
         if (allAppointment.length > 0)
+<<<<<<< HEAD
+            return (0, response_1.successResponse)({
+                past: older_apppointmentData,
+                upcoming: appointmentData,
+            }, "Appointments has been found", res);
+=======
             return (0, response_1.successResponse)({ past: older_apppointmentData, upcoming: allAppointment }, "Appointments has been found", res);
+>>>>>>> 03ac35e3b173eb0140559ee3e3e4620b8fe3909c
         else {
             let error = new Error("No appointments is found");
             return (0, response_1.errorResponse)(error, res, 404);

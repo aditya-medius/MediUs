@@ -9,6 +9,7 @@ import hospitalRouter from "./routes/Hospital.route";
 import adminRouter from "./routes/Admin.route";
 import patientRouter from "./routes/Patient.route";
 import path from "path";
+import feedbackRouter from "./routes/Feedback.route";
 import { oneOf, tokenNikalo } from "./Services/middlewareHelper";
 import { authenticateDoctor } from "./authentication/Doctor.auth";
 import { authenticateHospital } from "./authentication/Hospital.auth";
@@ -25,6 +26,8 @@ app.use("/doctor", doctorRouter);
 app.use("/hospital", hospitalRouter);
 app.use("/admin", adminRouter);
 app.use("/patient", patientRouter);
+app.use("/feedback", feedbackRouter);
+app.use("/static", express.static(path.join(__dirname, "./src/uploads")));
 app.use(
   "/static",
   tokenNikalo,
