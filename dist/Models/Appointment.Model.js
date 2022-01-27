@@ -95,7 +95,7 @@ const appointmentSchema = new mongoose_1.Schema({
         type: Date,
         default: Date.now(),
     },
-    reschduled: {
+    rescheduled: {
         type: Boolean,
         default: false,
     },

@@ -31,3 +31,4 @@ export const CountryMap: string = "countryMap";
 export const stateMap: string = "stateMap";
 export const cityMap: string = "cityMap";
 export const kycDetails: string = "KYCDetails";
+export const feedback: string = "feedbacks";

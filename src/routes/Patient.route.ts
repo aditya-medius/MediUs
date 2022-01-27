@@ -37,6 +37,11 @@ patientRouter.post(
   patientController.BookAppointment
 );
 patientRouter.post(
+  "/rescheduleAppointment",
+  oneOf(authenticatePatient),
+  patientController.rescheduleAppointment
+);
+patientRouter.post(
   "/CancelAppointment",
   oneOf(authenticatePatient),
   patientController.CancelAppointment

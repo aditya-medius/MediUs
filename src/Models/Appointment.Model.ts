@@ -80,7 +80,7 @@ const appointmentSchema = new Schema({
     type: Date,
     default: Date.now(),
   },
-  reschduled: {
+  rescheduled: {
     type: Boolean,
     default: false,
   },
