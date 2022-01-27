@@ -95,6 +95,10 @@ const appointmentSchema = new mongoose_1.Schema({
         type: Date,
         default: Date.now(),
     },
+    reschduled: {
+        type: Boolean,
+        default: false,
+    },
 });
 const appointmentModel = (0, mongoose_1.model)(schemaNames_1.appointment, appointmentSchema);
 exports.default = appointmentModel;

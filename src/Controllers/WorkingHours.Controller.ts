@@ -61,6 +61,26 @@ export const createOpeningHours = async (req: Request, res: Response) => {
   }
 };
 
+// Get working hours
+export const getWorkingHours = async (req: Request, res: Response) => {
+  try {
+    const WHObj = await workingHourModel.find(
+      {
+        doctorDetails: req.body.doctorDetails,
+        hospitalDetails: req.body.hospitalDetails,
+      },
+      "-byHospital -doctorDetails -hospitalDetails"
+    );
+    if (WHObj) {
+      return successResponse(WHObj, "Success", res);
+    } else {
+      return successResponse({}, "No data found", res);
+    }
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
 function timeLessThan(t1: any, t2: any) {
   if (t1.division == 1 && t2.division == 0) {
     return false;

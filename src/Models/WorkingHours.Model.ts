@@ -1,6 +1,6 @@
 import mongoose, { Schema, model } from "mongoose";
 import { doctor, hospital, workingHour } from "../Services/schemaNames";
-
+import { formatWorkingHour } from "../Services/WorkingHour.helper";
 let divisionArray = Array.from(Array(60).keys());
 const workingHoursSchema = new Schema({
   doctorDetails: {
@@ -301,11 +301,19 @@ const workingHoursSchema = new Schema({
   },
 });
 
+// ["find", "findOne", "aggregate"].forEach((e: string) => {
+//   workingHoursSchema.post(e, async function (result) {
+//     if (typeof result == "object" && result.length && result.length > 0) {
+//       result.map(async (elem: any) => {
+//         elem.workingHours = await formatWorkingHour(elem.workingHours);
+//       });
+//     }
+//   });
+// });
 workingHoursSchema.pre("save", async function (next) {
   if (this.byHospital) {
     next();
   } else {
-    console.log("thid: ", this);
     if (!this.hospitalDetails || !this.doctorDetails) {
       throw new Error("Doctor and Hospital details are required");
     }

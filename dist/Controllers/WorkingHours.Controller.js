@@ -23,7 +23,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createOpeningHours = exports.createWorkingHours = void 0;
+exports.getWorkingHours = exports.createOpeningHours = exports.createWorkingHours = void 0;
 const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
 const response_1 = require("../Services/response");
 const time_class_1 = require("../Services/time.class");
@@ -75,6 +75,25 @@ const createOpeningHours = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.createOpeningHours = createOpeningHours;
+// Get working hours
+const getWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const WHObj = yield WorkingHours_Model_1.default.find({
+            doctorDetails: req.body.doctorDetails,
+            hospitalDetails: req.body.hospitalDetails,
+        }, "-byHospital -doctorDetails -hospitalDetails");
+        if (WHObj) {
+            return (0, response_1.successResponse)(WHObj, "Success", res);
+        }
+        else {
+            return (0, response_1.successResponse)({}, "No data found", res);
+        }
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getWorkingHours = getWorkingHours;
 function timeLessThan(t1, t2) {
     if (t1.division == 1 && t2.division == 0) {
         return false;

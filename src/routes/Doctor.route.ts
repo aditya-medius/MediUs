@@ -8,6 +8,7 @@ import { authenticatePatient } from "../authentication/Patient.auth";
 import { oneOf } from "../Services/middlewareHelper";
 import * as preferredPharmaController from "../Controllers/Pharma.Cotroller";
 import * as kycController from "../Controllers/KYC.Controller";
+import { authenticateHospital } from "../authentication/Hospital.auth";
 const doctorRouter = express.Router();
 
 doctorRouter.post("/login", doctorController.doctorLogin);
@@ -86,6 +87,11 @@ doctorRouter.get(
   "/getDoctorWorkingInHospitals/:id",
   oneOf(authenticateDoctor, authenticatePatient),
   doctorController.getDoctorWorkingInHospitals
+);
+doctorRouter.post(
+  "/getWorkingHours",
+  oneOf(authenticateDoctor, authenticatePatient, authenticateHospital),
+  workingHoursController.getWorkingHours
 );
 
 //Preferred Pharma Routes
