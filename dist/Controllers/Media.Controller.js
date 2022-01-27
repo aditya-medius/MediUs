@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.uploadImage = void 0;
+const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const Media_model_1 = __importDefault(require("../Models/Media.model"));
 const response_1 = require("../Services/response");
 const schemaNames_1 = require("../Services/schemaNames");
@@ -35,8 +36,18 @@ const uploadImage = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         body.image = req.file
             ? `${process.env.MEDIA_DIR}/user/${req.file.filename}`
             : "";
-        const mediaObj = yield new Media_model_1.default(body).save();
-        yield mediaObj.populate({ path: "user", select: Doctor_Controller_1.excludeDoctorFields });
+        let mediaObj = yield new Media_model_1.default(body).save();
+        yield Doctors_Model_1.default.findOneAndUpdate({
+            _id: body.user,
+        }, {
+            $set: {
+                image: body.image,
+            },
+        });
+        mediaObj = yield mediaObj.populate({
+            path: "user",
+            select: Doctor_Controller_1.excludeDoctorFields,
+        });
         return (0, response_1.successResponse)({ response: mediaObj }, "Success", res);
     }
     catch (error) {

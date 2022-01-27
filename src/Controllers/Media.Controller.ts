@@ -20,10 +20,22 @@ export const uploadImage = async (req: Request, res: Response) => {
     body.image = req.file
       ? `${process.env.MEDIA_DIR as string}/user/${req.file.filename}`
       : "";
-    const mediaObj = await new mediaModel(body).save();
+    let mediaObj = await new mediaModel(body).save();
 
-    await mediaObj.populate({ path: "user", select: excludeDoctorFields });
-
+    await doctorModel.findOneAndUpdate(
+      {
+        _id: body.user,
+      },
+      {
+        $set: {
+          image: body.image,
+        },
+      }
+    );
+    mediaObj = await mediaObj.populate({
+      path: "user",
+      select: excludeDoctorFields,
+    });
     return successResponse({ response: mediaObj }, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);

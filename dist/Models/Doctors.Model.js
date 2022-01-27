@@ -98,7 +98,9 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
         type: mongoose_1.default.Schema.Types.Mixed,
         required: true,
     }, image: {
-        type: mongoose_1.default.Schema.Types.Mixed,
+        type: String,
+        default: "static/user/default.png",
+        // ref: media,
     } }), {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
@@ -140,15 +142,7 @@ doctorSchema.post("find", function (res) {
                 else {
                     overExp = `${overExp} years`;
                 }
-                // const d = await mediaModel
-                //   .findOne({
-                //     user: result._id,
-                //   })
-                //   .sort({ createdAt: -1 })
-                //   .limit(1);
                 result.overallExperience = overExp;
-                // result.image = d.image;
-                console.log("image:", result);
             }
         }));
     });
@@ -244,7 +238,7 @@ doctorSchema.pre("findOneAndUpdate", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         let updateQuery = this.getUpdate();
         updateQuery = updateQuery["$addToSet"];
-        if ("hospitalDetails" in updateQuery) {
+        if (updateQuery && "hospitalDetails" in updateQuery) {
             const currentDoc = yield this.model.findOne({ _id: this.getQuery()._id });
             const incomingHospitals = lodash_1.default.map(updateQuery.hospitalDetails, (e) => e.hospital.toString());
             const currentHospitals = lodash_1.default.map(currentDoc.hospitalDetails, (e) => e.hospital.toString());
