@@ -60,6 +60,7 @@ const Appointment_Model_1 = __importDefault(require("../Models/Appointment.Model
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
 const Patient_Controller_1 = require("./Patient.Controller");
 const Validation_Service_1 = require("../Services/Validation.Service");
+const WorkingHour_helper_1 = require("../Services/WorkingHour.helper");
 exports.excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -831,6 +832,9 @@ const getDoctorWorkingInHospitals = (req, res) => __awaiter(void 0, void 0, void
             });
             return Object.assign({ hospital: element }, doctorObj[index]);
         });
+        yield doctorsWorkingInHospital.forEach((e) => __awaiter(void 0, void 0, void 0, function* () {
+            e.workingHours = yield (0, WorkingHour_helper_1.formatWorkingHour)(e.workingHours);
+        }));
         return (0, response_1.successResponse)({ doctorDetails, doctorsWorkingInHospital }, "Success", res);
     }
     catch (error) {

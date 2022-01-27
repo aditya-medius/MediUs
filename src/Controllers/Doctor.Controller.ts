@@ -25,6 +25,7 @@ import {
   emailValidation,
   phoneNumberValidation,
 } from "../Services/Validation.Service";
+import { formatWorkingHour } from "../Services/WorkingHour.helper";
 export const excludeDoctorFields = {
   password: 0,
   // panCard: 0,
@@ -889,6 +890,11 @@ export const getDoctorWorkingInHospitals = async (
         ...doctorObj[index],
       };
     });
+
+    await doctorsWorkingInHospital.forEach(async (e: any) => {
+      e.workingHours = await formatWorkingHour(e.workingHours);
+    });
+
     return successResponse(
       { doctorDetails, doctorsWorkingInHospital },
       "Success",
