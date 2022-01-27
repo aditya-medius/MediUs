@@ -25,6 +25,7 @@ import {
   emailValidation,
   phoneNumberValidation,
 } from "../Services/Validation.Service";
+import { formatWorkingHour } from "../Services/WorkingHour.helper";
 export const excludeDoctorFields = {
   password: 0,
   // panCard: 0,
@@ -499,12 +500,7 @@ export const searchDoctor = async (req: Request, res: Response) => {
           )
           .populate("specialization")
           // .populate("hospitalDetails.hospital")
-          .populate({
-            path: "qualification",
-            select: {
-              duration: 0,
-            },
-          });
+          .populate({ path: "qualification", select: { duration: 0 } });
         return successResponse(doctorArray, "Success", res);
       })
       .catch((error) => {
@@ -907,6 +903,11 @@ export const getDoctorWorkingInHospitals = async (
         ...doctorObj[index],
       };
     });
+
+    await doctorsWorkingInHospital.forEach(async (e: any) => {
+      e.workingHours = await formatWorkingHour(e.workingHours);
+    });
+
     return successResponse(
       { doctorDetails, doctorsWorkingInHospital },
       "Success",

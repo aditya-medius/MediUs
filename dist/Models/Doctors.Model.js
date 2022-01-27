@@ -97,6 +97,10 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
     }, overallExperience: {
         type: mongoose_1.default.Schema.Types.Mixed,
         required: true,
+    }, image: {
+        type: String,
+        default: "static/user/default.png",
+        // ref: media,
     } }), {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
@@ -121,12 +125,13 @@ doctorSchema.post("findOne", function (result) {
                 overExp = `${overExp} years`;
             }
             result.overallExperience = overExp;
+            // result["image"]
         }
     });
 });
 doctorSchema.post("find", function (res) {
     return __awaiter(this, void 0, void 0, function* () {
-        res.forEach((result) => {
+        res.forEach((result) => __awaiter(this, void 0, void 0, function* () {
             if (result && result.overallExperience) {
                 const exp = (0, moment_1.default)(new Date(result.overallExperience));
                 const currentDate = (0, moment_1.default)(new Date());
@@ -139,7 +144,7 @@ doctorSchema.post("find", function (res) {
                 }
                 result.overallExperience = overExp;
             }
-        });
+        }));
     });
 });
 doctorSchema.pre("save", function (next) {
@@ -233,7 +238,7 @@ doctorSchema.pre("findOneAndUpdate", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         let updateQuery = this.getUpdate();
         updateQuery = updateQuery["$addToSet"];
-        if ("hospitalDetails" in updateQuery) {
+        if (updateQuery && "hospitalDetails" in updateQuery) {
             const currentDoc = yield this.model.findOne({ _id: this.getQuery()._id });
             const incomingHospitals = lodash_1.default.map(updateQuery.hospitalDetails, (e) => e.hospital.toString());
             const currentHospitals = lodash_1.default.map(currentDoc.hospitalDetails, (e) => e.hospital.toString());

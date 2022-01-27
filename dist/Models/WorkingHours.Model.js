@@ -329,13 +329,21 @@ const workingHoursSchema = new mongoose_1.Schema({
         default: false,
     },
 });
+// ["find", "findOne", "aggregate"].forEach((e: string) => {
+//   workingHoursSchema.post(e, async function (result) {
+//     if (typeof result == "object" && result.length && result.length > 0) {
+//       result.map(async (elem: any) => {
+//         elem.workingHours = await formatWorkingHour(elem.workingHours);
+//       });
+//     }
+//   });
+// });
 workingHoursSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         if (this.byHospital) {
             next();
         }
         else {
-            console.log("thid: ", this);
             if (!this.hospitalDetails || !this.doctorDetails) {
                 throw new Error("Doctor and Hospital details are required");
             }

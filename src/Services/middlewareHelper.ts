@@ -21,3 +21,17 @@ export const oneOf = (...middlewares: any): any => {
     }
   };
 };
+
+export const tokenNikalo = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (req.query.token) {
+    req.headers["auth-header"] = `${req.query.token}`;
+    next();
+  } else {
+    const error: Error = new Error("Token is missing");
+    return errorResponse(error, res);
+  }
+};

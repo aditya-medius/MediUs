@@ -10,6 +10,10 @@ import adminRouter from "./routes/Admin.route";
 import patientRouter from "./routes/Patient.route";
 import path from "path";
 import feedbackRouter from "./routes/Feedback.route";
+import { oneOf, tokenNikalo } from "./Services/middlewareHelper";
+import { authenticateDoctor } from "./authentication/Doctor.auth";
+import { authenticateHospital } from "./authentication/Hospital.auth";
+import { authenticatePatient } from "./authentication/Patient.auth";
 dotenv.config();
 
 const port = process.env.PORT;
@@ -24,6 +28,12 @@ app.use("/admin", adminRouter);
 app.use("/patient", patientRouter);
 app.use("/feedback", feedbackRouter);
 app.use("/static", express.static(path.join(__dirname, "./src/uploads")));
+app.use(
+  "/static",
+  tokenNikalo,
+  oneOf(authenticateDoctor, authenticateHospital, authenticatePatient),
+  express.static(path.join(__dirname, "../uploads"))
+);
 app.get("test", (req: Request, res: Response) => {
   res.send("Hello");
 });

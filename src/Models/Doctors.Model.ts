@@ -14,7 +14,9 @@ import {
   specialization,
   BodyPart,
   kycDetails,
+  media,
 } from "../Services/schemaNames";
+import mediaModel from "./Media.model";
 const doctorSchema = new Schema(
   {
     ...schemaOptions,
@@ -87,6 +89,11 @@ const doctorSchema = new Schema(
       type: mongoose.Schema.Types.Mixed,
       required: true,
     },
+    image: {
+      type: String,
+      default: "static/user/default.png",
+      // ref: media,
+    },
   },
   {
     toJSON: { virtuals: true },
@@ -112,10 +119,11 @@ doctorSchema.post("findOne", async function (result) {
       overExp = `${overExp} years`;
     }
     result.overallExperience = overExp;
+    // result["image"]
   }
 });
 doctorSchema.post("find", async function (res) {
-  res.forEach((result: any) => {
+  res.forEach(async (result: any) => {
     if (result && result.overallExperience) {
       const exp = moment(new Date(result.overallExperience));
       const currentDate = moment(new Date());
@@ -225,7 +233,7 @@ doctorSchema.pre("findOneAndUpdate", async function (next) {
 doctorSchema.pre("findOneAndUpdate", async function (next) {
   let updateQuery: any = this.getUpdate();
   updateQuery = updateQuery["$addToSet"];
-  if ("hospitalDetails" in updateQuery) {
+  if (updateQuery && "hospitalDetails" in updateQuery) {
     const currentDoc = await this.model.findOne({ _id: this.getQuery()._id });
     const incomingHospitals = _.map(updateQuery.hospitalDetails, (e) =>
       e.hospital.toString()

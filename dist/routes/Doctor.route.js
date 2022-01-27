@@ -33,6 +33,19 @@ const middlewareHelper_1 = require("../Services/middlewareHelper");
 const preferredPharmaController = __importStar(require("../Controllers/Pharma.Cotroller"));
 const kycController = __importStar(require("../Controllers/KYC.Controller"));
 const Hospital_auth_1 = require("../authentication/Hospital.auth");
+const mediaController = __importStar(require("../Controllers/Media.Controller"));
+const multer_1 = __importDefault(require("multer"));
+const path = __importStar(require("path"));
+const storage = multer_1.default.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, "uploads/user");
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+        cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
+    },
+});
+const upload = (0, multer_1.default)({ storage });
 const doctorRouter = express_1.default.Router();
 doctorRouter.post("/login", doctorController.doctorLogin);
 /*
@@ -53,7 +66,7 @@ doctorRouter.post("/findDoctorBySpecialityOrBodyPart/:term", (0, middlewareHelpe
 doctorRouter.put("/setSchedule", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.setSchedule);
 // Get Doctor's appointment
 doctorRouter.get("/viewAppointments/:page", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.viewAppointments);
-doctorRouter.get("/viewAppointmentsByDate/:page", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.viewAppointmentsByDate);
+doctorRouter.post("/viewAppointmentsByDate/:page", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.viewAppointmentsByDate);
 // Cancel doctor's appointments
 doctorRouter.put("/cancelAppointments", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.cancelAppointments);
 doctorRouter.get("/getDoctorWorkingInHospitals/:id", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.getDoctorWorkingInHospitals);
@@ -70,4 +83,6 @@ doctorRouter.post("/updatePharma/:id", Doctor_auth_1.authenticateDoctor, preferr
 // KYC details
 doctorRouter.post("/setKYC", kycController.addKYC);
 doctorRouter.post("/updateKyc", kycController.updateKyc);
+// Media
+doctorRouter.post("/uploadImage", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), upload.single("profileImage"), mediaController.uploadImage);
 exports.default = doctorRouter;

@@ -60,6 +60,7 @@ const Appointment_Model_1 = __importDefault(require("../Models/Appointment.Model
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
 const Patient_Controller_1 = require("./Patient.Controller");
 const Validation_Service_1 = require("../Services/Validation.Service");
+const WorkingHour_helper_1 = require("../Services/WorkingHour.helper");
 exports.excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -475,12 +476,16 @@ const searchDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             }, Object.assign(Object.assign({}, exports.excludeDoctorFields), { "hospitalDetails.hospital": 0, "hospitalDetails.workingHours": 0 }))
                 .populate("specialization")
                 // .populate("hospitalDetails.hospital")
+<<<<<<< HEAD
                 .populate({
                 path: "qualification",
                 select: {
                     duration: 0,
                 },
             });
+=======
+                .populate({ path: "qualification", select: { duration: 0 } });
+>>>>>>> 03ac35e3b173eb0140559ee3e3e4620b8fe3909c
             return (0, response_1.successResponse)(doctorArray, "Success", res);
         }))
             .catch((error) => {
@@ -843,6 +848,9 @@ const getDoctorWorkingInHospitals = (req, res) => __awaiter(void 0, void 0, void
             });
             return Object.assign({ hospital: element }, doctorObj[index]);
         });
+        yield doctorsWorkingInHospital.forEach((e) => __awaiter(void 0, void 0, void 0, function* () {
+            e.workingHours = yield (0, WorkingHour_helper_1.formatWorkingHour)(e.workingHours);
+        }));
         return (0, response_1.successResponse)({ doctorDetails, doctorsWorkingInHospital }, "Success", res);
     }
     catch (error) {

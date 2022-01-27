@@ -32,3 +32,4 @@ export const stateMap: string = "stateMap";
 export const cityMap: string = "cityMap";
 export const kycDetails: string = "KYCDetails";
 export const feedback: string = "feedbacks";
+export const media: string = "medias";
