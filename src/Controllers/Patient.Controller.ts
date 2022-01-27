@@ -571,7 +571,7 @@ export const ViewAppointment = async (req: Request, res: Response) => {
 
     if (allAppointment.length > 0)
       return successResponse(
-        allAppointment,
+        { past: older_apppointmentData, upcoming: allAppointment },
         "Appointments has been found",
         res
       );

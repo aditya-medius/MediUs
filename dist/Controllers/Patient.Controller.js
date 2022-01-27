@@ -522,7 +522,7 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
             .limit(2);
         const allAppointment = appointmentData.concat(older_apppointmentData);
         if (allAppointment.length > 0)
-            return (0, response_1.successResponse)(allAppointment, "Appointments has been found", res);
+            return (0, response_1.successResponse)({ past: older_apppointmentData, upcoming: allAppointment }, "Appointments has been found", res);
         else {
             let error = new Error("No appointments is found");
             return (0, response_1.errorResponse)(error, res, 404);

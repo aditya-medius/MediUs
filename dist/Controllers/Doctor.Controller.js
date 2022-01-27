@@ -473,10 +473,10 @@ const searchDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                 deleted: false,
                 active: true,
                 specialization: { $in: specialityArray },
-            }, exports.excludeDoctorFields)
+            }, Object.assign(Object.assign({}, exports.excludeDoctorFields), { "hospitalDetails.hospital": 0, "hospitalDetails.workingHours": 0 }))
                 .populate("specialization")
-                .populate("hospitalDetails.hospital")
-                .populate("qualification");
+                // .populate("hospitalDetails.hospital")
+                .populate({ path: "qualification", select: { duration: 0 } });
             return (0, response_1.successResponse)(doctorArray, "Success", res);
         }))
             .catch((error) => {

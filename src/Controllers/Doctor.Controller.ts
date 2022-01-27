@@ -492,11 +492,15 @@ export const searchDoctor = async (req: Request, res: Response) => {
               active: true,
               specialization: { $in: specialityArray },
             },
-            excludeDoctorFields
+            {
+              ...excludeDoctorFields,
+              "hospitalDetails.hospital": 0,
+              "hospitalDetails.workingHours": 0,
+            }
           )
           .populate("specialization")
-          .populate("hospitalDetails.hospital")
-          .populate("qualification");
+          // .populate("hospitalDetails.hospital")
+          .populate({ path: "qualification", select: { duration: 0 } });
         return successResponse(doctorArray, "Success", res);
       })
       .catch((error) => {
