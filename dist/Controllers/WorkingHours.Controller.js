@@ -78,12 +78,31 @@ exports.createOpeningHours = createOpeningHours;
 // Get working hours
 const getWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const WHObj = yield WorkingHours_Model_1.default.find({
+        let WHObj = yield WorkingHours_Model_1.default
+            .find({
             doctorDetails: req.body.doctorDetails,
             hospitalDetails: req.body.hospitalDetails,
-        }, "-byHospital -doctorDetails -hospitalDetails");
+        }, "-byHospital -doctorDetails -hospitalDetails")
+            .lean();
+        let WHObj2 = {};
         if (WHObj) {
-            return (0, response_1.successResponse)(WHObj, "Success", res);
+            WHObj.map((e) => {
+                for (let data in e) {
+                    if (data != "_id" && data != "__v") {
+                        if (WHObj2[data]) {
+                            WHObj2[data] = [...WHObj2[data], e[data]];
+                        }
+                        else {
+                            WHObj2[data] = [e[data]];
+                        }
+                    }
+                    else {
+                        WHObj2[data] = e[data];
+                    }
+                }
+            });
+            // return successResponse({ WHObj, WHObj2 }, "Success", res);
+            return (0, response_1.successResponse)({ workingHours: WHObj2 }, "Success", res);
         }
         else {
             return (0, response_1.successResponse)({}, "No data found", res);
