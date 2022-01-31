@@ -28,9 +28,10 @@ const patientController = __importStar(require("../Controllers/Patient.Controlle
 const paymentController = __importStar(require("../Controllers/AppointmentPayment.Controller"));
 const multer_1 = __importDefault(require("multer"));
 const middlewareHelper_1 = require("../Services/middlewareHelper");
+const Doctor_auth_1 = require("../authentication/Doctor.auth");
 const subPatientController = __importStar(require("../Controllers/SubPatient.Controller"));
 const patientRouter = express_1.default.Router();
-const upload = (0, multer_1.default)({ dest: './src/uploads' });
+const upload = (0, multer_1.default)({ dest: "./src/uploads" });
 patientRouter.post("/login", patientController.patientLogin);
 patientRouter.post("/", patientController.createPatient);
 patientRouter.get("/", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.getAllPatientsList);
@@ -59,4 +60,6 @@ patientRouter.get("/getSubPatientList", (0, middlewareHelper_1.oneOf)(Patient_au
 patientRouter.put("/deleteSubPatient/:id", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), subPatientController.deleteSubPatient);
 patientRouter.get("/getSubPatientById/:id", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), subPatientController.getSubPatientById);
 patientRouter.put("/updateSubPatient/:id", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), subPatientController.updateSubPatient);
+// Check kro k doctor available hai uss din
+patientRouter.post("/checkDoctorAvailability", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), patientController.checkDoctorAvailability);
 exports.default = patientRouter;

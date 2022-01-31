@@ -195,8 +195,18 @@ export const doctorLogin = async (req: Request, res: Response) => {
 // Get Doctor By Doctor Id
 export const getDoctorById = async (req: Request, res: Response) => {
   try {
+    let query: any = {
+      _id: req.params.id,
+      deleted: false,
+      excludeDoctorFields,
+    };
+    let select: any = { ...excludeDoctorFields };
+    if (req.body.fullDetails) {
+      query = { _id: req.params.id, deleted: false };
+      select = { password: 0 };
+    }
     const doctorData = await doctorModel
-      .findOne({ _id: req.params.id, deleted: false }, excludeDoctorFields)
+      .findOne(query, select)
       .populate({
         path: "hospitalDetails.hospital",
         populate: {
@@ -208,7 +218,16 @@ export const getDoctorById = async (req: Request, res: Response) => {
       })
       .populate("hospitalDetails.workingHours")
       .populate("specialization")
-      .populate("qualification");
+      .populate("qualification")
+      .lean();
+
+    doctorData.hospitalDetails = doctorData.hospitalDetails.map((elem: any) => {
+      return {
+        _id: elem.hospital._id,
+        name: elem.hospital.name,
+        address: elem.hospital.address,
+      };
+    });
     if (doctorData) {
       return successResponse(
         doctorData,
@@ -275,9 +294,10 @@ export const updateDoctorProfile = async (req: Request, res: Response) => {
 */
 export const deleteProfile = async (req: Request, res: Response) => {
   try {
+    let deleteDate: Date = new Date();
     const doctorProfile = await doctorModel.findOneAndUpdate(
       { _id: req.currentDoctor, deleted: false },
-      { $set: { deleted: true } }
+      { $set: { deleted: true, deleteDate } }
     );
     if (doctorProfile) {
       return successResponse({}, "Profile deleted successfully", res);
@@ -501,6 +521,7 @@ export const searchDoctor = async (req: Request, res: Response) => {
           .populate("specialization")
           // .populate("hospitalDetails.hospital")
           .populate({ path: "qualification", select: { duration: 0 } });
+
         return successResponse(doctorArray, "Success", res);
       })
       .catch((error) => {
@@ -905,7 +926,7 @@ export const getDoctorWorkingInHospitals = async (
     });
 
     await doctorsWorkingInHospital.forEach(async (e: any) => {
-      e.workingHours = await formatWorkingHour(e.workingHours);
+      e.workingHours = formatWorkingHour(e.workingHours);
     });
 
     return successResponse(
@@ -1006,4 +1027,79 @@ export const getHospitalListByDoctorId = async (
   } catch (error: any) {
     return errorResponse(error, res);
   }
+};
+
+export const checkDoctorAvailability = async (
+  body: any
+): Promise<{
+  status: boolean;
+  message: string;
+}> => {
+  // @TODO check if working hour exist first
+  let capacity = await workingHourModel.findOne({
+    doctorDetails: body.doctors,
+    hospitalDetails: body.hospital,
+  });
+  if (!capacity) {
+    let error: Error = new Error("Error");
+    error.message = "Cannot create appointment";
+    // return errorResponse(error, res);
+    throw error;
+  }
+
+  body.time.date = new Date(body.time.date);
+  // body.time.date = new Date(body.time.date);
+  const requestDate: Date = new Date(body.time.date);
+  const day = requestDate.getDay();
+  if (day == 0) {
+    capacity = capacity.sunday;
+  } else if (day == 1) {
+    capacity = capacity.monday;
+  } else if (day == 2) {
+    capacity = capacity.tuesday;
+  } else if (day == 3) {
+    capacity = capacity.wednesday;
+  } else if (day == 4) {
+    capacity = capacity.thursday;
+  } else if (day == 5) {
+    capacity = capacity.friday;
+  } else if (day == 6) {
+    capacity = capacity.saturday;
+  }
+  if (!capacity) {
+    return {
+      status: false,
+      message: "Doctor not available on this day",
+    };
+  }
+  let appointmentCount = await appointmentModel.find({
+    doctors: body.doctors,
+    hospital: body.hospital,
+    "time.from.time": capacity.from.time,
+    "time.till.time": capacity.till.time,
+  });
+
+  let appCount = 0;
+  appointmentCount = appointmentCount.map((e: any) => {
+    if (
+      new Date(e.time.date).getDate() == new Date(requestDate).getDate() &&
+      new Date(e.time.date).getFullYear() ==
+        new Date(requestDate).getFullYear() &&
+      new Date(e.time.date).getMonth() == new Date(requestDate).getMonth()
+    ) {
+      appCount++;
+    }
+  });
+
+  if (appCount == capacity.capacity) {
+    return {
+      status: false,
+      message: "Doctor cannot take any more appointments",
+    };
+  }
+
+  return {
+    status: true,
+    message: "Doctor is available",
+  };
 };

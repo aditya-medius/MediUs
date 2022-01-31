@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
+exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -188,8 +188,18 @@ exports.doctorLogin = doctorLogin;
 // Get Doctor By Doctor Id
 const getDoctorById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        let query = {
+            _id: req.params.id,
+            deleted: false,
+            excludeDoctorFields: exports.excludeDoctorFields,
+        };
+        let select = Object.assign({}, exports.excludeDoctorFields);
+        if (req.body.fullDetails) {
+            query = { _id: req.params.id, deleted: false };
+            select = { password: 0 };
+        }
         const doctorData = yield Doctors_Model_1.default
-            .findOne({ _id: req.params.id, deleted: false }, exports.excludeDoctorFields)
+            .findOne(query, select)
             .populate({
             path: "hospitalDetails.hospital",
             populate: {
@@ -201,7 +211,15 @@ const getDoctorById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         })
             .populate("hospitalDetails.workingHours")
             .populate("specialization")
-            .populate("qualification");
+            .populate("qualification")
+            .lean();
+        doctorData.hospitalDetails = doctorData.hospitalDetails.map((elem) => {
+            return {
+                _id: elem.hospital._id,
+                name: elem.hospital.name,
+                address: elem.hospital.address,
+            };
+        });
         if (doctorData) {
             return (0, response_1.successResponse)(doctorData, "Successfully fetched doctor details", res);
         }
@@ -261,7 +279,8 @@ exports.updateDoctorProfile = updateDoctorProfile;
 */
 const deleteProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const doctorProfile = yield Doctors_Model_1.default.findOneAndUpdate({ _id: req.currentDoctor, deleted: false }, { $set: { deleted: true } });
+        let deleteDate = new Date();
+        const doctorProfile = yield Doctors_Model_1.default.findOneAndUpdate({ _id: req.currentDoctor, deleted: false }, { $set: { deleted: true, deleteDate } });
         if (doctorProfile) {
             return (0, response_1.successResponse)({}, "Profile deleted successfully", res);
         }
@@ -840,7 +859,7 @@ const getDoctorWorkingInHospitals = (req, res) => __awaiter(void 0, void 0, void
             return Object.assign({ hospital: element }, doctorObj[index]);
         });
         yield doctorsWorkingInHospital.forEach((e) => __awaiter(void 0, void 0, void 0, function* () {
-            e.workingHours = yield (0, WorkingHour_helper_1.formatWorkingHour)(e.workingHours);
+            e.workingHours = (0, WorkingHour_helper_1.formatWorkingHour)(e.workingHours);
         }));
         return (0, response_1.successResponse)({ doctorDetails, doctorsWorkingInHospital }, "Success", res);
     }
@@ -929,3 +948,73 @@ const getHospitalListByDoctorId = (req, res) => __awaiter(void 0, void 0, void 0
     }
 });
 exports.getHospitalListByDoctorId = getHospitalListByDoctorId;
+const checkDoctorAvailability = (body) => __awaiter(void 0, void 0, void 0, function* () {
+    // @TODO check if working hour exist first
+    let capacity = yield WorkingHours_Model_1.default.findOne({
+        doctorDetails: body.doctors,
+        hospitalDetails: body.hospital,
+    });
+    if (!capacity) {
+        let error = new Error("Error");
+        error.message = "Cannot create appointment";
+        // return errorResponse(error, res);
+        throw error;
+    }
+    body.time.date = new Date(body.time.date);
+    // body.time.date = new Date(body.time.date);
+    const requestDate = new Date(body.time.date);
+    const day = requestDate.getDay();
+    if (day == 0) {
+        capacity = capacity.sunday;
+    }
+    else if (day == 1) {
+        capacity = capacity.monday;
+    }
+    else if (day == 2) {
+        capacity = capacity.tuesday;
+    }
+    else if (day == 3) {
+        capacity = capacity.wednesday;
+    }
+    else if (day == 4) {
+        capacity = capacity.thursday;
+    }
+    else if (day == 5) {
+        capacity = capacity.friday;
+    }
+    else if (day == 6) {
+        capacity = capacity.saturday;
+    }
+    if (!capacity) {
+        return {
+            status: false,
+            message: "Doctor not available on this day",
+        };
+    }
+    let appointmentCount = yield Appointment_Model_1.default.find({
+        doctors: body.doctors,
+        hospital: body.hospital,
+        "time.from.time": capacity.from.time,
+        "time.till.time": capacity.till.time,
+    });
+    let appCount = 0;
+    appointmentCount = appointmentCount.map((e) => {
+        if (new Date(e.time.date).getDate() == new Date(requestDate).getDate() &&
+            new Date(e.time.date).getFullYear() ==
+                new Date(requestDate).getFullYear() &&
+            new Date(e.time.date).getMonth() == new Date(requestDate).getMonth()) {
+            appCount++;
+        }
+    });
+    if (appCount == capacity.capacity) {
+        return {
+            status: false,
+            message: "Doctor cannot take any more appointments",
+        };
+    }
+    return {
+        status: true,
+        message: "Doctor is available",
+    };
+});
+exports.checkDoctorAvailability = checkDoctorAvailability;

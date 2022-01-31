@@ -37,6 +37,10 @@ const middlewareHelper_1 = require("./Services/middlewareHelper");
 const Doctor_auth_1 = require("./authentication/Doctor.auth");
 const Hospital_auth_1 = require("./authentication/Hospital.auth");
 const Patient_auth_1 = require("./authentication/Patient.auth");
+// Cron Jobs
+// cronJobService.cronFunctions.forEach((e: Function) => {
+//   e();
+// });
 dotenv.config();
 const port = process.env.PORT;
 const app = (0, express_1.default)();

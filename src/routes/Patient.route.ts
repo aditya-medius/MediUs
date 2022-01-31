@@ -8,7 +8,7 @@ import { authenticateDoctor } from "../authentication/Doctor.auth";
 import * as subPatientController from "../Controllers/SubPatient.Controller";
 import { patient, subPatient } from "../Services/schemaNames";
 const patientRouter = express.Router();
-const upload = multer({ dest: './src/uploads'});
+const upload = multer({ dest: "./src/uploads" });
 patientRouter.post("/login", patientController.patientLogin);
 patientRouter.post("/", patientController.createPatient);
 patientRouter.get(
@@ -94,11 +94,11 @@ patientRouter.get(
 );
 //upload prescription
 patientRouter.post(
-  "/uploadPrescription", 
-   upload.single("prescription"), 
-   authenticatePatient,
-   patientController.uploadPrescription
-)
+  "/uploadPrescription",
+  upload.single("prescription"),
+  authenticatePatient,
+  patientController.uploadPrescription
+);
 
 // Sub Patient
 patientRouter.post(
@@ -131,5 +131,10 @@ patientRouter.put(
   subPatientController.updateSubPatient
 );
 
+// Check kro k doctor available hai uss din
+patientRouter.post(
+  "/checkDoctorAvailability",
+  oneOf(authenticateDoctor, authenticatePatient),
+  patientController.checkDoctorAvailability
+);
 export default patientRouter;
-

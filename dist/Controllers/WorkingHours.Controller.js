@@ -27,6 +27,7 @@ exports.getWorkingHours = exports.createOpeningHours = exports.createWorkingHour
 const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
 const response_1 = require("../Services/response");
 const time_class_1 = require("../Services/time.class");
+const WorkingHour_helper_1 = require("../Services/WorkingHour.helper");
 // For Doctors
 const createWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -78,7 +79,7 @@ exports.createOpeningHours = createOpeningHours;
 // Get working hours
 const getWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let WHObj = yield WorkingHours_Model_1.default
+        const WHObj = yield WorkingHours_Model_1.default
             .find({
             doctorDetails: req.body.doctorDetails,
             hospitalDetails: req.body.hospitalDetails,
@@ -102,6 +103,8 @@ const getWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function
                 }
             });
             // return successResponse({ WHObj, WHObj2 }, "Success", res);
+            WHObj2 = (0, WorkingHour_helper_1.formatWorkingHour)([WHObj2]);
+            console.log("Who:", WHObj2);
             return (0, response_1.successResponse)({ workingHours: WHObj2 }, "Success", res);
         }
         else {
