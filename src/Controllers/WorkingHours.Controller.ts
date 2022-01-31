@@ -3,6 +3,7 @@ import { Request, Response, Router } from "express";
 import { errorResponse, successResponse } from "../Services/response";
 import { addBodyPart } from "../Admin Controlled Models/Admin.Controller";
 import { time } from "../Services/time.class";
+import { formatWorkingHour } from "../Services/WorkingHour.helper";
 
 // For Doctors
 export const createWorkingHours = async (req: Request, res: Response) => {
@@ -64,15 +65,34 @@ export const createOpeningHours = async (req: Request, res: Response) => {
 // Get working hours
 export const getWorkingHours = async (req: Request, res: Response) => {
   try {
-    const WHObj = await workingHourModel.find(
-      {
-        doctorDetails: req.body.doctorDetails,
-        hospitalDetails: req.body.hospitalDetails,
-      },
-      "-byHospital -doctorDetails -hospitalDetails"
-    );
+    const WHObj = await workingHourModel
+      .find(
+        {
+          doctorDetails: req.body.doctorDetails,
+          hospitalDetails: req.body.hospitalDetails,
+        },
+        "-byHospital -doctorDetails -hospitalDetails"
+      )
+      .lean();
+    let WHObj2: any = {};
     if (WHObj) {
-      return successResponse(WHObj, "Success", res);
+      WHObj.map((e) => {
+        for (let data in e) {
+          if (data != "_id" && data != "__v") {
+            if (WHObj2[data]) {
+              WHObj2[data] = [...WHObj2[data], e[data]];
+            } else {
+              WHObj2[data] = [e[data]];
+            }
+          } else {
+            WHObj2[data] = e[data];
+          }
+        }
+      });
+      // return successResponse({ WHObj, WHObj2 }, "Success", res);
+      WHObj2 = formatWorkingHour([WHObj2]);
+      console.log("Who:", WHObj2);
+      return successResponse({ workingHours: WHObj2 }, "Success", res);
     } else {
       return successResponse({}, "No data found", res);
     }

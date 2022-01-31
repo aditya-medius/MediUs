@@ -175,35 +175,6 @@ doctorSchema.pre("save", function (next) {
         }
     });
 });
-// doctorSchema.pre("save", async function (next) {
-//   console.log("this: ", this.hospitalDetails);
-//   const hospitalIdArray: Array<string> = this.hospitalDetails.map((e: any) =>
-//     e.workingHours.toString()
-//   );
-//   if (hospitalIdArray.length > 1) {
-//     const workingHourObj: Array<any> = await workingHourModel.find({
-//       _id: { $in: hospitalIdArray },
-//     });
-//     for (let index = 0; index < workingHourObj.length; index++) {
-//       for (let i = index + 1; i < workingHourObj.length; i++) {
-//         if (workingHourObj[i]) {
-//           if (
-//             workingHourObj[index].monday.from.division ==
-//             workingHourObj[i].monday.from.division
-//           ) {
-//             if (
-//               workingHourObj[index].monday.from.time <
-//               workingHourObj[i].monday.from.time
-//             ) {
-//               throw new Error("Error!");
-//             }
-//           }
-//         }
-//       }
-//     }
-//   }
-//   next();
-// });
 doctorSchema.pre("findOneAndUpdate", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         let updateQuery = this.getUpdate();

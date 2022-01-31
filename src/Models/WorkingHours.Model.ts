@@ -301,15 +301,26 @@ const workingHoursSchema = new Schema({
   },
 });
 
+// workingHoursSchema.pre("find", async function (next) {
+//   const query = this.getQuery();
+//   console.log("query:", query);
+
+//   let workingHours;
+//   workingHours = await this.model.find(query);
+
+//   console.log("working hours:", workingHours);
+
+//   next();
+// });
 // ["find", "findOne", "aggregate"].forEach((e: string) => {
-//   workingHoursSchema.post(e, async function (result) {
-//     if (typeof result == "object" && result.length && result.length > 0) {
-//       result.map(async (elem: any) => {
-//         elem.workingHours = await formatWorkingHour(elem.workingHours);
-//       });
-//     }
+//   workingHoursSchema.post(e, function (result) {
+//     console.log("result:", result);
 //   });
 // });
+
+// const handleDeletedProfiles = async (data: any) => {
+
+// };
 workingHoursSchema.pre("save", async function (next) {
   if (this.byHospital) {
     next();

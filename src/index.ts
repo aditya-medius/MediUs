@@ -14,6 +14,13 @@ import { oneOf, tokenNikalo } from "./Services/middlewareHelper";
 import { authenticateDoctor } from "./authentication/Doctor.auth";
 import { authenticateHospital } from "./authentication/Hospital.auth";
 import { authenticatePatient } from "./authentication/Patient.auth";
+
+import * as cronJobService from "./Services/Cron-Jobs.Service";
+
+// Cron Jobs
+// cronJobService.cronFunctions.forEach((e: Function) => {
+//   e();
+// });
 dotenv.config();
 
 const port = process.env.PORT;

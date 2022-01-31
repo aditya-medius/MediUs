@@ -1,11 +1,24 @@
-export const formatWorkingHour = async (workingHours: Array<any>) => {
+const dayArray: Array<string> = [
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "sunday",
+];
+
+export const formatWorkingHour = (workingHours: Array<any>) => {
   workingHours = workingHours.map((e: any) => {
     return Object.keys(e).map((elem: any) => {
-      return {
-        day: elem,
-        timings: e[elem],
-      };
+      if (dayArray.includes(elem)) {
+        return {
+          day: elem,
+          timings: e[elem],
+        };
+      }
     });
   });
-  return workingHours.flat();
+  workingHours = workingHours.flat().filter((e: any) => e);
+  return workingHours;
 };

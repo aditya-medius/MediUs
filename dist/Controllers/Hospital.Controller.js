@@ -59,6 +59,7 @@ const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const message_service_1 = require("../Services/message.service");
 const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
 const Patient_Controller_1 = require("./Patient.Controller");
+const WorkingHour_helper_1 = require("../Services/WorkingHour.helper");
 const excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -614,14 +615,31 @@ const getHospitalById = (req, res) => __awaiter(void 0, void 0, void 0, function
             .populate("anemity")
             .populate("payment")
             .populate("specialisedIn")
-            .populate("openingHour");
+            .populate({
+            path: "openingHour",
+            select: {
+                _id: 0,
+                __v: 0,
+                byHospital: 0,
+            },
+        })
+            .lean();
         const doctorIds = hospital.doctors.map((e) => {
             return e._id.toString();
         });
-        let workingHours = yield WorkingHours_Model_1.default.find({
+        let workingHours = yield WorkingHours_Model_1.default
+            .find({
             doctorDetails: { $in: doctorIds },
             hospitalDetails: req.params.id,
-        });
+        })
+            .select({
+            hosptial: 0,
+            _id: 0,
+            __v: 0,
+            byHospital: 0,
+            hospitalDetails: 0,
+        })
+            .lean();
         workingHours = workingHours.reduce((r, a) => {
             r[a.doctorDetails.toString()] = [
                 ...(r[a.doctorDetails.toString()] || []),
@@ -639,9 +657,19 @@ const getHospitalById = (req, res) => __awaiter(void 0, void 0, void 0, function
                 lastName: e.lastName,
                 specialization: e.specialization,
                 qualification: e.qualification,
-                workingHour: workingHours[e._id.toString()],
+                KYCDetails: e.KYCDetails,
+                overallExperience: e.overallExperience,
+                hospitalDetails: [
+                    {
+                        workingHour: (0, WorkingHour_helper_1.formatWorkingHour)(workingHours[e._id.toString()]),
+                        consultationFee: e.hospitalDetails[0].consultationFee,
+                        _id: e.hospitalDetails._id,
+                    },
+                ],
             };
         });
+        hospital.openingHour = (0, WorkingHour_helper_1.formatWorkingHour)([hospital.openingHour]);
+        hospital.doctors = doctors;
         return (0, response_1.successResponse)({ hospital }, "Success", res);
     }
     catch (error) {
@@ -649,133 +677,3 @@ const getHospitalById = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.getHospitalById = getHospitalById;
-// const hospital = await hospitalModel.aggregate([
-//   {
-//     $match: {
-//       _id: {
-//         $eq: new mongoose.Types.ObjectId(req.params.id),
-//       },
-//     },
-//   },
-//   {
-//     $lookup: {
-//       from: "doctors",
-//       localField: "doctors",
-//       foreignField: "_id",
-//       as: "doctorss",
-//     },
-//   },
-//   {
-//     $lookup: {
-//       from: "addresses",
-//       localField: "address",
-//       foreignField: "_id",
-//       as: "addresss",
-//     },
-//   },
-//   {
-//     $lookup: {
-//       from: "states",
-//       localField: "addresss.state",
-//       foreignField: "_id",
-//       as: "address.state",
-//     },
-//   },
-//   {
-//     $lookup: {
-//       from: "cities",
-//       localField: "addresss.city",
-//       foreignField: "_id",
-//       as: "address.city",
-//     },
-//   },
-//   {
-//     $lookup: {
-//       from: "localities",
-//       localField: "addresss.locality",
-//       foreignField: "_id",
-//       as: "address.locality",
-//     },
-//   },
-//   {
-//     $lookup: {
-//       from: "countries",
-//       localField: "addresss.country",
-//       foreignField: "_id",
-//       as: "address.country",
-//     },
-//   },
-//   {
-//     $unwind: "$address.country",
-//   },
-//   {
-//     $unwind: "$address.city",
-//   },
-//   {
-//     $unwind: "$address.locality",
-//   },
-//   {
-//     $unwind: "$address.state",
-//   },
-//   {
-//     $lookup: {
-//       from: "specializations",
-//       localField: "doctors.specialization",
-//       foreignField: "_id",
-//       as: "doctors.specialization",
-//     },
-//   },
-//   {
-//     $lookup: {
-//       from: "anemitys",
-//       localField: "anemity",
-//       foreignField: "_id",
-//       as: "anemity",
-//     },
-//   },
-//   {
-//     $lookup: {
-//       from: "specializations",
-//       localField: "specialisedIn",
-//       foreignField: "_id",
-//       as: "specialisedIn",
-//     },
-//   },
-//   {
-//     $lookup: {
-//       from: "treatmenttypes",
-//       localField: "treatmentType",
-//       foreignField: "_id",
-//       as: "treatmentType",
-//     },
-//   },
-//   {
-//     $lookup: {
-//       from: "payments",
-//       localField: "payment",
-//       foreignField: "_id",
-//       as: "payment",
-//     },
-//   },
-//   {
-//     $project: {
-//       address: 1,
-//       // "doctors.firstName": 1,
-//       // "doctors.lastName": 1,
-//       // "doctors.hospitalDetails": 1,
-//       // "doctors.specialization": 1,
-//       // "doctors.qualification": 1,
-//       doctors: 1,
-//       doctorss: 1,
-//       name: 1,
-//       specialisedIn: 1,
-//       anemity: 1,
-//       treatmentType: 1,
-//       type: 1,
-//       payment: 1,
-//       contactNumber: 1,
-//       numberOfBed: 1,
-//       location: 1,
-//     },
-//   },
-// ]);

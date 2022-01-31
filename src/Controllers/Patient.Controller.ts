@@ -22,6 +22,7 @@ import specialityModel from "../Admin Controlled Models/Specialization.Model";
 import hospitalModel from "../Models/Hospital.Model";
 import addressModel from "../Models/Address.Model";
 import prescriptionModel from "../Models/Prescription.Model";
+import * as doctorController from "../Controllers/Doctor.Controller";
 export const excludePatientFields = {
   password: 0,
   verified: 0,
@@ -155,8 +156,10 @@ export const patientLogin = async (req: Request, res: Response) => {
               process.env.SECRET_PATIENT_KEY as string
             );
             otpData.remove();
+            const { firstName, lastName, gender, phoneNumber, email, _id } =
+              profile.toJSON();
             return successResponse(
-              { token, profileInfo: profile },
+              { token, firstName, lastName, gender, phoneNumber, email, _id },
               "Successfully logged in",
               res
             );
@@ -510,20 +513,21 @@ export const ViewAppointment = async (req: Request, res: Response) => {
         cancelled: false,
         "time.date": { $gt: Date() },
       })
-      .populate({
-        path: "patient",
-        select: excludePatientFields,
-      })
+      // .populate({
+      //   path: "patient",
+      //   select: excludePatientFields,
+      // })
       .sort({ "time.date": 1 })
       .skip(page > 1 ? (page - 1) * 2 : 0)
       .limit(2)
       .populate({
-        path: "patient",
-        select: excludePatientFields,
-      })
-      .populate({
         path: "hospital",
-        select: excludeHospitalFields,
+        select: {
+          ...excludeHospitalFields,
+          type: 0,
+          deleted: 0,
+          contactNumber: 0,
+        },
       })
       .populate({
         path: "doctors",
@@ -532,6 +536,12 @@ export const ViewAppointment = async (req: Request, res: Response) => {
           hospitalDetails: 0,
           specialization: 0,
           qualification: 0,
+          email: 0,
+          active: 0,
+          deleted: 0,
+          overallExperience: 0,
+          gender: 0,
+          image: 0,
         },
       })
       .populate({
@@ -544,19 +554,22 @@ export const ViewAppointment = async (req: Request, res: Response) => {
     const page2 = appointmentData.length / 2;
 
     const older_apppointmentData: Array<object> = await appointmentModel
-      .find({
-        patient: req.currentPatient,
-        cancelled: false,
-        "time.date": { $lte: Date() },
-      })
-      // .populate("patient subPatient hospital doctors")
-      .populate({
-        path: "patient",
-        select: excludePatientFields,
-      })
+      .find(
+        {
+          patient: req.currentPatient,
+          cancelled: false,
+          "time.date": { $lte: Date() },
+        },
+        "-patient"
+      )
       .populate({
         path: "hospital",
-        select: excludeHospitalFields,
+        select: {
+          ...excludeHospitalFields,
+          type: 0,
+          deleted: 0,
+          contactNumber: 0,
+        },
       })
       .populate({
         path: "doctors",
@@ -565,6 +578,12 @@ export const ViewAppointment = async (req: Request, res: Response) => {
           hospitalDetails: 0,
           specialization: 0,
           qualification: 0,
+          email: 0,
+          active: 0,
+          deleted: 0,
+          overallExperience: 0,
+          gender: 0,
+          image: 0,
         },
       })
       .populate({
@@ -770,4 +789,17 @@ export const uploadPrescription = async (req: Request, res: Response) => {
   } catch (error: any) {
     return errorResponse(error, res);
   }
+};
+
+export const checkDoctorAvailability = async (req: Request, res: Response) => {
+  try {
+    const isDoctorAvaiable: { status: boolean; message: string } =
+      await doctorController.checkDoctorAvailability(req.body);
+
+    return successResponse(
+      isDoctorAvaiable.status,
+      isDoctorAvaiable.message,
+      res
+    );
+  } catch (error: any) {}
 };

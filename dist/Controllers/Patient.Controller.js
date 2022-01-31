@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uploadPrescription = exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.CancelAppointment = exports.doneAppointment = exports.rescheduleAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = exports.excludeHospitalFields = exports.excludePatientFields = void 0;
+exports.checkDoctorAvailability = exports.uploadPrescription = exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.CancelAppointment = exports.doneAppointment = exports.rescheduleAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = exports.excludeHospitalFields = exports.excludePatientFields = void 0;
 const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
 // import { excludePatientFields } from "./Patient.Controller";
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
@@ -50,6 +50,7 @@ const Specialization_Model_1 = __importDefault(require("../Admin Controlled Mode
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Prescription_Model_1 = __importDefault(require("../Models/Prescription.Model"));
+const doctorController = __importStar(require("../Controllers/Doctor.Controller"));
 exports.excludePatientFields = {
     password: 0,
     verified: 0,
@@ -145,7 +146,8 @@ const patientLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                     if (profile) {
                         const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_PATIENT_KEY);
                         otpData.remove();
-                        return (0, response_1.successResponse)({ token, profileInfo: profile }, "Successfully logged in", res);
+                        const { firstName, lastName, gender, phoneNumber, email, _id } = profile.toJSON();
+                        return (0, response_1.successResponse)({ token, firstName, lastName, gender, phoneNumber, email, _id }, "Successfully logged in", res);
                     }
                     else {
                         otpData.remove();
@@ -478,24 +480,20 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
             cancelled: false,
             "time.date": { $gt: Date() },
         })
-            .populate({
-            path: "patient",
-            select: exports.excludePatientFields,
-        })
+            // .populate({
+            //   path: "patient",
+            //   select: excludePatientFields,
+            // })
             .sort({ "time.date": 1 })
             .skip(page > 1 ? (page - 1) * 2 : 0)
             .limit(2)
             .populate({
-            path: "patient",
-            select: exports.excludePatientFields,
-        })
-            .populate({
             path: "hospital",
-            select: exports.excludeHospitalFields,
+            select: Object.assign(Object.assign({}, exports.excludeHospitalFields), { type: 0, deleted: 0, contactNumber: 0 }),
         })
             .populate({
             path: "doctors",
-            select: Object.assign(Object.assign({}, Doctor_Controller_1.excludeDoctorFields), { hospitalDetails: 0, specialization: 0, qualification: 0 }),
+            select: Object.assign(Object.assign({}, Doctor_Controller_1.excludeDoctorFields), { hospitalDetails: 0, specialization: 0, qualification: 0, email: 0, active: 0, deleted: 0, overallExperience: 0, gender: 0, image: 0 }),
         })
             .populate({
             path: "subPatient",
@@ -509,19 +507,14 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
             patient: req.currentPatient,
             cancelled: false,
             "time.date": { $lte: Date() },
-        })
-            // .populate("patient subPatient hospital doctors")
-            .populate({
-            path: "patient",
-            select: exports.excludePatientFields,
-        })
+        }, "-patient")
             .populate({
             path: "hospital",
-            select: exports.excludeHospitalFields,
+            select: Object.assign(Object.assign({}, exports.excludeHospitalFields), { type: 0, deleted: 0, contactNumber: 0 }),
         })
             .populate({
             path: "doctors",
-            select: Object.assign(Object.assign({}, Doctor_Controller_1.excludeDoctorFields), { hospitalDetails: 0, specialization: 0, qualification: 0 }),
+            select: Object.assign(Object.assign({}, Doctor_Controller_1.excludeDoctorFields), { hospitalDetails: 0, specialization: 0, qualification: 0, email: 0, active: 0, deleted: 0, overallExperience: 0, gender: 0, image: 0 }),
         })
             .populate({
             path: "subPatient",
@@ -534,14 +527,7 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
             .limit(2);
         const allAppointment = appointmentData.concat(older_apppointmentData);
         if (allAppointment.length > 0)
-<<<<<<< HEAD
-            return (0, response_1.successResponse)({
-                past: older_apppointmentData,
-                upcoming: appointmentData,
-            }, "Appointments has been found", res);
-=======
             return (0, response_1.successResponse)({ past: older_apppointmentData, upcoming: allAppointment }, "Appointments has been found", res);
->>>>>>> 03ac35e3b173eb0140559ee3e3e4620b8fe3909c
         else {
             let error = new Error("No appointments is found");
             return (0, response_1.errorResponse)(error, res, 404);
@@ -709,3 +695,11 @@ const uploadPrescription = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.uploadPrescription = uploadPrescription;
+const checkDoctorAvailability = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const isDoctorAvaiable = yield doctorController.checkDoctorAvailability(req.body);
+        return (0, response_1.successResponse)(isDoctorAvaiable.status, isDoctorAvaiable.message, res);
+    }
+    catch (error) { }
+});
+exports.checkDoctorAvailability = checkDoctorAvailability;

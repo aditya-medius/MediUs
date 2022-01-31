@@ -49,6 +49,9 @@ const schemaOptions = {
         type: Boolean,
         default: false,
     },
+    deleteDate: {
+        type: Date,
+    },
 };
 exports.default = schemaOptions;
 // {
