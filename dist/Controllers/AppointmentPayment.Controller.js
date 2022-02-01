@@ -1,4 +1,23 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -16,7 +35,8 @@ exports.verifyPayment = exports.generateOrderId = void 0;
 const razorpay_1 = __importDefault(require("razorpay"));
 const response_1 = require("../Services/response");
 const AppointmentPayment_Model_1 = __importDefault(require("../Models/AppointmentPayment.Model"));
-const crypto_1 = __importDefault(require("crypto"));
+const orderController = __importStar(require("./Order.Controller"));
+const CreditAmount_Model_1 = __importDefault(require("../Models/CreditAmount.Model"));
 const generateOrderId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const body = req.body;
@@ -24,18 +44,16 @@ const generateOrderId = (req, res) => __awaiter(void 0, void 0, void 0, function
             key_id: process.env.RAZOR_PAY_TEST_ID,
             key_secret: process.env.RAZOR_PAY_TEST_SECRET,
         });
-        const receiptNumber = Math.floor(100000 + Math.random() * 900000).toString();
-        var options = {
-            amount: body.amount,
-            currency: body.currency,
-            receipt: `order_rcptid_${receiptNumber}`,
-        };
+        const { appointmentOrderId, options, receiptNumber } = yield orderController.generateOrderId(body);
         instance.orders.create(options, function (err, order) {
-            // console.log(order);
             if (err) {
                 return (0, response_1.errorResponse)(err, res);
             }
-            return (0, response_1.successResponse)({ orderId: order.id, orderReceipt: `order_rcptid_${receiptNumber}` }, "Order id generated", res);
+            return (0, response_1.successResponse)({
+                appointmentOrderId,
+                orderId: order.id,
+                orderReceipt: `order_rcptid_${receiptNumber}`,
+            }, "Order id generated", res);
         });
     }
     catch (e) {
@@ -45,18 +63,28 @@ const generateOrderId = (req, res) => __awaiter(void 0, void 0, void 0, function
 exports.generateOrderId = generateOrderId;
 const verifyPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let body = req.body.orderId + "|" + req.body.paymentId;
-        var expectedSignature = crypto_1.default
-            .createHmac("sha256", process.env.RAZOR_PAY_TEST_SECRET)
-            .update(body.toString())
-            .digest("hex");
-        var response = { signatureIsValid: "false" };
-        if (expectedSignature === req.body.paymentSignature) {
-            response = { signatureIsValid: "true" };
-            const paymentObj = yield new AppointmentPayment_Model_1.default(req.body);
-            response.paymentDetails = paymentObj;
-            return (0, response_1.successResponse)(response, "Signature is valid", res);
-        }
+        // let body = req.body.orderId + "|" + req.body.paymentId;
+        // var expectedSignature = crypto
+        //   .createHmac("sha256", process.env.RAZOR_PAY_TEST_SECRET as string)
+        //   .update(body.toString())
+        //   .digest("hex");
+        // var response: any = { signatureIsValid: "false" };
+        // if (expectedSignature === req.body.paymentSignature) {
+        //   response = { signatureIsValid: "true" };
+        //   const paymentObj = await new appointmentPayment(req.body);
+        //   await new creditAmountModel({
+        //     orderId: req.body.orderId,
+        //     appointmentDetails: req.body.appointmentDetails,
+        //   }).save();
+        //   response.paymentDetails = paymentObj;
+        //   return successResponse(response, "Signature is valid", res);
+        // }
+        const paymentObj = yield new AppointmentPayment_Model_1.default(req.body).save();
+        yield new CreditAmount_Model_1.default({
+            orderId: req.body.orderId,
+            appointmentDetails: req.body.appointmentId,
+        }).save();
+        return (0, response_1.successResponse)(paymentObj, "Signature is valid", res);
         let error = new Error("Signature is invalid");
         error.name = "INvalid signature";
         return (0, response_1.errorResponse)(error, res);

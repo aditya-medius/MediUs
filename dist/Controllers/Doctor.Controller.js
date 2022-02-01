@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
+exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -61,6 +61,8 @@ const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
 const Patient_Controller_1 = require("./Patient.Controller");
 const Validation_Service_1 = require("../Services/Validation.Service");
 const WorkingHour_helper_1 = require("../Services/WorkingHour.helper");
+const doctorService = __importStar(require("../Services/Doctor/Doctor.Service"));
+const Withdrawal_Model_1 = __importDefault(require("../Models/Withdrawal.Model"));
 exports.excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -1018,3 +1020,111 @@ const checkDoctorAvailability = (body) => __awaiter(void 0, void 0, void 0, func
     };
 });
 exports.checkDoctorAvailability = checkDoctorAvailability;
+const getTotalEarnings = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // const totalEarnings = await appointmentPaymentModel.aggregate([
+        //   {
+        //     $lookup: {
+        //       from: "orders",
+        //       localField: "orderId",
+        //       foreignField: "_id",
+        //       as: "orderId",
+        //     },
+        //   },
+        //   {
+        //     $unwind: {
+        //       path: "$orderId",
+        //     },
+        //   },
+        //   {
+        //     $lookup: {
+        //       from: "appointments",
+        //       localField: "orderId.appointmentDetails",
+        //       foreignField: "_id",
+        //       as: "orderId.appointmentDetails",
+        //     },
+        //   },
+        //   {
+        //     $unwind: {
+        //       path: "$orderId.appointmentDetails",
+        //     },
+        //   },
+        //   {
+        //     $match: {
+        //       "orderId.appointmentDetails.doctors": new mongoose.Types.ObjectId(
+        //         req.currentDoctor
+        //       ),
+        //     },
+        //   },
+        //   {
+        //     $group: {
+        //       _id: "$orderId.appointmentDetails.doctors",
+        //       totalEarnings: {
+        //         $sum: "$orderId.amount",
+        //       },
+        //     },
+        //   },
+        // ]);
+        const totalEarnings = yield doctorService.getTotalEarnings(req.currentDoctor);
+        return (0, response_1.successResponse)(totalEarnings, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getTotalEarnings = getTotalEarnings;
+const getAvailableAmount = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const totalEarnings = yield doctorService.getTotalEarnings(req.currentDoctor);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getAvailableAmount = getAvailableAmount;
+const getPendingAmount = (req, res) => __awaiter(void 0, void 0, void 0, function* () { });
+exports.getPendingAmount = getPendingAmount;
+const withdraw = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let user = schemaNames_1.doctor;
+        let id = req.currentDoctor
+            ? req.currentDoctor
+            : req.currentHospital;
+        if (req.currentHospital) {
+            user = schemaNames_1.hospital;
+        }
+        const body = req.body;
+        const pendingAmount = yield doctorService.getPendingAmount(id);
+        if (body.withdrawalAmount > pendingAmount) {
+            let error = new Error("Insufficient Balance");
+            error.name = "Not sufficient balance.";
+            return (0, response_1.errorResponse)(error, res);
+        }
+        else {
+            const receiptNumber = Math.floor(100000 + Math.random() * 900000).toString();
+            const todayDate = new Date();
+            yield new Withdrawal_Model_1.default({
+                withdrawalAmount: req.body.withdrawalAmount,
+                withdrawnBy: id,
+                user: user,
+                withdrawalReceipt: `wthdrw_${receiptNumber}`,
+                createdAt: todayDate,
+            }).save();
+            return (0, response_1.successResponse)({
+                withdrawalReceipt: `wthdrw_${receiptNumber}`,
+                withdrawalAmount: req.body.withdrawalAmount,
+                withdrawalDate: todayDate,
+            }, "Success", res);
+        }
+        // const Promise_TotalEarnings = doctorService.getTotalEarnings(req);
+        // const [pendingAmount, totalEarnings] = Promise.all([
+        //   Promise_PendingAmount,
+        //   Promise_TotalEarnings,
+        // ]);
+    }
+    catch (error) {
+        let err = new Error(error);
+        return (0, response_1.errorResponse)(err, res);
+    }
+});
+exports.withdraw = withdraw;

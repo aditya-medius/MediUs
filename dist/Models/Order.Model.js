@@ -21,26 +21,24 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const schemaNames_1 = require("../Services/schemaNames");
-const appointmentPaymentSchema = new mongoose_1.Schema({
-    orderId: {
-        type: mongoose_1.default.Schema.Types.ObjectId,
-        ref: schemaNames_1.order,
+const orderSchema = new mongoose_1.Schema({
+    receipt: {
+        type: String,
         required: true,
     },
-    orderReceipt: {
-        type: String,
+    amount: {
+        type: Number,
+        required: true,
     },
-    paymentId: {
+    currency: {
         type: String,
+        required: true,
     },
-    appointmentId: {
+    appointmentDetails: {
         type: mongoose_1.default.Schema.Types.ObjectId,
         ref: schemaNames_1.appointment,
         required: true,
     },
-    paymentSignature: {
-        type: String,
-    },
 });
-const appointmentPaymentModel = (0, mongoose_1.model)(schemaNames_1.appointmentPayment, appointmentPaymentSchema);
-exports.default = appointmentPaymentModel;
+const orderModel = (0, mongoose_1.model)(schemaNames_1.order, orderSchema);
+exports.default = orderModel;

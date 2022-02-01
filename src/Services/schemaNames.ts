@@ -33,3 +33,6 @@ export const cityMap: string = "cityMap";
 export const kycDetails: string = "KYCDetails";
 export const feedback: string = "feedbacks";
 export const media: string = "medias";
+export const order: string = "orders";
+export const creditAmount: string = "credits";
+export const withdraw: string = "withdrawals"

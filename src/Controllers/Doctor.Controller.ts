@@ -10,8 +10,11 @@ import bodyPartModel from "../Admin Controlled Models/BodyPart.Model";
 import _ from "underscore";
 import specialityDiseaseModel from "../Admin Controlled Models/SpecialityDisease.Model";
 import {
+  appointment,
   disease,
+  doctor,
   doctorType,
+  hospital,
   specialization,
   workingHour,
 } from "../Services/schemaNames";
@@ -26,6 +29,12 @@ import {
   phoneNumberValidation,
 } from "../Services/Validation.Service";
 import { formatWorkingHour } from "../Services/WorkingHour.helper";
+import orderModel from "../Models/Order.Model";
+
+import appointmentPaymentModel from "../Models/AppointmentPayment.Model";
+import * as doctorService from "../Services/Doctor/Doctor.Service";
+import withdrawModel from "../Models/Withdrawal.Model";
+
 export const excludeDoctorFields = {
   password: 0,
   // panCard: 0,
@@ -1102,4 +1111,123 @@ export const checkDoctorAvailability = async (
     status: true,
     message: "Doctor is available",
   };
+};
+
+export const getTotalEarnings = async (req: Request, res: Response) => {
+  try {
+    // const totalEarnings = await appointmentPaymentModel.aggregate([
+    //   {
+    //     $lookup: {
+    //       from: "orders",
+    //       localField: "orderId",
+    //       foreignField: "_id",
+    //       as: "orderId",
+    //     },
+    //   },
+    //   {
+    //     $unwind: {
+    //       path: "$orderId",
+    //     },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "appointments",
+    //       localField: "orderId.appointmentDetails",
+    //       foreignField: "_id",
+    //       as: "orderId.appointmentDetails",
+    //     },
+    //   },
+    //   {
+    //     $unwind: {
+    //       path: "$orderId.appointmentDetails",
+    //     },
+    //   },
+    //   {
+    //     $match: {
+    //       "orderId.appointmentDetails.doctors": new mongoose.Types.ObjectId(
+    //         req.currentDoctor
+    //       ),
+    //     },
+    //   },
+    //   {
+    //     $group: {
+    //       _id: "$orderId.appointmentDetails.doctors",
+    //       totalEarnings: {
+    //         $sum: "$orderId.amount",
+    //       },
+    //     },
+    //   },
+    // ]);
+
+    const totalEarnings = await doctorService.getTotalEarnings(
+      req.currentDoctor
+    );
+    return successResponse(totalEarnings, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getAvailableAmount = async (req: Request, res: Response) => {
+  try {
+    const totalEarnings = await doctorService.getTotalEarnings(
+      req.currentDoctor
+    );
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getPendingAmount = async (req: Request, res: Response) => {};
+
+export const withdraw = async (req: Request, res: Response) => {
+  try {
+    let user: string = doctor;
+    let id: string = req.currentDoctor
+      ? req.currentDoctor
+      : req.currentHospital;
+    if (req.currentHospital) {
+      user = hospital;
+    }
+    const body = req.body;
+    const pendingAmount = await doctorService.getPendingAmount(id);
+    if (body.withdrawalAmount > pendingAmount) {
+      let error: Error = new Error("Insufficient Balance");
+      error.name = "Not sufficient balance.";
+      return errorResponse(error, res);
+    } else {
+      const receiptNumber = Math.floor(
+        100000 + Math.random() * 900000
+      ).toString();
+
+      const todayDate: Date = new Date();
+
+      await new withdrawModel({
+        withdrawalAmount: req.body.withdrawalAmount,
+        withdrawnBy: id,
+        user: user,
+        withdrawalReceipt: `wthdrw_${receiptNumber}`,
+        createdAt: todayDate,
+      }).save();
+
+      return successResponse(
+        {
+          withdrawalReceipt: `wthdrw_${receiptNumber}`,
+          withdrawalAmount: req.body.withdrawalAmount,
+          withdrawalDate: todayDate,
+        },
+        "Success",
+        res
+      );
+    }
+    // const Promise_TotalEarnings = doctorService.getTotalEarnings(req);
+
+    // const [pendingAmount, totalEarnings] = Promise.all([
+    //   Promise_PendingAmount,
+    //   Promise_TotalEarnings,
+    // ]);
+  } catch (error: any) {
+    let err = new Error(error);
+    return errorResponse(err, res);
+  }
 };

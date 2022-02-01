@@ -149,4 +149,18 @@ doctorRouter.post(
   upload.single("profileImage"),
   mediaController.uploadImage
 );
+
+// Doctors ki kamayi
+doctorRouter.get(
+  "/getTotalEarnings",
+  oneOf(authenticateDoctor),
+  doctorController.getTotalEarnings
+);
+
+// Account se paise nikalna
+doctorRouter.post(
+  "/withdraw",
+  oneOf(authenticateDoctor),
+  doctorController.withdraw
+);
 export default doctorRouter;
