@@ -1,9 +1,14 @@
 import mongoose, { Schema, model } from "mongoose";
-import { appointment, appointmentPayment } from "../Services/schemaNames";
+import {
+  appointment,
+  appointmentPayment,
+  order,
+} from "../Services/schemaNames";
 
 const appointmentPaymentSchema = new Schema({
   orderId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: order,
   },
   orderReceipt: {
     type: String,

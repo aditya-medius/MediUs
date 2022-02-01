@@ -23,7 +23,8 @@ const mongoose_1 = __importStar(require("mongoose"));
 const schemaNames_1 = require("../Services/schemaNames");
 const appointmentPaymentSchema = new mongoose_1.Schema({
     orderId: {
-        type: String,
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        ref: schemaNames_1.order,
     },
     orderReceipt: {
         type: String,

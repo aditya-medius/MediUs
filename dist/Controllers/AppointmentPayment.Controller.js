@@ -1,4 +1,23 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -17,6 +36,7 @@ const razorpay_1 = __importDefault(require("razorpay"));
 const response_1 = require("../Services/response");
 const AppointmentPayment_Model_1 = __importDefault(require("../Models/AppointmentPayment.Model"));
 const crypto_1 = __importDefault(require("crypto"));
+const orderController = __importStar(require("../Controllers/Order.Controller"));
 const generateOrderId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const body = req.body;
@@ -24,18 +44,25 @@ const generateOrderId = (req, res) => __awaiter(void 0, void 0, void 0, function
             key_id: process.env.RAZOR_PAY_TEST_ID,
             key_secret: process.env.RAZOR_PAY_TEST_SECRET,
         });
-        const receiptNumber = Math.floor(100000 + Math.random() * 900000).toString();
-        var options = {
-            amount: body.amount,
-            currency: body.currency,
-            receipt: `order_rcptid_${receiptNumber}`,
-        };
+        // const receiptNumber = Math.floor(
+        //   100000 + Math.random() * 900000
+        // ).toString();
+        // var options = {
+        //   amount: body.amount, // amount in the smallest currency unit
+        //   currency: body.currency,
+        //   receipt: `order_rcptid_${receiptNumber}`,
+        // };
+        const { orderId, options, receiptNumber } = yield orderController.createOrderId(body);
         instance.orders.create(options, function (err, order) {
             // console.log(order);
             if (err) {
                 return (0, response_1.errorResponse)(err, res);
             }
-            return (0, response_1.successResponse)({ orderId: order.id, orderReceipt: `order_rcptid_${receiptNumber}` }, "Order id generated", res);
+            return (0, response_1.successResponse)({
+                orderId: order,
+                orderReceipt: `order_rcptid_${receiptNumber}`,
+                _id: orderId._id,
+            }, "Order id generated", res);
         });
     }
     catch (e) {

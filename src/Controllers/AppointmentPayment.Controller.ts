@@ -3,6 +3,7 @@ import RazorPay from "razorpay";
 import { errorResponse, successResponse } from "../Services/response";
 import appointmentPayment from "../Models/AppointmentPayment.Model";
 import crypto from "crypto";
+import * as orderController from "../Controllers/Order.Controller";
 export const generateOrderId = async (req: Request, res: Response) => {
   try {
     const body = req.body;
@@ -11,15 +12,17 @@ export const generateOrderId = async (req: Request, res: Response) => {
       key_secret: process.env.RAZOR_PAY_TEST_SECRET as string,
     });
 
-    const receiptNumber = Math.floor(
-      100000 + Math.random() * 900000
-    ).toString();
+    // const receiptNumber = Math.floor(
+    //   100000 + Math.random() * 900000
+    // ).toString();
 
-    var options = {
-      amount: body.amount, // amount in the smallest currency unit
-      currency: body.currency,
-      receipt: `order_rcptid_${receiptNumber}`,
-    };
+    // var options = {
+    //   amount: body.amount, // amount in the smallest currency unit
+    //   currency: body.currency,
+    //   receipt: `order_rcptid_${receiptNumber}`,
+    // };
+    const { orderId, options, receiptNumber } =
+      await orderController.createOrderId(body);
 
     instance.orders.create(options, function (err: any, order: any) {
       // console.log(order);
@@ -27,7 +30,11 @@ export const generateOrderId = async (req: Request, res: Response) => {
         return errorResponse(err, res);
       }
       return successResponse(
-        { orderId: order.id, orderReceipt: `order_rcptid_${receiptNumber}` },
+        {
+          orderId: order,
+          orderReceipt: `order_rcptid_${receiptNumber}`,
+          _id: orderId._id,
+        },
         "Order id generated",
         res
       );
