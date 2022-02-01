@@ -25,6 +25,10 @@ const appointmentPaymentSchema = new mongoose_1.Schema({
     orderId: {
         type: mongoose_1.default.Schema.Types.ObjectId,
         ref: schemaNames_1.order,
+<<<<<<< HEAD
+=======
+        required: true,
+>>>>>>> d4390c565c69b8571d8f9b113539d4133622576c
     },
     orderReceipt: {
         type: String,

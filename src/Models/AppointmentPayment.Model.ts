@@ -9,6 +9,7 @@ const appointmentPaymentSchema = new Schema({
   orderId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: order,
+    required: true,
   },
   orderReceipt: {
     type: String,

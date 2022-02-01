@@ -85,4 +85,8 @@ doctorRouter.post("/setKYC", kycController.addKYC);
 doctorRouter.post("/updateKyc", kycController.updateKyc);
 // Media
 doctorRouter.post("/uploadImage", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), upload.single("profileImage"), mediaController.uploadImage);
+// Doctors ki kamayi
+doctorRouter.get("/getTotalEarnings", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getTotalEarnings);
+// Account se paise nikalna
+doctorRouter.post("/withdraw", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.withdraw);
 exports.default = doctorRouter;

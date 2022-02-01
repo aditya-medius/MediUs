@@ -1,21 +1,23 @@
-import { Request, Response } from "express";
 import orderModel from "../Models/Order.Model";
 
-export const createOrderId = async (body: any) => {
+export const generateOrderId = async (body: any) => {
   try {
     const receiptNumber = Math.floor(
       100000 + Math.random() * 900000
     ).toString();
 
-    var options = {
+    var opt = {
       amount: body.amount, // amount in the smallest currency unit
       currency: body.currency,
       receipt: `order_rcptid_${receiptNumber}`,
+      appointmentDetails: body.appointment,
     };
 
-    const orderId = await new orderModel(options).save();
-    return { orderId, options, receiptNumber };
+    const appointmentOrderId = await new orderModel(opt).save();
+    const { appointmentDetails, ...options } = opt;
+
+    return { appointmentOrderId, options, receiptNumber };
   } catch (error: any) {
-    return error;
+    return { error };
   }
 };

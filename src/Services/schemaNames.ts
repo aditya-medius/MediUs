@@ -34,3 +34,8 @@ export const kycDetails: string = "KYCDetails";
 export const feedback: string = "feedbacks";
 export const media: string = "medias";
 export const order: string = "orders";
+<<<<<<< HEAD
+=======
+export const creditAmount: string = "credits";
+export const withdraw: string = "withdrawals"
+>>>>>>> d4390c565c69b8571d8f9b113539d4133622576c

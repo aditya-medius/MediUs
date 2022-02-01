@@ -1,8 +1,4 @@
 "use strict";
-<<<<<<< HEAD
-Object.defineProperty(exports, "__esModule", { value: true });
-const mongoose_1 = require("mongoose");
-=======
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
@@ -24,34 +20,21 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
->>>>>>> d4390c565c69b8571d8f9b113539d4133622576c
 const schemaNames_1 = require("../Services/schemaNames");
-const orderSchema = new mongoose_1.Schema({
-    receipt: {
-        type: String,
-        required: true,
+const creditAmountSchema = new mongoose_1.Schema({
+    createdAt: {
+        type: Date,
+        default: Date.now(),
     },
-<<<<<<< HEAD
-=======
-    amount: {
-        type: Number,
-        required: true,
-    },
->>>>>>> d4390c565c69b8571d8f9b113539d4133622576c
-    currency: {
-        type: String,
-        required: true,
-    },
-<<<<<<< HEAD
-    amount: {
-        type: Number,
-=======
     appointmentDetails: {
         type: mongoose_1.default.Schema.Types.ObjectId,
         ref: schemaNames_1.appointment,
->>>>>>> d4390c565c69b8571d8f9b113539d4133622576c
         required: true,
     },
+    orderId: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        ref: schemaNames_1.order,
+    },
 });
-const orderModel = (0, mongoose_1.model)(schemaNames_1.order, orderSchema);
-exports.default = orderModel;
+const creditAmountModel = (0, mongoose_1.model)(schemaNames_1.creditAmount, creditAmountSchema);
+exports.default = creditAmountModel;
