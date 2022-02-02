@@ -12,10 +12,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = void 0;
+exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const CreditAmount_Model_1 = __importDefault(require("../../Models/CreditAmount.Model"));
 const Withdrawal_Model_1 = __importDefault(require("../../Models/Withdrawal.Model"));
+const getUser = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    return req.currentDoctor ? req.currentDoctor : req.currentHospital;
+});
+exports.getUser = getUser;
 const getTotalEarnings = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const totalEarnings = yield CreditAmount_Model_1.default.aggregate([
         {
@@ -61,30 +65,49 @@ const getTotalEarnings = (id) => __awaiter(void 0, void 0, void 0, function* () 
     return totalEarnings;
 });
 exports.getTotalEarnings = getTotalEarnings;
-const getAvailableAmount = (req) => __awaiter(void 0, void 0, void 0, function* () { });
+const getAvailableAmount = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const Promise_TotalEarning = (0, exports.getTotalEarnings)(id);
+        const Promise_PendingAmount = (0, exports.getPendingAmount)(id);
+        let [totalEarning, pendingAmount] = yield Promise.all([
+            Promise_TotalEarning,
+            Promise_PendingAmount,
+        ]);
+        totalEarning = totalEarning[0] ? totalEarning[0].totalEarnings : null;
+        pendingAmount = pendingAmount[0] ? pendingAmount[0].pendingAmount : null;
+        return Promise.resolve();
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
 exports.getAvailableAmount = getAvailableAmount;
 const getWithdrawanAmount = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const data = yield Withdrawal_Model_1.default.aggregate([
-        {
-            $match: {
-                user: new mongoose_1.default.Types.ObjectId(id),
-            },
-        },
-        {
-            $group: {
-                _id: "$user",
-                withdrawnAmount: {
-                    $sum: "$withdrawalAmount",
+    try {
+        const data = yield Withdrawal_Model_1.default.aggregate([
+            {
+                $match: {
+                    withdrawnBy: new mongoose_1.default.Types.ObjectId(id),
                 },
             },
-        },
-    ]);
-    return data;
+            {
+                $group: {
+                    _id: "$user",
+                    withdrawnAmount: {
+                        $sum: "$withdrawalAmount",
+                    },
+                },
+            },
+        ]);
+        return Promise.resolve(data);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
 });
 exports.getWithdrawanAmount = getWithdrawanAmount;
 const getPendingAmount = (id) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log("id:", id);
         const Promise_TotalEarning = (0, exports.getTotalEarnings)(id);
         const Promise_WithdrawnAmount = (0, exports.getWithdrawanAmount)(id);
         let [totalEarning, withdrawnAmount] = yield Promise.all([
@@ -101,7 +124,6 @@ const getPendingAmount = (id) => __awaiter(void 0, void 0, void 0, function* () 
         else if (!withdrawnAmount) {
             return Promise.resolve(totalEarning);
         }
-        console.log("DSdsds:", withdrawnAmount, totalEarning);
         return Promise.resolve(totalEarning - withdrawnAmount);
     }
     catch (error) {

@@ -12,6 +12,7 @@ export const generateOrderId = async (body: any) => {
       receipt: `order_rcptid_${receiptNumber}`,
       appointmentDetails: body.appointment,
     };
+    console.log("opt:", opt);
 
     const appointmentOrderId = await new orderModel(opt).save();
     const { appointmentDetails, ...options } = opt;

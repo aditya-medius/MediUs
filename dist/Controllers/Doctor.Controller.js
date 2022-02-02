@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
+exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -1082,7 +1082,16 @@ const getAvailableAmount = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.getAvailableAmount = getAvailableAmount;
-const getPendingAmount = (req, res) => __awaiter(void 0, void 0, void 0, function* () { });
+const getPendingAmount = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user = yield doctorService.getUser(req);
+        const pendingBalance = yield doctorService.getPendingAmount(user);
+        return (0, response_1.successResponse)(pendingBalance, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
 exports.getPendingAmount = getPendingAmount;
 const withdraw = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -1128,3 +1137,39 @@ const withdraw = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.withdraw = withdraw;
+const getAppointmentSummary = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let cancelledAppointments = Appointment_Model_1.default
+            .find({
+            doctors: req.currentDoctor,
+            cancelled: true,
+        })
+            .count();
+        let doneAppointments = Appointment_Model_1.default
+            .find({
+            doctors: req.currentDoctor,
+            done: true,
+        })
+            .count();
+        let totalAppointments = Appointment_Model_1.default
+            .find({
+            doctors: req.currentDoctor,
+        })
+            .count();
+        [cancelledAppointments, doneAppointments, totalAppointments] =
+            yield Promise.all([
+                cancelledAppointments,
+                doneAppointments,
+                totalAppointments,
+            ]);
+        return (0, response_1.successResponse)({
+            cancelledAppointments,
+            doneAppointments,
+            totalAppointments,
+        }, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getAppointmentSummary = getAppointmentSummary;

@@ -1178,7 +1178,15 @@ export const getAvailableAmount = async (req: Request, res: Response) => {
   }
 };
 
-export const getPendingAmount = async (req: Request, res: Response) => {};
+export const getPendingAmount = async (req: Request, res: Response) => {
+  try {
+    const user = await doctorService.getUser(req);
+    const pendingBalance = await doctorService.getPendingAmount(user);
+    return successResponse(pendingBalance, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
 
 export const withdraw = async (req: Request, res: Response) => {
   try {
@@ -1229,5 +1237,48 @@ export const withdraw = async (req: Request, res: Response) => {
   } catch (error: any) {
     let err = new Error(error);
     return errorResponse(err, res);
+  }
+};
+
+export const getAppointmentSummary = async (req: Request, res: Response) => {
+  try {
+    let cancelledAppointments: any = appointmentModel
+      .find({
+        doctors: req.currentDoctor,
+        cancelled: true,
+      })
+      .count();
+
+    let doneAppointments: any = appointmentModel
+      .find({
+        doctors: req.currentDoctor,
+        done: true,
+      })
+      .count();
+
+    let totalAppointments: any = appointmentModel
+      .find({
+        doctors: req.currentDoctor,
+      })
+      .count();
+
+    [cancelledAppointments, doneAppointments, totalAppointments] =
+      await Promise.all([
+        cancelledAppointments,
+        doneAppointments,
+        totalAppointments,
+      ]);
+
+    return successResponse(
+      {
+        cancelledAppointments,
+        doneAppointments,
+        totalAppointments,
+      },
+      "Success",
+      res
+    );
+  } catch (error: any) {
+    return errorResponse(error, res);
   }
 };

@@ -163,4 +163,18 @@ doctorRouter.post(
   oneOf(authenticateDoctor),
   doctorController.withdraw
 );
+
+// Balance check kro account me
+doctorRouter.get(
+  "/getPendingAmount",
+  oneOf(authenticateDoctor),
+  doctorController.getPendingAmount
+);
+
+// kitni appointment bachi hai, poori ho gayi hai aur cancel ho gayi hai. Uska data
+doctorRouter.get(
+  "/appointmentSummary",
+  oneOf(authenticateDoctor),
+  doctorController.getAppointmentSummary
+);
 export default doctorRouter;

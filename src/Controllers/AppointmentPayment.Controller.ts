@@ -37,31 +37,31 @@ export const generateOrderId = async (req: Request, res: Response) => {
 
 export const verifyPayment = async (req: Request, res: Response) => {
   try {
-    // let body = req.body.orderId + "|" + req.body.paymentId;
+    let body = req.body.orderId + "|" + req.body.paymentId;
 
-    // var expectedSignature = crypto
-    //   .createHmac("sha256", process.env.RAZOR_PAY_TEST_SECRET as string)
-    //   .update(body.toString())
-    //   .digest("hex");
-    // var response: any = { signatureIsValid: "false" };
-    // if (expectedSignature === req.body.paymentSignature) {
-    //   response = { signatureIsValid: "true" };
-    //   const paymentObj = await new appointmentPayment(req.body);
+    var expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZOR_PAY_TEST_SECRET as string)
+      .update(body.toString())
+      .digest("hex");
+    var response: any = { signatureIsValid: "false" };
+    if (expectedSignature === req.body.paymentSignature) {
+      response = { signatureIsValid: "true" };
+      const paymentObj = await new appointmentPayment(req.body);
 
-    //   await new creditAmountModel({
-    //     orderId: req.body.orderId,
-    //     appointmentDetails: req.body.appointmentDetails,
-    //   }).save();
-    //   response.paymentDetails = paymentObj;
-    //   return successResponse(response, "Signature is valid", res);
-    // }
-    const paymentObj = await new appointmentPayment(req.body).save();
+      await new creditAmountModel({
+        orderId: req.body.orderId,
+        appointmentDetails: req.body.appointmentDetails,
+      }).save();
+      response.paymentDetails = paymentObj;
+      return successResponse(response, "Signature is valid", res);
+    }
+    // const paymentObj = await new appointmentPayment(req.body).save();
 
-    await new creditAmountModel({
-      orderId: req.body.orderId,
-      appointmentDetails: req.body.appointmentId,
-    }).save();
-    return successResponse(paymentObj, "Signature is valid", res);
+    // await new creditAmountModel({
+    //   orderId: req.body.orderId,
+    //   appointmentDetails: req.body.appointmentId,
+    // }).save();
+    // return successResponse(paymentObj, "Signature is valid", res);
     let error = new Error("Signature is invalid");
     error.name = "INvalid signature";
     return errorResponse(error, res);
