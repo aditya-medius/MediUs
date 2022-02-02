@@ -4,6 +4,10 @@ import appointmentPaymentModel from "../../Models/AppointmentPayment.Model";
 import creditAmountModel from "../../Models/CreditAmount.Model";
 import withdrawModel from "../../Models/Withdrawal.Model";
 
+export const getUser = async (req: Request) => {
+  return req.currentDoctor ? req.currentDoctor : req.currentHospital;
+};
+
 export const getTotalEarnings = async (id: string) => {
   const totalEarnings = await creditAmountModel.aggregate([
     {
@@ -50,51 +54,68 @@ export const getTotalEarnings = async (id: string) => {
   return totalEarnings;
 };
 
-export const getAvailableAmount = async (req: Request) => {};
+export const getAvailableAmount = async (id: string) => {
+  try {
+    const Promise_TotalEarning = getTotalEarnings(id);
+    const Promise_PendingAmount = getPendingAmount(id);
+
+    let [totalEarning, pendingAmount]: any = await Promise.all([
+      Promise_TotalEarning,
+      Promise_PendingAmount,
+    ]);
+
+    totalEarning = totalEarning[0] ? totalEarning[0].totalEarnings : null;
+    pendingAmount = pendingAmount[0] ? pendingAmount[0].pendingAmount : null;
+
+    return Promise.resolve();
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
 
 export const getWithdrawanAmount = async (id: string) => {
-  const data = await withdrawModel.aggregate([
-    {
-      $match: {
-        user: new mongoose.Types.ObjectId(id),
-      },
-    },
-    {
-      $group: {
-        _id: "$user",
-        withdrawnAmount: {
-          $sum: "$withdrawalAmount",
+  try {
+    const data = await withdrawModel.aggregate([
+      {
+        $match: {
+          withdrawnBy: new mongoose.Types.ObjectId(id),
         },
       },
-    },
-  ]);
+      {
+        $group: {
+          _id: "$user",
+          withdrawnAmount: {
+            $sum: "$withdrawalAmount",
+          },
+        },
+      },
+    ]);
 
-  return data;
+    return Promise.resolve(data);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
 };
 
 export const getPendingAmount = async (id: string) => {
   try {
-    console.log("id:", id);
     const Promise_TotalEarning = getTotalEarnings(id);
     const Promise_WithdrawnAmount = getWithdrawanAmount(id);
-
     let [totalEarning, withdrawnAmount]: any = await Promise.all([
       Promise_TotalEarning,
       Promise_WithdrawnAmount,
     ]);
 
-    
     totalEarning = totalEarning[0] ? totalEarning[0].totalEarnings : null;
     withdrawnAmount = withdrawnAmount[0]
-    ? withdrawnAmount[0].withdrawnAmount
-    : null;
-    
+      ? withdrawnAmount[0].withdrawnAmount
+      : null;
+
     if (!totalEarning) {
-        return Promise.reject("You have not earned anything");
+      return Promise.reject("You have not earned anything");
     } else if (!withdrawnAmount) {
-        return Promise.resolve(totalEarning);
+      return Promise.resolve(totalEarning);
     }
-    console.log("DSdsds:", withdrawnAmount, totalEarning);
 
     return Promise.resolve(totalEarning - withdrawnAmount);
   } catch (error: any) {

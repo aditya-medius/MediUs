@@ -89,4 +89,8 @@ doctorRouter.post("/uploadImage", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.au
 doctorRouter.get("/getTotalEarnings", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getTotalEarnings);
 // Account se paise nikalna
 doctorRouter.post("/withdraw", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.withdraw);
+// Balance check kro account me
+doctorRouter.get("/getPendingAmount", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getPendingAmount);
+// kitni appointment bachi hai, poori ho gayi hai aur cancel ho gayi hai. Uska data
+doctorRouter.get("/appointmentSummary", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getAppointmentSummary);
 exports.default = doctorRouter;
