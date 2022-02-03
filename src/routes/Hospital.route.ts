@@ -17,6 +17,7 @@ hospitalRouter.get(
   hospitalController.getAllHospitalsList
 );
 hospitalRouter.post("/login", hospitalController.login);
+hospitalRouter.post("/loginWithPassword", hospitalController.loginWithPassword);
 
 hospitalRouter.get(
   "/myHospital",

@@ -111,6 +111,11 @@ const hospitalSchema = new mongoose_1.Schema({
             // required: true
         },
     },
+    password: {
+        type: String,
+        minlength: 6,
+        required: true,
+    },
 });
 hospitalSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {

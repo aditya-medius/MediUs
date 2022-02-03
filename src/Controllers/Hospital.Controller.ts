@@ -2,7 +2,6 @@ import { json, Request, Response } from "express";
 import addressModel from "../Models/Address.Model";
 import anemityModel from "../Models/Anemities.Model";
 import hospitalModel from "../Models/Hospital.Model";
-import specialityModel from "../Models/Speciality.Model";
 import { errorResponse, successResponse } from "../Services/response";
 import * as jwt from "jsonwebtoken";
 import specialityBodyModel from "../Admin Controlled Models/SpecialityBody.Model";
@@ -16,16 +15,16 @@ import {
 } from "../Services/schemaNames";
 import _ from "underscore";
 import doctorModel from "../Models/Doctors.Model";
-import { Mongoose } from "mongoose";
 import appointmentModel from "../Models/Appointment.Model";
-import { date } from "joi";
 import otpModel from "../Models/OTP.Model";
 import { sendMessage } from "../Services/message.service";
-import { GeoJSON } from "geojson";
-import mongoose from "mongoose";
 import workingHourModel from "../Models/WorkingHours.Model";
-import { excludePatientFields } from "./Patient.Controller";
+import {
+  excludeHospitalFields,
+  excludePatientFields,
+} from "./Patient.Controller";
 import { formatWorkingHour } from "../Services/WorkingHour.helper";
+import * as bcrypt from "bcrypt";
 
 const excludeDoctorFields = {
   password: 0,
@@ -142,6 +141,57 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
+export const loginWithPassword = async (req: Request, res: Response) => {
+  try {
+    let body = req.body;
+    body.password =
+      body.password && body.password.trim().length >= 5 ? body.password : null;
+
+    body.contactNumber =
+      body.contactNumber && body.contactNumber.trim().length == 10
+        ? body.contactNumber
+        : null;
+
+    if (body.password && body.contactNumber) {
+      const hospital = await hospitalModel.findOne(
+        {
+          contactNumber: body.contactNumber,
+          deleted: false,
+        },
+        excludeHospitalFields
+      );
+
+      if (hospital) {
+        let cryptSalt = await bcrypt.genSalt(10);
+        let password = await bcrypt.hash(body.password, cryptSalt);
+        const compare = await bcrypt.compare(body.password, hospital.password);
+        if (compare) {
+          const token = await jwt.sign(
+            hospital.toJSON(),
+            process.env.SECRET_HOSPITAL_KEY as string
+          );
+          const { name, _id } = hospital;
+          return successResponse({ token, name, _id }, "Success", res);
+        } else {
+          let error: Error = new Error("Incorrect password");
+          error.name = "Authentication Failed";
+          return errorResponse(error, res);
+        }
+      } else {
+        let error = new Error("No hospital found");
+        error.name = "Not Found";
+        return errorResponse(error, res);
+      }
+      // bcrypt.compare()
+    }
+
+    let error: Error = new Error("Invalid Phone Number");
+    error.name = "Authentication Failed";
+    return errorResponse(error, res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
 //get all hospitals
 export const getAllHospitalsList = async (req: Request, res: Response) => {
   try {

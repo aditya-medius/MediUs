@@ -97,6 +97,11 @@ const hospitalSchema = new Schema({
       // required: true
     },
   },
+  password: {
+    type: String,
+    minlength: 6,
+    required: true,
+  },
 });
 
 hospitalSchema.pre("save", async function (next) {

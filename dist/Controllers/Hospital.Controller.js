@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getHospitalById = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.login = void 0;
+exports.getHospitalById = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Anemities_Model_1 = __importDefault(require("../Models/Anemities.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
@@ -60,6 +60,7 @@ const message_service_1 = require("../Services/message.service");
 const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
 const Patient_Controller_1 = require("./Patient.Controller");
 const WorkingHour_helper_1 = require("../Services/WorkingHour.helper");
+const bcrypt = __importStar(require("bcrypt"));
 const excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -148,6 +149,51 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.login = login;
+const loginWithPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.body;
+        body.password =
+            body.password && body.password.trim().length >= 5 ? body.password : null;
+        body.contactNumber =
+            body.contactNumber && body.contactNumber.trim().length == 10
+                ? body.contactNumber
+                : null;
+        if (body.password && body.contactNumber) {
+            const hospital = yield Hospital_Model_1.default.findOne({
+                contactNumber: body.contactNumber,
+                deleted: false,
+            }, Patient_Controller_1.excludeHospitalFields);
+            if (hospital) {
+                let cryptSalt = yield bcrypt.genSalt(10);
+                let password = yield bcrypt.hash(body.password, cryptSalt);
+                const compare = yield bcrypt.compare(body.password, hospital.password);
+                if (compare) {
+                    const token = yield jwt.sign(hospital.toJSON(), process.env.SECRET_HOSPITAL_KEY);
+                    const { name, _id } = hospital;
+                    return (0, response_1.successResponse)({ token, name, _id }, "Success", res);
+                }
+                else {
+                    let error = new Error("Incorrect password");
+                    error.name = "Authentication Failed";
+                    return (0, response_1.errorResponse)(error, res);
+                }
+            }
+            else {
+                let error = new Error("No hospital found");
+                error.name = "Not Found";
+                return (0, response_1.errorResponse)(error, res);
+            }
+            // bcrypt.compare()
+        }
+        let error = new Error("Invalid Phone Number");
+        error.name = "Authentication Failed";
+        return (0, response_1.errorResponse)(error, res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.loginWithPassword = loginWithPassword;
 //get all hospitals
 const getAllHospitalsList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
