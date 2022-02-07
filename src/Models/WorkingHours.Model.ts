@@ -299,28 +299,25 @@ const workingHoursSchema = new Schema({
     type: Boolean,
     default: false,
   },
+
+  deleted: {
+    deletedAt: {
+      type: Date,
+    },
+
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+  },
 });
 
-// workingHoursSchema.pre("find", async function (next) {
-//   const query = this.getQuery();
-//   console.log("query:", query);
+["remove", "findOneAndDelete"].forEach((e: string) => {
+  workingHoursSchema.pre(e, async function (next) {
+    this.set({ "deleted.deleteAt": Date.now(), "deleted.isDeleted": true });
+  });
+});
 
-//   let workingHours;
-//   workingHours = await this.model.find(query);
-
-//   console.log("working hours:", workingHours);
-
-//   next();
-// });
-// ["find", "findOne", "aggregate"].forEach((e: string) => {
-//   workingHoursSchema.post(e, function (result) {
-//     console.log("result:", result);
-//   });
-// });
-
-// const handleDeletedProfiles = async (data: any) => {
-
-// };
 workingHoursSchema.pre("save", async function (next) {
   if (this.byHospital) {
     next();
@@ -330,6 +327,17 @@ workingHoursSchema.pre("save", async function (next) {
     }
   }
 });
+
+["find", "findOne"].forEach((e: string) => {
+  workingHoursSchema.pre(e, async function (next) {
+    console.log("deleted:", this.get("deleted"));
+    if (this.get("deleted")) {
+      this.where({ "deleted.isDeleted": false });
+    }
+    next();
+  });
+});
+
 const workingHourModel = model(workingHour, workingHoursSchema);
 
 export default workingHourModel;
