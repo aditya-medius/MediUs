@@ -103,6 +103,7 @@ const doctorSchema = new Schema(
 
 ["find", "findOne"].forEach((e: string) => {
   doctorSchema.pre(e, async function (next) {
+    this.where({ deleted: false });
     this.populate("KYCDetails");
   });
 });
@@ -268,6 +269,13 @@ doctorSchema.path("qualification").validate(function (qualification: any) {
   }
   return true;
 }, "qualification details are required");
+
+["remove", "findOneAndDelete"].forEach((e: string) => {
+  doctorSchema.pre(e, async function (next) {
+    const doctor: any = this;
+    doctor.model(workingHour).remove({ doctorDetails: doctor._id }, next);
+  });
+});
 
 // For later
 // doctorSchema.virtual("bodyPart", {

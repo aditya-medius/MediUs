@@ -108,6 +108,7 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
 ["find", "findOne"].forEach((e) => {
     doctorSchema.pre(e, function (next) {
         return __awaiter(this, void 0, void 0, function* () {
+            this.where({ deleted: false });
             this.populate("KYCDetails");
         });
     });
@@ -266,6 +267,14 @@ doctorSchema.path("qualification").validate(function (qualification) {
     }
     return true;
 }, "qualification details are required");
+["remove", "findOneAndDelete"].forEach((e) => {
+    doctorSchema.pre(e, function (next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const doctor = this;
+            doctor.model(schemaNames_1.workingHour).remove({ doctorDetails: doctor._id }, next);
+        });
+    });
+});
 // For later
 // doctorSchema.virtual("bodyPart", {
 //   ref: "specialities",
