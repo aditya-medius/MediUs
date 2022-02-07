@@ -61,6 +61,12 @@ const hospitalSchema = new mongoose_1.Schema({
             ref: schemaNames_1.anemity,
         },
     ],
+    services: [
+        {
+            type: mongoose_1.default.Schema.Types.ObjectId,
+            ref: schemaNames_1.services,
+        },
+    ],
     treatmentType: [
         {
             type: mongoose_1.default.Schema.Types.ObjectId,

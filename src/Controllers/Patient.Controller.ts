@@ -23,6 +23,10 @@ import hospitalModel from "../Models/Hospital.Model";
 import addressModel from "../Models/Address.Model";
 import prescriptionModel from "../Models/Prescription.Model";
 import * as doctorController from "../Controllers/Doctor.Controller";
+import {
+  phoneNumberValidation,
+  emailValidation,
+} from "../Services/Validation.Service";
 export const excludePatientFields = {
   password: 0,
   verified: 0,
@@ -802,4 +806,45 @@ export const checkDoctorAvailability = async (req: Request, res: Response) => {
       res
     );
   } catch (error: any) {}
+};
+
+export const searchPatientByPhoneNumberOrEmail = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const term = req.params.term;
+    const phone = phoneNumberValidation(term);
+    const email = emailValidation(term);
+
+    if (!phone && !email) {
+      const error: Error = new Error("Enter a valid phone number or email");
+      error.name = "Invalid Term";
+      return errorResponse(error, res);
+    }
+
+    const patientObj = await patientModel.find(
+      {
+        $or: [
+          {
+            email: term,
+          },
+          {
+            phoneNumber: term,
+          },
+        ],
+      },
+      excludePatientFields
+    );
+    if (patientObj) {
+      return successResponse(patientObj, "Success", res);
+    }
+    return successResponse({}, "No data found", res);
+  } catch (error: any) {
+    if (typeof error == "string") {
+      error = new Error(error);
+      error.name = "Not Found";
+    }
+    return errorResponse(error, res);
+  }
 };

@@ -16,7 +16,7 @@ const orderSchema = new Schema({
   appointmentDetails: {
     type: mongoose.Schema.Types.ObjectId,
     ref: appointment,
-    required: true,
+    // required: true,
   },
 });
 

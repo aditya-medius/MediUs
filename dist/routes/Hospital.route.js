@@ -40,6 +40,7 @@ hospitalRouter.post("/deleteHospital", (0, middlewareHelper_1.oneOf)(Hospital_au
 hospitalRouter.post("/updateHospital", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.updateHospital);
 hospitalRouter.post("/anemity", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.createHospitalAnemity);
 hospitalRouter.get("/getAnemities", hospitalController.getAnemities);
+hospitalRouter.get("/getServices", hospitalController.getServices);
 // hospitalRouter.post("/speciality",oneOf(authenticateHospital),hospitalController.addHospitalSpeciality);
 hospitalRouter.post("/findHospitalBySpecialityOrBodyPart/:term", hospitalController.searchHospital);
 //ADD DOCTOR TO THE HOSPITAL

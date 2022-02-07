@@ -10,12 +10,11 @@ export const generateOrderId = async (body: any) => {
       amount: body.amount, // amount in the smallest currency unit
       currency: body.currency,
       receipt: `order_rcptid_${receiptNumber}`,
-      appointmentDetails: body.appointment,
+      // appointmentDetails: body.appointment,
     };
-    console.log("opt:", opt);
 
     const appointmentOrderId = await new orderModel(opt).save();
-    const { appointmentDetails, ...options } = opt;
+    const { ...options } = opt;
 
     return { appointmentOrderId, options, receiptNumber };
   } catch (error: any) {

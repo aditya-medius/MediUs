@@ -65,6 +65,13 @@ export const createOpeningHours = async (req: Request, res: Response) => {
 // Get working hours
 export const getWorkingHours = async (req: Request, res: Response) => {
   try {
+    console.log(
+      "doctorDetails: req.body.doctorDetails, ospitalDetails: req.body.hospitalDetails",
+      {
+        doctorDetails: req.body.doctorDetails,
+        hospitalDetails: req.body.hospitalDetails,
+      }
+    );
     const WHObj = await workingHourModel
       .find(
         {
@@ -74,6 +81,8 @@ export const getWorkingHours = async (req: Request, res: Response) => {
         "-byHospital -doctorDetails -hospitalDetails"
       )
       .lean();
+
+    console.log("hwo obj:", WHObj);
     let WHObj2: any = {};
     if (WHObj) {
       WHObj.map((e) => {

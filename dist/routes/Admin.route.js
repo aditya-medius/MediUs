@@ -48,4 +48,6 @@ adminRouter.get("/getCityStateLocalityCountry", adminController.getCityStateLoca
 adminRouter.post("/create", adminController.create);
 // Get admin profile
 adminRouter.get("/login", adminController.login);
+// Anemity controller
+adminRouter.post("/addHospitalService", adminController.addHospitalService);
 exports.default = adminRouter;

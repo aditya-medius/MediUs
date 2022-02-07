@@ -79,12 +79,17 @@ exports.createOpeningHours = createOpeningHours;
 // Get working hours
 const getWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        console.log("doctorDetails: req.body.doctorDetails, ospitalDetails: req.body.hospitalDetails", {
+            doctorDetails: req.body.doctorDetails,
+            hospitalDetails: req.body.hospitalDetails,
+        });
         const WHObj = yield WorkingHours_Model_1.default
             .find({
             doctorDetails: req.body.doctorDetails,
             hospitalDetails: req.body.hospitalDetails,
         }, "-byHospital -doctorDetails -hospitalDetails")
             .lean();
+        console.log("hwo obj:", WHObj);
         let WHObj2 = {};
         if (WHObj) {
             WHObj.map((e) => {

@@ -30,6 +30,7 @@ const multer_1 = __importDefault(require("multer"));
 const middlewareHelper_1 = require("../Services/middlewareHelper");
 const Doctor_auth_1 = require("../authentication/Doctor.auth");
 const subPatientController = __importStar(require("../Controllers/SubPatient.Controller"));
+const Hospital_auth_1 = require("../authentication/Hospital.auth");
 const patientRouter = express_1.default.Router();
 const upload = (0, multer_1.default)({ dest: "./src/uploads" });
 patientRouter.post("/login", patientController.patientLogin);
@@ -62,4 +63,6 @@ patientRouter.get("/getSubPatientById/:id", (0, middlewareHelper_1.oneOf)(Patien
 patientRouter.put("/updateSubPatient/:id", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), subPatientController.updateSubPatient);
 // Check kro k doctor available hai uss din
 patientRouter.post("/checkDoctorAvailability", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), patientController.checkDoctorAvailability);
+// Search patient
+patientRouter.get("/searchPatientByPhoneNumberOrEmail/:term", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital), patientController.searchPatientByPhoneNumberOrEmail);
 exports.default = patientRouter;

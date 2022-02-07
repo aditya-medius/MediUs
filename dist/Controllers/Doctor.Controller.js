@@ -535,6 +535,10 @@ const setSchedule = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         if (doctorProfile) {
             workingHourId = doctorProfile.hospitalDetails[0].workingHours;
         }
+        console.log("{doctorDetails: req.currentDoctor, hospitalDetails: body.hospitalId,}", {
+            doctorDetails: req.currentDoctor,
+            hospitalDetails: body.hospitalId,
+        });
         const Wh = yield WorkingHours_Model_1.default.findOneAndUpdate({
             $or: [
                 {
@@ -889,7 +893,7 @@ const searchDoctorByPhoneNumberOrEmail = (req, res) => __awaiter(void 0, void 0,
                     phoneNumber: term,
                 },
             ],
-        });
+        }, exports.excludeDoctorFields);
         if (doctorObj) {
             return (0, response_1.successResponse)(doctorObj, "Success", res);
         }
