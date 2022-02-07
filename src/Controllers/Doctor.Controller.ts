@@ -211,7 +211,7 @@ export const getDoctorById = async (req: Request, res: Response) => {
     };
     let select: any = { ...excludeDoctorFields };
     if (req.body.fullDetails) {
-      query = { _id: req.params.id, deleted: false };
+      query = { adminSearch: true, _id: req.params.id, deleted: false };
       select = { password: 0 };
     }
     const doctorData = await doctorModel
