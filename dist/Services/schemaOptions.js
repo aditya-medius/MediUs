@@ -9,7 +9,7 @@ const schemaOptions = {
     },
     lastName: {
         type: String,
-        required: true,
+        required: [true, "Last name is required"],
     },
     gender: {
         type: String,
@@ -18,7 +18,7 @@ const schemaOptions = {
     },
     DOB: {
         type: Date,
-        required: true,
+        // required: true,
     },
     WhatsappNumber: {
         type: String,
@@ -35,7 +35,7 @@ const schemaOptions = {
     },
     password: {
         type: String,
-        required: true,
+        // required: true,
     },
     appointments: {
         type: mongoose_1.Schema.Types.ObjectId,

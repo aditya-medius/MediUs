@@ -58,7 +58,7 @@ const doctorSchema = new Schema(
           type: Date,
         },
       },
-      required: true,
+      // required: true,
     },
     specialization: [
       {
@@ -69,7 +69,7 @@ const doctorSchema = new Schema(
     KYCDetails: {
       type: mongoose.Schema.Types.ObjectId,
       ref: kycDetails,
-      required: [true, "KYC details are required"],
+      // required: [true, "KYC details are required"],
     },
     qualification: [
       {
@@ -87,7 +87,7 @@ const doctorSchema = new Schema(
     },
     overallExperience: {
       type: mongoose.Schema.Types.Mixed,
-      required: true,
+      // required: true,
     },
     image: {
       type: String,

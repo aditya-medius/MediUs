@@ -73,7 +73,7 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
                 type: Date,
             },
         },
-        required: true,
+        // required: true,
     }, specialization: [
         {
             type: mongoose_1.Schema.Types.ObjectId,
@@ -82,7 +82,7 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
     ], KYCDetails: {
         type: mongoose_1.default.Schema.Types.ObjectId,
         ref: schemaNames_1.kycDetails,
-        required: [true, "KYC details are required"],
+        // required: [true, "KYC details are required"],
     }, qualification: [
         {
             type: mongoose_1.default.Schema.Types.ObjectId,
@@ -96,7 +96,7 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
         ref: schemaNames_1.treatmentType,
     }, overallExperience: {
         type: mongoose_1.default.Schema.Types.Mixed,
-        required: true,
+        // required: true,
     }, image: {
         type: String,
         default: "static/user/default.png",
