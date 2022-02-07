@@ -328,22 +328,23 @@ const workingHoursSchema = new mongoose_1.Schema({
         type: Boolean,
         default: false,
     },
+    deleted: {
+        deletedAt: {
+            type: Date,
+        },
+        isDeleted: {
+            type: Boolean,
+            default: false,
+        },
+    },
 });
-// workingHoursSchema.pre("find", async function (next) {
-//   const query = this.getQuery();
-//   console.log("query:", query);
-//   let workingHours;
-//   workingHours = await this.model.find(query);
-//   console.log("working hours:", workingHours);
-//   next();
-// });
-// ["find", "findOne", "aggregate"].forEach((e: string) => {
-//   workingHoursSchema.post(e, function (result) {
-//     console.log("result:", result);
-//   });
-// });
-// const handleDeletedProfiles = async (data: any) => {
-// };
+["remove", "findOneAndDelete"].forEach((e) => {
+    workingHoursSchema.pre(e, function (next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.set({ "deleted.deleteAt": Date.now(), "deleted.isDeleted": true });
+        });
+    });
+});
 workingHoursSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         if (this.byHospital) {
@@ -354,6 +355,17 @@ workingHoursSchema.pre("save", function (next) {
                 throw new Error("Doctor and Hospital details are required");
             }
         }
+    });
+});
+["find", "findOne"].forEach((e) => {
+    workingHoursSchema.pre(e, function (next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("deleted:", this.get("deleted"));
+            if (this.get("deleted")) {
+                this.where({ "deleted.isDeleted": false });
+            }
+            next();
+        });
     });
 });
 const workingHourModel = (0, mongoose_1.model)(schemaNames_1.workingHour, workingHoursSchema);

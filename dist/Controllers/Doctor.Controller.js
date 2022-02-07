@@ -215,14 +215,14 @@ const getDoctorById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             .populate("specialization")
             .populate("qualification")
             .lean();
-        doctorData.hospitalDetails = doctorData.hospitalDetails.map((elem) => {
-            return {
-                _id: elem.hospital._id,
-                name: elem.hospital.name,
-                address: elem.hospital.address,
-            };
-        });
         if (doctorData) {
+            doctorData.hospitalDetails = doctorData.hospitalDetails.map((elem) => {
+                return {
+                    _id: elem.hospital._id,
+                    name: elem.hospital.name,
+                    address: elem.hospital.address,
+                };
+            });
             return (0, response_1.successResponse)(doctorData, "Successfully fetched doctor details", res);
         }
         else {

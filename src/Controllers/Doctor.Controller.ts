@@ -230,14 +230,16 @@ export const getDoctorById = async (req: Request, res: Response) => {
       .populate("qualification")
       .lean();
 
-    doctorData.hospitalDetails = doctorData.hospitalDetails.map((elem: any) => {
-      return {
-        _id: elem.hospital._id,
-        name: elem.hospital.name,
-        address: elem.hospital.address,
-      };
-    });
     if (doctorData) {
+      doctorData.hospitalDetails = doctorData.hospitalDetails.map(
+        (elem: any) => {
+          return {
+            _id: elem.hospital._id,
+            name: elem.hospital.name,
+            address: elem.hospital.address,
+          };
+        }
+      );
       return successResponse(
         doctorData,
         "Successfully fetched doctor details",
