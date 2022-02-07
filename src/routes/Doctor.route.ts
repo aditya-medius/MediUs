@@ -76,6 +76,11 @@ doctorRouter.post(
   oneOf(authenticateDoctor, authenticatePatient),
   doctorController.searchDoctor
 );
+doctorRouter.get(
+  "/searchDoctorByPhoneNumberOrEmail/:term",
+  oneOf(authenticateDoctor, authenticatePatient),
+  doctorController.searchDoctorByPhoneNumberOrEmail
+);
 
 doctorRouter.put(
   "/setSchedule",

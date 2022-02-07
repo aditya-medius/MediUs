@@ -11,6 +11,7 @@ import {
   openingHour,
   specialization,
   workingHour,
+  services,
 } from "../Services/schemaNames";
 import { errorResponse, successResponse } from "../Services/response";
 import { query } from "express";
@@ -44,6 +45,12 @@ const hospitalSchema = new Schema({
       type: mongoose.Schema.Types.ObjectId,
       // required: true,
       ref: anemity,
+    },
+  ],
+  services: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: services,
     },
   ],
   treatmentType: [

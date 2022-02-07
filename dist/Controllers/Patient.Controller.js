@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkDoctorAvailability = exports.uploadPrescription = exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.CancelAppointment = exports.doneAppointment = exports.rescheduleAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = exports.excludeHospitalFields = exports.excludePatientFields = void 0;
+exports.searchPatientByPhoneNumberOrEmail = exports.checkDoctorAvailability = exports.uploadPrescription = exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.CancelAppointment = exports.doneAppointment = exports.rescheduleAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = exports.excludeHospitalFields = exports.excludePatientFields = void 0;
 const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
 // import { excludePatientFields } from "./Patient.Controller";
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
@@ -51,6 +51,7 @@ const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Prescription_Model_1 = __importDefault(require("../Models/Prescription.Model"));
 const doctorController = __importStar(require("../Controllers/Doctor.Controller"));
+const Validation_Service_1 = require("../Services/Validation.Service");
 exports.excludePatientFields = {
     password: 0,
     verified: 0,
@@ -703,3 +704,37 @@ const checkDoctorAvailability = (req, res) => __awaiter(void 0, void 0, void 0, 
     catch (error) { }
 });
 exports.checkDoctorAvailability = checkDoctorAvailability;
+const searchPatientByPhoneNumberOrEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const term = req.params.term;
+        const phone = (0, Validation_Service_1.phoneNumberValidation)(term);
+        const email = (0, Validation_Service_1.emailValidation)(term);
+        if (!phone && !email) {
+            const error = new Error("Enter a valid phone number or email");
+            error.name = "Invalid Term";
+            return (0, response_1.errorResponse)(error, res);
+        }
+        const patientObj = yield Patient_Model_1.default.find({
+            $or: [
+                {
+                    email: term,
+                },
+                {
+                    phoneNumber: term,
+                },
+            ],
+        }, exports.excludePatientFields);
+        if (patientObj) {
+            return (0, response_1.successResponse)(patientObj, "Success", res);
+        }
+        return (0, response_1.successResponse)({}, "No data found", res);
+    }
+    catch (error) {
+        if (typeof error == "string") {
+            error = new Error(error);
+            error.name = "Not Found";
+        }
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.searchPatientByPhoneNumberOrEmail = searchPatientByPhoneNumberOrEmail;

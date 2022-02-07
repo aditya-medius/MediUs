@@ -575,6 +575,14 @@ export const setSchedule = async (req: Request, res: Response) => {
       workingHourId = doctorProfile.hospitalDetails[0].workingHours;
     }
 
+    console.log(
+      "{doctorDetails: req.currentDoctor, hospitalDetails: body.hospitalId,}",
+      {
+        doctorDetails: req.currentDoctor,
+        hospitalDetails: body.hospitalId,
+      }
+    );
+
     const Wh = await workingHourModel.findOneAndUpdate(
       {
         $or: [
@@ -963,16 +971,19 @@ export const searchDoctorByPhoneNumberOrEmail = async (
       return errorResponse(error, res);
     }
 
-    const doctorObj = await doctorModel.find({
-      $or: [
-        {
-          email: term,
-        },
-        {
-          phoneNumber: term,
-        },
-      ],
-    });
+    const doctorObj = await doctorModel.find(
+      {
+        $or: [
+          {
+            email: term,
+          },
+          {
+            phoneNumber: term,
+          },
+        ],
+      },
+      excludeDoctorFields
+    );
     if (doctorObj) {
       return successResponse(doctorObj, "Success", res);
     }

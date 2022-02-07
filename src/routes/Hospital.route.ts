@@ -44,6 +44,7 @@ hospitalRouter.post(
   hospitalController.createHospitalAnemity
 );
 hospitalRouter.get("/getAnemities", hospitalController.getAnemities);
+hospitalRouter.get("/getServices", hospitalController.getServices);
 // hospitalRouter.post("/speciality",oneOf(authenticateHospital),hospitalController.addHospitalSpeciality);
 
 hospitalRouter.post(

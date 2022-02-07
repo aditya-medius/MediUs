@@ -38,6 +38,7 @@ const AppointmentPayment_Model_1 = __importDefault(require("../Models/Appointmen
 const orderController = __importStar(require("./Order.Controller"));
 const crypto_1 = __importDefault(require("crypto"));
 const CreditAmount_Model_1 = __importDefault(require("../Models/CreditAmount.Model"));
+const Patient_Service_1 = require("../Services/Patient/Patient.Service");
 const generateOrderId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const body = req.body;
@@ -65,6 +66,7 @@ exports.generateOrderId = generateOrderId;
 const verifyPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body.orderId + "|" + req.body.paymentId;
+        let b = req.body;
         var expectedSignature = crypto_1.default
             .createHmac("sha256", process.env.RAZOR_PAY_TEST_SECRET)
             .update(body.toString())
@@ -72,18 +74,35 @@ const verifyPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         var response = { signatureIsValid: "false" };
         if (expectedSignature === req.body.paymentSignature) {
             response = { signatureIsValid: "true" };
-            const paymentObj = yield new AppointmentPayment_Model_1.default(req.body);
+            const appointmentBook = yield (0, Patient_Service_1.BookAppointment)(b.appointment);
+            const { paymentId, orderId, paymentSignature, orderReceipt } = b;
+            const paymentObj = yield new AppointmentPayment_Model_1.default({
+                paymentId,
+                orderId: req.body.appointmentOrderId,
+                paymentSignature,
+                orderReceipt,
+                appointmentId: appointmentBook._id,
+            }).save();
             yield new CreditAmount_Model_1.default({
-                orderId: req.body.orderId,
-                appointmentDetails: req.body.appointmentDetails,
+                orderId: req.body.appointmentOrderId,
+                appointmentDetails: appointmentBook._id,
             }).save();
             response.paymentDetails = paymentObj;
             return (0, response_1.successResponse)(response, "Signature is valid", res);
         }
-        // const paymentObj = await new appointmentPayment(req.body).save();
+        // let body = req.body;
+        // const appointmentBook = await BookAppointment(body.appointment);
+        // const { paymentId, orderId, paymentSignature, orderReceipt } = body;
+        // const paymentObj = await new appointmentPayment({
+        //   paymentId,
+        //   orderId,
+        //   paymentSignature,
+        //   orderReceipt,
+        //   appointmentId: appointmentBook._id,
+        // }).save();
         // await new creditAmountModel({
         //   orderId: req.body.orderId,
-        //   appointmentDetails: req.body.appointmentId,
+        //   appointmentDetails: appointmentBook._id,
         // }).save();
         // return successResponse(paymentObj, "Signature is valid", res);
         let error = new Error("Signature is invalid");

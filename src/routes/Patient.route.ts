@@ -7,6 +7,7 @@ import { oneOf } from "../Services/middlewareHelper";
 import { authenticateDoctor } from "../authentication/Doctor.auth";
 import * as subPatientController from "../Controllers/SubPatient.Controller";
 import { patient, subPatient } from "../Services/schemaNames";
+import { authenticateHospital } from "../authentication/Hospital.auth";
 const patientRouter = express.Router();
 const upload = multer({ dest: "./src/uploads" });
 patientRouter.post("/login", patientController.patientLogin);
@@ -136,5 +137,12 @@ patientRouter.post(
   "/checkDoctorAvailability",
   oneOf(authenticateDoctor, authenticatePatient),
   patientController.checkDoctorAvailability
+);
+
+// Search patient
+patientRouter.get(
+  "/searchPatientByPhoneNumberOrEmail/:term",
+  oneOf(authenticateDoctor, authenticatePatient, authenticateHospital),
+  patientController.searchPatientByPhoneNumberOrEmail
 );
 export default patientRouter;

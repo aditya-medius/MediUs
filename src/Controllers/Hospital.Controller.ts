@@ -25,6 +25,7 @@ import {
 } from "./Patient.Controller";
 import { formatWorkingHour } from "../Services/WorkingHour.helper";
 import * as bcrypt from "bcrypt";
+import servicesModel from "../Admin Controlled Models/Services.Model";
 
 const excludeDoctorFields = {
   password: 0,
@@ -282,6 +283,17 @@ export const getAnemities = async (req: Request, res: Response) => {
   }
 };
 
+// Get services
+export const getServices = async (req: Request, res: Response) => {
+  try {
+    let body = req.body;
+    let serviceObj = await servicesModel.find({});
+    return successResponse(serviceObj, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
 //add hospital speciality
 // export const addHospitalSpeciality= async(req:Request, res:Response)=>{
 //   try{
@@ -330,11 +342,13 @@ export const updateHospital = async (req: Request, res: Response) => {
         payment,
       },
     };
+
+    let b = req.body;
     const DoctorObj = await doctorModel.find({ deleted: false, _id: doctors });
-    if (DoctorObj.length == doctors.length) {
+    if (!doctors || DoctorObj.length == doctors.length) {
       const HospitalUpdateObj = await hospitalModel.findOneAndUpdate(
         { _id: req.currentHospital, deleted: false },
-        updateQuery,
+        b,
         { new: true }
       );
       if (HospitalUpdateObj) {
@@ -704,7 +718,12 @@ export const getHospitalById = async (req: Request, res: Response) => {
           byHospital: 0,
         },
       })
+      .populate("services")
       .lean();
+
+    if (hospital.doctors.length == 0) {
+      return successResponse({ hospital }, "Success", res);
+    }
     const doctorIds: Array<string> = hospital.doctors.map((e: any) => {
       return e._id.toString();
     });
@@ -737,25 +756,35 @@ export const getHospitalById = async (req: Request, res: Response) => {
     });
 
     const doctors = hospital.doctors.map((e: any) => {
-      return {
-        _id: e._id,
-        firstName: e.firstName,
-        lastName: e.lastName,
-        specialization: e.specialization,
-        qualification: e.qualification,
-        KYCDetails: e.KYCDetails,
-        overallExperience: e.overallExperience,
-        hospitalDetails: [
-          {
-            workingHour: formatWorkingHour(workingHours[e._id.toString()]),
-            consultationFee: e.hospitalDetails[0].consultationFee,
-            _id: e.hospitalDetails._id,
-          },
-        ],
-      };
+      if (e.hospitalDetails.length != 0) {
+        return {
+          _id: e._id,
+          firstName: e.firstName,
+          lastName: e.lastName,
+          specialization: e.specialization,
+          qualification: e.qualification,
+          KYCDetails: e.KYCDetails,
+          overallExperience: e.overallExperience,
+          hospitalDetails: [
+            {
+              workingHour: formatWorkingHour(workingHours[e._id.toString()]),
+              consultationFee: e.hospitalDetails[0].consultationFee,
+              _id: e.hospitalDetails._id,
+            },
+          ],
+        };
+      }
+      // return ...[]
+      // return;
     });
-    hospital.openingHour = formatWorkingHour([hospital.openingHour]);
+    if (hospital.openingHour) {
+      hospital.openingHour = formatWorkingHour([hospital.openingHour]);
+    }
+
     hospital.doctors = doctors;
+    if (doctors.includes(undefined)) {
+      hospital.doctors = [];
+    }
     return successResponse({ hospital }, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);

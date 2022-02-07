@@ -32,11 +32,10 @@ const generateOrderId = (body) => __awaiter(void 0, void 0, void 0, function* ()
             amount: body.amount,
             currency: body.currency,
             receipt: `order_rcptid_${receiptNumber}`,
-            appointmentDetails: body.appointment,
+            // appointmentDetails: body.appointment,
         };
-        console.log("opt:", opt);
         const appointmentOrderId = yield new Order_Model_1.default(opt).save();
-        const { appointmentDetails } = opt, options = __rest(opt, ["appointmentDetails"]);
+        const options = __rest(opt, []);
         return { appointmentOrderId, options, receiptNumber };
     }
     catch (error) {

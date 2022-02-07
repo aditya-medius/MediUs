@@ -20,6 +20,7 @@ import * as jwt from "jsonwebtoken";
 import * as bcrypt from "bcrypt";
 import { sendMessage } from "../Services/message.service";
 import otpModel from "../Models/OTP.Model";
+import servicesModel from "./Services.Model";
 
 export const addSpeciality = async (req: Request, res: Response) => {
   try {
@@ -374,3 +375,14 @@ export const create = async (req: Request, res: Response) => {
 
 // Country, State, City ki mapping
 // export const setCountryMap
+
+// Service Controller
+export const addHospitalService = async (req: Request, res: Response) => {
+  try {
+    let body = req.body;
+    let serviceObj = await new servicesModel(body).save();
+    return successResponse(serviceObj, "Successfully created services", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};

@@ -5,6 +5,7 @@ import appointmentPayment from "../Models/AppointmentPayment.Model";
 import * as orderController from "./Order.Controller";
 import crypto from "crypto";
 import creditAmountModel from "../Models/CreditAmount.Model";
+import { BookAppointment } from "../Services/Patient/Patient.Service";
 export const generateOrderId = async (req: Request, res: Response) => {
   try {
     const body = req.body;
@@ -38,7 +39,7 @@ export const generateOrderId = async (req: Request, res: Response) => {
 export const verifyPayment = async (req: Request, res: Response) => {
   try {
     let body = req.body.orderId + "|" + req.body.paymentId;
-
+    let b: any = req.body;
     var expectedSignature = crypto
       .createHmac("sha256", process.env.RAZOR_PAY_TEST_SECRET as string)
       .update(body.toString())
@@ -46,20 +47,40 @@ export const verifyPayment = async (req: Request, res: Response) => {
     var response: any = { signatureIsValid: "false" };
     if (expectedSignature === req.body.paymentSignature) {
       response = { signatureIsValid: "true" };
-      const paymentObj = await new appointmentPayment(req.body);
+      const appointmentBook = await BookAppointment(b.appointment);
+      const { paymentId, orderId, paymentSignature, orderReceipt } = b;
+
+      const paymentObj = await new appointmentPayment({
+        paymentId,
+        orderId: req.body.appointmentOrderId,
+        paymentSignature,
+        orderReceipt,
+        appointmentId: appointmentBook._id,
+      }).save();
 
       await new creditAmountModel({
-        orderId: req.body.orderId,
-        appointmentDetails: req.body.appointmentDetails,
+        orderId: req.body.appointmentOrderId,
+        appointmentDetails: appointmentBook._id,
       }).save();
       response.paymentDetails = paymentObj;
       return successResponse(response, "Signature is valid", res);
     }
-    // const paymentObj = await new appointmentPayment(req.body).save();
+
+    // let body = req.body;
+    // const appointmentBook = await BookAppointment(body.appointment);
+    // const { paymentId, orderId, paymentSignature, orderReceipt } = body;
+
+    // const paymentObj = await new appointmentPayment({
+    //   paymentId,
+    //   orderId,
+    //   paymentSignature,
+    //   orderReceipt,
+    //   appointmentId: appointmentBook._id,
+    // }).save();
 
     // await new creditAmountModel({
     //   orderId: req.body.orderId,
-    //   appointmentDetails: req.body.appointmentId,
+    //   appointmentDetails: appointmentBook._id,
     // }).save();
     // return successResponse(paymentObj, "Signature is valid", res);
     let error = new Error("Signature is invalid");
