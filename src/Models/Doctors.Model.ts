@@ -213,11 +213,14 @@ doctorSchema.pre("findOneAndUpdate", async function (next) {
 doctorSchema.pre("findOneAndUpdate", async function (next) {
   let updateQuery: any = this.getUpdate();
   updateQuery = updateQuery["$addToSet"];
+  console.log("updateQuery:", updateQuery);
   if (updateQuery && "hospitalDetails" in updateQuery) {
+    console.log("this.getQuery()._id :", this.getQuery()._id);
     const currentDoc = await this.model.findOne({ _id: this.getQuery()._id });
     const incomingHospitals = _.map(updateQuery.hospitalDetails, (e) =>
       e.hospital.toString()
     );
+    console.log("currentDoc", currentDoc);
     const currentHospitals = _.map(currentDoc.hospitalDetails, (e) =>
       e.hospital.toString()
     );
@@ -297,8 +300,6 @@ doctorSchema.path("specialization").validate(function (specialization: any) {
 const doctorModel = model(doctor, doctorSchema);
 
 export default doctorModel;
-
-
 
 // {
 //   "password":"12334",

@@ -220,9 +220,12 @@ doctorSchema.pre("findOneAndUpdate", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         let updateQuery = this.getUpdate();
         updateQuery = updateQuery["$addToSet"];
+        console.log("updateQuery:", updateQuery);
         if (updateQuery && "hospitalDetails" in updateQuery) {
+            console.log("this.getQuery()._id :", this.getQuery()._id);
             const currentDoc = yield this.model.findOne({ _id: this.getQuery()._id });
             const incomingHospitals = lodash_1.default.map(updateQuery.hospitalDetails, (e) => e.hospital.toString());
+            console.log("currentDoc", currentDoc);
             const currentHospitals = lodash_1.default.map(currentDoc.hospitalDetails, (e) => e.hospital.toString());
             const combinedHospitals = [
                 ...incomingHospitals,

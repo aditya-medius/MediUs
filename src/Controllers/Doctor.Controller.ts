@@ -270,6 +270,7 @@ export const updateDoctorProfile = async (req: Request, res: Response) => {
       $set: body,
       $addToSet: { hospitalDetails, specialization, qualification },
     };
+    console.log("req.currentDoctor:", req.currentDoctor);
     const updatedDoctorObj = await doctorModel.findOneAndUpdate(
       {
         _id: req.currentDoctor,
