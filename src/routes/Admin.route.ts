@@ -57,4 +57,14 @@ adminRouter.get("/login", adminController.login);
 
 // Anemity controller
 adminRouter.post("/addHospitalService", adminController.addHospitalService);
+
+// Verification doctors ka
+adminRouter.get(
+  "/getUnverifiedDoctors",
+  adminController.getUnverifiedDoctors
+);
+adminRouter.put(
+  "/verifyDoctors/:doctorId",
+  adminController.verifyDoctors
+);
 export default adminRouter;

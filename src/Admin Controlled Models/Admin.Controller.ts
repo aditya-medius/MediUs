@@ -402,3 +402,29 @@ export const getUnverifiedDoctors = async (req: Request, res: Response) => {
     return errorResponse(error, res);
   }
 };
+
+export const verifyDoctors = async (req: Request, res: Response) => {
+  try {
+    let body = req.params;
+    const doctorObj = await doctorModel.findOneAndUpdate(
+      {
+        _id: body.doctorId,
+        deleted: false,
+        verified: false,
+        adminSearch: true,
+      },
+      {
+        $set: {
+          verified: true,
+        },
+      }
+    );
+    if (doctorObj.verified) {
+      throw new Error("Doctor is already verified");
+    } else {
+      return successResponse({}, "Successfully verified", res);
+    }
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};

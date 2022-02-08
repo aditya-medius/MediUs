@@ -107,14 +107,64 @@ const doctorSchema = new Schema(
   }
 );
 
+doctorSchema.pre("save", async function (next) {
+  const profileExist = await doctorModel.findOne({
+    $and: [
+      {
+        $or: [
+          {
+            email: this.email,
+          },
+          { phoneNumber: this.phoneNumber },
+        ],
+      },
+      { deleted: false },
+    ],
+    queryType: "save",
+  });
+  if (/^[0]?[789]\d{9}$/.test(this.phoneNumber)) {
+    if (!profileExist || this.phoneNumber == "9999999999") {
+      return next();
+    } else if (!profileExist.verified) {
+      throw new Error("Your profile is under verification process");
+    } else {
+      throw new Error(
+        "Profile alredy exist. Select a different phone number and email"
+      );
+    }
+  } else {
+    throw new Error("Invalid phone number");
+  }
+});
+
 ["find", "findOne"].forEach((e: string) => {
   doctorSchema.pre(e, async function (next) {
-    if (Object.keys(this.getQuery()).includes("adminSearch")) {
-      this.where({ deleted: false });
+    // Yeh Crob Job k liye hai
+    // queryType ki field pass kara dena cron job me
+    // doctor pe query lagate samay
+    if (Object.keys(this.getQuery()).includes("queryType")) {
+      const { queryType, ...rest } = this.getQuery();
+      this.where({
+        rest,
+        deleted: false,
+      });
     } else {
-      this.where({ deleted: false, verified: false });
+      // Agar admin se doctor ki koi record get kr rhe ho to
+      // adminSearch field daal dena.
+      // Usse unverified records bhi aa jayenge
+      if (Object.keys(this.getQuery()).includes("adminSearch")) {
+        const { adminSearch, ...rest } = this.getQuery();
+        this.where({ rest });
+      } else {
+        this.where({
+          ...this.getQuery(),
+          deleted: false,
+          $or: [{ verified: true }, { verified: { $exists: false } }],
+        });
+      }
+      this.populate("KYCDetails");
+      next();
     }
-    this.populate("KYCDetails");
   });
 });
 
@@ -130,7 +180,6 @@ doctorSchema.post("findOne", async function (result) {
       overExp = `${overExp} years`;
     }
     result.overallExperience = overExp;
-    // result["image"]
   }
 });
 doctorSchema.post("find", async function (res) {
@@ -148,33 +197,6 @@ doctorSchema.post("find", async function (res) {
       result.overallExperience = overExp;
     }
   });
-});
-
-doctorSchema.pre("save", async function (next) {
-  const profileExist = await doctorModel.findOne({
-    $and: [
-      {
-        $or: [
-          {
-            email: this.email,
-          },
-          { phoneNumber: this.phoneNumber },
-        ],
-      },
-      { deleted: false },
-    ],
-  });
-  if (/^[0]?[789]\d{9}$/.test(this.phoneNumber)) {
-    if (!profileExist || this.phoneNumber == "9999999999") {
-      return next();
-    } else {
-      throw new Error(
-        "Profile alredy exist. Select a different phone number and email"
-      );
-    }
-  } else {
-    throw new Error("Invalid phone number");
-  }
 });
 
 doctorSchema.pre("findOneAndUpdate", async function (next) {
@@ -287,34 +309,6 @@ doctorSchema.path("specialization").validate(function (specialization: any) {
   });
 });
 
-// For later
-// doctorSchema.virtual("bodyPart", {
-//   ref: "specialities",
-//   localField: "specialization",
-//   foreignField: "speciality",
-//   justOne: false,
-// });
 const doctorModel = model(doctor, doctorSchema);
 
 export default doctorModel;
-
-
-
-// {
-//   "password":"12334",
-//   "KYCDetails":"61ebc11dcfd31a6c80e7d782",
-//   "registration":{
-//   "registrationNumber":"123456",
-//   "registrationCouncil":"Registration Council",
-//   "registrationDate":"Tue Nov 30 2021 22:47:17 GMT+0530 (India Standard Time)"
-//   },
-//   "email":"aditya.rawat.1119021@gmail.com",
-//   "phoneNumber":"8826332445",
-//   "DOB":"Tue Nov 30 2021 22:47:17 GMT+0530 (India Standard Time)",
-//   "gender":"Male",
-//   "lastName":"Rawat",
-//   "firstName":"Aditya",
-//   "specialization":["61b121c9d8d361e50fbe26ae"],
-//   "qualification":["61d9204abf627811a19cdea8"],
-//   "overallExperience":"{{experience}}"
-// }
