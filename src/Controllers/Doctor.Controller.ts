@@ -67,8 +67,10 @@ export const getAllDoctorsList = async (req: Request, res: Response) => {
 export const createDoctor = async (req: Request, res: Response) => {
   try {
     let body = req.body;
-    let cryptSalt = await bcrypt.genSalt(10);
-    body.password = await bcrypt.hash(body.password, cryptSalt);
+    if (body.password) {
+      let cryptSalt = await bcrypt.genSalt(10);
+      body.password = await bcrypt.hash(body.password, cryptSalt);
+    }
     let doctorObj = await new doctorModel(body).save();
     jwt.sign(
       doctorObj.toJSON(),
@@ -211,7 +213,7 @@ export const getDoctorById = async (req: Request, res: Response) => {
     };
     let select: any = { ...excludeDoctorFields };
     if (req.body.fullDetails) {
-      query = { adminSearch: true, _id: req.params.id, deleted: false };
+      query = { _id: req.params.id, deleted: false };
       select = { password: 0 };
     }
     const doctorData = await doctorModel
@@ -578,14 +580,6 @@ export const setSchedule = async (req: Request, res: Response) => {
       workingHourId = doctorProfile.hospitalDetails[0].workingHours;
     }
 
-    console.log(
-      "{doctorDetails: req.currentDoctor, hospitalDetails: body.hospitalId,}",
-      {
-        doctorDetails: req.currentDoctor,
-        hospitalDetails: body.hospitalId,
-      }
-    );
-
     const Wh = await workingHourModel.findOneAndUpdate(
       {
         $or: [
@@ -605,7 +599,8 @@ export const setSchedule = async (req: Request, res: Response) => {
       }
     );
 
-    return successResponse(Wh, "Success", res);
+    return successResponse({}, "Success", res);
+    // return successResponse(Wh, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

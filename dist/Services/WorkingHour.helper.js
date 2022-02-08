@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.formatWorkingHour = void 0;
-const dayArray = [
+exports.formatWorkingHour = exports.dayArray = void 0;
+exports.dayArray = [
     "monday",
     "tuesday",
     "wednesday",
@@ -13,7 +13,7 @@ const dayArray = [
 const formatWorkingHour = (workingHours) => {
     workingHours = workingHours.map((e) => {
         return Object.keys(e).map((elem) => {
-            if (dayArray.includes(elem)) {
+            if (exports.dayArray.includes(elem)) {
                 return {
                     day: elem,
                     timings: e[elem],

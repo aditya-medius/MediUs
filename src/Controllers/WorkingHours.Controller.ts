@@ -3,7 +3,7 @@ import { Request, Response, Router } from "express";
 import { errorResponse, successResponse } from "../Services/response";
 import { addBodyPart } from "../Admin Controlled Models/Admin.Controller";
 import { time } from "../Services/time.class";
-import { formatWorkingHour } from "../Services/WorkingHour.helper";
+import { dayArray, formatWorkingHour } from "../Services/WorkingHour.helper";
 
 // For Doctors
 export const createWorkingHours = async (req: Request, res: Response) => {
@@ -13,17 +13,24 @@ export const createWorkingHours = async (req: Request, res: Response) => {
     let workingHour = await workingHourModel.find(
       {
         doctorDetails: req.currentDoctor,
-        hospitalDetails: body.hospitalDetails,
+        hospitalDetails: body.hospitalId,
       },
       { doctorDetails: 0, hospitalDetails: 0 }
     );
 
-    const { doctorDetails, hospitalDetails, ...tempBody } = body;
+    const { hospitalId, ...tempBody } = body;
+
+    if (workingHour.length >= 24) {
+      let error = new Error("Cannot create more than 24 schedules");
+      error.name = "Exceeded number of schedules";
+      throw error;
+    }
+
     workingHour.forEach((e: any) => {
       Object.keys(e.toJSON()).forEach((elem: any) => {
-        if (elem != "_id" && elem != "__v") {
+        if (dayArray.includes(elem)) {
           const element = e[elem];
-          const e2 = tempBody[elem];
+          const e2 = tempBody.workingHour[elem];
           const t1_from = new time(e2.from.time, e2.from.division);
           const t1_till = new time(e2.till.time, e2.till.division);
 
@@ -41,8 +48,13 @@ export const createWorkingHours = async (req: Request, res: Response) => {
         }
       });
     });
+    let tb = { ...tempBody.workingHour };
 
-    const WHObj = await new workingHourModel(body).save();
+    const WHObj = await new workingHourModel({
+      doctorDetails: req.currentDoctor,
+      hospitalDetails: body.hospitalId,
+      ...tb,
+    }).save();
     // return successResponse({}, "Successfully created", res);
     return successResponse(WHObj, "Successfully created", res);
   } catch (error) {
@@ -65,13 +77,6 @@ export const createOpeningHours = async (req: Request, res: Response) => {
 // Get working hours
 export const getWorkingHours = async (req: Request, res: Response) => {
   try {
-    console.log(
-      "doctorDetails: req.body.doctorDetails, ospitalDetails: req.body.hospitalDetails",
-      {
-        doctorDetails: req.body.doctorDetails,
-        hospitalDetails: req.body.hospitalDetails,
-      }
-    );
     const WHObj = await workingHourModel
       .find(
         {
@@ -82,7 +87,6 @@ export const getWorkingHours = async (req: Request, res: Response) => {
       )
       .lean();
 
-    console.log("hwo obj:", WHObj);
     let WHObj2: any = {};
     if (WHObj) {
       WHObj.map((e) => {
@@ -100,7 +104,6 @@ export const getWorkingHours = async (req: Request, res: Response) => {
       });
       // return successResponse({ WHObj, WHObj2 }, "Success", res);
       WHObj2 = formatWorkingHour([WHObj2]);
-      console.log("Who:", WHObj2);
       return successResponse({ workingHours: WHObj2 }, "Success", res);
     } else {
       return successResponse({}, "No data found", res);

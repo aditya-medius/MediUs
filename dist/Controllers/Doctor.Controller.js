@@ -88,8 +88,10 @@ exports.getAllDoctorsList = getAllDoctorsList;
 const createDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
-        let cryptSalt = yield bcrypt.genSalt(10);
-        body.password = yield bcrypt.hash(body.password, cryptSalt);
+        if (body.password) {
+            let cryptSalt = yield bcrypt.genSalt(10);
+            body.password = yield bcrypt.hash(body.password, cryptSalt);
+        }
         let doctorObj = yield new Doctors_Model_1.default(body).save();
         jwt.sign(doctorObj.toJSON(), process.env.SECRET_DOCTOR_KEY, (err, token) => {
             if (err)
@@ -197,7 +199,7 @@ const getDoctorById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         };
         let select = Object.assign({}, exports.excludeDoctorFields);
         if (req.body.fullDetails) {
-            query = { adminSearch: true, _id: req.params.id, deleted: false };
+            query = { _id: req.params.id, deleted: false };
             select = { password: 0 };
         }
         const doctorData = yield Doctors_Model_1.default
@@ -536,10 +538,6 @@ const setSchedule = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         if (doctorProfile) {
             workingHourId = doctorProfile.hospitalDetails[0].workingHours;
         }
-        console.log("{doctorDetails: req.currentDoctor, hospitalDetails: body.hospitalId,}", {
-            doctorDetails: req.currentDoctor,
-            hospitalDetails: body.hospitalId,
-        });
         const Wh = yield WorkingHours_Model_1.default.findOneAndUpdate({
             $or: [
                 {
@@ -554,7 +552,8 @@ const setSchedule = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             upsert: true,
             new: true,
         });
-        return (0, response_1.successResponse)(Wh, "Success", res);
+        return (0, response_1.successResponse)({}, "Success", res);
+        // return successResponse(Wh, "Success", res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);

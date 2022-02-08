@@ -85,7 +85,8 @@ doctorRouter.get(
 doctorRouter.put(
   "/setSchedule",
   oneOf(authenticateDoctor),
-  doctorController.setSchedule
+  // doctorController.setSchedule
+  workingHoursController.createWorkingHours
 );
 
 // Get Doctor's appointment
