@@ -21,6 +21,7 @@ import * as bcrypt from "bcrypt";
 import { sendMessage } from "../Services/message.service";
 import otpModel from "../Models/OTP.Model";
 import servicesModel from "./Services.Model";
+import doctorModel from "../Models/Doctors.Model";
 
 export const addSpeciality = async (req: Request, res: Response) => {
   try {
@@ -382,6 +383,21 @@ export const addHospitalService = async (req: Request, res: Response) => {
     let body = req.body;
     let serviceObj = await new servicesModel(body).save();
     return successResponse(serviceObj, "Successfully created services", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+// Unverified users ko get krne ki query
+export const getUnverifiedDoctors = async (req: Request, res: Response) => {
+  try {
+    let body = req.body;
+    const unverifiedDoctors = await doctorModel.find({
+      verified: false,
+      adminSearch: true,
+    });
+
+    return successResponse(unverifiedDoctors, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

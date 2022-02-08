@@ -73,7 +73,7 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
                 type: Date,
             },
         },
-        required: true,
+        // required: true,
     }, specialization: [
         {
             type: mongoose_1.Schema.Types.ObjectId,
@@ -82,7 +82,7 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
     ], KYCDetails: {
         type: mongoose_1.default.Schema.Types.ObjectId,
         ref: schemaNames_1.kycDetails,
-        required: [true, "KYC details are required"],
+        // required: [true, "KYC details are required"],
     }, qualification: [
         {
             type: mongoose_1.default.Schema.Types.ObjectId,
@@ -96,11 +96,16 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
         ref: schemaNames_1.treatmentType,
     }, overallExperience: {
         type: mongoose_1.default.Schema.Types.Mixed,
-        required: true,
+        // required: true,
     }, image: {
         type: String,
         default: "static/user/default.png",
         // ref: media,
+    }, 
+    // // Admin is field edit karega aur koi nhi
+    verified: {
+        type: Boolean,
+        default: false,
     } }), {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
@@ -108,7 +113,12 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
 ["find", "findOne"].forEach((e) => {
     doctorSchema.pre(e, function (next) {
         return __awaiter(this, void 0, void 0, function* () {
-            this.where({ deleted: false });
+            if (Object.keys(this.getQuery()).includes("adminSearch")) {
+                this.where({ deleted: false });
+            }
+            else {
+                this.where({ deleted: false, verified: false });
+            }
             this.populate("KYCDetails");
         });
     });
@@ -261,12 +271,12 @@ doctorSchema.path("specialization").validate(function (specialization) {
     return true;
 }, "specialization details are required");
 // Qualification Validation
-doctorSchema.path("qualification").validate(function (qualification) {
-    if (qualification.length < 1) {
-        return false;
-    }
-    return true;
-}, "qualification details are required");
+// doctorSchema.path("qualification").validate(function (qualification: any) {
+//   if (qualification.length < 1) {
+//     return false;
+//   }
+//   return true;
+// }, "qualification details are required");
 ["remove", "findOneAndDelete"].forEach((e) => {
     doctorSchema.pre(e, function (next) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -284,3 +294,21 @@ doctorSchema.path("qualification").validate(function (qualification) {
 // });
 const doctorModel = (0, mongoose_1.model)(schemaNames_1.doctor, doctorSchema);
 exports.default = doctorModel;
+// {
+//   "password":"12334",
+//   "KYCDetails":"61ebc11dcfd31a6c80e7d782",
+//   "registration":{
+//   "registrationNumber":"123456",
+//   "registrationCouncil":"Registration Council",
+//   "registrationDate":"Tue Nov 30 2021 22:47:17 GMT+0530 (India Standard Time)"
+//   },
+//   "email":"aditya.rawat.1119021@gmail.com",
+//   "phoneNumber":"8826332445",
+//   "DOB":"Tue Nov 30 2021 22:47:17 GMT+0530 (India Standard Time)",
+//   "gender":"Male",
+//   "lastName":"Rawat",
+//   "firstName":"Aditya",
+//   "specialization":["61b121c9d8d361e50fbe26ae"],
+//   "qualification":["61d9204abf627811a19cdea8"],
+//   "overallExperience":"{{experience}}"
+// }

@@ -197,7 +197,7 @@ const getDoctorById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         };
         let select = Object.assign({}, exports.excludeDoctorFields);
         if (req.body.fullDetails) {
-            query = { _id: req.params.id, deleted: false };
+            query = { adminSearch: true, _id: req.params.id, deleted: false };
             select = { password: 0 };
         }
         const doctorData = yield Doctors_Model_1.default

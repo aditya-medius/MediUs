@@ -78,7 +78,7 @@ doctorRouter.post(
 );
 doctorRouter.get(
   "/searchDoctorByPhoneNumberOrEmail/:term",
-  oneOf(authenticateDoctor, authenticatePatient),
+  oneOf(authenticateDoctor, authenticatePatient, authenticateHospital),
   doctorController.searchDoctorByPhoneNumberOrEmail
 );
 

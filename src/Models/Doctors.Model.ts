@@ -58,7 +58,7 @@ const doctorSchema = new Schema(
           type: Date,
         },
       },
-      required: true,
+      // required: true,
     },
     specialization: [
       {
@@ -69,7 +69,7 @@ const doctorSchema = new Schema(
     KYCDetails: {
       type: mongoose.Schema.Types.ObjectId,
       ref: kycDetails,
-      required: [true, "KYC details are required"],
+      // required: [true, "KYC details are required"],
     },
     qualification: [
       {
@@ -87,12 +87,18 @@ const doctorSchema = new Schema(
     },
     overallExperience: {
       type: mongoose.Schema.Types.Mixed,
-      required: true,
+      // required: true,
     },
     image: {
       type: String,
       default: "static/user/default.png",
       // ref: media,
+    },
+
+    // // Admin is field edit karega aur koi nhi
+    verified: {
+      type: Boolean,
+      default: false,
     },
   },
   {
@@ -103,7 +109,11 @@ const doctorSchema = new Schema(
 
 ["find", "findOne"].forEach((e: string) => {
   doctorSchema.pre(e, async function (next) {
-    this.where({ deleted: false });
+    if (Object.keys(this.getQuery()).includes("adminSearch")) {
+      this.where({ deleted: false });
+    } else {
+      this.where({ deleted: false, verified: false });
+    }
     this.populate("KYCDetails");
   });
 });
@@ -263,12 +273,12 @@ doctorSchema.path("specialization").validate(function (specialization: any) {
 }, "specialization details are required");
 
 // Qualification Validation
-doctorSchema.path("qualification").validate(function (qualification: any) {
-  if (qualification.length < 1) {
-    return false;
-  }
-  return true;
-}, "qualification details are required");
+// doctorSchema.path("qualification").validate(function (qualification: any) {
+//   if (qualification.length < 1) {
+//     return false;
+//   }
+//   return true;
+// }, "qualification details are required");
 
 ["remove", "findOneAndDelete"].forEach((e: string) => {
   doctorSchema.pre(e, async function (next) {
@@ -287,3 +297,24 @@ doctorSchema.path("qualification").validate(function (qualification: any) {
 const doctorModel = model(doctor, doctorSchema);
 
 export default doctorModel;
+
+
+
+// {
+//   "password":"12334",
+//   "KYCDetails":"61ebc11dcfd31a6c80e7d782",
+//   "registration":{
+//   "registrationNumber":"123456",
+//   "registrationCouncil":"Registration Council",
+//   "registrationDate":"Tue Nov 30 2021 22:47:17 GMT+0530 (India Standard Time)"
+//   },
+//   "email":"aditya.rawat.1119021@gmail.com",
+//   "phoneNumber":"8826332445",
+//   "DOB":"Tue Nov 30 2021 22:47:17 GMT+0530 (India Standard Time)",
+//   "gender":"Male",
+//   "lastName":"Rawat",
+//   "firstName":"Aditya",
+//   "specialization":["61b121c9d8d361e50fbe26ae"],
+//   "qualification":["61d9204abf627811a19cdea8"],
+//   "overallExperience":"{{experience}}"
+// }
