@@ -82,7 +82,7 @@ const workingHoursSchema = new mongoose_1.Schema({
                 required: true,
             },
         },
-        required: true,
+        // required: true,
     },
     tuesday: {
         type: {
@@ -122,7 +122,7 @@ const workingHoursSchema = new mongoose_1.Schema({
                 required: true,
             },
         },
-        required: true,
+        // required: true,
     },
     wednesday: {
         type: {
@@ -162,7 +162,7 @@ const workingHoursSchema = new mongoose_1.Schema({
                 required: true,
             },
         },
-        required: true,
+        // required: true,
     },
     thursday: {
         type: {
@@ -202,7 +202,7 @@ const workingHoursSchema = new mongoose_1.Schema({
                 required: true,
             },
         },
-        required: true,
+        // required: true,
     },
     friday: {
         type: {
@@ -242,7 +242,7 @@ const workingHoursSchema = new mongoose_1.Schema({
                 required: true,
             },
         },
-        required: true,
+        // required: true,
     },
     saturday: {
         type: {
@@ -282,7 +282,7 @@ const workingHoursSchema = new mongoose_1.Schema({
                 required: true,
             },
         },
-        required: true,
+        // required: true,
     },
     sunday: {
         type: {
@@ -322,7 +322,7 @@ const workingHoursSchema = new mongoose_1.Schema({
                 required: true,
             },
         },
-        required: true,
+        // required: true,
     },
     byHospital: {
         type: Boolean,
@@ -351,16 +351,16 @@ workingHoursSchema.pre("save", function (next) {
             next();
         }
         else {
-            if (!this.hospitalDetails || !this.doctorDetails) {
-                throw new Error("Doctor and Hospital details are required");
-            }
+            // console.log("this:", this);
+            // if (!this.hospitalId || !this.doctorDetails) {
+            //   throw new Error("Doctor and Hospital details are required");
+            // }
         }
     });
 });
 ["find", "findOne"].forEach((e) => {
     workingHoursSchema.pre(e, function (next) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("deleted:", this.get("deleted"));
             if (this.get("deleted")) {
                 this.where({ "deleted.isDeleted": false });
             }

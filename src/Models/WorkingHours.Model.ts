@@ -53,7 +53,7 @@ const workingHoursSchema = new Schema({
         required: true,
       },
     },
-    required: true,
+    // required: true,
   },
   tuesday: {
     type: {
@@ -93,7 +93,7 @@ const workingHoursSchema = new Schema({
         required: true,
       },
     },
-    required: true,
+    // required: true,
   },
   wednesday: {
     type: {
@@ -133,7 +133,7 @@ const workingHoursSchema = new Schema({
         required: true,
       },
     },
-    required: true,
+    // required: true,
   },
   thursday: {
     type: {
@@ -173,7 +173,7 @@ const workingHoursSchema = new Schema({
         required: true,
       },
     },
-    required: true,
+    // required: true,
   },
   friday: {
     type: {
@@ -213,7 +213,7 @@ const workingHoursSchema = new Schema({
         required: true,
       },
     },
-    required: true,
+    // required: true,
   },
   saturday: {
     type: {
@@ -253,7 +253,7 @@ const workingHoursSchema = new Schema({
         required: true,
       },
     },
-    required: true,
+    // required: true,
   },
   sunday: {
     type: {
@@ -293,7 +293,7 @@ const workingHoursSchema = new Schema({
         required: true,
       },
     },
-    required: true,
+    // required: true,
   },
   byHospital: {
     type: Boolean,
@@ -322,15 +322,15 @@ workingHoursSchema.pre("save", async function (next) {
   if (this.byHospital) {
     next();
   } else {
-    if (!this.hospitalDetails || !this.doctorDetails) {
-      throw new Error("Doctor and Hospital details are required");
-    }
+    // console.log("this:", this);
+    // if (!this.hospitalId || !this.doctorDetails) {
+    //   throw new Error("Doctor and Hospital details are required");
+    // }
   }
 });
 
 ["find", "findOne"].forEach((e: string) => {
   workingHoursSchema.pre(e, async function (next) {
-    console.log("deleted:", this.get("deleted"));
     if (this.get("deleted")) {
       this.where({ "deleted.isDeleted": false });
     }

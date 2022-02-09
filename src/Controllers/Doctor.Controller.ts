@@ -272,6 +272,7 @@ export const updateDoctorProfile = async (req: Request, res: Response) => {
       $set: body,
       $addToSet: { hospitalDetails, specialization, qualification },
     };
+    console.log("req.currentDoctor:", req.currentDoctor);
     const updatedDoctorObj = await doctorModel.findOneAndUpdate(
       {
         _id: req.currentDoctor,
@@ -598,7 +599,8 @@ export const setSchedule = async (req: Request, res: Response) => {
       }
     );
 
-    return successResponse(Wh, "Success", res);
+    return successResponse({}, "Success", res);
+    // return successResponse(Wh, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

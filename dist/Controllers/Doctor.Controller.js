@@ -254,6 +254,7 @@ const updateDoctorProfile = (req, res) => __awaiter(void 0, void 0, void 0, func
             $set: body,
             $addToSet: { hospitalDetails, specialization, qualification },
         };
+        console.log("req.currentDoctor:", req.currentDoctor);
         const updatedDoctorObj = yield Doctors_Model_1.default.findOneAndUpdate({
             _id: req.currentDoctor,
             deleted: false,
@@ -551,7 +552,8 @@ const setSchedule = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             upsert: true,
             new: true,
         });
-        return (0, response_1.successResponse)(Wh, "Success", res);
+        return (0, response_1.successResponse)({}, "Success", res);
+        // return successResponse(Wh, "Success", res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);

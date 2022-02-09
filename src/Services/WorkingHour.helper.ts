@@ -1,4 +1,4 @@
-const dayArray: Array<string> = [
+export const dayArray: Array<string> = [
   "monday",
   "tuesday",
   "wednesday",

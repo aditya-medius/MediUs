@@ -13,7 +13,7 @@ const hospitalRouter = express.Router();
 
 hospitalRouter.get(
   "/",
-  oneOf(authenticateHospital),
+  // oneOf(authenticateHospital),
   hospitalController.getAllHospitalsList
 );
 hospitalRouter.post("/login", hospitalController.login);

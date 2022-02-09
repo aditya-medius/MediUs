@@ -35,14 +35,19 @@ const createWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, funct
         body.doctorDetails = req.currentDoctor;
         let workingHour = yield WorkingHours_Model_1.default.find({
             doctorDetails: req.currentDoctor,
-            hospitalDetails: body.hospitalDetails,
+            hospitalDetails: body.hospitalId,
         }, { doctorDetails: 0, hospitalDetails: 0 });
-        const { doctorDetails, hospitalDetails } = body, tempBody = __rest(body, ["doctorDetails", "hospitalDetails"]);
+        const { hospitalId } = body, tempBody = __rest(body, ["hospitalId"]);
+        if (workingHour.length >= 24) {
+            let error = new Error("Cannot create more than 24 schedules");
+            error.name = "Exceeded number of schedules";
+            throw error;
+        }
         workingHour.forEach((e) => {
             Object.keys(e.toJSON()).forEach((elem) => {
-                if (elem != "_id" && elem != "__v") {
+                if (WorkingHour_helper_1.dayArray.includes(elem)) {
                     const element = e[elem];
-                    const e2 = tempBody[elem];
+                    const e2 = tempBody.workingHour[elem];
                     const t1_from = new time_class_1.time(e2.from.time, e2.from.division);
                     const t1_till = new time_class_1.time(e2.till.time, e2.till.division);
                     const t2_from = new time_class_1.time(element.from.time, element.from.division);
@@ -54,7 +59,8 @@ const createWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, funct
                 }
             });
         });
-        const WHObj = yield new WorkingHours_Model_1.default(body).save();
+        let tb = Object.assign({}, tempBody.workingHour);
+        const WHObj = yield new WorkingHours_Model_1.default(Object.assign({ doctorDetails: req.currentDoctor, hospitalDetails: body.hospitalId }, tb)).save();
         // return successResponse({}, "Successfully created", res);
         return (0, response_1.successResponse)(WHObj, "Successfully created", res);
     }
@@ -79,17 +85,12 @@ exports.createOpeningHours = createOpeningHours;
 // Get working hours
 const getWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log("doctorDetails: req.body.doctorDetails, ospitalDetails: req.body.hospitalDetails", {
-            doctorDetails: req.body.doctorDetails,
-            hospitalDetails: req.body.hospitalDetails,
-        });
         const WHObj = yield WorkingHours_Model_1.default
             .find({
             doctorDetails: req.body.doctorDetails,
             hospitalDetails: req.body.hospitalDetails,
         }, "-byHospital -doctorDetails -hospitalDetails")
             .lean();
-        console.log("hwo obj:", WHObj);
         let WHObj2 = {};
         if (WHObj) {
             WHObj.map((e) => {
@@ -109,7 +110,6 @@ const getWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function
             });
             // return successResponse({ WHObj, WHObj2 }, "Success", res);
             WHObj2 = (0, WorkingHour_helper_1.formatWorkingHour)([WHObj2]);
-            console.log("Who:", WHObj2);
             return (0, response_1.successResponse)({ workingHours: WHObj2 }, "Success", res);
         }
         else {
