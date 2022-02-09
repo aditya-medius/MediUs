@@ -648,8 +648,33 @@ export const viewAppointment = async (req: Request, res: Response) => {
     const page = parseInt(req.params.page);
     const appointmentObj: Array<object> = await appointmentModel
       .find({ hospital: req.currentHospital, "time.date": { $gt: Date() } })
-      .populate({ path: "patient", select: excludePatientFields })
-      .populate({ path: "doctors", select: excludeDoctorFields })
+      .populate({
+        path: "patient",
+        select: {
+          ...excludePatientFields,
+          phoneNumber: 0,
+          email: 0,
+          active: 0,
+          deleted: 0,
+        },
+      })
+      .populate({
+        path: "doctors",
+        select: {
+          ...excludeDoctorFields,
+          gender: 0,
+          phoneNumber: 0,
+          email: 0,
+          active: 0,
+          deleted: 0,
+          specialization: 0,
+          qualification: 0,
+          overallExperience: 0,
+          hospitalDetails: 0,
+          image: 0,
+          id: 0,
+        },
+      })
       .sort({ "time.date": 1 })
       .skip(page > 1 ? (page - 1) * 2 : 0)
       .limit(2);
@@ -658,8 +683,33 @@ export const viewAppointment = async (req: Request, res: Response) => {
 
     const older_apppointmentObj: Array<object> = await appointmentModel
       .find({ hospital: req.currentHospital, "time.date": { $lte: Date() } })
-      .populate({ path: "patient", select: excludePatientFields })
-      .populate({ path: "doctors", select: excludeDoctorFields })
+      .populate({
+        path: "patient",
+        select: {
+          ...excludePatientFields,
+          phoneNumber: 0,
+          email: 0,
+          active: 0,
+          deleted: 0,
+        },
+      })
+      .populate({
+        path: "doctors",
+        select: {
+          ...excludeDoctorFields,
+          gender: 0,
+          phoneNumber: 0,
+          email: 0,
+          active: 0,
+          deleted: 0,
+          specialization: 0,
+          qualification: 0,
+          overallExperience: 0,
+          hospitalDetails: 0,
+          image: 0,
+          id: 0,
+        },
+      })
       .sort({ "time.date": 1 })
       .skip(page > page2 ? (page - 1) * 2 : 0)
       .limit(2);
