@@ -616,16 +616,28 @@ const viewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
         const page = parseInt(req.params.page);
         const appointmentObj = yield Appointment_Model_1.default
             .find({ hospital: req.currentHospital, "time.date": { $gt: Date() } })
-            .populate({ path: "patient", select: Patient_Controller_1.excludePatientFields })
-            .populate({ path: "doctors", select: excludeDoctorFields })
+            .populate({
+            path: "patient",
+            select: Object.assign(Object.assign({}, Patient_Controller_1.excludePatientFields), { phoneNumber: 0, email: 0, active: 0, deleted: 0 }),
+        })
+            .populate({
+            path: "doctors",
+            select: Object.assign(Object.assign({}, excludeDoctorFields), { gender: 0, phoneNumber: 0, email: 0, active: 0, deleted: 0, specialization: 0, qualification: 0, overallExperience: 0, hospitalDetails: 0, image: 0, id: 0 }),
+        })
             .sort({ "time.date": 1 })
             .skip(page > 1 ? (page - 1) * 2 : 0)
             .limit(2);
         const page2 = appointmentObj.length / 2;
         const older_apppointmentObj = yield Appointment_Model_1.default
             .find({ hospital: req.currentHospital, "time.date": { $lte: Date() } })
-            .populate({ path: "patient", select: Patient_Controller_1.excludePatientFields })
-            .populate({ path: "doctors", select: excludeDoctorFields })
+            .populate({
+            path: "patient",
+            select: Object.assign(Object.assign({}, Patient_Controller_1.excludePatientFields), { phoneNumber: 0, email: 0, active: 0, deleted: 0 }),
+        })
+            .populate({
+            path: "doctors",
+            select: Object.assign(Object.assign({}, excludeDoctorFields), { gender: 0, phoneNumber: 0, email: 0, active: 0, deleted: 0, specialization: 0, qualification: 0, overallExperience: 0, hospitalDetails: 0, image: 0, id: 0 }),
+        })
             .sort({ "time.date": 1 })
             .skip(page > page2 ? (page - 1) * 2 : 0)
             .limit(2);
