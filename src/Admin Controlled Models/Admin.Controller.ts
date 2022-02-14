@@ -410,7 +410,7 @@ export const verifyDoctors = async (req: Request, res: Response) => {
       {
         _id: body.doctorId,
         deleted: false,
-        verified: false,
+        // verified: false,
         adminSearch: true,
       },
       {

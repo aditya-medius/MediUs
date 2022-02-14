@@ -1,4 +1,4 @@
-import { json, Request, Response } from "express";
+import { Request, Response } from "express";
 import addressModel from "../Models/Address.Model";
 import anemityModel from "../Models/Anemities.Model";
 import hospitalModel from "../Models/Hospital.Model";
@@ -348,7 +348,7 @@ export const updateHospital = async (req: Request, res: Response) => {
     if (!doctors || DoctorObj.length == doctors.length) {
       const HospitalUpdateObj = await hospitalModel.findOneAndUpdate(
         { _id: req.currentHospital, deleted: false },
-        b,
+        updateQuery,
         { new: true }
       );
       if (HospitalUpdateObj) {
@@ -836,6 +836,21 @@ export const getHospitalById = async (req: Request, res: Response) => {
       hospital.doctors = [];
     }
     return successResponse({ hospital }, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getDoctorsInHospital = async (req: Request, res: Response) => {
+  try {
+    const hospitalDetails = await hospitalModel
+      .findOne({ _id: req.currentHospital, deleted: false }, { doctors: 1 })
+      .populate({
+        path: "doctors",
+        select: excludeDoctorFields,
+      });
+
+    return successResponse(hospitalDetails, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

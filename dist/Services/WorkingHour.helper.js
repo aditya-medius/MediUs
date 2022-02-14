@@ -11,13 +11,19 @@ exports.dayArray = [
     "sunday",
 ];
 const formatWorkingHour = (workingHours) => {
+    // console.log("qoekjnjbd:", workingHours[0]["monday"][0]);
     workingHours = workingHours.map((e) => {
         return Object.keys(e).map((elem) => {
             if (exports.dayArray.includes(elem)) {
-                return {
+                // console.log("eleme:", e[elem]);
+                let returnData = {
                     day: elem,
                     timings: e[elem],
                 };
+                if (e.workingHourId) {
+                    returnData["workingHourId"] = e.workingHourId;
+                }
+                return returnData;
             }
         });
     });

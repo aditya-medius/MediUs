@@ -34,6 +34,7 @@ import orderModel from "../Models/Order.Model";
 import appointmentPaymentModel from "../Models/AppointmentPayment.Model";
 import * as doctorService from "../Services/Doctor/Doctor.Service";
 import withdrawModel from "../Models/Withdrawal.Model";
+import qualificationModel from "../Models/Qualification.Model";
 
 export const excludeDoctorFields = {
   password: 0,
@@ -272,7 +273,6 @@ export const updateDoctorProfile = async (req: Request, res: Response) => {
       $set: body,
       $addToSet: { hospitalDetails, specialization, qualification },
     };
-    console.log("req.currentDoctor:", req.currentDoctor);
     const updatedDoctorObj = await doctorModel.findOneAndUpdate(
       {
         _id: req.currentDoctor,
@@ -1287,6 +1287,88 @@ export const getAppointmentSummary = async (req: Request, res: Response) => {
       "Success",
       res
     );
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const deleteSpecializationAndQualification = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const keys = ["specialization", "qualification"];
+    let body = req.body;
+    for (const key in body) {
+      if (!keys.includes(key)) {
+        let error = new Error(
+          `${key} is not an acceptable key in the request body`
+        );
+        error.name = "Invalid request";
+        throw error;
+      }
+    }
+    if (body[Object.keys(body)[0]].length == 0) {
+      throw new Error("Doctor must have at least on specialization");
+    }
+    let updateQuery = {
+      $set: body,
+    };
+    const updatedDoctor = await doctorModel.findOneAndUpdate(
+      {
+        _id: req.currentDoctor,
+      },
+      updateQuery
+    );
+
+    if (!updatedDoctor) {
+      throw new Error("Doctor does not exist");
+    }
+    return successResponse({}, "success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+// verify payment ka issue
+
+export const deleteHospitalFromDoctor = async (req: Request, res: Response) => {
+  try {
+    let body = req.body;
+    const doctor = await doctorModel.findOne({ _id: req.currentDoctor });
+    const hospital = doctor.hospitalDetails.filter((e: any, index: number) => {
+      // if (index == doctor.hospitalDetails.length - 1) {
+      //   throw new Error("Doctor is not appointed in this hospital");
+      // }
+      return e.hospital != body.hospital;
+    });
+    // await doctor.save();
+    await doctor.update({ $set: { hospitalDetails: hospital } });
+    return successResponse(doctor, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const updateQualification = async (req: Request, res: Response) => {
+  try {
+    let body = req.body;
+    let updateBody = {
+      $set: body,
+    };
+    const qualification = await qualificationModel.findOneAndUpdate(
+      {
+        _id: req.params.qualificationId,
+      },
+      updateBody,
+      {
+        new: true,
+      }
+    );
+    if (qualification) {
+      return successResponse(qualification, "Success", res);
+    }
+    throw new Error("Qualification doesn't exist");
   } catch (error: any) {
     return errorResponse(error, res);
   }

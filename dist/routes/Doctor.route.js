@@ -67,6 +67,9 @@ doctorRouter.get("/searchDoctorByPhoneNumberOrEmail/:term", (0, middlewareHelper
 doctorRouter.put("/setSchedule", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), 
 // doctorController.setSchedule
 workingHoursController.createWorkingHours);
+doctorRouter.put("/updateWorkingHour", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), 
+// doctorController.setSchedule
+workingHoursController.updateWorkingHour);
 // Get Doctor's appointment
 doctorRouter.get("/viewAppointments/:page", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.viewAppointments);
 doctorRouter.post("/viewAppointmentsByDate/:page", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.viewAppointmentsByDate);
@@ -96,4 +99,8 @@ doctorRouter.post("/withdraw", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authe
 doctorRouter.get("/getPendingAmount", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getPendingAmount);
 // kitni appointment bachi hai, poori ho gayi hai aur cancel ho gayi hai. Uska data
 doctorRouter.get("/appointmentSummary", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getAppointmentSummary);
+// doctor ki specialization or qualification ko delete
+doctorRouter.delete("/deleteSpecializationAndQualification", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.deleteSpecializationAndQualification);
+doctorRouter.delete("/deleteHospitalFromDoctor", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.deleteHospitalFromDoctor);
+doctorRouter.put("/updateQualification/:qualificationId", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.updateQualification);
 exports.default = doctorRouter;

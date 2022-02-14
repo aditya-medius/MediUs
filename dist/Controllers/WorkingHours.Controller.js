@@ -23,7 +23,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getWorkingHours = exports.createOpeningHours = exports.createWorkingHours = void 0;
+exports.updateWorkingHour = exports.getWorkingHours = exports.createOpeningHours = exports.createWorkingHours = void 0;
 const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
 const response_1 = require("../Services/response");
 const time_class_1 = require("../Services/time.class");
@@ -48,21 +48,23 @@ const createWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, funct
                 if (WorkingHour_helper_1.dayArray.includes(elem)) {
                     const element = e[elem];
                     const e2 = tempBody.workingHour[elem];
-                    const t1_from = new time_class_1.time(e2.from.time, e2.from.division);
-                    const t1_till = new time_class_1.time(e2.till.time, e2.till.division);
-                    const t2_from = new time_class_1.time(element.from.time, element.from.division);
-                    const t2_till = new time_class_1.time(element.till.time, element.till.division);
-                    if (!((t2_from.lessThan(t1_from) && t2_till.lessThan(t1_from)) ||
-                        (t2_from.greaterThan(t1_till) && t2_till.greaterThan(t1_till)))) {
-                        throw new Error("Invalid timings");
+                    if (e2) {
+                        const t1_from = new time_class_1.time(e2.from.time, e2.from.division);
+                        const t1_till = new time_class_1.time(e2.till.time, e2.till.division);
+                        const t2_from = new time_class_1.time(element.from.time, element.from.division);
+                        const t2_till = new time_class_1.time(element.till.time, element.till.division);
+                        if (!((t2_from.lessThan(t1_from) && t2_till.lessThan(t1_from)) ||
+                            (t2_from.greaterThan(t1_till) && t2_till.greaterThan(t1_till)))) {
+                            throw new Error("Invalid timings");
+                        }
                     }
                 }
             });
         });
         let tb = Object.assign({}, tempBody.workingHour);
         const WHObj = yield new WorkingHours_Model_1.default(Object.assign({ doctorDetails: req.currentDoctor, hospitalDetails: body.hospitalId }, tb)).save();
-        // return successResponse({}, "Successfully created", res);
         return (0, response_1.successResponse)(WHObj, "Successfully created", res);
+        // return successResponse({}, "Successfully created", res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);
@@ -95,7 +97,8 @@ const getWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function
         if (WHObj) {
             WHObj.map((e) => {
                 for (let data in e) {
-                    if (data != "_id" && data != "__v") {
+                    if (WorkingHour_helper_1.dayArray.includes(data)) {
+                        e[data] = Object.assign(Object.assign({}, e[data]), { workingHour: e["_id"] });
                         if (WHObj2[data]) {
                             WHObj2[data] = [...WHObj2[data], e[data]];
                         }
@@ -108,7 +111,6 @@ const getWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function
                     }
                 }
             });
-            // return successResponse({ WHObj, WHObj2 }, "Success", res);
             WHObj2 = (0, WorkingHour_helper_1.formatWorkingHour)([WHObj2]);
             return (0, response_1.successResponse)({ workingHours: WHObj2 }, "Success", res);
         }
@@ -121,6 +123,65 @@ const getWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.getWorkingHours = getWorkingHours;
+const updateWorkingHour = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let _a = req.body, { workingHour } = _a, rest = __rest(_a, ["workingHour"]);
+        let updateQuery = { $set: rest };
+        let WH = yield WorkingHours_Model_1.default.find({
+            _id: workingHour,
+        });
+        WH.forEach((e) => {
+            Object.keys(e.toJSON()).forEach((elem) => {
+                if (WorkingHour_helper_1.dayArray.includes(elem)) {
+                    const element = e[elem];
+                    const e2 = rest[elem];
+                    if (e2) {
+                        if (e2.working != element.working) {
+                            if (e2["from"].time == element["from"].time &&
+                                e2["till"].time == element["till"].time &&
+                                e2["from"].division == element["from"].division &&
+                                e2["till"].division == element["till"].division) {
+                                return;
+                            }
+                            else {
+                                const t1_from = new time_class_1.time(e2.from.time, e2.from.division);
+                                const t1_till = new time_class_1.time(e2.till.time, e2.till.division);
+                                const t2_from = new time_class_1.time(element.from.time, element.from.division);
+                                const t2_till = new time_class_1.time(element.till.time, element.till.division);
+                                if (!((t2_from.lessThan(t1_from) && t2_till.lessThan(t1_from)) ||
+                                    (t2_from.greaterThan(t1_till) &&
+                                        t2_till.greaterThan(t1_till)))) {
+                                    throw new Error("Invalid timings");
+                                }
+                            }
+                        }
+                        else {
+                            const t1_from = new time_class_1.time(e2.from.time, e2.from.division);
+                            const t1_till = new time_class_1.time(e2.till.time, e2.till.division);
+                            const t2_from = new time_class_1.time(element.from.time, element.from.division);
+                            const t2_till = new time_class_1.time(element.till.time, element.till.division);
+                            if (!((t2_from.lessThan(t1_from) && t2_till.lessThan(t1_from)) ||
+                                (t2_from.greaterThan(t1_till) && t2_till.greaterThan(t1_till)))) {
+                                throw new Error("Invalid timings");
+                            }
+                        }
+                    }
+                    else {
+                        throw new Error(`Doctor's timings does not exist for the day`);
+                    }
+                }
+            });
+        });
+        WH = yield WorkingHours_Model_1.default.findOneAndUpdate({
+            _id: workingHour,
+        }, updateQuery);
+        return (0, response_1.successResponse)({}, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.updateWorkingHour = updateWorkingHour;
 function timeLessThan(t1, t2) {
     if (t1.division == 1 && t2.division == 0) {
         return false;

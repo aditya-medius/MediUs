@@ -153,6 +153,7 @@ hospitalSchema.pre("findOneAndUpdate", function (next) {
         if ("contactNumber" in UpdateQuery) {
             UpdateQuery = UpdateQuery["$set"];
             const query = this.getQuery();
+            console.log("pupdate qbqbwL:", UpdateQuery);
             const hospitalExist = yield this.model.findOne({
                 _id: { $ne: query._id },
                 $or: [{ contactNumber: UpdateQuery.contactNumber }],

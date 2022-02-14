@@ -14,6 +14,7 @@ export const authenticateHospital = (
       process.env.SECRET_HOSPITAL_KEY as string
     );
     req.currentHospital = data._id;
+    console.log("hospital:", req.currentHospital);
     return true;
   } catch (error: any) {
     return false;
