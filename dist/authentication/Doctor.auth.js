@@ -10,6 +10,7 @@ const authenticateDoctor = (req, res, next) => {
         const authHeader = req.header("auth-header");
         const data = jsonwebtoken_1.default.verify(authHeader, process.env.SECRET_DOCTOR_KEY);
         req.currentDoctor = data._id;
+        console.log("doctor:", req.currentDoctor);
         return true;
     }
     catch (error) {

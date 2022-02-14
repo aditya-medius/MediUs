@@ -14,6 +14,7 @@ export const authenticatePatient = (
       process.env.SECRET_PATIENT_KEY as string
     );
     req.currentPatient = data._id;
+    console.log("patient:", req.currentPatient);
     return true;
   } catch (error: any) {
     return false;

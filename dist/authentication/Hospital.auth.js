@@ -10,6 +10,7 @@ const authenticateHospital = (req, res, next) => {
         const authHeader = req.header("auth-header");
         const data = jsonwebtoken_1.default.verify(authHeader, process.env.SECRET_HOSPITAL_KEY);
         req.currentHospital = data._id;
+        console.log("hospital:", req.currentHospital);
         return true;
     }
     catch (error) {
