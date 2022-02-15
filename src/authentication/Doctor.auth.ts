@@ -14,6 +14,7 @@ export const authenticateDoctor = (
       process.env.SECRET_DOCTOR_KEY as string
     );
     req.currentDoctor = data._id;
+    console.log("doctor:", req.currentDoctor);
     return true;
   } catch (error: any) {
     return false;

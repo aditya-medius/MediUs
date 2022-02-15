@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getHospitalById = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
+exports.getDoctorsInHospital = exports.getHospitalById = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Anemities_Model_1 = __importDefault(require("../Models/Anemities.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
@@ -328,7 +328,7 @@ const updateHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
         let b = req.body;
         const DoctorObj = yield Doctors_Model_1.default.find({ deleted: false, _id: doctors });
         if (!doctors || DoctorObj.length == doctors.length) {
-            const HospitalUpdateObj = yield Hospital_Model_1.default.findOneAndUpdate({ _id: req.currentHospital, deleted: false }, b, { new: true });
+            const HospitalUpdateObj = yield Hospital_Model_1.default.findOneAndUpdate({ _id: req.currentHospital, deleted: false }, updateQuery, { new: true });
             if (HospitalUpdateObj) {
                 return (0, response_1.successResponse)(HospitalUpdateObj, "Hospital updated successfully", res);
             }
@@ -766,3 +766,18 @@ const getHospitalById = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.getHospitalById = getHospitalById;
+const getDoctorsInHospital = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const hospitalDetails = yield Hospital_Model_1.default
+            .findOne({ _id: req.currentHospital, deleted: false }, { doctors: 1 })
+            .populate({
+            path: "doctors",
+            select: excludeDoctorFields,
+        });
+        return (0, response_1.successResponse)(hospitalDetails, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getDoctorsInHospital = getDoctorsInHospital;

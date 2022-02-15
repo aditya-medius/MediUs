@@ -89,6 +89,13 @@ doctorRouter.put(
   workingHoursController.createWorkingHours
 );
 
+doctorRouter.put(
+  "/updateWorkingHour",
+  oneOf(authenticateDoctor),
+  // doctorController.setSchedule
+  workingHoursController.updateWorkingHour
+);
+
 // Get Doctor's appointment
 doctorRouter.get(
   "/viewAppointments/:page",
@@ -182,5 +189,23 @@ doctorRouter.get(
   "/appointmentSummary",
   oneOf(authenticateDoctor),
   doctorController.getAppointmentSummary
+);
+
+// doctor ki specialization or qualification ko delete
+doctorRouter.delete(
+  "/deleteSpecializationAndQualification",
+  oneOf(authenticateDoctor),
+  doctorController.deleteSpecializationAndQualification
+);
+doctorRouter.delete(
+  "/deleteHospitalFromDoctor",
+  oneOf(authenticateDoctor),
+  doctorController.deleteHospitalFromDoctor
+);
+
+doctorRouter.put(
+  "/updateQualification/:qualificationId",
+  oneOf(authenticateDoctor),
+  doctorController.updateQualification
 );
 export default doctorRouter;

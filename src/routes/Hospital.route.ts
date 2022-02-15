@@ -77,4 +77,11 @@ hospitalRouter.get(
 // Hospital opening hours
 hospitalRouter.post("/createOpeningHours", createOpeningHours);
 
+// hospital me kaam krne waale doctors
+hospitalRouter.get(
+  "/getDoctorsInHospital",
+  oneOf(authenticateHospital),
+  hospitalController.getDoctorsInHospital
+);
+
 export default hospitalRouter;

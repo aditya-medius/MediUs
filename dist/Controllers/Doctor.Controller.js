@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
+exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -63,6 +63,7 @@ const Validation_Service_1 = require("../Services/Validation.Service");
 const WorkingHour_helper_1 = require("../Services/WorkingHour.helper");
 const doctorService = __importStar(require("../Services/Doctor/Doctor.Service"));
 const Withdrawal_Model_1 = __importDefault(require("../Models/Withdrawal.Model"));
+const Qualification_Model_1 = __importDefault(require("../Models/Qualification.Model"));
 exports.excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -254,7 +255,6 @@ const updateDoctorProfile = (req, res) => __awaiter(void 0, void 0, void 0, func
             $set: body,
             $addToSet: { hospitalDetails, specialization, qualification },
         };
-        console.log("req.currentDoctor:", req.currentDoctor);
         const updatedDoctorObj = yield Doctors_Model_1.default.findOneAndUpdate({
             _id: req.currentDoctor,
             deleted: false,
@@ -1182,3 +1182,74 @@ const getAppointmentSummary = (req, res) => __awaiter(void 0, void 0, void 0, fu
     }
 });
 exports.getAppointmentSummary = getAppointmentSummary;
+const deleteSpecializationAndQualification = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const keys = ["specialization", "qualification"];
+        let body = req.body;
+        for (const key in body) {
+            if (!keys.includes(key)) {
+                let error = new Error(`${key} is not an acceptable key in the request body`);
+                error.name = "Invalid request";
+                throw error;
+            }
+        }
+        if (body[Object.keys(body)[0]].length == 0) {
+            throw new Error("Doctor must have at least on specialization");
+        }
+        let updateQuery = {
+            $set: body,
+        };
+        const updatedDoctor = yield Doctors_Model_1.default.findOneAndUpdate({
+            _id: req.currentDoctor,
+        }, updateQuery);
+        if (!updatedDoctor) {
+            throw new Error("Doctor does not exist");
+        }
+        return (0, response_1.successResponse)({}, "success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.deleteSpecializationAndQualification = deleteSpecializationAndQualification;
+// verify payment ka issue
+const deleteHospitalFromDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.body;
+        const doctor = yield Doctors_Model_1.default.findOne({ _id: req.currentDoctor });
+        const hospital = doctor.hospitalDetails.filter((e, index) => {
+            // if (index == doctor.hospitalDetails.length - 1) {
+            //   throw new Error("Doctor is not appointed in this hospital");
+            // }
+            return e.hospital != body.hospital;
+        });
+        // await doctor.save();
+        yield doctor.update({ $set: { hospitalDetails: hospital } });
+        return (0, response_1.successResponse)(doctor, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.deleteHospitalFromDoctor = deleteHospitalFromDoctor;
+const updateQualification = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.body;
+        let updateBody = {
+            $set: body,
+        };
+        const qualification = yield Qualification_Model_1.default.findOneAndUpdate({
+            _id: req.params.qualificationId,
+        }, updateBody, {
+            new: true,
+        });
+        if (qualification) {
+            return (0, response_1.successResponse)(qualification, "Success", res);
+        }
+        throw new Error("Qualification doesn't exist");
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.updateQualification = updateQualification;

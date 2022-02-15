@@ -406,7 +406,7 @@ const verifyDoctors = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const doctorObj = yield Doctors_Model_1.default.findOneAndUpdate({
             _id: body.doctorId,
             deleted: false,
-            verified: false,
+            // verified: false,
             adminSearch: true,
         }, {
             $set: {
