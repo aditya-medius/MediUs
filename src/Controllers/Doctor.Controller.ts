@@ -791,14 +791,21 @@ export const viewAppointmentsByDate = async (req: Request, res: Response) => {
     gtDate.setDate(gtDate.getDate() + 1);
     gtDate.setUTCHours(0, 0, 0, 0);
 
+    console.log("body:", req.body);
+
+    let query: any = {
+      doctors: req.currentDoctor,
+      "time.date": {
+        $gte: ltDate,
+        $lte: gtDate,
+      },
+    };
+    if (req.body.hospital) {
+      query["hospital"] = req.body.hospital;
+    }
+
     const appointments = await appointmentModel
-      .find({
-        doctors: req.currentDoctor,
-        "time.date": {
-          $gte: ltDate,
-          $lte: gtDate,
-        },
-      })
+      .find(query)
       .populate({ path: "patient", select: excludePatientFields })
       .populate({ path: "doctors", select: excludeDoctorFields })
       .populate({ path: "hospital" })

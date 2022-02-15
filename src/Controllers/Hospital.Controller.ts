@@ -805,7 +805,7 @@ export const getHospitalById = async (req: Request, res: Response) => {
       );
     });
 
-    const doctors = hospital.doctors.map((e: any) => {
+    let doctors = hospital.doctors.map((e: any) => {
       if (e.hospitalDetails.length != 0) {
         return {
           _id: e._id,
@@ -832,8 +832,11 @@ export const getHospitalById = async (req: Request, res: Response) => {
     }
 
     hospital.doctors = doctors;
-    if (doctors.includes(undefined)) {
+    if (doctors.includes(undefined) && doctors.length == 1) {
       hospital.doctors = [];
+    } else {
+      doctors = doctors.filter((e: any) => e);
+      hospital.doctors = doctors;
     }
     return successResponse({ hospital }, "Success", res);
   } catch (error: any) {
