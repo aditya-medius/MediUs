@@ -726,7 +726,7 @@ const getHospitalById = (req, res) => __awaiter(void 0, void 0, void 0, function
         hospital.doctors.map((e) => {
             e.hospitalDetails = e.hospitalDetails.filter((elem) => elem.hospital.toString() == req.params.id);
         });
-        const doctors = hospital.doctors.map((e) => {
+        let doctors = hospital.doctors.map((e) => {
             if (e.hospitalDetails.length != 0) {
                 return {
                     _id: e._id,
@@ -752,8 +752,12 @@ const getHospitalById = (req, res) => __awaiter(void 0, void 0, void 0, function
             hospital.openingHour = (0, WorkingHour_helper_1.formatWorkingHour)([hospital.openingHour]);
         }
         hospital.doctors = doctors;
-        if (doctors.includes(undefined)) {
+        if (doctors.includes(undefined) && doctors.length == 1) {
             hospital.doctors = [];
+        }
+        else {
+            doctors = doctors.filter((e) => e);
+            hospital.doctors = doctors;
         }
         return (0, response_1.successResponse)({ hospital }, "Success", res);
     }

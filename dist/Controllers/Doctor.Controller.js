@@ -742,14 +742,19 @@ const viewAppointmentsByDate = (req, res) => __awaiter(void 0, void 0, void 0, f
         ltDate.setUTCHours(24, 60, 60, 0);
         gtDate.setDate(gtDate.getDate() + 1);
         gtDate.setUTCHours(0, 0, 0, 0);
-        const appointments = yield Appointment_Model_1.default
-            .find({
+        console.log("body:", req.body);
+        let query = {
             doctors: req.currentDoctor,
             "time.date": {
                 $gte: ltDate,
                 $lte: gtDate,
             },
-        })
+        };
+        if (req.body.hospital) {
+            query["hospital"] = req.body.hospital;
+        }
+        const appointments = yield Appointment_Model_1.default
+            .find(query)
             .populate({ path: "patient", select: Patient_Controller_1.excludePatientFields })
             .populate({ path: "doctors", select: exports.excludeDoctorFields })
             .populate({ path: "hospital" })
