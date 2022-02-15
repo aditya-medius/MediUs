@@ -774,10 +774,12 @@ export const getHospitalById = async (req: Request, res: Response) => {
     if (hospital.doctors.length == 0) {
       return successResponse({ hospital }, "Success", res);
     }
+    console.log("dhbhsdbds:", hospital.doctors);
     const doctorIds: Array<string> = hospital.doctors.map((e: any) => {
       return e._id.toString();
     });
 
+    console.log("dhbdhbsddsdds:", doctorIds);
     let workingHours: any = await workingHourModel
       .find({
         doctorDetails: { $in: doctorIds },
@@ -791,6 +793,7 @@ export const getHospitalById = async (req: Request, res: Response) => {
         hospitalDetails: 0,
       })
       .lean();
+
     workingHours = workingHours.reduce((r: any, a: any) => {
       r[a.doctorDetails.toString()] = [
         ...(r[a.doctorDetails.toString()] || []),
@@ -799,13 +802,15 @@ export const getHospitalById = async (req: Request, res: Response) => {
       return r;
     }, {});
 
+    console.log("workingHours:", workingHours);
+
     hospital.doctors.map((e: any) => {
       e.hospitalDetails = e.hospitalDetails.filter(
         (elem: any) => elem.hospital.toString() == req.params.id
       );
     });
 
-    const doctors = hospital.doctors.map((e: any) => {
+    let doctors = hospital.doctors.map((e: any) => {
       if (e.hospitalDetails.length != 0) {
         return {
           _id: e._id,
@@ -831,9 +836,14 @@ export const getHospitalById = async (req: Request, res: Response) => {
       hospital.openingHour = formatWorkingHour([hospital.openingHour]);
     }
 
-    hospital.doctors = doctors;
-    if (doctors.includes(undefined)) {
+    console.log("doctors: ssasa", doctors);
+    if (doctors.includes(undefined) && doctors.length == 1) {
       hospital.doctors = [];
+    } else {
+      if (doctors.includes(undefined)) {
+        doctors = doctors.filter((e: any) => e);
+      }
+      hospital.doctors = doctors;
     }
     return successResponse({ hospital }, "Success", res);
   } catch (error: any) {

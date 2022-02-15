@@ -700,9 +700,11 @@ const getHospitalById = (req, res) => __awaiter(void 0, void 0, void 0, function
         if (hospital.doctors.length == 0) {
             return (0, response_1.successResponse)({ hospital }, "Success", res);
         }
+        console.log("dhbhsdbds:", hospital.doctors);
         const doctorIds = hospital.doctors.map((e) => {
             return e._id.toString();
         });
+        console.log("dhbdhbsddsdds:", doctorIds);
         let workingHours = yield WorkingHours_Model_1.default
             .find({
             doctorDetails: { $in: doctorIds },
@@ -723,10 +725,11 @@ const getHospitalById = (req, res) => __awaiter(void 0, void 0, void 0, function
             ];
             return r;
         }, {});
+        console.log("workingHours:", workingHours);
         hospital.doctors.map((e) => {
             e.hospitalDetails = e.hospitalDetails.filter((elem) => elem.hospital.toString() == req.params.id);
         });
-        const doctors = hospital.doctors.map((e) => {
+        let doctors = hospital.doctors.map((e) => {
             if (e.hospitalDetails.length != 0) {
                 return {
                     _id: e._id,
@@ -751,9 +754,15 @@ const getHospitalById = (req, res) => __awaiter(void 0, void 0, void 0, function
         if (hospital.openingHour) {
             hospital.openingHour = (0, WorkingHour_helper_1.formatWorkingHour)([hospital.openingHour]);
         }
-        hospital.doctors = doctors;
-        if (doctors.includes(undefined)) {
+        console.log("doctors: ssasa", doctors);
+        if (doctors.includes(undefined) && doctors.length == 1) {
             hospital.doctors = [];
+        }
+        else {
+            if (doctors.includes(undefined)) {
+                doctors = doctors.filter((e) => e);
+            }
+            hospital.doctors = doctors;
         }
         return (0, response_1.successResponse)({ hospital }, "Success", res);
     }
