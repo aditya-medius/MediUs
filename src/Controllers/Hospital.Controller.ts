@@ -26,6 +26,7 @@ import {
 import { formatWorkingHour } from "../Services/WorkingHour.helper";
 import * as bcrypt from "bcrypt";
 import servicesModel from "../Admin Controlled Models/Services.Model";
+import { request } from "http";
 
 const excludeDoctorFields = {
   password: 0,
@@ -723,6 +724,32 @@ export const viewAppointment = async (req: Request, res: Response) => {
       return errorResponse(error, res, 404);
     }
   } catch (error) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getAppointmentByDate = async (req: Request, res: Response) => {
+  try {
+    const body = req.body;
+    const date: Date = req.body.date;
+    let d = new Date(date);
+    let gtDate: Date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
+    console.log("gdate:", gtDate);
+    let ltDate: Date = new Date(gtDate);
+    ltDate.setDate(gtDate.getDate() - 1);
+    ltDate.setUTCHours(24, 0, 0, 0);
+
+    gtDate.setDate(gtDate.getDate() + 1);
+    gtDate.setUTCHours(0, 0, 0, 0);
+    console.log("ssss:", { $gte: ltDate, $lte: gtDate });
+    const appointmenObj = await appointmentModel.find({
+      hospital: req.currentHospital,
+      "time.date": { $gte: ltDate, $lte: gtDate },
+    });
+
+    return successResponse(appointmenObj, "Success", res);
+  } catch (error: any) {
     return errorResponse(error, res);
   }
 };

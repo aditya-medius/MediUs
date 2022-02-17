@@ -159,7 +159,7 @@ doctorSchema.pre("save", async function (next) {
         this.where({
           ...this.getQuery(),
           deleted: false,
-          // $or: [{ verified: true }, { verified: { $exists: false } }],
+          $or: [{ verified: true }, { verified: { $exists: false } }],
         });
       }
       this.populate("KYCDetails");

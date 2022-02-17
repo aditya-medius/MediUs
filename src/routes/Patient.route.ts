@@ -34,7 +34,7 @@ patientRouter.post(
 );
 patientRouter.post(
   "/BookAppointment",
-  oneOf(authenticatePatient),
+  oneOf(authenticatePatient, authenticateHospital),
   patientController.BookAppointment
 );
 patientRouter.post(

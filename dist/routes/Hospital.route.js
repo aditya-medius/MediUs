@@ -55,4 +55,5 @@ hospitalRouter.get("/getHospitalById/:id", (0, middlewareHelper_1.oneOf)(Patient
 hospitalRouter.post("/createOpeningHours", WorkingHours_Controller_1.createOpeningHours);
 // hospital me kaam krne waale doctors
 hospitalRouter.get("/getDoctorsInHospital", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getDoctorsInHospital);
+hospitalRouter.post("/getAppointmentByDate", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getAppointmentByDate);
 exports.default = hospitalRouter;
