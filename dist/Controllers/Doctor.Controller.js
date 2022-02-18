@@ -742,7 +742,6 @@ const viewAppointmentsByDate = (req, res) => __awaiter(void 0, void 0, void 0, f
         ltDate.setUTCHours(24, 60, 60, 0);
         gtDate.setDate(gtDate.getDate() + 1);
         gtDate.setUTCHours(0, 0, 0, 0);
-        console.log("body:", req.body);
         let query = {
             doctors: req.currentDoctor,
             "time.date": {

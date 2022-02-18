@@ -175,7 +175,7 @@ doctorSchema.pre("save", function (next) {
                     this.where({ rest });
                 }
                 else {
-                    this.where(Object.assign(Object.assign({}, this.getQuery()), { deleted: false }));
+                    this.where(Object.assign(Object.assign({}, this.getQuery()), { deleted: false, $or: [{ verified: true }, { verified: { $exists: false } }] }));
                 }
                 this.populate("KYCDetails");
                 next();

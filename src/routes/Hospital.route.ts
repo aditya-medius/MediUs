@@ -84,4 +84,9 @@ hospitalRouter.get(
   hospitalController.getDoctorsInHospital
 );
 
+hospitalRouter.post(
+  "/getAppointmentByDate",
+  oneOf(authenticateHospital),
+  hospitalController.getAppointmentByDate
+);
 export default hospitalRouter;

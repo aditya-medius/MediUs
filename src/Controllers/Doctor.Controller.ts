@@ -791,8 +791,6 @@ export const viewAppointmentsByDate = async (req: Request, res: Response) => {
     gtDate.setDate(gtDate.getDate() + 1);
     gtDate.setUTCHours(0, 0, 0, 0);
 
-    console.log("body:", req.body);
-
     let query: any = {
       doctors: req.currentDoctor,
       "time.date": {

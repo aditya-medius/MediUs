@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDoctorsInHospital = exports.getHospitalById = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
+exports.getDoctorsInHospital = exports.getHospitalById = exports.getAppointmentByDate = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Anemities_Model_1 = __importDefault(require("../Models/Anemities.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
@@ -654,6 +654,30 @@ const viewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.viewAppointment = viewAppointment;
+const getAppointmentByDate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const body = req.body;
+        const date = req.body.date;
+        let d = new Date(date);
+        let gtDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        console.log("gdate:", gtDate);
+        let ltDate = new Date(gtDate);
+        ltDate.setDate(gtDate.getDate() - 1);
+        ltDate.setUTCHours(24, 0, 0, 0);
+        gtDate.setDate(gtDate.getDate() + 1);
+        gtDate.setUTCHours(0, 0, 0, 0);
+        console.log("ssss:", { $gte: ltDate, $lte: gtDate });
+        const appointmenObj = yield Appointment_Model_1.default.find({
+            hospital: req.currentHospital,
+            "time.date": { $gte: ltDate, $lte: gtDate },
+        });
+        return (0, response_1.successResponse)(appointmenObj, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getAppointmentByDate = getAppointmentByDate;
 const getHospitalById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let hospital = yield Hospital_Model_1.default
@@ -700,9 +724,11 @@ const getHospitalById = (req, res) => __awaiter(void 0, void 0, void 0, function
         if (hospital.doctors.length == 0) {
             return (0, response_1.successResponse)({ hospital }, "Success", res);
         }
+        console.log("dhbhsdbds:", hospital.doctors);
         const doctorIds = hospital.doctors.map((e) => {
             return e._id.toString();
         });
+        console.log("dhbdhbsddsdds:", doctorIds);
         let workingHours = yield WorkingHours_Model_1.default
             .find({
             doctorDetails: { $in: doctorIds },
@@ -723,6 +749,7 @@ const getHospitalById = (req, res) => __awaiter(void 0, void 0, void 0, function
             ];
             return r;
         }, {});
+        console.log("workingHours:", workingHours);
         hospital.doctors.map((e) => {
             e.hospitalDetails = e.hospitalDetails.filter((elem) => elem.hospital.toString() == req.params.id);
         });
@@ -751,12 +778,14 @@ const getHospitalById = (req, res) => __awaiter(void 0, void 0, void 0, function
         if (hospital.openingHour) {
             hospital.openingHour = (0, WorkingHour_helper_1.formatWorkingHour)([hospital.openingHour]);
         }
-        hospital.doctors = doctors;
+        console.log("doctors: ssasa", doctors);
         if (doctors.includes(undefined) && doctors.length == 1) {
             hospital.doctors = [];
         }
         else {
-            doctors = doctors.filter((e) => e);
+            if (doctors.includes(undefined)) {
+                doctors = doctors.filter((e) => e);
+            }
             hospital.doctors = doctors;
         }
         return (0, response_1.successResponse)({ hospital }, "Success", res);
