@@ -660,13 +660,11 @@ const getAppointmentByDate = (req, res) => __awaiter(void 0, void 0, void 0, fun
         const date = req.body.date;
         let d = new Date(date);
         let gtDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-        console.log("gdate:", gtDate);
         let ltDate = new Date(gtDate);
-        ltDate.setDate(gtDate.getDate() - 1);
-        ltDate.setUTCHours(24, 0, 0, 0);
+        // ltDate.setDate(gtDate.getDate() - 1);
+        // ltDate.setUTCHours(24, 0, 0, 0);
         gtDate.setDate(gtDate.getDate() + 1);
         gtDate.setUTCHours(0, 0, 0, 0);
-        console.log("ssss:", { $gte: ltDate, $lte: gtDate });
         const appointmenObj = yield Appointment_Model_1.default.find({
             hospital: req.currentHospital,
             "time.date": { $gte: ltDate, $lte: gtDate },
