@@ -143,10 +143,12 @@ export const patientLogin = async (req: Request, res: Response) => {
         phoneNumber: body.phoneNumber,
       });
       try {
-        const data: any = await jwt.verify(otpData.otp, body.OTP);
-        if (Date.now() > data.expiresIn)
-          return errorResponse(new Error("OTP expired"), res);
-        if (body.OTP === data.otp) {
+        // Abhi k liye OTP verification hata di hai
+        // const data: any = await jwt.verify(otpData.otp, body.OTP);
+        // if (Date.now() > data.expiresIn)
+        //   return errorResponse(new Error("OTP expired"), res);
+        // if (body.OTP === data.otp) {
+        if (true) {
           const profile = await patientModel.findOne(
             {
               phoneNumber: body.phoneNumber,

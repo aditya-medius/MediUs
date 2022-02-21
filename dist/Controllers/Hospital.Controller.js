@@ -110,10 +110,12 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 phoneNumber: body.phoneNumber,
             });
             try {
-                const data = yield jwt.verify(otpData.otp, body.OTP);
-                if (Date.now() > data.expiresIn)
-                    return (0, response_1.errorResponse)(new Error("OTP expired"), res);
-                if (body.OTP === data.otp) {
+                // Abhi k liye OTP verification hata di hai
+                // const data: any = await jwt.verify(otpData.otp, body.OTP);
+                // if (Date.now() > data.expiresIn)
+                //   return errorResponse(new Error("OTP expired"), res);
+                // if (body.OTP === data.otp) {
+                if (true) {
                     const profile = yield Hospital_Model_1.default.findOne({
                         contactNumber: body.phoneNumber,
                         deleted: false,
