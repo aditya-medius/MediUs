@@ -735,14 +735,13 @@ export const getAppointmentByDate = async (req: Request, res: Response) => {
     let d = new Date(date);
     let gtDate: Date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
-    console.log("gdate:", gtDate);
     let ltDate: Date = new Date(gtDate);
-    ltDate.setDate(gtDate.getDate() - 1);
-    ltDate.setUTCHours(24, 0, 0, 0);
+    // ltDate.setDate(gtDate.getDate() - 1);
+    // ltDate.setUTCHours(24, 0, 0, 0);
 
     gtDate.setDate(gtDate.getDate() + 1);
     gtDate.setUTCHours(0, 0, 0, 0);
-    console.log("ssss:", { $gte: ltDate, $lte: gtDate });
+
     const appointmenObj = await appointmentModel.find({
       hospital: req.currentHospital,
       "time.date": { $gte: ltDate, $lte: gtDate },
