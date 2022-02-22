@@ -665,9 +665,22 @@ const getAppointmentByDate = (req, res) => __awaiter(void 0, void 0, void 0, fun
         // ltDate.setUTCHours(24, 0, 0, 0);
         gtDate.setDate(gtDate.getDate() + 1);
         gtDate.setUTCHours(0, 0, 0, 0);
-        const appointmenObj = yield Appointment_Model_1.default.find({
+        const appointmenObj = yield Appointment_Model_1.default
+            .find({
             hospital: req.currentHospital,
             "time.date": { $gte: ltDate, $lte: gtDate },
+        })
+            .populate({
+            path: "doctors",
+            select: Object.assign(Object.assign({}, excludeDoctorFields), { hospitalDetails: 0, specialization: 0, qualification: 0, overallExperience: 0 }),
+        })
+            .populate({
+            path: "patient",
+            select: Object.assign(Object.assign({}, Patient_Controller_1.excludePatientFields), { services: 0 }),
+        })
+            .populate({
+            path: "hospital",
+            select: Patient_Controller_1.excludeHospitalFields,
         });
         return (0, response_1.successResponse)(appointmenObj, "Success", res);
     }

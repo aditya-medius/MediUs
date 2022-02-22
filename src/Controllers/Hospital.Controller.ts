@@ -742,10 +742,29 @@ export const getAppointmentByDate = async (req: Request, res: Response) => {
     gtDate.setDate(gtDate.getDate() + 1);
     gtDate.setUTCHours(0, 0, 0, 0);
 
-    const appointmenObj = await appointmentModel.find({
-      hospital: req.currentHospital,
-      "time.date": { $gte: ltDate, $lte: gtDate },
-    });
+    const appointmenObj = await appointmentModel
+      .find({
+        hospital: req.currentHospital,
+        "time.date": { $gte: ltDate, $lte: gtDate },
+      })
+      .populate({
+        path: "doctors",
+        select: {
+          ...excludeDoctorFields,
+          hospitalDetails: 0,
+          specialization: 0,
+          qualification: 0,
+          overallExperience: 0,
+        },
+      })
+      .populate({
+        path: "patient",
+        select: { ...excludePatientFields, services: 0 },
+      })
+      .populate({
+        path: "hospital",
+        select: excludeHospitalFields,
+      });
 
     return successResponse(appointmenObj, "Success", res);
   } catch (error: any) {
