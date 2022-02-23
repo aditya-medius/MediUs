@@ -342,18 +342,24 @@ export const BookAppointment = async (req: Request, res: Response) => {
         res
       );
     }
-    let appointmentBook = await new appointmentModel(body).save();
-    await appointmentBook.populate({
-      path: "subPatient",
-      select: {
-        parentPatient: 0,
-      },
-    });
-    return successResponse(
-      appointmentBook,
-      "Appoinment has been successfully booked",
-      res
-    );
+    // let appointmentBook = await new appointmentModel(body).save();
+    // await appointmentBook.populate({
+    //   path: "subPatient",
+    //   select: {
+    //     parentPatient: 0,
+    //   },
+    // });
+    // return successResponse(
+    //   appointmentBook,
+    //   "Appoinment has been successfully booked",
+    //   res
+    // );
+
+    console.log("body:", body);
+    body.time.date = new Date(body.time.date);
+    console.log("body:", body);
+
+    return successResponse({}, "Aaaa:", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }
