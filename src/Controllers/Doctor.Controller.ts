@@ -976,19 +976,23 @@ export const searchDoctorByPhoneNumberOrEmail = async (
       return errorResponse(error, res);
     }
 
-    const doctorObj = await doctorModel.find(
-      {
-        $or: [
-          {
-            email: term,
-          },
-          {
-            phoneNumber: term,
-          },
-        ],
-      },
-      excludeDoctorFields
-    );
+    let doctorObj;
+    if (phone) {
+      doctorObj = await doctorModel.findOne(
+        {
+          phoneNumber: term,
+        },
+        { firstName: 1, lastName: 1, KYCDetails: 0 }
+      );
+    } else if (email) {
+      doctorObj = await doctorModel.findOne(
+        {
+          email: term,
+        },
+        { firstName: 1, lastName: 1, KYCDetails: 0 }
+      );
+    }
+
     if (doctorObj) {
       return successResponse(doctorObj, "Success", res);
     }
