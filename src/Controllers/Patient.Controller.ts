@@ -813,7 +813,9 @@ export const checkDoctorAvailability = async (req: Request, res: Response) => {
       isDoctorAvaiable.message,
       res
     );
-  } catch (error: any) {}
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
 };
 
 export const searchPatientByPhoneNumberOrEmail = async (

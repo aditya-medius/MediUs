@@ -707,7 +707,9 @@ const checkDoctorAvailability = (req, res) => __awaiter(void 0, void 0, void 0, 
         const isDoctorAvaiable = yield doctorController.checkDoctorAvailability(req.body);
         return (0, response_1.successResponse)(isDoctorAvaiable.status, isDoctorAvaiable.message, res);
     }
-    catch (error) { }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
 });
 exports.checkDoctorAvailability = checkDoctorAvailability;
 const searchPatientByPhoneNumberOrEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {

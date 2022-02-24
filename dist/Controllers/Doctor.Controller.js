@@ -908,15 +908,20 @@ const searchDoctorByPhoneNumberOrEmail = (req, res) => __awaiter(void 0, void 0,
         }
         let doctorObj;
         if (phone) {
-            doctorObj = yield Doctors_Model_1.default.findOne({
+            doctorObj = yield Doctors_Model_1.default
+                .findOne({
                 phoneNumber: term,
-            }, { firstName: 1, lastName: 1, KYCDetails: 0 });
+            }, { firstName: 1, lastName: 1, gender: 1, DOB: 1, KYCDetails: 0 })
+                .lean();
         }
         else if (email) {
-            doctorObj = yield Doctors_Model_1.default.findOne({
+            doctorObj = yield Doctors_Model_1.default
+                .findOne({
                 email: term,
-            }, { firstName: 1, lastName: 1, KYCDetails: 0 });
+            }, { firstName: 1, lastName: 1, gender: 1, DOB: 1, KYCDetails: 0 })
+                .lean();
         }
+        doctorObj["age"] = (0, Patient_Service_1.calculateAge)(doctorObj["DOB"]);
         if (doctorObj) {
             return (0, response_1.successResponse)(doctorObj, "Success", res);
         }
@@ -978,14 +983,69 @@ const getHospitalListByDoctorId = (req, res) => __awaiter(void 0, void 0, void 0
 });
 exports.getHospitalListByDoctorId = getHospitalListByDoctorId;
 const checkDoctorAvailability = (body) => __awaiter(void 0, void 0, void 0, function* () {
-    // @TODO check if working hour exist first
-    let capacity = yield WorkingHours_Model_1.default.findOne({
+    console.log("toime:", body.time.date);
+    const time = new Date(body.time.date);
+    console.log("time:", time);
+    let d = time.getDay();
+    let query = {
         doctorDetails: body.doctors,
         hospitalDetails: body.hospital,
-    });
+    };
+    if (d == 0) {
+        d = "sunday";
+        query["sunday.working"] = true;
+        query["sunday.from.time"] = body.time.from.time;
+        query["sunday.from.division"] = body.time.from.division;
+        query["sunday.till.time"] = body.time.till.time;
+        query["sunday.till.division"] = body.time.till.division;
+    }
+    else if (d == 1) {
+        query["monday.working"] = true;
+        query["monday.from.time"] = body.time.from.time;
+        query["monday.from.division"] = body.time.from.division;
+        query["monday.till.time"] = body.time.till.time;
+        query["monday.till.division"] = body.time.till.division;
+    }
+    else if (d == 2) {
+        query["tuesday.working"] = true;
+        query["tuesday.from.time"] = body.time.from.time;
+        query["tuesday.from.division"] = body.time.from.division;
+        query["tuesday.till.time"] = body.time.till.time;
+        query["tuesday.till.division"] = body.time.till.division;
+    }
+    else if (d == 3) {
+        query["wednesday.working"] = true;
+        query["wednesday.from.time"] = body.time.from.time;
+        query["wednesday.from.division"] = body.time.from.division;
+        query["wednesday.till.time"] = body.time.till.time;
+        query["wednesday.till.division"] = body.time.till.division;
+    }
+    else if (d == 4) {
+        query["thursday.working"] = true;
+        query["thursday.from.time"] = body.time.from.time;
+        query["thursday.from.division"] = body.time.from.division;
+        query["thursday.till.time"] = body.time.till.time;
+        query["thursday.till.division"] = body.time.till.division;
+    }
+    else if (d == 5) {
+        query["friday.working"] = true;
+        query["friday.from.time"] = body.time.from.time;
+        query["friday.from.division"] = body.time.from.division;
+        query["friday.till.time"] = body.time.till.time;
+        query["friday.till.division"] = body.time.till.division;
+    }
+    else if (d == 6) {
+        query["saturday.working"] = true;
+        query["saturday.from.time"] = body.time.from.time;
+        query["saturday.from.division"] = body.time.from.division;
+        query["saturday.till.time"] = body.time.till.time;
+        query["saturday.till.division"] = body.time.till.division;
+    }
+    // @TODO check if working hour exist first
+    let capacity = yield WorkingHours_Model_1.default.findOne(query);
     if (!capacity) {
         let error = new Error("Error");
-        error.message = "Cannot create appointment";
+        error.message = "Doctor not available";
         // return errorResponse(error, res);
         throw error;
     }
