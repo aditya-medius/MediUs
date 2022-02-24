@@ -1004,20 +1004,26 @@ export const searchDoctorByPhoneNumberOrEmail = async (
 
     let doctorObj;
     if (phone) {
-      doctorObj = await doctorModel.findOne(
-        {
-          phoneNumber: term,
-        },
-        { firstName: 1, lastName: 1, KYCDetails: 0 }
-      );
+      doctorObj = await doctorModel
+        .findOne(
+          {
+            phoneNumber: term,
+          },
+          { firstName: 1, lastName: 1, gender: 1, DOB: 1, KYCDetails: 0 }
+        )
+        .lean();
     } else if (email) {
-      doctorObj = await doctorModel.findOne(
-        {
-          email: term,
-        },
-        { firstName: 1, lastName: 1, KYCDetails: 0 }
-      );
+      doctorObj = await doctorModel
+        .findOne(
+          {
+            email: term,
+          },
+          { firstName: 1, lastName: 1, gender: 1, DOB: 1, KYCDetails: 0 }
+        )
+        .lean();
     }
+
+    doctorObj["age"] = calculateAge(doctorObj["DOB"]);
 
     if (doctorObj) {
       return successResponse(doctorObj, "Success", res);
@@ -1090,14 +1096,64 @@ export const checkDoctorAvailability = async (
   status: boolean;
   message: string;
 }> => {
-  // @TODO check if working hour exist first
-  let capacity = await workingHourModel.findOne({
+  console.log("toime:", body.time.date);
+  const time = new Date(body.time.date);
+  console.log("time:", time);
+
+  let d: any = time.getDay();
+  let query: any = {
     doctorDetails: body.doctors,
     hospitalDetails: body.hospital,
-  });
+  };
+  if (d == 0) {
+    d = "sunday";
+    query["sunday.working"] = true;
+    query["sunday.from.time"] = body.time.from.time;
+    query["sunday.from.division"] = body.time.from.division;
+    query["sunday.till.time"] = body.time.till.time;
+    query["sunday.till.division"] = body.time.till.division;
+  } else if (d == 1) {
+    query["monday.working"] = true;
+    query["monday.from.time"] = body.time.from.time;
+    query["monday.from.division"] = body.time.from.division;
+    query["monday.till.time"] = body.time.till.time;
+    query["monday.till.division"] = body.time.till.division;
+  } else if (d == 2) {
+    query["tuesday.working"] = true;
+    query["tuesday.from.time"] = body.time.from.time;
+    query["tuesday.from.division"] = body.time.from.division;
+    query["tuesday.till.time"] = body.time.till.time;
+    query["tuesday.till.division"] = body.time.till.division;
+  } else if (d == 3) {
+    query["wednesday.working"] = true;
+    query["wednesday.from.time"] = body.time.from.time;
+    query["wednesday.from.division"] = body.time.from.division;
+    query["wednesday.till.time"] = body.time.till.time;
+    query["wednesday.till.division"] = body.time.till.division;
+  } else if (d == 4) {
+    query["thursday.working"] = true;
+    query["thursday.from.time"] = body.time.from.time;
+    query["thursday.from.division"] = body.time.from.division;
+    query["thursday.till.time"] = body.time.till.time;
+    query["thursday.till.division"] = body.time.till.division;
+  } else if (d == 5) {
+    query["friday.working"] = true;
+    query["friday.from.time"] = body.time.from.time;
+    query["friday.from.division"] = body.time.from.division;
+    query["friday.till.time"] = body.time.till.time;
+    query["friday.till.division"] = body.time.till.division;
+  } else if (d == 6) {
+    query["saturday.working"] = true;
+    query["saturday.from.time"] = body.time.from.time;
+    query["saturday.from.division"] = body.time.from.division;
+    query["saturday.till.time"] = body.time.till.time;
+    query["saturday.till.division"] = body.time.till.division;
+  }
+  // @TODO check if working hour exist first
+  let capacity = await workingHourModel.findOne(query);
   if (!capacity) {
     let error: Error = new Error("Error");
-    error.message = "Cannot create appointment";
+    error.message = "Doctor not available";
     // return errorResponse(error, res);
     throw error;
   }
