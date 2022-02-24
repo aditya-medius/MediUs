@@ -12,9 +12,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BookAppointment = void 0;
+exports.calculateAge = exports.BookAppointment = void 0;
 const WorkingHours_Model_1 = __importDefault(require("../../Models/WorkingHours.Model"));
 const Appointment_Model_1 = __importDefault(require("../../Models/Appointment.Model"));
+const moment_1 = __importDefault(require("moment"));
 const BookAppointment = (body) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // @TODO check if working hour exist first
@@ -95,3 +96,16 @@ const BookAppointment = (body) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.BookAppointment = BookAppointment;
+const calculateAge = (DOB) => {
+    const exp = (0, moment_1.default)(DOB);
+    const currentDate = (0, moment_1.default)(new Date());
+    let age = currentDate.diff(exp, "years", true);
+    if (age < 1) {
+        age = `${currentDate.diff(exp, "months")} months`;
+    }
+    else {
+        age = `${age} years`;
+    }
+    return age;
+};
+exports.calculateAge = calculateAge;

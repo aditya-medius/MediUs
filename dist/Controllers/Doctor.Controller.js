@@ -58,12 +58,12 @@ const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Mod
 const mongoose_1 = __importDefault(require("mongoose"));
 const Appointment_Model_1 = __importDefault(require("../Models/Appointment.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
-const Patient_Controller_1 = require("./Patient.Controller");
 const Validation_Service_1 = require("../Services/Validation.Service");
 const WorkingHour_helper_1 = require("../Services/WorkingHour.helper");
 const doctorService = __importStar(require("../Services/Doctor/Doctor.Service"));
 const Withdrawal_Model_1 = __importDefault(require("../Models/Withdrawal.Model"));
 const Qualification_Model_1 = __importDefault(require("../Models/Qualification.Model"));
+const Patient_Service_1 = require("../Services/Patient/Patient.Service");
 exports.excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -138,13 +138,25 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         }
         else {
             if (body.phoneNumber == "9999999999") {
-                const profile = yield Doctors_Model_1.default.findOne({
+                const profile = yield Doctors_Model_1.default
+                    .findOne({
                     phoneNumber: body.phoneNumber,
                     deleted: false,
-                }, exports.excludeDoctorFields);
+                }, exports.excludeDoctorFields)
+                    .populate("qualification");
                 const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_DOCTOR_KEY);
-                const { firstName, lastName, gender, phoneNumber, email, _id } = profile.toJSON();
-                return (0, response_1.successResponse)({ token, firstName, lastName, gender, phoneNumber, email, _id }, "Successfully logged in", res);
+                let { firstName, lastName, gender, phoneNumber, email, _id, qualification, } = profile.toJSON();
+                qualification = qualification[0];
+                return (0, response_1.successResponse)({
+                    token,
+                    firstName,
+                    lastName,
+                    gender,
+                    phoneNumber,
+                    email,
+                    _id,
+                    qualification,
+                }, "Successfully logged in", res);
             }
             const otpData = yield OTP_Model_1.default.findOne({
                 phoneNumber: body.phoneNumber,
@@ -756,11 +768,15 @@ const viewAppointmentsByDate = (req, res) => __awaiter(void 0, void 0, void 0, f
         }
         const appointments = yield Appointment_Model_1.default
             .find(query)
-            .populate({ path: "patient", select: Patient_Controller_1.excludePatientFields })
+            .populate({ path: "patient", select: { password: 0, verified: 0 } })
             .populate({ path: "doctors", select: exports.excludeDoctorFields })
             .populate({ path: "hospital" })
             .limit(limit)
-            .skip(skip);
+            .skip(skip)
+            .lean();
+        appointments.forEach((appointment) => {
+            appointment.patient["age"] = (0, Patient_Service_1.calculateAge)(appointment.patient.DOB);
+        });
         return (0, response_1.successResponse)(appointments, "Success", res);
     }
     catch (error) {

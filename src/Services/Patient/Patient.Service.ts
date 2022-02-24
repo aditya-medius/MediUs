@@ -1,5 +1,7 @@
 import workingHourModel from "../../Models/WorkingHours.Model";
 import appointmentModel from "../../Models/Appointment.Model";
+import moment from "moment";
+
 export const BookAppointment = async (body: any) => {
   try {
     // @TODO check if working hour exist first
@@ -79,4 +81,18 @@ export const BookAppointment = async (body: any) => {
   } catch (error: any) {
     return Promise.reject(error);
   }
+};
+
+export const calculateAge = (DOB: Date) => {
+  const exp = moment(DOB);
+  const currentDate = moment(new Date());
+
+  let age: any = currentDate.diff(exp, "years", true);
+
+  if (age < 1) {
+    age = `${currentDate.diff(exp, "months")} months`;
+  } else {
+    age = `${age} years`;
+  }
+  return age;
 };
