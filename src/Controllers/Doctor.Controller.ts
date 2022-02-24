@@ -35,6 +35,7 @@ import appointmentPaymentModel from "../Models/AppointmentPayment.Model";
 import * as doctorService from "../Services/Doctor/Doctor.Service";
 import withdrawModel from "../Models/Withdrawal.Model";
 import qualificationModel from "../Models/Qualification.Model";
+import { calculateAge } from "../Services/Patient/Patient.Service";
 
 export const excludeDoctorFields = {
   password: 0,
@@ -129,21 +130,41 @@ export const doctorLogin = async (req: Request, res: Response) => {
       }
     } else {
       if (body.phoneNumber == "9999999999") {
-        const profile = await doctorModel.findOne(
-          {
-            phoneNumber: body.phoneNumber,
-            deleted: false,
-          },
-          excludeDoctorFields
-        );
+        const profile = await doctorModel
+          .findOne(
+            {
+              phoneNumber: body.phoneNumber,
+              deleted: false,
+            },
+            excludeDoctorFields
+          )
+          .populate("qualification");
+
         const token = await jwt.sign(
           profile.toJSON(),
           process.env.SECRET_DOCTOR_KEY as string
         );
-        const { firstName, lastName, gender, phoneNumber, email, _id } =
-          profile.toJSON();
+        let {
+          firstName,
+          lastName,
+          gender,
+          phoneNumber,
+          email,
+          _id,
+          qualification,
+        } = profile.toJSON();
+        qualification = qualification[0];
         return successResponse(
-          { token, firstName, lastName, gender, phoneNumber, email, _id },
+          {
+            token,
+            firstName,
+            lastName,
+            gender,
+            phoneNumber,
+            email,
+            _id,
+            qualification,
+          },
           "Successfully logged in",
           res
         );
@@ -806,11 +827,16 @@ export const viewAppointmentsByDate = async (req: Request, res: Response) => {
 
     const appointments = await appointmentModel
       .find(query)
-      .populate({ path: "patient", select: excludePatientFields })
+      .populate({ path: "patient", select: { password: 0, verified: 0 } })
       .populate({ path: "doctors", select: excludeDoctorFields })
       .populate({ path: "hospital" })
       .limit(limit)
-      .skip(skip);
+      .skip(skip)
+      .lean();
+
+    appointments.forEach((appointment: any) => {
+      appointment.patient["age"] = calculateAge(appointment.patient.DOB);
+    });
     return successResponse(appointments, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);

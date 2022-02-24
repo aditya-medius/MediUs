@@ -312,22 +312,18 @@ const BookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
         if (appCount == capacity.capacity) {
             return (0, response_1.errorResponse)(new Error("Doctor cannot take any more appointments"), res);
         }
-        // let appointmentBook = await new appointmentModel(body).save();
-        // await appointmentBook.populate({
-        //   path: "subPatient",
-        //   select: {
-        //     parentPatient: 0,
-        //   },
-        // });
-        // return successResponse(
-        //   appointmentBook,
-        //   "Appoinment has been successfully booked",
-        //   res
-        // );
-        console.log("body:", body);
-        body.time.date = new Date(body.time.date);
-        console.log("body:", body);
-        return (0, response_1.successResponse)({}, "Aaaa:", res);
+        let appointmentBook = yield new Appointment_Model_1.default(body).save();
+        yield appointmentBook.populate({
+            path: "subPatient",
+            select: {
+                parentPatient: 0,
+            },
+        });
+        return (0, response_1.successResponse)(appointmentBook, "Appoinment has been successfully booked", res);
+        // console.log("body:", body);
+        // body.time.date = new Date(body.time.date);
+        // console.log("body:", body);
+        // return successResponse({}, "Aaaa:", res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);
