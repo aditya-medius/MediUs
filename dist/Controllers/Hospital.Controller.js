@@ -320,7 +320,7 @@ const updateHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
     try {
         let _a = req.body, { doctors, anemity, payment, contactNumber, numberOfBed, type } = _a, body = __rest(_a, ["doctors", "anemity", "payment", "contactNumber", "numberOfBed", "type"]);
         const updateQuery = {
-            $set: { body, numberOfBed, type },
+            $set: Object.assign(Object.assign({}, body), { numberOfBed, type }),
             $addToSet: {
                 doctors,
                 anemity,
@@ -737,11 +737,9 @@ const getHospitalById = (req, res) => __awaiter(void 0, void 0, void 0, function
         if (hospital.doctors.length == 0) {
             return (0, response_1.successResponse)({ hospital }, "Success", res);
         }
-        console.log("dhbhsdbds:", hospital.doctors);
         const doctorIds = hospital.doctors.map((e) => {
             return e._id.toString();
         });
-        console.log("dhbdhbsddsdds:", doctorIds);
         let workingHours = yield WorkingHours_Model_1.default
             .find({
             doctorDetails: { $in: doctorIds },
@@ -762,7 +760,6 @@ const getHospitalById = (req, res) => __awaiter(void 0, void 0, void 0, function
             ];
             return r;
         }, {});
-        console.log("workingHours:", workingHours);
         hospital.doctors.map((e) => {
             e.hospitalDetails = e.hospitalDetails.filter((elem) => elem.hospital.toString() == req.params.id);
         });
@@ -791,7 +788,6 @@ const getHospitalById = (req, res) => __awaiter(void 0, void 0, void 0, function
         if (hospital.openingHour) {
             hospital.openingHour = (0, WorkingHour_helper_1.formatWorkingHour)([hospital.openingHour]);
         }
-        console.log("doctors: ssasa", doctors);
         if (doctors.includes(undefined) && doctors.length == 1) {
             hospital.doctors = [];
         }

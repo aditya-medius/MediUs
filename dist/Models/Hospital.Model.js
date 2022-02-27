@@ -106,6 +106,9 @@ const hospitalSchema = new mongoose_1.Schema({
         type: Number,
         // required: true,
     },
+    ICUBeds: {
+        type: Number,
+    },
     location: {
         type: {
             type: String,
@@ -153,7 +156,6 @@ hospitalSchema.pre("findOneAndUpdate", function (next) {
         if ("contactNumber" in UpdateQuery) {
             UpdateQuery = UpdateQuery["$set"];
             const query = this.getQuery();
-            console.log("pupdate qbqbwL:", UpdateQuery);
             const hospitalExist = yield this.model.findOne({
                 _id: { $ne: query._id },
                 $or: [{ contactNumber: UpdateQuery.contactNumber }],
@@ -184,6 +186,16 @@ hospitalSchema.pre("findOneAndUpdate", function (next) {
         else {
             return next();
         }
+    });
+});
+hospitalSchema.post("find", function (result) {
+    return __awaiter(this, void 0, void 0, function* () {
+        console.log("result:", result);
+    });
+});
+hospitalSchema.post("findOne", function (result) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // console.log("result:", Object.keys(result));
     });
 });
 const hospitalModel = (0, mongoose_1.model)(schemaNames_1.hospital, hospitalSchema);
