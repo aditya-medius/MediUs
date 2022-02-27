@@ -253,11 +253,61 @@ exports.deleteProfile = deleteProfile;
 const BookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
+        const rd = new Date(body.time.date);
+        const d = rd.getDay();
+        let b = req.body;
+        let query = {};
+        if (d == 0) {
+            query["sunday.working"] = true;
+            query["sunday.from.time"] = b.time.from.time;
+            query["sunday.from.division"] = b.time.from.division;
+            query["sunday.till.time"] = b.time.till.time;
+            query["sunday.till.division"] = b.time.till.division;
+        }
+        else if (d == 1) {
+            query["monday.working"] = true;
+            query["monday.from.time"] = b.time.from.time;
+            query["monday.from.division"] = b.time.from.division;
+            query["monday.till.time"] = b.time.till.time;
+            query["monday.till.division"] = b.time.till.division;
+        }
+        else if (d == 2) {
+            query["tuesday.working"] = true;
+            query["tuesday.from.time"] = b.time.from.time;
+            query["tuesday.from.division"] = b.time.from.division;
+            query["tuesday.till.time"] = b.time.till.time;
+            query["tuesday.till.division"] = b.time.till.division;
+        }
+        else if (d == 3) {
+            query["wednesday.working"] = true;
+            query["wednesday.from.time"] = b.time.from.time;
+            query["wednesday.from.division"] = b.time.from.division;
+            query["wednesday.till.time"] = b.time.till.time;
+            query["wednesday.till.division"] = b.time.till.division;
+        }
+        else if (d == 4) {
+            query["thursday.working"] = true;
+            query["thursday.from.time"] = b.time.from.time;
+            query["thursday.from.division"] = b.time.from.division;
+            query["thursday.till.time"] = b.time.till.time;
+            query["thursday.till.division"] = b.time.till.division;
+        }
+        else if (d == 5) {
+            query["friday.working"] = true;
+            query["friday.from.time"] = b.time.from.time;
+            query["friday.from.division"] = b.time.from.division;
+            query["friday.till.time"] = b.time.till.time;
+            query["friday.till.division"] = b.time.till.division;
+        }
+        else if (d == 6) {
+            query["saturday.working"] = true;
+            query["saturday.from.time"] = b.time.from.time;
+            query["saturday.from.division"] = b.time.from.division;
+            query["saturday.till.time"] = b.time.till.time;
+            query["saturday.till.division"] = b.time.till.division;
+        }
         // @TODO check if working hour exist first
-        let capacity = yield WorkingHours_Model_1.default.findOne({
-            doctorDetails: body.doctors,
-            hospitalDetails: body.hospital,
-        });
+        let capacity = yield WorkingHours_Model_1.default.findOne(Object.assign({ doctorDetails: body.doctors, hospitalDetails: body.hospital }, query));
         if (!capacity) {
             let error = new Error("Error");
             error.message = "Cannot create appointment";
@@ -487,13 +537,6 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
             cancelled: false,
             "time.date": { $gt: Date() },
         })
-            // .populate({
-            //   path: "patient",
-            //   select: excludePatientFields,
-            // })
-            .sort({ "time.date": 1 })
-            .skip(page > 1 ? (page - 1) * 2 : 0)
-            .limit(2)
             .populate({
             path: "hospital",
             select: Object.assign(Object.assign({}, exports.excludeHospitalFields), { type: 0, deleted: 0, contactNumber: 0 }),
@@ -507,7 +550,10 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
             select: {
                 parentPatient: 0,
             },
-        });
+        })
+            .sort({ "time.date": -1 })
+            .skip(page > 1 ? (page - 1) * 2 : 0)
+            .limit(2);
         const page2 = appointmentData.length / 2;
         const older_apppointmentData = yield Appointment_Model_1.default
             .find({

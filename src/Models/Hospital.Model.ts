@@ -93,6 +93,9 @@ const hospitalSchema = new Schema({
     type: Number,
     // required: true,
   },
+  ICUBeds: {
+    type: Number,
+  },
   location: {
     type: {
       type: String,
@@ -139,8 +142,6 @@ hospitalSchema.pre("findOneAndUpdate", async function (next) {
   if ("contactNumber" in UpdateQuery) {
     UpdateQuery = UpdateQuery["$set"];
     const query = this.getQuery();
-
-    console.log("pupdate qbqbwL:", UpdateQuery);
     const hospitalExist = await this.model.findOne({
       _id: { $ne: query._id },
       $or: [{ contactNumber: UpdateQuery.contactNumber }],
@@ -170,6 +171,15 @@ hospitalSchema.pre("findOneAndUpdate", async function (next) {
     return next();
   }
 });
+
+hospitalSchema.post("find", async function (result) {
+  console.log("result:", result);
+});
+
+hospitalSchema.post("findOne", async function (result) {
+  // console.log("result:", Object.keys(result));
+});
+
 const hospitalModel = model(hospital, hospitalSchema);
 
 export default hospitalModel;

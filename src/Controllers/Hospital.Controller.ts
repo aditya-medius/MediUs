@@ -339,7 +339,7 @@ export const updateHospital = async (req: Request, res: Response) => {
       ...body
     } = req.body;
     const updateQuery = {
-      $set: { body, numberOfBed, type },
+      $set: { ...body, numberOfBed, type },
       $addToSet: {
         doctors,
         anemity,
@@ -349,6 +349,7 @@ export const updateHospital = async (req: Request, res: Response) => {
 
     let b = req.body;
     const DoctorObj = await doctorModel.find({ deleted: false, _id: doctors });
+
     if (!doctors || DoctorObj.length == doctors.length) {
       const HospitalUpdateObj = await hospitalModel.findOneAndUpdate(
         { _id: req.currentHospital, deleted: false },
@@ -822,12 +823,10 @@ export const getHospitalById = async (req: Request, res: Response) => {
     if (hospital.doctors.length == 0) {
       return successResponse({ hospital }, "Success", res);
     }
-    console.log("dhbhsdbds:", hospital.doctors);
     const doctorIds: Array<string> = hospital.doctors.map((e: any) => {
       return e._id.toString();
     });
 
-    console.log("dhbdhbsddsdds:", doctorIds);
     let workingHours: any = await workingHourModel
       .find({
         doctorDetails: { $in: doctorIds },
@@ -849,8 +848,6 @@ export const getHospitalById = async (req: Request, res: Response) => {
       ];
       return r;
     }, {});
-
-    console.log("workingHours:", workingHours);
 
     hospital.doctors.map((e: any) => {
       e.hospitalDetails = e.hospitalDetails.filter(
@@ -884,7 +881,6 @@ export const getHospitalById = async (req: Request, res: Response) => {
       hospital.openingHour = formatWorkingHour([hospital.openingHour]);
     }
 
-    console.log("doctors: ssasa", doctors);
     if (doctors.includes(undefined) && doctors.length == 1) {
       hospital.doctors = [];
     } else {
