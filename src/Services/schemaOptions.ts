@@ -28,7 +28,7 @@ const schemaOptions: any = {
   },
   email: {
     type: String,
-    required: true,
+    // required: true,
     // unique: [true, "Email already exist"],
   },
   password: {

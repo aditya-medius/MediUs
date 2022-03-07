@@ -282,7 +282,27 @@ const getCityStateLocalityCountry = (req, res) => __awaiter(void 0, void 0, void
         const locality = yield Locality_Model_1.default.find();
         const country = yield Country_Model_1.default.find();
         const [Ci, S, L, Co] = yield Promise.all([city, state, locality, country]);
-        return (0, response_1.successResponse)({ city: Ci, state: S, locality: L, country: Co }, "Success", res);
+        let response = {};
+        let { region } = req.query;
+        if (region) {
+            region = region.toLowerCase();
+            if (region == "city") {
+                response[region] = Ci;
+            }
+            else if (region == "state") {
+                response[region] = S;
+            }
+            else if (region == "locality") {
+                response[region] = L;
+            }
+            else if (region == "country") {
+                response[region] = Co;
+            }
+            else {
+                response = { city: Ci, state: S, locality: L, country: Co };
+            }
+        }
+        return (0, response_1.successResponse)(response, "Success", res);
     }
     catch (error) { }
 });

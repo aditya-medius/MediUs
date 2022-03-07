@@ -22,9 +22,9 @@ patientSchema.pre("save", function (next) {
             $and: [
                 {
                     $or: [
-                        {
-                            email: this.email,
-                        },
+                        // {
+                        //   email: this.email,
+                        // },
                         { phoneNumber: this.phoneNumber },
                     ],
                 },
