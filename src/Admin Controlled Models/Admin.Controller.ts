@@ -265,11 +265,25 @@ export const getCityStateLocalityCountry = async (
     const country = await countryModel.find();
 
     const [Ci, S, L, Co] = await Promise.all([city, state, locality, country]);
-    return successResponse(
-      { city: Ci, state: S, locality: L, country: Co },
-      "Success",
-      res
-    );
+    let response: any = {};
+    let { region } = req.query;
+    if (region) {
+      region = (region as string).toLowerCase();
+      if (region == "city") {
+        response[region] = Ci;
+      } else if (region == "state") {
+        response[region] = S;
+      } else if (region == "locality") {
+        response[region] = L;
+      } else if (region == "country") {
+        response[region] = Co;
+      } else {
+        response = { city: Ci, state: S, locality: L, country: Co };
+      }
+    }
+
+
+    return successResponse(response, "Success", res);
   } catch (error: any) {}
 };
 
