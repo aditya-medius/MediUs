@@ -5,7 +5,7 @@ export const sendMessage = async (body: any, phoneNumber: string) => {
   const client = new Twilio(accountSid, authToken);
   return client.messages.create({
     body,
-    messagingServiceSid: "MGc3fa1b1bb213ef12045067e46202e44b",
+    messagingServiceSid: "MG6481ac5da00f72f6d8dbd58587d6f52b",
     to: `+91${phoneNumber}`,
   })
   // .then(message => console.log(message.sid))
