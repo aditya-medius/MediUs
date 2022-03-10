@@ -10,6 +10,10 @@ const agentSchema: Schema = new Schema({
     required: true,
     length: 10,
   },
+  alternateNumber: {
+    type: String,
+    length: 10,
+  },
   firstName: {
     type: String,
     required: true,
@@ -17,6 +21,30 @@ const agentSchema: Schema = new Schema({
   lastName: {
     type: String,
     required: true,
+  },
+  gender: {
+    type: String,
+    required: true,
+    enum: ["Male", "Female"],
+  },
+  photoIdentityNumber: {
+    type: String,
+  },
+  location: {
+    type: {
+      type: String,
+      enum: ["Point"],
+      // required: true
+    },
+    coordinates: {
+      type: [Number],
+      // required: true
+    },
+  },
+  image: {
+    type: String,
+    default: "static/user/default.png",
+    // ref: media,
   },
 });
 
