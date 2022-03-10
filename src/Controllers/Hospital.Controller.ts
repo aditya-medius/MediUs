@@ -27,6 +27,7 @@ import { formatWorkingHour } from "../Services/WorkingHour.helper";
 import * as bcrypt from "bcrypt";
 import servicesModel from "../Admin Controlled Models/Services.Model";
 import { request } from "http";
+import { getHospitalToken } from "../Services/Hospital/Hospital.Service";
 
 const excludeDoctorFields = {
   password: 0,
@@ -905,6 +906,45 @@ export const getDoctorsInHospital = async (req: Request, res: Response) => {
       });
 
     return successResponse(hospitalDetails, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const checkVerificationStatus = async (req: Request, res: Response) => {
+  try {
+    const hospitalProfile = await hospitalModel.findOne(
+      {
+        contactNumber: req.body.phoneNumber,
+        login: true,
+      },
+      excludeHospitalFields
+    );
+    if (hospitalProfile.verified) {
+      let error: Error = new Error("Your profile is under verification");
+      error.name = "Unverified Profile";
+      throw error;
+    }
+
+    let {
+      name,
+      contactNumber,
+      email,
+      _id,
+      token = await getHospitalToken(hospitalProfile.toJSON()),
+    } = hospitalProfile.toJSON();
+
+    return successResponse(
+      {
+        token,
+        name,
+        contactNumber,
+        email,
+        _id,
+      },
+      "Your profile is verified",
+      res
+    );
   } catch (error: any) {
     return errorResponse(error, res);
   }

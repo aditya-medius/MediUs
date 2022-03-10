@@ -3,6 +3,9 @@ import mongoose from "mongoose";
 import appointmentPaymentModel from "../../Models/AppointmentPayment.Model";
 import creditAmountModel from "../../Models/CreditAmount.Model";
 import withdrawModel from "../../Models/Withdrawal.Model";
+import * as jwt from "jsonwebtoken";
+import * as dotenv from "dotenv";
+dotenv.config();
 
 export const getUser = async (req: Request) => {
   return req.currentDoctor ? req.currentDoctor : req.currentHospital;
@@ -121,4 +124,9 @@ export const getPendingAmount = async (id: string) => {
   } catch (error: any) {
     throw error;
   }
+};
+
+export const getDoctorToken = async (body: any) => {
+  const token = await jwt.sign(body, process.env.SECRET_DOCTOR_KEY as string);
+  return token;
 };

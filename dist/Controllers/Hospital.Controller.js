@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDoctorsInHospital = exports.getHospitalById = exports.getAppointmentByDate = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
+exports.checkVerificationStatus = exports.getDoctorsInHospital = exports.getHospitalById = exports.getAppointmentByDate = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Anemities_Model_1 = __importDefault(require("../Models/Anemities.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
@@ -62,6 +62,7 @@ const Patient_Controller_1 = require("./Patient.Controller");
 const WorkingHour_helper_1 = require("../Services/WorkingHour.helper");
 const bcrypt = __importStar(require("bcrypt"));
 const Services_Model_1 = __importDefault(require("../Admin Controlled Models/Services.Model"));
+const Hospital_Service_1 = require("../Services/Hospital/Hospital.Service");
 const excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -819,3 +820,28 @@ const getDoctorsInHospital = (req, res) => __awaiter(void 0, void 0, void 0, fun
     }
 });
 exports.getDoctorsInHospital = getDoctorsInHospital;
+const checkVerificationStatus = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const hospitalProfile = yield Hospital_Model_1.default.findOne({
+            contactNumber: req.body.phoneNumber,
+            login: true,
+        }, Patient_Controller_1.excludeHospitalFields);
+        if (hospitalProfile.verified) {
+            let error = new Error("Your profile is under verification");
+            error.name = "Unverified Profile";
+            throw error;
+        }
+        let { name, contactNumber, email, _id, token = yield (0, Hospital_Service_1.getHospitalToken)(hospitalProfile.toJSON()), } = hospitalProfile.toJSON();
+        return (0, response_1.successResponse)({
+            token,
+            name,
+            contactNumber,
+            email,
+            _id,
+        }, "Your profile is verified", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.checkVerificationStatus = checkVerificationStatus;

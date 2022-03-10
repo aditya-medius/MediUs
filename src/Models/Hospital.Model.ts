@@ -112,6 +112,12 @@ const hospitalSchema = new Schema({
     minlength: 6,
     required: true,
   },
+
+  // Admin is field edit karega aur koi nhi
+  verified: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 hospitalSchema.pre("save", async function (next) {

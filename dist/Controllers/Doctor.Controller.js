@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
+exports.checkVerificationStatus = exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -1369,3 +1369,40 @@ const updateQualification = (req, res) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.updateQualification = updateQualification;
+const checkVerificationStatus = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const doctorProfile = yield Doctors_Model_1.default.findOne({
+            phoneNumber: req.body.phoneNumber,
+            login: true,
+        }, {
+            password: 0,
+            registrationDate: 0,
+            DOB: 0,
+            registration: 0,
+            KYCDetails: 0,
+        });
+        if (!doctorProfile.verified) {
+            let error = new Error("Your profile is under verification");
+            error.name = "Unverified Profile";
+            throw error;
+        }
+        yield doctorProfile.populate("qualification");
+        let { firstName, lastName, gender, phoneNumber, email, _id, qualification, } = doctorProfile.toJSON();
+        qualification = qualification[0];
+        let token = yield doctorService.getDoctorToken(doctorProfile.toJSON());
+        return (0, response_1.successResponse)({
+            token,
+            firstName,
+            lastName,
+            gender,
+            phoneNumber,
+            email,
+            _id,
+            qualification,
+        }, "Your profile is verified", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.checkVerificationStatus = checkVerificationStatus;

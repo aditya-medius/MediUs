@@ -22,6 +22,7 @@ import { sendMessage } from "../Services/message.service";
 import otpModel from "../Models/OTP.Model";
 import servicesModel from "./Services.Model";
 import doctorModel from "../Models/Doctors.Model";
+import hospitalModel from "../Models/Hospital.Model";
 
 export const addSpeciality = async (req: Request, res: Response) => {
   try {
@@ -434,6 +435,31 @@ export const verifyDoctors = async (req: Request, res: Response) => {
     );
     if (doctorObj.verified) {
       throw new Error("Doctor is already verified");
+    } else {
+      return successResponse({}, "Successfully verified", res);
+    }
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+export const verifyHospitals = async (req: Request, res: Response) => {
+  try {
+    let body = req.params;
+    const hospitalObj = await hospitalModel.findOneAndUpdate(
+      {
+        _id: body.hospitalId,
+        deleted: false,
+        // verified: false,
+        adminSearch: true,
+      },
+      {
+        $set: {
+          verified: true,
+        },
+      }
+    );
+    if (hospitalObj.verified) {
+      throw new Error("Hospital is already verified");
     } else {
       return successResponse({}, "Successfully verified", res);
     }

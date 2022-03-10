@@ -19,25 +19,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const mongoose_1 = __importStar(require("mongoose"));
-const schemaNames_1 = require("../Services/schemaNames");
-const mediaSchema = new mongoose_1.Schema({
-    user: {
-        type: mongoose_1.default.Schema.Types.ObjectId,
-        refPath: "userType",
-    },
-    userType: {
-        type: String,
-        required: true,
-        enum: [schemaNames_1.patient, schemaNames_1.doctor, schemaNames_1.hospital, schemaNames_1.agent],
-    },
-    image: {
-        type: String,
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now(),
-    },
-});
-const mediaModel = (0, mongoose_1.model)(schemaNames_1.media, mediaSchema);
-exports.default = mediaModel;
+const express_1 = require("express");
+const agentController = __importStar(require("../Controllers/Agent.Controller"));
+const agentRouter = (0, express_1.Router)();
+agentRouter.post("/createAgentProfile", agentController.createAgentProfile);
+exports.default = agentRouter;

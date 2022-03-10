@@ -69,6 +69,9 @@ export const createPatient = async (req: Request, res: Response) => {
       body["address"] = addressObj._id;
     }
     let cryptSalt = await bcrypt.genSalt(10);
+    if (!body.password) {
+      body.password = process.env.DEFAULT_PASSWORD as string;
+    }
     body.password = await bcrypt.hash(body.password, cryptSalt);
     let patientObj = await new patientModel(body).save();
     jwt.sign(

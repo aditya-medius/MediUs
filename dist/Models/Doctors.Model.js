@@ -175,8 +175,6 @@ doctorSchema.pre("save", function (next) {
                     const _b = this.getQuery(), { adminSearch } = _b, rest = __rest(_b, ["adminSearch"]);
                     this.where({ rest });
                 }
-                else if (Object.keys(this.getQuery()).includes("login")) {
-                }
                 else {
                     this.where(Object.assign(Object.assign({}, this.getQuery()), { deleted: false, $or: [{ verified: true }, { verified: { $exists: false } }] }));
                 }

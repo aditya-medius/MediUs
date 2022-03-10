@@ -1526,3 +1526,57 @@ export const updateQualification = async (req: Request, res: Response) => {
     return errorResponse(error, res);
   }
 };
+
+export const checkVerificationStatus = async (req: Request, res: Response) => {
+  try {
+    const doctorProfile = await doctorModel.findOne(
+      {
+        phoneNumber: req.body.phoneNumber,
+        login: true,
+      },
+      {
+        password: 0,
+        registrationDate: 0,
+        DOB: 0,
+        registration: 0,
+        KYCDetails: 0,
+      }
+    );
+
+    if (!doctorProfile.verified) {
+      let error: Error = new Error("Your profile is under verification");
+      error.name = "Unverified Profile";
+      throw error;
+    }
+
+    await doctorProfile.populate("qualification");
+    let {
+      firstName,
+      lastName,
+      gender,
+      phoneNumber,
+      email,
+      _id,
+      qualification,
+    } = doctorProfile.toJSON();
+    qualification = qualification[0];
+
+    let token = await doctorService.getDoctorToken(doctorProfile.toJSON());
+    return successResponse(
+      {
+        token,
+        firstName,
+        lastName,
+        gender,
+        phoneNumber,
+        email,
+        _id,
+        qualification,
+      },
+      "Your profile is verified",
+      res
+    );
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};

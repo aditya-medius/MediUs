@@ -89,4 +89,9 @@ hospitalRouter.post(
   oneOf(authenticateHospital),
   hospitalController.getAppointmentByDate
 );
+
+hospitalRouter.put(
+  "/checkVerificationStatus",
+  hospitalController.checkVerificationStatus
+);
 export default hospitalRouter;

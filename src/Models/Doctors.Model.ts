@@ -158,7 +158,6 @@ doctorSchema.pre("save", async function (next) {
       ) {
         const { adminSearch, ...rest } = this.getQuery();
         this.where({ rest });
-      } else if (Object.keys(this.getQuery()).includes("login")) {
       } else {
         this.where({
           ...this.getQuery(),
