@@ -82,6 +82,9 @@ const createPatient = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     try {
         let body = req.body;
         let cryptSalt = yield bcrypt.genSalt(10);
+        if (!body.password) {
+            body.password = process.env.DEFAULT_PASSWORD;
+        }
         body.password = yield bcrypt.hash(body.password, cryptSalt);
         let patientObj = yield new Patient_Model_1.default(body).save();
         jwt.sign(patientObj.toJSON(), process.env.SECRET_PATIENT_KEY, (err, token) => {
