@@ -74,14 +74,34 @@ export const createDoctor = async (req: Request, res: Response) => {
       body.password = await bcrypt.hash(body.password, cryptSalt);
     }
     let doctorObj = await new doctorModel(body).save();
+    await doctorObj.populate("qualification");
+    doctorObj = doctorObj.toObject();
+    doctorObj.qualification = doctorObj.qualification[0];
     jwt.sign(
-      doctorObj.toJSON(),
+      doctorObj,
       process.env.SECRET_DOCTOR_KEY as string,
       (err: any, token: any) => {
         if (err) return errorResponse(err, res);
-        const { firstName, lastName, gender, phoneNumber, _id } = doctorObj;
+        const {
+          firstName,
+          lastName,
+          gender,
+          phoneNumber,
+          _id,
+          qualification,
+          verified,
+        } = doctorObj;
         return successResponse(
-          { token, firstName, lastName, gender, phoneNumber, _id },
+          {
+            token,
+            firstName,
+            lastName,
+            gender,
+            phoneNumber,
+            _id,
+            qualification,
+            verified,
+          },
           "Doctor profile successfully created",
           res
         );
@@ -179,23 +199,63 @@ export const doctorLogin = async (req: Request, res: Response) => {
         //   return errorResponse(new Error("OTP expired"), res);
         // if (body.OTP === data.otp) {
         if (true) {
-          const profile = await doctorModel.findOne(
+          let profile = await doctorModel.findOne(
             {
               phoneNumber: body.phoneNumber,
               deleted: false,
+              login: true,
             },
-            excludeDoctorFields
+            {
+              password: 0,
+              // panCard: 0,
+              // adhaarCard: 0,
+              registrationDate: 0,
+              DOB: 0,
+              registration: 0,
+              KYCDetails: 0,
+            }
           );
           if (profile) {
+            if (
+              Object.keys(profile.toObject()).includes("verified") &&
+              !profile.verified
+            ) {
+              return errorResponse(
+                new Error("Your profile is under verification"),
+                res,
+                202
+              );
+            }
             const token = await jwt.sign(
               profile.toJSON(),
               process.env.SECRET_DOCTOR_KEY as string
             );
             otpData.remove();
-            const { firstName, lastName, gender, phoneNumber, email, _id } =
-              profile.toJSON();
+            await profile.populate("qualification");
+            profile = profile.toObject();
+            profile.qualification = profile.qualification[0];
+            const {
+              firstName,
+              lastName,
+              gender,
+              phoneNumber,
+              email,
+              _id,
+              qualification,
+              verified,
+            } = profile;
             return successResponse(
-              { token, firstName, lastName, gender, phoneNumber, email, _id },
+              {
+                token,
+                firstName,
+                lastName,
+                gender,
+                phoneNumber,
+                email,
+                _id,
+                qualification,
+                verified,
+              },
               "Successfully logged in",
               res
             );

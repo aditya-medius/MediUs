@@ -298,9 +298,9 @@ const getCityStateLocalityCountry = (req, res) => __awaiter(void 0, void 0, void
             else if (region == "country") {
                 response[region] = Co;
             }
-            else {
-                response = { city: Ci, state: S, locality: L, country: Co };
-            }
+        }
+        else {
+            response = { city: Ci, state: S, locality: L, country: Co };
         }
         return (0, response_1.successResponse)(response, "Success", res);
     }
