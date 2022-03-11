@@ -28,26 +28,40 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.login = exports.createAgentProfile = void 0;
-const response_1 = require("../Services/response");
-const agentService = __importStar(require("../Services/Agent/Agent.Service"));
-const createAgentProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.generateOTPtoken = exports.generateOTP = exports.encryptPassword = exports.phoneNumberRegex = void 0;
+const bcrypt = __importStar(require("bcrypt"));
+const jwt = __importStar(require("jsonwebtoken"));
+exports.phoneNumberRegex = /^[0]?[6789]\d{9}$/;
+const encryptPassword = (password) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const data = yield agentService.createAgentProfile(req.body);
-        return (0, response_1.successResponse)(data, "Successfully created agent profile", res);
+        let cryptSalt = yield bcrypt.genSalt(10);
+        let encPassword = yield bcrypt.hash(password, cryptSalt);
+        return Promise.resolve(encPassword);
     }
     catch (error) {
-        return (0, response_1.errorResponse)(error, res);
+        return Promise.reject(error);
     }
 });
-exports.createAgentProfile = createAgentProfile;
-const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const data = yield agentService.login(req.query);
-        return (0, response_1.successResponse)(data.data, data.message, res);
+exports.encryptPassword = encryptPassword;
+// export const checkPasswordHas = async (password: string) => {
+//   try {
+//   } catch (error: any) {
+//     return Promise.reject(error);
+//   }
+// };
+const generateOTP = (phoneNumber) => __awaiter(void 0, void 0, void 0, function* () {
+    if (exports.phoneNumberRegex.test(phoneNumber)) {
+        const OTP = Math.floor(100000 + Math.random() * 900000).toString();
+        console.log("jdfjnjndf", OTP);
+        return Promise.resolve(OTP);
     }
-    catch (error) {
-        return (0, response_1.errorResponse)(error, res);
+    else {
+        return Promise.reject("Invalid Phone Number");
     }
 });
-exports.login = login;
+exports.generateOTP = generateOTP;
+const generateOTPtoken = (OTP) => {
+    const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 }, OTP);
+    return otpToken;
+};
+exports.generateOTPtoken = generateOTPtoken;

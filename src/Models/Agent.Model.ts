@@ -18,6 +18,10 @@ const agentSchema: Schema = new Schema({
     type: String,
     required: true,
   },
+  password: {
+    type: String,
+    required: true,
+  },
   lastName: {
     type: String,
     required: true,
@@ -58,7 +62,16 @@ const agentSchema: Schema = new Schema({
   },
 });
 
-agentSchema.pre("find", async function (next) {});
+agentSchema.pre("find", async function (next) {
+  const query = this.getQuery();
+  const data = this.where({
+    ...query,
+    "delData.deleted": false,
+  });
+
+  console.log("Dsjdsnjsn:", data);
+  next();
+});
 
 agentSchema.pre("save", async function (next) {
   const agentProfile = await agentModel.findOne({

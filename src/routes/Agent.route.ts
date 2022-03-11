@@ -4,4 +4,6 @@ const agentRouter = Router();
 
 agentRouter.post("/createAgentProfile", agentController.createAgentProfile);
 
+agentRouter.put("/login", agentController.login);
+
 export default agentRouter;

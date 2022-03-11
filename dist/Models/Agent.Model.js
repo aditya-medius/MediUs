@@ -28,6 +28,10 @@ const agentSchema = new mongoose_1.Schema({
         type: String,
         required: true,
     },
+    password: {
+        type: String,
+        required: true,
+    },
     lastName: {
         type: String,
         required: true,
@@ -67,7 +71,12 @@ const agentSchema = new mongoose_1.Schema({
     },
 });
 agentSchema.pre("find", function (next) {
-    return __awaiter(this, void 0, void 0, function* () { });
+    return __awaiter(this, void 0, void 0, function* () {
+        const query = this.getQuery();
+        const data = this.where(Object.assign(Object.assign({}, query), { "delData.deleted": false }));
+        console.log("Dsjdsnjsn:", data);
+        next();
+    });
 });
 agentSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
