@@ -10,3 +10,12 @@ export const createAgentProfile = async (req: Request, res: Response) => {
     return errorResponse(error, res);
   }
 };
+
+export const login = async (req: Request, res: Response) => {
+  try {
+    const data = await agentService.login(req.query);
+    return successResponse(data.data, data.message, res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};

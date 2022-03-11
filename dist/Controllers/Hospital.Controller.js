@@ -826,7 +826,7 @@ const checkVerificationStatus = (req, res) => __awaiter(void 0, void 0, void 0, 
             contactNumber: req.body.phoneNumber,
             login: true,
         }, Patient_Controller_1.excludeHospitalFields);
-        if (hospitalProfile.verified) {
+        if (!hospitalProfile.verified) {
             let error = new Error("Your profile is under verification");
             error.name = "Unverified Profile";
             throw error;

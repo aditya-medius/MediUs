@@ -920,7 +920,7 @@ export const checkVerificationStatus = async (req: Request, res: Response) => {
       },
       excludeHospitalFields
     );
-    if (hospitalProfile.verified) {
+    if (!hospitalProfile.verified) {
       let error: Error = new Error("Your profile is under verification");
       error.name = "Unverified Profile";
       throw error;

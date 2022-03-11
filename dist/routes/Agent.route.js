@@ -23,4 +23,5 @@ const express_1 = require("express");
 const agentController = __importStar(require("../Controllers/Agent.Controller"));
 const agentRouter = (0, express_1.Router)();
 agentRouter.post("/createAgentProfile", agentController.createAgentProfile);
+agentRouter.put("/login", agentController.login);
 exports.default = agentRouter;
