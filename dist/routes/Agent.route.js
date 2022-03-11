@@ -21,6 +21,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const agentController = __importStar(require("../Controllers/Agent.Controller"));
-const router = (0, express_1.Router)();
-router.post("/createAgentProfile", agentController.createAgentProfile);
-exports.default = router;
+const agentRouter = (0, express_1.Router)();
+agentRouter.post("/createAgentProfile", agentController.createAgentProfile);
+exports.default = agentRouter;

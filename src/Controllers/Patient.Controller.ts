@@ -64,6 +64,10 @@ export const getAllPatientsList = async (_req: Request, res: Response) => {
 export const createPatient = async (req: Request, res: Response) => {
   try {
     let body = req.body;
+    if (Object.keys(body.address).length > 0) {
+      let addressObj = await new addressModel(body.address).save();
+      body["address"] = addressObj._id;
+    }
     let cryptSalt = await bcrypt.genSalt(10);
     if (!body.password) {
       body.password = process.env.DEFAULT_PASSWORD as string;

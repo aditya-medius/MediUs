@@ -46,7 +46,19 @@ const agentSchema: Schema = new Schema({
     default: "static/user/default.png",
     // ref: media,
   },
+
+  delData: {
+    deleted: {
+      type: Boolean,
+      default: false,
+    },
+    deletedAt: {
+      type: Date,
+    },
+  },
 });
+
+agentSchema.pre("find", async function (next) {});
 
 agentSchema.pre("save", async function (next) {
   const agentProfile = await agentModel.findOne({

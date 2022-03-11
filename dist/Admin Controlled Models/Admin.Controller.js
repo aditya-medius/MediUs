@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifyDoctors = exports.getUnverifiedDoctors = exports.addHospitalService = exports.create = exports.login = exports.getCityStateLocalityCountry = exports.getPayments = exports.addPayment = exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityDoctorType = exports.addSpecialityDoctorType = exports.addDoctorType = exports.addToSpecialityDisease = exports.addSpecialityDisease = exports.addDisease = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
+exports.verifyHospitals = exports.verifyDoctors = exports.getUnverifiedDoctors = exports.addHospitalService = exports.create = exports.login = exports.getCityStateLocalityCountry = exports.getPayments = exports.addPayment = exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityDoctorType = exports.addSpecialityDoctorType = exports.addDoctorType = exports.addToSpecialityDisease = exports.addSpecialityDisease = exports.addDisease = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
 const BodyPart_Model_1 = __importDefault(require("./BodyPart.Model"));
 const SpecialityBody_Model_1 = __importDefault(require("./SpecialityBody.Model"));
 const SpecialityDisease_Model_1 = __importDefault(require("./SpecialityDisease.Model"));
@@ -52,6 +52,7 @@ const message_service_1 = require("../Services/message.service");
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const Services_Model_1 = __importDefault(require("./Services.Model"));
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
+const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
 const addSpeciality = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const body = req.body;
@@ -298,9 +299,9 @@ const getCityStateLocalityCountry = (req, res) => __awaiter(void 0, void 0, void
             else if (region == "country") {
                 response[region] = Co;
             }
-            else {
-                response = { city: Ci, state: S, locality: L, country: Co };
-            }
+        }
+        else {
+            response = { city: Ci, state: S, locality: L, country: Co };
         }
         return (0, response_1.successResponse)(response, "Success", res);
     }
@@ -445,3 +446,28 @@ const verifyDoctors = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.verifyDoctors = verifyDoctors;
+const verifyHospitals = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.params;
+        const hospitalObj = yield Hospital_Model_1.default.findOneAndUpdate({
+            _id: body.hospitalId,
+            deleted: false,
+            // verified: false,
+            adminSearch: true,
+        }, {
+            $set: {
+                verified: true,
+            },
+        });
+        if (hospitalObj.verified) {
+            throw new Error("Hospital is already verified");
+        }
+        else {
+            return (0, response_1.successResponse)({}, "Successfully verified", res);
+        }
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.verifyHospitals = verifyHospitals;

@@ -56,6 +56,18 @@ const agentSchema = new mongoose_1.Schema({
         default: "static/user/default.png",
         // ref: media,
     },
+    delData: {
+        deleted: {
+            type: Boolean,
+            default: false,
+        },
+        deletedAt: {
+            type: Date,
+        },
+    },
+});
+agentSchema.pre("find", function (next) {
+    return __awaiter(this, void 0, void 0, function* () { });
 });
 agentSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {

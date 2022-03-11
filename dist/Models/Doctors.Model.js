@@ -170,7 +170,8 @@ doctorSchema.pre("save", function (next) {
                 // Agar admin se doctor ki koi record get kr rhe ho to
                 // adminSearch field daal dena.
                 // Usse unverified records bhi aa jayenge
-                if (Object.keys(this.getQuery()).includes("adminSearch")) {
+                if (Object.keys(this.getQuery()).includes("adminSearch") ||
+                    Object.keys(this.getQuery()).includes("login")) {
                     const _b = this.getQuery(), { adminSearch } = _b, rest = __rest(_b, ["adminSearch"]);
                     this.where({ rest });
                 }

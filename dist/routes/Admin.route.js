@@ -53,4 +53,5 @@ adminRouter.post("/addHospitalService", adminController.addHospitalService);
 // Verification doctors ka
 adminRouter.get("/getUnverifiedDoctors", adminController.getUnverifiedDoctors);
 adminRouter.put("/verifyDoctors/:doctorId", adminController.verifyDoctors);
+adminRouter.put("/verifyHospital/:hospitalId", adminController.verifyHospitals);
 exports.default = adminRouter;

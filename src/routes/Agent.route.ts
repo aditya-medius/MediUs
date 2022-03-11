@@ -1,7 +1,7 @@
 import { Router } from "express";
 import * as agentController from "../Controllers/Agent.Controller";
-const router = Router();
+const agentRouter = Router();
 
-router.post("/createAgentProfile", agentController.createAgentProfile);
+agentRouter.post("/createAgentProfile", agentController.createAgentProfile);
 
-export default router;
+export default agentRouter;

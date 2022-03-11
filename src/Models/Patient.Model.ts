@@ -1,10 +1,25 @@
 import mongoose, { Schema, model } from "mongoose";
 import { type } from "os";
 import schemaOptions from "../Services/schemaOptions";
-import { patient, doctor, hospital } from "../Services/schemaNames";
+import { patient, doctor, hospital, address } from "../Services/schemaNames";
 
 const patientSchema = new Schema({
   ...schemaOptions,
+  location: {
+    type: {
+      type: String,
+      enum: ["Point"],
+      // required: true
+    },
+    coordinates: {
+      type: [Number],
+      // required: true
+    },
+  },
+  address: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: address,
+  },
 });
 
 patientSchema.pre("save", async function (next) {

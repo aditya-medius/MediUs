@@ -103,4 +103,5 @@ doctorRouter.get("/appointmentSummary", (0, middlewareHelper_1.oneOf)(Doctor_aut
 doctorRouter.delete("/deleteSpecializationAndQualification", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.deleteSpecializationAndQualification);
 doctorRouter.delete("/deleteHospitalFromDoctor", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.deleteHospitalFromDoctor);
 doctorRouter.put("/updateQualification/:qualificationId", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.updateQualification);
+doctorRouter.put("/checkVerificationStatus", doctorController.checkVerificationStatus);
 exports.default = doctorRouter;

@@ -208,4 +208,10 @@ doctorRouter.put(
   oneOf(authenticateDoctor),
   doctorController.updateQualification
 );
+
+doctorRouter.put(
+  "/checkVerificationStatus",
+  doctorController.checkVerificationStatus
+);
+
 export default doctorRouter;

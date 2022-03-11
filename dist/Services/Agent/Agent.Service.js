@@ -8,9 +8,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createAgentProfile = void 0;
+const Agent_Model_1 = __importDefault(require("../../Models/Agent.Model"));
 const createAgentProfile = (body) => __awaiter(void 0, void 0, void 0, function* () {
-    return {};
+    try {
+        const agentData = yield new Agent_Model_1.default(body).save();
+        return Promise.resolve(agentData);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
 });
 exports.createAgentProfile = createAgentProfile;
