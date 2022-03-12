@@ -41,7 +41,7 @@ export const excludeDoctorFields = {
   password: 0,
   // panCard: 0,
   // adhaarCard: 0,
-  verified: 0,
+  // verified: 0,
   registrationDate: 0,
   DOB: 0,
   registration: 0,
@@ -1533,6 +1533,7 @@ export const checkVerificationStatus = async (req: Request, res: Response) => {
       {
         phoneNumber: req.body.phoneNumber,
         login: true,
+        deleted: false,
       },
       {
         password: 0,
@@ -1542,6 +1543,12 @@ export const checkVerificationStatus = async (req: Request, res: Response) => {
         KYCDetails: 0,
       }
     );
+
+    if (!doctorProfile) {
+      let error: Error = new Error("Profile doesn't exist");
+      error.name = "Not Found";
+      throw error;
+    }
 
     if (!doctorProfile.verified) {
       let error: Error = new Error("Your profile is under verification");

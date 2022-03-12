@@ -68,7 +68,7 @@ exports.excludeDoctorFields = {
     password: 0,
     // panCard: 0,
     // adhaarCard: 0,
-    verified: 0,
+    // verified: 0,
     registrationDate: 0,
     DOB: 0,
     registration: 0,
@@ -1374,6 +1374,7 @@ const checkVerificationStatus = (req, res) => __awaiter(void 0, void 0, void 0, 
         const doctorProfile = yield Doctors_Model_1.default.findOne({
             phoneNumber: req.body.phoneNumber,
             login: true,
+            deleted: false,
         }, {
             password: 0,
             registrationDate: 0,
@@ -1381,6 +1382,11 @@ const checkVerificationStatus = (req, res) => __awaiter(void 0, void 0, void 0, 
             registration: 0,
             KYCDetails: 0,
         });
+        if (!doctorProfile) {
+            let error = new Error("Profile doesn't exist");
+            error.name = "Not Found";
+            throw error;
+        }
         if (!doctorProfile.verified) {
             let error = new Error("Your profile is under verification");
             error.name = "Unverified Profile";

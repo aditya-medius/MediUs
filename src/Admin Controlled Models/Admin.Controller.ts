@@ -23,6 +23,7 @@ import otpModel from "../Models/OTP.Model";
 import servicesModel from "./Services.Model";
 import doctorModel from "../Models/Doctors.Model";
 import hospitalModel from "../Models/Hospital.Model";
+import { excludeDoctorFields } from "../Controllers/Doctor.Controller";
 
 export const addSpeciality = async (req: Request, res: Response) => {
   try {
@@ -463,6 +464,25 @@ export const verifyHospitals = async (req: Request, res: Response) => {
     } else {
       return successResponse({}, "Successfully verified", res);
     }
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getAllDoctorsList = async (req: Request, res: Response) => {
+  try {
+    const doctorList = await doctorModel.find(
+      {
+        deleted: false,
+        adminSearch: true,
+      },
+      excludeDoctorFields
+    );
+    return successResponse(
+      doctorList,
+      "Successfully fetched doctor's list",
+      res
+    );
   } catch (error: any) {
     return errorResponse(error, res);
   }

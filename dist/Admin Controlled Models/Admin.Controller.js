@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifyHospitals = exports.verifyDoctors = exports.getUnverifiedDoctors = exports.addHospitalService = exports.create = exports.login = exports.getCityStateLocalityCountry = exports.getPayments = exports.addPayment = exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityDoctorType = exports.addSpecialityDoctorType = exports.addDoctorType = exports.addToSpecialityDisease = exports.addSpecialityDisease = exports.addDisease = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
+exports.getAllDoctorsList = exports.verifyHospitals = exports.verifyDoctors = exports.getUnverifiedDoctors = exports.addHospitalService = exports.create = exports.login = exports.getCityStateLocalityCountry = exports.getPayments = exports.addPayment = exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityDoctorType = exports.addSpecialityDoctorType = exports.addDoctorType = exports.addToSpecialityDisease = exports.addSpecialityDisease = exports.addDisease = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
 const BodyPart_Model_1 = __importDefault(require("./BodyPart.Model"));
 const SpecialityBody_Model_1 = __importDefault(require("./SpecialityBody.Model"));
 const SpecialityDisease_Model_1 = __importDefault(require("./SpecialityDisease.Model"));
@@ -53,6 +53,7 @@ const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const Services_Model_1 = __importDefault(require("./Services.Model"));
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
+const Doctor_Controller_1 = require("../Controllers/Doctor.Controller");
 const addSpeciality = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const body = req.body;
@@ -471,3 +472,16 @@ const verifyHospitals = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.verifyHospitals = verifyHospitals;
+const getAllDoctorsList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const doctorList = yield Doctors_Model_1.default.find({
+            deleted: false,
+            adminSearch: true,
+        }, Doctor_Controller_1.excludeDoctorFields);
+        return (0, response_1.successResponse)(doctorList, "Successfully fetched doctor's list", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getAllDoctorsList = getAllDoctorsList;
