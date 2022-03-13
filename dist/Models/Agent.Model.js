@@ -28,6 +28,10 @@ const agentSchema = new mongoose_1.Schema({
         type: String,
         required: true,
     },
+    password: {
+        type: String,
+        // required: true,
+    },
     lastName: {
         type: String,
         required: true,
@@ -56,6 +60,10 @@ const agentSchema = new mongoose_1.Schema({
         default: "static/user/default.png",
         // ref: media,
     },
+    verified: {
+        type: Boolean,
+        default: false,
+    },
     delData: {
         deleted: {
             type: Boolean,
@@ -65,10 +73,18 @@ const agentSchema = new mongoose_1.Schema({
             type: Date,
         },
     },
+    DOB: {
+        type: Date,
+    },
 });
-agentSchema.pre("find", function (next) {
-    return __awaiter(this, void 0, void 0, function* () { });
-});
+// agentSchema.pre("find", async function (next) {
+//   const query = this.getQuery();
+//   // const data = this.where({
+//   //   ...query,
+//   //   "delData.deleted": false,
+//   // });
+//   next();
+// });
 agentSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         const agentProfile = yield agentModel.findOne({

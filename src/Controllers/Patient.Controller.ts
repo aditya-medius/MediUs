@@ -64,7 +64,7 @@ export const getAllPatientsList = async (_req: Request, res: Response) => {
 export const createPatient = async (req: Request, res: Response) => {
   try {
     let body = req.body;
-    if (Object.keys(body.address).length > 0) {
+    if (body.address) {
       let addressObj = await new addressModel(body.address).save();
       body["address"] = addressObj._id;
     }
