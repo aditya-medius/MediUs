@@ -81,7 +81,7 @@ exports.getAllPatientsList = getAllPatientsList;
 const createPatient = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
-        if (Object.keys(body.address).length > 0) {
+        if (body.address) {
             let addressObj = yield new Address_Model_1.default(body.address).save();
             body["address"] = addressObj._id;
         }

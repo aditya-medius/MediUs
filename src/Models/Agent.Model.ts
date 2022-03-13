@@ -20,7 +20,7 @@ const agentSchema: Schema = new Schema({
   },
   password: {
     type: String,
-    required: true,
+    // required: true,
   },
   lastName: {
     type: String,
@@ -50,6 +50,10 @@ const agentSchema: Schema = new Schema({
     default: "static/user/default.png",
     // ref: media,
   },
+  verified: {
+    type: Boolean,
+    default: false,
+  },
 
   delData: {
     deleted: {
@@ -60,18 +64,20 @@ const agentSchema: Schema = new Schema({
       type: Date,
     },
   },
+  DOB: {
+    type: Date,
+  },
 });
 
-agentSchema.pre("find", async function (next) {
-  const query = this.getQuery();
-  const data = this.where({
-    ...query,
-    "delData.deleted": false,
-  });
+// agentSchema.pre("find", async function (next) {
+//   const query = this.getQuery();
+//   // const data = this.where({
+//   //   ...query,
+//   //   "delData.deleted": false,
+//   // });
 
-  console.log("Dsjdsnjsn:", data);
-  next();
-});
+//   next();
+// });
 
 agentSchema.pre("save", async function (next) {
   const agentProfile = await agentModel.findOne({

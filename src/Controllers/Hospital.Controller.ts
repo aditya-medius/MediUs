@@ -917,9 +917,17 @@ export const checkVerificationStatus = async (req: Request, res: Response) => {
       {
         contactNumber: req.body.phoneNumber,
         login: true,
+        deleted: false,
       },
       excludeHospitalFields
     );
+
+    if (!hospitalProfile) {
+      let error: Error = new Error("Profile doesn't exist");
+      error.name = "Not Found";
+      throw error;
+    }
+
     if (!hospitalProfile.verified) {
       let error: Error = new Error("Your profile is under verification");
       error.name = "Unverified Profile";

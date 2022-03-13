@@ -45,21 +45,30 @@ export const login = async (body: any) => {
 export const sendOTP = async (phoneNumber: string) => {
   try {
     if (/^[0]?[6789]\d{9}$/.test(phoneNumber)) {
+      let agentProfile: any = await agentModel.exists({
+        phoneNumber: phoneNumber,
+        "delData.deleted": false,
+      });
+      // if (!agentProfile) {
+      //   return Promise.reject(
+      //     new Error("Profile with this number doesn't exist")
+      //   );
+      // }
       const OTP: string = await generateOTP(phoneNumber);
 
-      sendMessage(`Your OTP is: ${OTP}`, phoneNumber)
-        .then(async (message: any) => {
-          // Add OTP and phone number to temporary collection
-          const otpToken = generateOTPtoken(OTP);
-          await otpModel.findOneAndUpdate(
-            { phoneNumber: phoneNumber },
-            { $set: { phoneNumber: phoneNumber, otp: otpToken } },
-            { upsert: true }
-          );
-        })
-        .catch((error: any) => {
-          return Promise.reject(error);
-        });
+      const otpToken = generateOTPtoken(OTP);
+      await otpModel.findOneAndUpdate(
+        { phoneNumber: phoneNumber },
+        { $set: { phoneNumber: phoneNumber, otp: otpToken } },
+        { upsert: true }
+      );
+      // sendMessage(`Your OTP is: ${OTP}`, phoneNumber)
+      //   .then(async (message: any) => {
+      //     // Add OTP and phone number to temporary collection
+      //   })
+      //   .catch((error: any) => {
+      //     return Promise.reject(error);
+      //   });
       return Promise.resolve({});
     }
   } catch (error: any) {
@@ -71,17 +80,18 @@ export const verifyOtpAndLogin = async (body: any) => {
   try {
     const otpData = await otpModel.findOne({
       phoneNumber: body.phoneNumber,
+      "delData.deleted": false,
     });
 
     const data: any = await jwt.verify(otpData.otp, body.OTP);
     if (Date.now() > data.expiresIn)
       return Promise.reject(new Error("OTP Expired"));
     if (body.OTP === data.otp) {
-      otpData.remove();
+      // otpData.remove();
       let profile = await agentModel.findOne(
         {
           phoneNumber: body.phoneNumber,
-          "delData.delData": false,
+          // "delData.deleted": false,
         },
         {
           location: 0,
@@ -90,11 +100,18 @@ export const verifyOtpAndLogin = async (body: any) => {
         }
       );
 
+      if (!profile) {
+        return Promise.reject({
+          status: 201,
+          message: "Account doesn't exist, create a new one",
+        });
+      }
+
       const token = await getAgentToken(profile.toJSON());
       return Promise.resolve({ token, ...profile.toJSON() });
     }
   } catch (error: any) {
-    return Promise.reject(new Error("Invalid OTP"));
+    return Promise.reject(error);
   }
 };
 

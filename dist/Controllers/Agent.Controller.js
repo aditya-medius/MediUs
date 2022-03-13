@@ -47,6 +47,10 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         return (0, response_1.successResponse)(data.data, data.message, res);
     }
     catch (error) {
+        if (error.status) {
+            let err = new Error(error.message);
+            return (0, response_1.errorResponse)(err, res, error.status);
+        }
         return (0, response_1.errorResponse)(error, res);
     }
 });

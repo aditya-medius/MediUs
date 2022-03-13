@@ -54,4 +54,7 @@ adminRouter.post("/addHospitalService", adminController.addHospitalService);
 adminRouter.get("/getUnverifiedDoctors", adminController.getUnverifiedDoctors);
 adminRouter.put("/verifyDoctors/:doctorId", adminController.verifyDoctors);
 adminRouter.put("/verifyHospital/:hospitalId", adminController.verifyHospitals);
+adminRouter.put("/verifyAgent/:agentId", adminController.verifyAgents);
+adminRouter.get("/getAllDoctorsList/", adminController.getAllDoctorsList);
+adminRouter.get("/getAllAgentList/", adminController.getAllAgentList);
 exports.default = adminRouter;

@@ -825,7 +825,13 @@ const checkVerificationStatus = (req, res) => __awaiter(void 0, void 0, void 0, 
         const hospitalProfile = yield Hospital_Model_1.default.findOne({
             contactNumber: req.body.phoneNumber,
             login: true,
+            deleted: false,
         }, Patient_Controller_1.excludeHospitalFields);
+        if (!hospitalProfile) {
+            let error = new Error("Profile doesn't exist");
+            error.name = "Not Found";
+            throw error;
+        }
         if (!hospitalProfile.verified) {
             let error = new Error("Your profile is under verification");
             error.name = "Unverified Profile";

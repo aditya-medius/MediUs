@@ -35,7 +35,6 @@ exports.getAgentToken = exports.verifyOtpAndLogin = exports.sendOTP = exports.lo
 const Agent_Model_1 = __importDefault(require("../../Models/Agent.Model"));
 const Utils_1 = require("../Utils");
 const dotenv = __importStar(require("dotenv"));
-const message_service_1 = require("../message.service");
 const OTP_Model_1 = __importDefault(require("../../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
 dotenv.config();
@@ -80,16 +79,25 @@ exports.login = login;
 const sendOTP = (phoneNumber) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         if (/^[0]?[6789]\d{9}$/.test(phoneNumber)) {
-            const OTP = yield (0, Utils_1.generateOTP)(phoneNumber);
-            (0, message_service_1.sendMessage)(`Your OTP is: ${OTP}`, phoneNumber)
-                .then((message) => __awaiter(void 0, void 0, void 0, function* () {
-                // Add OTP and phone number to temporary collection
-                const otpToken = (0, Utils_1.generateOTPtoken)(OTP);
-                yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: phoneNumber }, { $set: { phoneNumber: phoneNumber, otp: otpToken } }, { upsert: true });
-            }))
-                .catch((error) => {
-                return Promise.reject(error);
+            let agentProfile = yield Agent_Model_1.default.exists({
+                phoneNumber: phoneNumber,
+                "delData.deleted": false,
             });
+            // if (!agentProfile) {
+            //   return Promise.reject(
+            //     new Error("Profile with this number doesn't exist")
+            //   );
+            // }
+            const OTP = yield (0, Utils_1.generateOTP)(phoneNumber);
+            const otpToken = (0, Utils_1.generateOTPtoken)(OTP);
+            yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: phoneNumber }, { $set: { phoneNumber: phoneNumber, otp: otpToken } }, { upsert: true });
+            // sendMessage(`Your OTP is: ${OTP}`, phoneNumber)
+            //   .then(async (message: any) => {
+            //     // Add OTP and phone number to temporary collection
+            //   })
+            //   .catch((error: any) => {
+            //     return Promise.reject(error);
+            //   });
             return Promise.resolve({});
         }
     }
@@ -102,26 +110,33 @@ const verifyOtpAndLogin = (body) => __awaiter(void 0, void 0, void 0, function* 
     try {
         const otpData = yield OTP_Model_1.default.findOne({
             phoneNumber: body.phoneNumber,
+            "delData.deleted": false,
         });
         const data = yield jwt.verify(otpData.otp, body.OTP);
         if (Date.now() > data.expiresIn)
             return Promise.reject(new Error("OTP Expired"));
         if (body.OTP === data.otp) {
-            otpData.remove();
+            // otpData.remove();
             let profile = yield Agent_Model_1.default.findOne({
                 phoneNumber: body.phoneNumber,
-                "delData.delData": false,
+                // "delData.deleted": false,
             }, {
                 location: 0,
                 password: 0,
                 delData: 0,
             });
+            if (!profile) {
+                return Promise.reject({
+                    status: 201,
+                    message: "Account doesn't exist, create a new one",
+                });
+            }
             const token = yield (0, exports.getAgentToken)(profile.toJSON());
             return Promise.resolve(Object.assign({ token }, profile.toJSON()));
         }
     }
     catch (error) {
-        return Promise.reject(new Error("Invalid OTP"));
+        return Promise.reject(error);
     }
 });
 exports.verifyOtpAndLogin = verifyOtpAndLogin;

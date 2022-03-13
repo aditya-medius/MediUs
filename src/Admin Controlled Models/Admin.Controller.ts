@@ -23,6 +23,8 @@ import otpModel from "../Models/OTP.Model";
 import servicesModel from "./Services.Model";
 import doctorModel from "../Models/Doctors.Model";
 import hospitalModel from "../Models/Hospital.Model";
+import { excludeDoctorFields } from "../Controllers/Doctor.Controller";
+import agentModel from "../Models/Agent.Model";
 
 export const addSpeciality = async (req: Request, res: Response) => {
   try {
@@ -463,6 +465,67 @@ export const verifyHospitals = async (req: Request, res: Response) => {
     } else {
       return successResponse({}, "Successfully verified", res);
     }
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getAllDoctorsList = async (req: Request, res: Response) => {
+  try {
+    const doctorList = await doctorModel.find(
+      {
+        deleted: false,
+        adminSearch: true,
+      },
+      excludeDoctorFields
+    );
+    return successResponse(
+      doctorList,
+      "Successfully fetched doctor's list",
+      res
+    );
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const verifyAgents = async (req: Request, res: Response) => {
+  try {
+    let body = req.params;
+    const agentObject = await agentModel.findOneAndUpdate(
+      {
+        _id: body.agentId,
+        deleted: false,
+        // verified: false,
+        adminSearch: true,
+      },
+      {
+        $set: {
+          verified: true,
+        },
+      }
+    );
+    if (agentObject.verified) {
+      throw new Error("Agent is already verified");
+    } else {
+      return successResponse({}, "Successfully verified", res);
+    }
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getAllAgentList = async (req: Request, res: Response) => {
+  try {
+    const agentList = await agentModel.find({
+      "delData.deleted": false,
+      adminSearch: true,
+    });
+    return successResponse(
+      agentList,
+      "Successfully fetched Agent's list",
+      res
+    );
   } catch (error: any) {
     return errorResponse(error, res);
   }
