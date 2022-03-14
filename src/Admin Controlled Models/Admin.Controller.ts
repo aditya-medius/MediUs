@@ -530,3 +530,18 @@ export const getAllAgentList = async (req: Request, res: Response) => {
     return errorResponse(error, res);
   }
 };
+export const getAllHospitalList = async (req: Request, res: Response) => {
+  try {
+    const hospitalList = await hospitalModel.find({
+      "delData.deleted": false,
+      adminSearch: true,
+    });
+    return successResponse(
+      hospitalList,
+      "Successfully fetched Hospital's list",
+      res
+    );
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
