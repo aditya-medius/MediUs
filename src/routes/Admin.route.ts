@@ -67,5 +67,6 @@ adminRouter.put("/verifyHospital/:hospitalId", adminController.verifyHospitals);
 adminRouter.put("/verifyAgent/:agentId", adminController.verifyAgents);
 
 adminRouter.get("/getAllDoctorsList/", adminController.getAllDoctorsList);
+adminRouter.get("/getAllHospitalList/", adminController.getAllHospitalList);
 adminRouter.get("/getAllAgentList/", adminController.getAllAgentList);
 export default adminRouter;
