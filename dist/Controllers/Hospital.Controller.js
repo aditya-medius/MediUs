@@ -63,6 +63,7 @@ const WorkingHour_helper_1 = require("../Services/WorkingHour.helper");
 const bcrypt = __importStar(require("bcrypt"));
 const Services_Model_1 = __importDefault(require("../Admin Controlled Models/Services.Model"));
 const Hospital_Service_1 = require("../Services/Hospital/Hospital.Service");
+const Utils_1 = require("../Services/Utils");
 const excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -668,22 +669,38 @@ const getAppointmentByDate = (req, res) => __awaiter(void 0, void 0, void 0, fun
         // ltDate.setUTCHours(24, 0, 0, 0);
         gtDate.setDate(gtDate.getDate() + 1);
         gtDate.setUTCHours(0, 0, 0, 0);
-        const appointmenObj = yield Appointment_Model_1.default
+        let appointmenObj = yield Appointment_Model_1.default
             .find({
             hospital: req.currentHospital,
             "time.date": { $gte: ltDate, $lte: gtDate },
         })
             .populate({
             path: "doctors",
-            select: Object.assign(Object.assign({}, excludeDoctorFields), { hospitalDetails: 0, specialization: 0, qualification: 0, overallExperience: 0 }),
+            select: {
+                password: 0,
+                verified: 0,
+                registrationDate: 0,
+                registration: 0,
+                KYCDetails: 0,
+                hospitalDetails: 0,
+                specialization: 0,
+                qualification: 0,
+                overallExperience: 0,
+            },
         })
             .populate({
             path: "patient",
-            select: Object.assign(Object.assign({}, Patient_Controller_1.excludePatientFields), { services: 0 }),
+            select: { password: 0, verified: 0, services: 0 },
         })
             .populate({
             path: "hospital",
             select: Patient_Controller_1.excludeHospitalFields,
+        })
+            .lean();
+        // appointmenObj = appointmenObj.toObject();
+        appointmenObj.forEach((e) => {
+            e.patient["age"] = (0, Utils_1.getAge)(e.patient.DOB);
+            e.doctors["age"] = (0, Utils_1.getAge)(e.doctors.DOB);
         });
         return (0, response_1.successResponse)(appointmenObj, "Success", res);
     }
@@ -812,6 +829,14 @@ const getDoctorsInHospital = (req, res) => __awaiter(void 0, void 0, void 0, fun
             .populate({
             path: "doctors",
             select: excludeDoctorFields,
+            populate: {
+                path: "specialization qualification",
+            },
+        })
+            .lean();
+        console.log("dsjnssdds:", hospitalDetails);
+        hospitalDetails.doctors.forEach((e) => {
+            e.hospitalDetails = e.hospitalDetails.filter((elem) => elem && elem.hospital.toString() == req.currentHospital);
         });
         return (0, response_1.successResponse)(hospitalDetails, "Success", res);
     }

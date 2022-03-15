@@ -27,10 +27,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateOTPtoken = exports.generateOTP = exports.encryptPassword = exports.phoneNumberRegex = void 0;
+exports.getAge = exports.generateOTPtoken = exports.generateOTP = exports.encryptPassword = exports.phoneNumberRegex = void 0;
 const bcrypt = __importStar(require("bcrypt"));
 const jwt = __importStar(require("jsonwebtoken"));
+const moment_1 = __importDefault(require("moment"));
 exports.phoneNumberRegex = /^[0]?[6789]\d{9}$/;
 const encryptPassword = (password) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -65,3 +69,13 @@ const generateOTPtoken = (OTP) => {
     return otpToken;
 };
 exports.generateOTPtoken = generateOTPtoken;
+const getAge = (dob) => {
+    const exp = (0, moment_1.default)(new Date(dob));
+    const currentDate = (0, moment_1.default)(new Date());
+    let age = currentDate.diff(exp, "years", true);
+    if (age < 1) {
+        age = currentDate.diff(exp, "months");
+    }
+    return age;
+};
+exports.getAge = getAge;

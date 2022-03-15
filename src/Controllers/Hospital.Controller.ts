@@ -28,6 +28,8 @@ import * as bcrypt from "bcrypt";
 import servicesModel from "../Admin Controlled Models/Services.Model";
 import { request } from "http";
 import { getHospitalToken } from "../Services/Hospital/Hospital.Service";
+import { getAgeOfDoctor } from "../Services/Doctor/Doctor.Service";
+import { getAge } from "../Services/Utils";
 
 const excludeDoctorFields = {
   password: 0,
@@ -747,7 +749,7 @@ export const getAppointmentByDate = async (req: Request, res: Response) => {
     gtDate.setDate(gtDate.getDate() + 1);
     gtDate.setUTCHours(0, 0, 0, 0);
 
-    const appointmenObj = await appointmentModel
+    let appointmenObj = await appointmentModel
       .find({
         hospital: req.currentHospital,
         "time.date": { $gte: ltDate, $lte: gtDate },
@@ -755,7 +757,11 @@ export const getAppointmentByDate = async (req: Request, res: Response) => {
       .populate({
         path: "doctors",
         select: {
-          ...excludeDoctorFields,
+          password: 0,
+          verified: 0,
+          registrationDate: 0,
+          registration: 0,
+          KYCDetails: 0,
           hospitalDetails: 0,
           specialization: 0,
           qualification: 0,
@@ -764,13 +770,19 @@ export const getAppointmentByDate = async (req: Request, res: Response) => {
       })
       .populate({
         path: "patient",
-        select: { ...excludePatientFields, services: 0 },
+        select: { password: 0, verified: 0, services: 0 },
       })
       .populate({
         path: "hospital",
         select: excludeHospitalFields,
-      });
+      })
+      .lean();
 
+    // appointmenObj = appointmenObj.toObject();
+    appointmenObj.forEach((e: any) => {
+      e.patient["age"] = getAge(e.patient.DOB);
+      e.doctors["age"] = getAge(e.doctors.DOB);
+    });
     return successResponse(appointmenObj, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
@@ -903,7 +915,18 @@ export const getDoctorsInHospital = async (req: Request, res: Response) => {
       .populate({
         path: "doctors",
         select: excludeDoctorFields,
-      });
+        populate: {
+          path: "specialization qualification",
+        },
+      })
+      .lean();
+    console.log("dsjnssdds:", hospitalDetails);
+
+    hospitalDetails.doctors.forEach((e: any) => {
+      e.hospitalDetails = e.hospitalDetails.filter(
+        (elem: any) => elem && elem.hospital.toString() == req.currentHospital
+      );
+    });
 
     return successResponse(hospitalDetails, "Success", res);
   } catch (error: any) {
