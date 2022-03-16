@@ -1,5 +1,6 @@
 import * as bcrypt from "bcrypt";
 import * as jwt from "jsonwebtoken";
+import moment from "moment";
 
 export const phoneNumberRegex: RegExp = /^[0]?[6789]\d{9}$/;
 
@@ -36,4 +37,15 @@ export const generateOTPtoken = (OTP: string) => {
     OTP
   );
   return otpToken;
+};
+
+export const getAge = (dob: Date) => {
+  const exp = moment(new Date(dob));
+  const currentDate = moment(new Date());
+
+  let age: any = currentDate.diff(exp, "years", true);
+  if (age < 1) {
+    age = currentDate.diff(exp, "months");
+  }
+  return age;
 };

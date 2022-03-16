@@ -21,12 +21,12 @@ const qualificationSchema = new Schema({
         required: true,
       },
     },
-    required: [true, "Duration is required"],
+    // required: [true, "Duration is required"],
   },
   email: {
     type: String,
     // required: [true, "Email is required"],
-    validate: [validator.isEmail, "Email isn't valid"],
+    // validate: [validator.isEmail, "Email isn't valid"],
     // unique: true,
   },
 });
