@@ -296,23 +296,23 @@ export const login = async (req: Request, res: Response) => {
       if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
         const OTP = Math.floor(100000 + Math.random() * 900000).toString();
 
+        const otpToken = jwt.sign(
+          { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
+          OTP
+        );
+        // Add OTP and phone number to temporary collection
+        await otpModel.findOneAndUpdate(
+          { phoneNumber: body.phoneNumber },
+          { $set: { phoneNumber: body.phoneNumber, otp: otpToken } },
+          { upsert: true }
+        );
         // Implement message service API
-        sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
-          .then(async (message: any) => {
-            const otpToken = jwt.sign(
-              { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
-              OTP
-            );
-            // Add OTP and phone number to temporary collection
-            await otpModel.findOneAndUpdate(
-              { phoneNumber: body.phoneNumber },
-              { $set: { phoneNumber: body.phoneNumber, otp: otpToken } },
-              { upsert: true }
-            );
-          })
-          .catch((error) => {
-            throw error;
-          });
+        // sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
+        //   .then(async (message: any) => {
+        //   })
+        //   .catch((error) => {
+        //     throw error;
+        //   });
 
         return successResponse({}, "OTP sent successfully", res);
       } else {
