@@ -5,6 +5,8 @@ import creditAmountModel from "../../Models/CreditAmount.Model";
 import withdrawModel from "../../Models/Withdrawal.Model";
 import * as jwt from "jsonwebtoken";
 import * as dotenv from "dotenv";
+import moment from "moment";
+
 dotenv.config();
 
 export const getUser = async (req: Request) => {
@@ -129,4 +131,16 @@ export const getPendingAmount = async (id: string) => {
 export const getDoctorToken = async (body: any) => {
   const token = await jwt.sign(body, process.env.SECRET_DOCTOR_KEY as string);
   return token;
+};
+
+export const getAgeOfDoctor = (dob: Date) => {
+  const exp = moment(new Date(dob));
+  const currentDate = moment(new Date());
+
+  let age: any = currentDate.diff(exp, "years", true);
+  if (age < 1) {
+    age = currentDate.diff(exp, "months");
+  }
+  console.log("dsjnbdsDS:", age);
+  return age;
 };

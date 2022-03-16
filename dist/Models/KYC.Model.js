@@ -20,9 +20,9 @@ const kycSchema = new mongoose_1.Schema({
     },
     adhaarCard: {
         type: String,
-        required: true,
-        minlength: 12,
-        unique: true,
+        // required: true,
+        // minlength: 12,
+        // unique: true,
     },
 }, {
     toJSON: { virtuals: true },
