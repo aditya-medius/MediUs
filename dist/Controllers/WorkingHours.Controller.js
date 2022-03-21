@@ -93,6 +93,7 @@ const getWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function
             hospitalDetails: req.body.hospitalDetails,
         }, "-byHospital -doctorDetails -hospitalDetails")
             .lean();
+        console.log("dsjbdssd:", WHObj);
         let WHObj2 = {};
         if (WHObj) {
             WHObj.map((e) => {
@@ -111,6 +112,7 @@ const getWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function
                     }
                 }
             });
+            console.log("dsjbsjbdsaasd:", WHObj2);
             WHObj2 = (0, WorkingHour_helper_1.formatWorkingHour)([WHObj2]);
             return (0, response_1.successResponse)({ workingHours: WHObj2 }, "Success", res);
         }

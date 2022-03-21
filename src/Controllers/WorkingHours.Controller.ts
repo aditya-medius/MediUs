@@ -88,6 +88,7 @@ export const getWorkingHours = async (req: Request, res: Response) => {
       )
       .lean();
 
+    console.log("dsjbdssd:", WHObj);
     let WHObj2: any = {};
     if (WHObj) {
       WHObj.map((e) => {
@@ -104,6 +105,7 @@ export const getWorkingHours = async (req: Request, res: Response) => {
           }
         }
       });
+      console.log("dsjbsjbdsaasd:", WHObj2);
       WHObj2 = formatWorkingHour([WHObj2]);
       return successResponse({ workingHours: WHObj2 }, "Success", res);
     } else {
