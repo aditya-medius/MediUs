@@ -920,7 +920,6 @@ export const getDoctorsInHospital = async (req: Request, res: Response) => {
         },
       })
       .lean();
-    console.log("dsjnssdds:", hospitalDetails);
 
     hospitalDetails.doctors.forEach((e: any) => {
       e.hospitalDetails = e.hospitalDetails.filter(

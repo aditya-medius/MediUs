@@ -834,7 +834,6 @@ const getDoctorsInHospital = (req, res) => __awaiter(void 0, void 0, void 0, fun
             },
         })
             .lean();
-        console.log("dsjnssdds:", hospitalDetails);
         hospitalDetails.doctors.forEach((e) => {
             e.hospitalDetails = e.hospitalDetails.filter((elem) => elem && elem.hospital.toString() == req.currentHospital);
         });

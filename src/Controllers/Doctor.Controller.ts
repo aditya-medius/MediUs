@@ -1085,6 +1085,21 @@ export const searchDoctorByPhoneNumberOrEmail = async (
 
     doctorObj["age"] = calculateAge(doctorObj["DOB"]);
 
+    if (req.currentHospital) {
+      let doctorExistInHospital = await hospitalModel.exists({
+        _id: req.currentHospital,
+        doctors: {
+          $in: [doctorObj._id],
+        },
+      });
+
+      if (doctorExistInHospital) {
+        doctorObj["existInHospital"] = true;
+      } else {
+        doctorObj["existInHospital"] = false;
+      }
+    }
+
     if (doctorObj) {
       return successResponse(doctorObj, "Success", res);
     }
