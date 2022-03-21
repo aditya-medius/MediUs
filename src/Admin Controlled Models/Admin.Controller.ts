@@ -289,78 +289,101 @@ export const getCityStateLocalityCountry = async (
   } catch (error: any) {}
 };
 
+// export const login = async (req: Request, res: Response) => {
+//   try {
+//     let body: any = req.query;
+//     if (!("OTP" in body)) {
+//       if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
+//         const OTP = Math.floor(100000 + Math.random() * 900000).toString();
+
+//         const otpToken = jwt.sign(
+//           { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
+//           OTP
+//         );
+//         // Add OTP and phone number to temporary collection
+//         await otpModel.findOneAndUpdate(
+//           { phoneNumber: body.phoneNumber },
+//           { $set: { phoneNumber: body.phoneNumber, otp: otpToken } },
+//           { upsert: true }
+//         );
+//         // Implement message service API
+//         // sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
+//         //   .then(async (message: any) => {
+//         //   })
+//         //   .catch((error) => {
+//         //     throw error;
+//         //   });
+
+//         return successResponse({}, "OTP sent successfully", res);
+//       } else {
+//         let error = new Error("Invalid phone number");
+//         error.name = "Invalid input";
+//         return errorResponse(error, res);
+//       }
+//     } else {
+//       const otpData = await otpModel.findOne({
+//         phoneNumber: body.phoneNumber,
+//       });
+//       try {
+//         const data: any = await jwt.verify(otpData.otp, body.OTP);
+//         if (Date.now() > data.expiresIn)
+//           return errorResponse(new Error("OTP expired"), res);
+//         if (body.OTP === data.otp) {
+//           const profile = await adminModel.findOne({
+//             phoneNumber: body.phoneNumber,
+//           });
+//           if (profile) {
+//             const token = await jwt.sign(
+//               profile.toJSON(),
+//               process.env.SECRET_ADMIN_KEY as string
+//             );
+//             otpData.remove();
+//             return successResponse(token, "Successfully logged in", res);
+//           } else {
+//             otpData.remove();
+//             return successResponse(
+//               { message: "No Data found" },
+//               "Create a new profile",
+//               res,
+//               201
+//             );
+//           }
+//         } else {
+//           const error = new Error("Invalid OTP");
+//           error.name = "Invalid";
+//           return errorResponse(error, res);
+//         }
+//       } catch (err) {
+//         if (err instanceof jwt.JsonWebTokenError) {
+//           const error = new Error("OTP isn't valid");
+//           error.name = "Invalid OTP";
+//           return errorResponse(error, res);
+//         }
+//         return errorResponse(err, res);
+//       }
+//     }
+//   } catch (error: any) {
+//     return errorResponse(error, res);
+//   }
+// };
+
 export const login = async (req: Request, res: Response) => {
   try {
     let body: any = req.query;
-    if (!("OTP" in body)) {
-      if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
-        const OTP = Math.floor(100000 + Math.random() * 900000).toString();
+    let profile: any = await adminModel.findOne({
+      phoneNumber: body.phoneNumber,
+    });
 
-        const otpToken = jwt.sign(
-          { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
-          OTP
-        );
-        // Add OTP and phone number to temporary collection
-        await otpModel.findOneAndUpdate(
-          { phoneNumber: body.phoneNumber },
-          { $set: { phoneNumber: body.phoneNumber, otp: otpToken } },
-          { upsert: true }
-        );
-        // Implement message service API
-        // sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
-        //   .then(async (message: any) => {
-        //   })
-        //   .catch((error) => {
-        //     throw error;
-        //   });
+    let compareResult: any = await bcrypt.compare(
+      body.password,
+      profile.password
+    );
+    console.log("dsjnsjnds", compareResult)
 
-        return successResponse({}, "OTP sent successfully", res);
-      } else {
-        let error = new Error("Invalid phone number");
-        error.name = "Invalid input";
-        return errorResponse(error, res);
-      }
-    } else {
-      const otpData = await otpModel.findOne({
-        phoneNumber: body.phoneNumber,
-      });
-      try {
-        const data: any = await jwt.verify(otpData.otp, body.OTP);
-        if (Date.now() > data.expiresIn)
-          return errorResponse(new Error("OTP expired"), res);
-        if (body.OTP === data.otp) {
-          const profile = await adminModel.findOne({
-            phoneNumber: body.phoneNumber,
-          });
-          if (profile) {
-            const token = await jwt.sign(
-              profile.toJSON(),
-              process.env.SECRET_ADMIN_KEY as string
-            );
-            otpData.remove();
-            return successResponse(token, "Successfully logged in", res);
-          } else {
-            otpData.remove();
-            return successResponse(
-              { message: "No Data found" },
-              "Create a new profile",
-              res,
-              201
-            );
-          }
-        } else {
-          const error = new Error("Invalid OTP");
-          error.name = "Invalid";
-          return errorResponse(error, res);
-        }
-      } catch (err) {
-        if (err instanceof jwt.JsonWebTokenError) {
-          const error = new Error("OTP isn't valid");
-          error.name = "Invalid OTP";
-          return errorResponse(error, res);
-        }
-        return errorResponse(err, res);
-      }
+    if (compareResult) {
+      return successResponse({}, "Successfully verified", res);
+    }else{
+      return errorResponse(new Error("Incorrect password"), res, 401)
     }
   } catch (error: any) {
     return errorResponse(error, res);
@@ -521,11 +544,7 @@ export const getAllAgentList = async (req: Request, res: Response) => {
       "delData.deleted": false,
       adminSearch: true,
     });
-    return successResponse(
-      agentList,
-      "Successfully fetched Agent's list",
-      res
-    );
+    return successResponse(agentList, "Successfully fetched Agent's list", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

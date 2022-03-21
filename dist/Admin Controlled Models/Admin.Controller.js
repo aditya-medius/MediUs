@@ -48,7 +48,6 @@ const Payment_Model_1 = __importDefault(require("./Payment.Model"));
 const Admin_Model_1 = __importDefault(require("./Admin.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
 const bcrypt = __importStar(require("bcrypt"));
-const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const Services_Model_1 = __importDefault(require("./Services.Model"));
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
@@ -309,66 +308,94 @@ const getCityStateLocalityCountry = (req, res) => __awaiter(void 0, void 0, void
     catch (error) { }
 });
 exports.getCityStateLocalityCountry = getCityStateLocalityCountry;
+// export const login = async (req: Request, res: Response) => {
+//   try {
+//     let body: any = req.query;
+//     if (!("OTP" in body)) {
+//       if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
+//         const OTP = Math.floor(100000 + Math.random() * 900000).toString();
+//         const otpToken = jwt.sign(
+//           { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
+//           OTP
+//         );
+//         // Add OTP and phone number to temporary collection
+//         await otpModel.findOneAndUpdate(
+//           { phoneNumber: body.phoneNumber },
+//           { $set: { phoneNumber: body.phoneNumber, otp: otpToken } },
+//           { upsert: true }
+//         );
+//         // Implement message service API
+//         // sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
+//         //   .then(async (message: any) => {
+//         //   })
+//         //   .catch((error) => {
+//         //     throw error;
+//         //   });
+//         return successResponse({}, "OTP sent successfully", res);
+//       } else {
+//         let error = new Error("Invalid phone number");
+//         error.name = "Invalid input";
+//         return errorResponse(error, res);
+//       }
+//     } else {
+//       const otpData = await otpModel.findOne({
+//         phoneNumber: body.phoneNumber,
+//       });
+//       try {
+//         const data: any = await jwt.verify(otpData.otp, body.OTP);
+//         if (Date.now() > data.expiresIn)
+//           return errorResponse(new Error("OTP expired"), res);
+//         if (body.OTP === data.otp) {
+//           const profile = await adminModel.findOne({
+//             phoneNumber: body.phoneNumber,
+//           });
+//           if (profile) {
+//             const token = await jwt.sign(
+//               profile.toJSON(),
+//               process.env.SECRET_ADMIN_KEY as string
+//             );
+//             otpData.remove();
+//             return successResponse(token, "Successfully logged in", res);
+//           } else {
+//             otpData.remove();
+//             return successResponse(
+//               { message: "No Data found" },
+//               "Create a new profile",
+//               res,
+//               201
+//             );
+//           }
+//         } else {
+//           const error = new Error("Invalid OTP");
+//           error.name = "Invalid";
+//           return errorResponse(error, res);
+//         }
+//       } catch (err) {
+//         if (err instanceof jwt.JsonWebTokenError) {
+//           const error = new Error("OTP isn't valid");
+//           error.name = "Invalid OTP";
+//           return errorResponse(error, res);
+//         }
+//         return errorResponse(err, res);
+//       }
+//     }
+//   } catch (error: any) {
+//     return errorResponse(error, res);
+//   }
+// };
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.query;
-        if (!("OTP" in body)) {
-            if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
-                const OTP = Math.floor(100000 + Math.random() * 900000).toString();
-                const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 }, OTP);
-                // Add OTP and phone number to temporary collection
-                yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: body.phoneNumber }, { $set: { phoneNumber: body.phoneNumber, otp: otpToken } }, { upsert: true });
-                // Implement message service API
-                // sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
-                //   .then(async (message: any) => {
-                //   })
-                //   .catch((error) => {
-                //     throw error;
-                //   });
-                return (0, response_1.successResponse)({}, "OTP sent successfully", res);
-            }
-            else {
-                let error = new Error("Invalid phone number");
-                error.name = "Invalid input";
-                return (0, response_1.errorResponse)(error, res);
-            }
+        let profile = yield Admin_Model_1.default.findOne({
+            phoneNumber: body.phoneNumber,
+        });
+        let compareResult = yield bcrypt.compare(body.password, profile.password);
+        console.log("dsjnsjnds", compareResult);
+        if (compareResult) {
+            return (0, response_1.successResponse)({}, "Successfully verified", res);
         }
         else {
-            const otpData = yield OTP_Model_1.default.findOne({
-                phoneNumber: body.phoneNumber,
-            });
-            try {
-                const data = yield jwt.verify(otpData.otp, body.OTP);
-                if (Date.now() > data.expiresIn)
-                    return (0, response_1.errorResponse)(new Error("OTP expired"), res);
-                if (body.OTP === data.otp) {
-                    const profile = yield Admin_Model_1.default.findOne({
-                        phoneNumber: body.phoneNumber,
-                    });
-                    if (profile) {
-                        const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_ADMIN_KEY);
-                        otpData.remove();
-                        return (0, response_1.successResponse)(token, "Successfully logged in", res);
-                    }
-                    else {
-                        otpData.remove();
-                        return (0, response_1.successResponse)({ message: "No Data found" }, "Create a new profile", res, 201);
-                    }
-                }
-                else {
-                    const error = new Error("Invalid OTP");
-                    error.name = "Invalid";
-                    return (0, response_1.errorResponse)(error, res);
-                }
-            }
-            catch (err) {
-                if (err instanceof jwt.JsonWebTokenError) {
-                    const error = new Error("OTP isn't valid");
-                    error.name = "Invalid OTP";
-                    return (0, response_1.errorResponse)(error, res);
-                }
-                return (0, response_1.errorResponse)(err, res);
-            }
+            return (0, response_1.errorResponse)(new Error("Incorrect password"), res, 401);
         }
     }
     catch (error) {
