@@ -314,23 +314,23 @@ exports.getCityStateLocalityCountry = getCityStateLocalityCountry;
 //     if (!("OTP" in body)) {
 //       if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
 //         const OTP = Math.floor(100000 + Math.random() * 900000).toString();
-//         const otpToken = jwt.sign(
-//           { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
-//           OTP
-//         );
-//         // Add OTP and phone number to temporary collection
-//         await otpModel.findOneAndUpdate(
-//           { phoneNumber: body.phoneNumber },
-//           { $set: { phoneNumber: body.phoneNumber, otp: otpToken } },
-//           { upsert: true }
-//         );
 //         // Implement message service API
-//         // sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
-//         //   .then(async (message: any) => {
-//         //   })
-//         //   .catch((error) => {
-//         //     throw error;
-//         //   });
+//         sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
+//           .then(async (message: any) => {
+//             const otpToken = jwt.sign(
+//               { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
+//               OTP
+//             );
+//             // Add OTP and phone number to temporary collection
+//             await otpModel.findOneAndUpdate(
+//               { phoneNumber: body.phoneNumber },
+//               { $set: { phoneNumber: body.phoneNumber, otp: otpToken } },
+//               { upsert: true }
+//             );
+//           })
+//           .catch((error) => {
+//             throw error;
+//           });
 //         return successResponse({}, "OTP sent successfully", res);
 //       } else {
 //         let error = new Error("Invalid phone number");
@@ -386,16 +386,15 @@ exports.getCityStateLocalityCountry = getCityStateLocalityCountry;
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.query;
-        let profile = yield Admin_Model_1.default.findOne({
+        const profile = yield Admin_Model_1.default.findOne({
             phoneNumber: body.phoneNumber,
         });
-        let compareResult = yield bcrypt.compare(body.password, profile.password);
-        console.log("dsjnsjnds", compareResult);
-        if (compareResult) {
-            return (0, response_1.successResponse)({}, "Successfully verified", res);
+        let compRes = yield bcrypt.compare(body.password, profile.password);
+        if (compRes) {
+            return (0, response_1.successResponse)({}, "Success", res);
         }
         else {
-            return (0, response_1.errorResponse)(new Error("Incorrect password"), res, 401);
+            return (0, response_1.errorResponse)(new Error("Invalid password"), res, 400);
         }
     }
     catch (error) {

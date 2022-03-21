@@ -296,23 +296,23 @@ export const getCityStateLocalityCountry = async (
 //       if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
 //         const OTP = Math.floor(100000 + Math.random() * 900000).toString();
 
-//         const otpToken = jwt.sign(
-//           { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
-//           OTP
-//         );
-//         // Add OTP and phone number to temporary collection
-//         await otpModel.findOneAndUpdate(
-//           { phoneNumber: body.phoneNumber },
-//           { $set: { phoneNumber: body.phoneNumber, otp: otpToken } },
-//           { upsert: true }
-//         );
 //         // Implement message service API
-//         // sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
-//         //   .then(async (message: any) => {
-//         //   })
-//         //   .catch((error) => {
-//         //     throw error;
-//         //   });
+//         sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
+//           .then(async (message: any) => {
+//             const otpToken = jwt.sign(
+//               { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
+//               OTP
+//             );
+//             // Add OTP and phone number to temporary collection
+//             await otpModel.findOneAndUpdate(
+//               { phoneNumber: body.phoneNumber },
+//               { $set: { phoneNumber: body.phoneNumber, otp: otpToken } },
+//               { upsert: true }
+//             );
+//           })
+//           .catch((error) => {
+//             throw error;
+//           });
 
 //         return successResponse({}, "OTP sent successfully", res);
 //       } else {
@@ -370,26 +370,20 @@ export const getCityStateLocalityCountry = async (
 export const login = async (req: Request, res: Response) => {
   try {
     let body: any = req.query;
-    let profile: any = await adminModel.findOne({
+    const profile = await adminModel.findOne({
       phoneNumber: body.phoneNumber,
     });
 
-    let compareResult: any = await bcrypt.compare(
-      body.password,
-      profile.password
-    );
-    console.log("dsjnsjnds", compareResult)
-
-    if (compareResult) {
-      return successResponse({}, "Successfully verified", res);
-    }else{
-      return errorResponse(new Error("Incorrect password"), res, 401)
+    let compRes = await bcrypt.compare(body.password, profile.password);
+    if (compRes) {
+      return successResponse({}, "Success", res);
+    } else {
+      return errorResponse(new Error("Invalid password"), res, 400);
     }
   } catch (error: any) {
     return errorResponse(error, res);
   }
 };
-
 export const create = async (req: Request, res: Response) => {
   try {
     let body = req.body;

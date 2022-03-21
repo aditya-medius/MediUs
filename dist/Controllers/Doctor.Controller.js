@@ -960,6 +960,20 @@ const searchDoctorByPhoneNumberOrEmail = (req, res) => __awaiter(void 0, void 0,
                 .lean();
         }
         doctorObj["age"] = (0, Patient_Service_1.calculateAge)(doctorObj["DOB"]);
+        if (req.currentHospital) {
+            let doctorExistInHospital = yield Hospital_Model_1.default.exists({
+                _id: req.currentHospital,
+                doctors: {
+                    $in: [doctorObj._id],
+                },
+            });
+            if (doctorExistInHospital) {
+                doctorObj["existInHospital"] = true;
+            }
+            else {
+                doctorObj["existInHospital"] = false;
+            }
+        }
         if (doctorObj) {
             return (0, response_1.successResponse)(doctorObj, "Success", res);
         }
