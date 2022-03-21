@@ -25,6 +25,7 @@ export const formatWorkingHour = (workingHours: Array<any>) => {
       }
     });
   });
+  console.log("working hours:", workingHours);
   workingHours = workingHours.flat().filter((e: any) => e);
   return workingHours;
 };

@@ -27,6 +27,7 @@ const formatWorkingHour = (workingHours) => {
             }
         });
     });
+    console.log("working hours:", workingHours);
     workingHours = workingHours.flat().filter((e) => e);
     return workingHours;
 };

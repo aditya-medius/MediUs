@@ -53,7 +53,7 @@ adminRouter.get(
 adminRouter.post("/create", adminController.create);
 
 // Get admin profile
-adminRouter.get("/login", adminController.login);
+adminRouter.put("/login", adminController.login);
 
 // Anemity controller
 adminRouter.post("/addHospitalService", adminController.addHospitalService);
