@@ -1035,6 +1035,7 @@ const getHospitalListByDoctorId = (req, res) => __awaiter(void 0, void 0, void 0
 });
 exports.getHospitalListByDoctorId = getHospitalListByDoctorId;
 const checkDoctorAvailability = (body) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("bodu:", body);
     console.log("toime:", body.time.date);
     const time = new Date(body.time.date);
     console.log("time:", time);

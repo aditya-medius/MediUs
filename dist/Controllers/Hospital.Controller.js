@@ -364,7 +364,7 @@ const searchHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
                         bySpeciality: [
                             {
                                 $lookup: {
-                                    from: "specialization",
+                                    from: schemaNames_1.specialization,
                                     localField: "speciality",
                                     foreignField: "_id",
                                     as: "byspeciality",
@@ -550,7 +550,7 @@ const searchHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 $or: [
                     {
                         deleted: false,
-                        active: true,
+                        // active: true,
                         specialisedIn: { $in: specialityArray },
                         // doctors: {specialization: {$in: specialityArray}}
                     },

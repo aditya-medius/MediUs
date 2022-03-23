@@ -1171,6 +1171,7 @@ export const checkDoctorAvailability = async (
   status: boolean;
   message: string;
 }> => {
+  console.log("bodu:", body);
   console.log("toime:", body.time.date);
   const time = new Date(body.time.date);
   console.log("time:", time);
