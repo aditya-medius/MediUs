@@ -209,6 +209,10 @@ exports.addToSpecialityDoctorType = addToSpecialityDoctorType;
 const addCity = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
+        let exist = yield City_Model_1.default.exists(body);
+        if (exist) {
+            return (0, response_1.errorResponse)(new Error("City already exist"), res);
+        }
         let cityObj = yield new City_Model_1.default(body).save();
         return (0, response_1.successResponse)(cityObj, "City has been successfully added", res);
     }
@@ -221,6 +225,10 @@ exports.addCity = addCity;
 const addState = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
+        let exist = yield State_Model_1.default.exists(body);
+        if (exist) {
+            return (0, response_1.errorResponse)(new Error("State already exist"), res);
+        }
         let stateObj = yield new State_Model_1.default(body).save();
         return (0, response_1.successResponse)(stateObj, "State has been successfully added", res);
     }
@@ -233,6 +241,10 @@ exports.addState = addState;
 const addLocality = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
+        let exist = yield Locality_Model_1.default.exists(body);
+        if (exist) {
+            return (0, response_1.errorResponse)(new Error("Locality already exist"), res);
+        }
         let localityObj = yield new Locality_Model_1.default(body).save();
         return (0, response_1.successResponse)(localityObj, "Locality has been successfully added", res);
     }
@@ -245,6 +257,10 @@ exports.addLocality = addLocality;
 const addCountry = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
+        let exist = yield Country_Model_1.default.exists(body);
+        if (exist) {
+            return (0, response_1.errorResponse)(new Error("Country already exist"), res);
+        }
         let countryObj = yield new Country_Model_1.default(body).save();
         return (0, response_1.successResponse)(countryObj, "Country has been successfully added", res);
     }

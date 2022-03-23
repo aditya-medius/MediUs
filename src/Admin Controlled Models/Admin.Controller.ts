@@ -187,6 +187,10 @@ export const addToSpecialityDoctorType = async (
 export const addCity = async (req: Request, res: Response) => {
   try {
     let body = req.body;
+    let exist = await cityModel.exists(body);
+    if (exist) {
+      return errorResponse(new Error("City already exist"), res);
+    }
     let cityObj = await new cityModel(body).save();
     return successResponse(cityObj, "City has been successfully added", res);
   } catch (error: any) {
@@ -198,6 +202,10 @@ export const addCity = async (req: Request, res: Response) => {
 export const addState = async (req: Request, res: Response) => {
   try {
     let body = req.body;
+    let exist = await stateModel.exists(body);
+    if (exist) {
+      return errorResponse(new Error("State already exist"), res);
+    }
     let stateObj = await new stateModel(body).save();
     return successResponse(stateObj, "State has been successfully added", res);
   } catch (error: any) {
@@ -208,6 +216,10 @@ export const addState = async (req: Request, res: Response) => {
 export const addLocality = async (req: Request, res: Response) => {
   try {
     let body = req.body;
+    let exist = await LocalityModel.exists(body);
+    if (exist) {
+      return errorResponse(new Error("Locality already exist"), res);
+    }
     let localityObj = await new LocalityModel(body).save();
     return successResponse(
       localityObj,
@@ -222,6 +234,10 @@ export const addLocality = async (req: Request, res: Response) => {
 export const addCountry = async (req: Request, res: Response) => {
   try {
     let body = req.body;
+    let exist = await countryModel.exists(body);
+    if (exist) {
+      return errorResponse(new Error("Country already exist"), res);
+    }
     let countryObj = await new countryModel(body).save();
     return successResponse(
       countryObj,
