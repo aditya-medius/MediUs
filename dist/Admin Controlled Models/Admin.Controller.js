@@ -56,6 +56,10 @@ const Agent_Model_1 = __importDefault(require("../Models/Agent.Model"));
 const addSpeciality = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const body = req.body;
+        let exist = yield Specialization_Model_1.default.exists(body);
+        if (exist) {
+            return (0, response_1.errorResponse)(new Error("Speciality already exist"), res);
+        }
         const data = yield new Specialization_Model_1.default(body).save();
         return (0, response_1.successResponse)(data, "Successfully created data", res);
     }
@@ -71,6 +75,10 @@ exports.addSpeciality = addSpeciality;
 const addBodyPart = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const body = req.body;
+        let exist = yield BodyPart_Model_1.default.exists(body);
+        if (exist) {
+            return (0, response_1.errorResponse)(new Error("Body Part already exist"), res);
+        }
         const data = yield new BodyPart_Model_1.default(body).save();
         return (0, response_1.successResponse)(data, "Successfully created data", res);
     }

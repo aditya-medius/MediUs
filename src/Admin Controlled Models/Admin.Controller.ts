@@ -29,6 +29,10 @@ import agentModel from "../Models/Agent.Model";
 export const addSpeciality = async (req: Request, res: Response) => {
   try {
     const body = req.body;
+    let exist = await specialityModel.exists(body);
+    if (exist) {
+      return errorResponse(new Error("Speciality already exist"), res);
+    }
     const data = await new specialityModel(body).save();
     return successResponse(data, "Successfully created data", res);
   } catch (error) {
@@ -43,6 +47,10 @@ export const addSpeciality = async (req: Request, res: Response) => {
 export const addBodyPart = async (req: Request, res: Response) => {
   try {
     const body = req.body;
+    let exist = await bodyPartModel.exists(body);
+    if (exist) {
+      return errorResponse(new Error("Body Part already exist"), res);
+    }
     const data = await new bodyPartModel(body).save();
     return successResponse(data, "Successfully created data", res);
   } catch (error) {
