@@ -391,7 +391,7 @@ export const searchHospital = async (req: Request, res: Response) => {
             bySpeciality: [
               {
                 $lookup: {
-                  from: "specialization",
+                  from: specialization,
                   localField: "speciality",
                   foreignField: "_id",
                   as: "byspeciality",
@@ -579,7 +579,7 @@ export const searchHospital = async (req: Request, res: Response) => {
               $or: [
                 {
                   deleted: false,
-                  active: true,
+                  // active: true,
                   specialisedIn: { $in: specialityArray },
                   // doctors: {specialization: {$in: specialityArray}}
                 },
