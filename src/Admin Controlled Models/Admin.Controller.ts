@@ -99,6 +99,11 @@ export const addToSpecialityBody = async (req: Request, res: Response) => {
 export const addDisease = async (req: Request, res: Response) => {
   try {
     let body = req.body;
+    console.log("jdnjdndd", body);
+    let exist = await diseaseModel.exists(body);
+    if (exist) {
+      return errorResponse(new Error("Disease already exist"), res);
+    }
     const data = await new diseaseModel(body).save();
     return successResponse(data, "Successfully added disease", res);
   } catch (error) {
@@ -147,6 +152,10 @@ export const addToSpecialityDisease = async (req: Request, res: Response) => {
 export const addDoctorType = async (req: Request, res: Response) => {
   try {
     let body = req.body;
+    let exist = await doctorTypeModel.exists(body);
+    if (exist) {
+      return errorResponse(new Error("Doctor Type already exist"), res);
+    }
     const data = await new doctorTypeModel(body).save();
     return successResponse(data, "Successfully added doctor type", res);
   } catch (error) {
@@ -438,6 +447,10 @@ export const create = async (req: Request, res: Response) => {
 export const addHospitalService = async (req: Request, res: Response) => {
   try {
     let body = req.body;
+    let exist = await servicesModel.exists(body);
+    if (exist) {
+      return errorResponse(new Error("Service already exist"), res);
+    }
     let serviceObj = await new servicesModel(body).save();
     return successResponse(serviceObj, "Successfully created services", res);
   } catch (error: any) {

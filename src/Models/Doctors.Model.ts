@@ -206,10 +206,11 @@ doctorSchema.pre("findOneAndUpdate", async function (next) {
   let updateQuery: any = this.getUpdate();
   updateQuery = updateQuery["$set"];
   if (
-    "phoneNumber" in updateQuery ||
-    "email" in updateQuery ||
-    "panCard" in updateQuery ||
-    "adhaarCard" in updateQuery
+    updateQuery &&
+    ("phoneNumber" in updateQuery ||
+      "email" in updateQuery ||
+      "panCard" in updateQuery ||
+      "adhaarCard" in updateQuery)
   ) {
     const query = this.getQuery();
 

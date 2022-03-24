@@ -214,4 +214,11 @@ doctorRouter.put(
   doctorController.checkVerificationStatus
 );
 
+/* Hospital khud ko doctor ki profile me add kr ske */
+doctorRouter.post(
+  "/addHospitalInDoctorProfile",
+  oneOf(authenticateHospital),
+  doctorController.addHospitalInDoctorProfile
+);
+
 export default doctorRouter;

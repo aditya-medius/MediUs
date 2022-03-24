@@ -1083,24 +1083,23 @@ export const searchDoctorByPhoneNumberOrEmail = async (
         .lean();
     }
 
-    doctorObj["age"] = calculateAge(doctorObj["DOB"]);
-
-    if (req.currentHospital) {
-      let doctorExistInHospital = await hospitalModel.exists({
-        _id: req.currentHospital,
-        doctors: {
-          $in: [doctorObj._id],
-        },
-      });
-
-      if (doctorExistInHospital) {
-        doctorObj["existInHospital"] = true;
-      } else {
-        doctorObj["existInHospital"] = false;
-      }
-    }
-
     if (doctorObj) {
+      doctorObj["age"] = calculateAge(doctorObj["DOB"]);
+
+      if (req.currentHospital) {
+        let doctorExistInHospital = await hospitalModel.exists({
+          _id: req.currentHospital,
+          doctors: {
+            $in: [doctorObj._id],
+          },
+        });
+
+        if (doctorExistInHospital) {
+          doctorObj["existInHospital"] = true;
+        } else {
+          doctorObj["existInHospital"] = false;
+        }
+      }
       return successResponse(doctorObj, "Success", res);
     }
     return successResponse({}, "No data found", res);
@@ -1599,6 +1598,70 @@ export const checkVerificationStatus = async (req: Request, res: Response) => {
       "Your profile is verified",
       res
     );
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+/* Hospital khud ko doctor ki profile me add kr ske */
+export const addHospitalInDoctorProfile = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    let { doctorId, ...rest } = req.body;
+    let keys = Object.keys(rest);
+    if (
+      !(
+        keys.includes("hospital") &&
+        keys.includes("workingHours") &&
+        keys.includes("consultationFee")
+      )
+    ) {
+      return errorResponse(
+        new Error("Incorrent or improper number of values in request body"),
+        res,
+        402
+      );
+    }
+
+    let all_workingHours = (
+      await workingHourModel.find(
+        { doctorDetails: doctorId, hospitalDetails: req.currentHospital },
+        { _id: 1 }
+      )
+    ).map((e) => e._id.toString());
+
+    if (!all_workingHours.includes(rest.workingHours)) {
+      return errorResponse(
+        new Error(
+          "The working hour you've sent does not belong to this doctor and hospital"
+        ),
+        res,
+        402
+      );
+    }
+    let doctor = await doctorModel.findOneAndUpdate(
+      {
+        _id: doctorId,
+      },
+      {
+        $addToSet: {
+          hospitalDetails: [
+            {
+              hospital: rest.hospital,
+              consultationFee: rest.consultationFee,
+            },
+          ],
+        },
+      }
+    );
+
+    if (doctor) {
+      return successResponse({}, "Successfully updated profile", res);
+    } else {
+      return errorResponse(new Error("Doctor doesn't exist"), res, 404);
+    }
   } catch (error: any) {
     return errorResponse(error, res);
   }

@@ -38,3 +38,5 @@ export const creditAmount: string = "credits";
 export const withdraw: string = "withdrawals";
 export const services: string = "services";
 export const agent: string = "agents";
+export const approveStatus: string = "approvestatus";
+export const notifications: string = "notifications";
