@@ -126,6 +126,11 @@ exports.addToSpecialityBody = addToSpecialityBody;
 const addDisease = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
+        console.log("jdnjdndd", body);
+        let exist = yield Disease_Model_1.default.exists(body);
+        if (exist) {
+            return (0, response_1.errorResponse)(new Error("Disease already exist"), res);
+        }
         const data = yield new Disease_Model_1.default(body).save();
         return (0, response_1.successResponse)(data, "Successfully added disease", res);
     }
@@ -173,6 +178,10 @@ exports.addToSpecialityDisease = addToSpecialityDisease;
 const addDoctorType = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
+        let exist = yield DoctorType_Model_1.default.exists(body);
+        if (exist) {
+            return (0, response_1.errorResponse)(new Error("Doctor Type already exist"), res);
+        }
         const data = yield new DoctorType_Model_1.default(body).save();
         return (0, response_1.successResponse)(data, "Successfully added doctor type", res);
     }
@@ -449,6 +458,10 @@ exports.create = create;
 const addHospitalService = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
+        let exist = yield Services_Model_1.default.exists(body);
+        if (exist) {
+            return (0, response_1.errorResponse)(new Error("Service already exist"), res);
+        }
         let serviceObj = yield new Services_Model_1.default(body).save();
         return (0, response_1.successResponse)(serviceObj, "Successfully created services", res);
     }
