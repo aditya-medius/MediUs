@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkVerificationStatus = exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
+exports.addHospitalInDoctorProfile = exports.checkVerificationStatus = exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -959,22 +959,22 @@ const searchDoctorByPhoneNumberOrEmail = (req, res) => __awaiter(void 0, void 0,
             }, { firstName: 1, lastName: 1, gender: 1, DOB: 1, KYCDetails: 0 })
                 .lean();
         }
-        doctorObj["age"] = (0, Patient_Service_1.calculateAge)(doctorObj["DOB"]);
-        if (req.currentHospital) {
-            let doctorExistInHospital = yield Hospital_Model_1.default.exists({
-                _id: req.currentHospital,
-                doctors: {
-                    $in: [doctorObj._id],
-                },
-            });
-            if (doctorExistInHospital) {
-                doctorObj["existInHospital"] = true;
-            }
-            else {
-                doctorObj["existInHospital"] = false;
-            }
-        }
         if (doctorObj) {
+            doctorObj["age"] = (0, Patient_Service_1.calculateAge)(doctorObj["DOB"]);
+            if (req.currentHospital) {
+                let doctorExistInHospital = yield Hospital_Model_1.default.exists({
+                    _id: req.currentHospital,
+                    doctors: {
+                        $in: [doctorObj._id],
+                    },
+                });
+                if (doctorExistInHospital) {
+                    doctorObj["existInHospital"] = true;
+                }
+                else {
+                    doctorObj["existInHospital"] = false;
+                }
+            }
             return (0, response_1.successResponse)(doctorObj, "Success", res);
         }
         return (0, response_1.successResponse)({}, "No data found", res);
@@ -1427,3 +1427,41 @@ const checkVerificationStatus = (req, res) => __awaiter(void 0, void 0, void 0, 
     }
 });
 exports.checkVerificationStatus = checkVerificationStatus;
+/* Hospital khud ko doctor ki profile me add kr ske */
+const addHospitalInDoctorProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let _b = req.body, { doctorId } = _b, rest = __rest(_b, ["doctorId"]);
+        let keys = Object.keys(rest);
+        if (!(keys.includes("hospital") &&
+            keys.includes("workingHours") &&
+            keys.includes("consultationFee"))) {
+            return (0, response_1.errorResponse)(new Error("Incorrent or improper number of values in request body"), res, 402);
+        }
+        let all_workingHours = (yield WorkingHours_Model_1.default.find({ doctorDetails: doctorId, hospitalDetails: req.currentHospital }, { _id: 1 })).map((e) => e._id.toString());
+        if (!all_workingHours.includes(rest.workingHours)) {
+            return (0, response_1.errorResponse)(new Error("The working hour you've sent does not belong to this doctor and hospital"), res, 402);
+        }
+        let doctor = yield Doctors_Model_1.default.findOneAndUpdate({
+            _id: doctorId,
+        }, {
+            $addToSet: {
+                hospitalDetails: [
+                    {
+                        hospital: rest.hospital,
+                        consultationFee: rest.consultationFee,
+                    },
+                ],
+            },
+        });
+        if (doctor) {
+            return (0, response_1.successResponse)({}, "Successfully updated profile", res);
+        }
+        else {
+            return (0, response_1.errorResponse)(new Error("Doctor doesn't exist"), res, 404);
+        }
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.addHospitalInDoctorProfile = addHospitalInDoctorProfile;

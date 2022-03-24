@@ -222,10 +222,11 @@ doctorSchema.pre("findOneAndUpdate", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         let updateQuery = this.getUpdate();
         updateQuery = updateQuery["$set"];
-        if ("phoneNumber" in updateQuery ||
-            "email" in updateQuery ||
-            "panCard" in updateQuery ||
-            "adhaarCard" in updateQuery) {
+        if (updateQuery &&
+            ("phoneNumber" in updateQuery ||
+                "email" in updateQuery ||
+                "panCard" in updateQuery ||
+                "adhaarCard" in updateQuery)) {
             const query = this.getQuery();
             const profileExist = yield this.model.findOne({
                 _id: { $ne: query._id },
