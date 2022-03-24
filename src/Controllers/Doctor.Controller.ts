@@ -1180,6 +1180,7 @@ export const checkDoctorAvailability = async (
     doctorDetails: body.doctors,
     hospitalDetails: body.hospital,
   };
+  console.log("D:", d);
   if (d == 0) {
     d = "sunday";
     query["sunday.working"] = true;
@@ -1224,6 +1225,7 @@ export const checkDoctorAvailability = async (
     query["saturday.till.time"] = body.time.till.time;
     query["saturday.till.division"] = body.time.till.division;
   }
+  console.log("query:", query);
   // @TODO check if working hour exist first
   let capacity = await workingHourModel.findOne(query);
   if (!capacity) {

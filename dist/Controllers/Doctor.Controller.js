@@ -1044,6 +1044,7 @@ const checkDoctorAvailability = (body) => __awaiter(void 0, void 0, void 0, func
         doctorDetails: body.doctors,
         hospitalDetails: body.hospital,
     };
+    console.log("D:", d);
     if (d == 0) {
         d = "sunday";
         query["sunday.working"] = true;
@@ -1094,6 +1095,7 @@ const checkDoctorAvailability = (body) => __awaiter(void 0, void 0, void 0, func
         query["saturday.till.time"] = body.time.till.time;
         query["saturday.till.division"] = body.time.till.division;
     }
+    console.log("query:", query);
     // @TODO check if working hour exist first
     let capacity = yield WorkingHours_Model_1.default.findOne(query);
     if (!capacity) {

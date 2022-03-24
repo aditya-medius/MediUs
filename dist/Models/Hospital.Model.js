@@ -130,6 +130,12 @@ const hospitalSchema = new mongoose_1.Schema({
         type: Boolean,
         default: false,
     },
+    modeOfAppointments: [
+        {
+            type: String,
+            enum: ["Offline", "Online"],
+        },
+    ],
 });
 hospitalSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {

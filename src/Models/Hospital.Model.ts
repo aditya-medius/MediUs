@@ -118,6 +118,13 @@ const hospitalSchema = new Schema({
     type: Boolean,
     default: false,
   },
+
+  modeOfAppointments: [
+    {
+      type: String,
+      enum: ["Offline", "Online"],
+    },
+  ],
 });
 
 hospitalSchema.pre("save", async function (next) {
