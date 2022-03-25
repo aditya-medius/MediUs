@@ -565,13 +565,26 @@ export const searchHospital = async (req: Request, res: Response) => {
         { $unwind: "$DoctorTypeAndSpeciality" },
         { $replaceRoot: { newRoot: "$DoctorTypeAndSpeciality" } },
       ]),
+      hospitalModel.aggregate([
+        {
+          $match: {
+            name: { $regex: term, $options: "i" },
+          },
+        },
+        {
+          $project: {
+            specialisedIn: 1,
+            _id: 0,
+          },
+        },
+      ]),
     ];
 
     Promise.all(promiseArray)
       .then(async (specialityArray: Array<any>) => {
         specialityArray = specialityArray.flat();
         specialityArray = _.map(specialityArray, (e) => {
-          return e.speciality;
+          return e.speciality ? e.speciality : e.specialisedIn;
         });
         const hospitalArray = await hospitalModel
           .find(
