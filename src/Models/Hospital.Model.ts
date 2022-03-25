@@ -186,7 +186,7 @@ hospitalSchema.pre("findOneAndUpdate", async function (next) {
 });
 
 hospitalSchema.post("find", async function (result) {
-  console.log("result:", result);
+  // console.log("result:", result);
 });
 
 hospitalSchema.post("findOne", async function (result) {

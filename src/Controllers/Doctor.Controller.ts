@@ -593,13 +593,29 @@ export const searchDoctor = async (req: Request, res: Response) => {
         { $unwind: "$DoctorTypeAndSpeciality" },
         { $replaceRoot: { newRoot: "$DoctorTypeAndSpeciality" } },
       ]),
+      doctorModel.aggregate([
+        {
+          $match: {
+            $or: [
+              { firstName: { $regex: term, $options: "i" } },
+              { lastName: { $regex: term, $options: "i" } },
+            ],
+          },
+        },
+        {
+          $project: {
+            specialization: 1,
+            _id: 0,
+          },
+        },
+      ]),
     ];
 
     Promise.all(promiseArray)
       .then(async (specialityArray: Array<any>) => {
         specialityArray = specialityArray.flat();
         specialityArray = _.map(specialityArray, (e) => {
-          return e.speciality;
+          return e.speciality ? e.speciality : e.specialization;
         });
 
         const doctorArray = await doctorModel

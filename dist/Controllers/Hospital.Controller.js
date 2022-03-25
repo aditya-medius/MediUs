@@ -538,12 +538,25 @@ const searchHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 { $unwind: "$DoctorTypeAndSpeciality" },
                 { $replaceRoot: { newRoot: "$DoctorTypeAndSpeciality" } },
             ]),
+            Hospital_Model_1.default.aggregate([
+                {
+                    $match: {
+                        name: { $regex: term, $options: "i" },
+                    },
+                },
+                {
+                    $project: {
+                        specialisedIn: 1,
+                        _id: 0,
+                    },
+                },
+            ]),
         ];
         Promise.all(promiseArray)
             .then((specialityArray) => __awaiter(void 0, void 0, void 0, function* () {
             specialityArray = specialityArray.flat();
             specialityArray = underscore_1.default.map(specialityArray, (e) => {
-                return e.speciality;
+                return e.speciality ? e.speciality : e.specialisedIn;
             });
             const hospitalArray = yield Hospital_Model_1.default
                 .find({

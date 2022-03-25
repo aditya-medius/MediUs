@@ -21,6 +21,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const adminController = __importStar(require("../Admin Controlled Models/Admin.Controller"));
+const patientController = __importStar(require("../Controllers/Patient.Controller"));
 const adminRouter = (0, express_1.Router)();
 adminRouter.post("/addSpeciality", adminController.addSpeciality);
 // Body part
@@ -58,4 +59,5 @@ adminRouter.put("/verifyAgent/:agentId", adminController.verifyAgents);
 adminRouter.get("/getAllDoctorsList/", adminController.getAllDoctorsList);
 adminRouter.get("/getAllHospitalList/", adminController.getAllHospitalList);
 adminRouter.get("/getAllAgentList/", adminController.getAllAgentList);
+adminRouter.get("/getListOfSpecialityBodyPartAndDisease", patientController.getSpecialityBodyPartAndDisease);
 exports.default = adminRouter;

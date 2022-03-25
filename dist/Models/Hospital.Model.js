@@ -201,7 +201,7 @@ hospitalSchema.pre("findOneAndUpdate", function (next) {
 });
 hospitalSchema.post("find", function (result) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log("result:", result);
+        // console.log("result:", result);
     });
 });
 hospitalSchema.post("findOne", function (result) {

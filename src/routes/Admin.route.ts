@@ -2,7 +2,7 @@ import { Router } from "express";
 import * as adminController from "../Admin Controlled Models/Admin.Controller";
 import { oneOf } from "../Services/middlewareHelper";
 import { authenticateAdmin } from "../authentication/Admin.auth";
-
+import * as patientController from "../Controllers/Patient.Controller";
 const adminRouter = Router();
 
 adminRouter.post("/addSpeciality", adminController.addSpeciality);
@@ -69,4 +69,8 @@ adminRouter.put("/verifyAgent/:agentId", adminController.verifyAgents);
 adminRouter.get("/getAllDoctorsList/", adminController.getAllDoctorsList);
 adminRouter.get("/getAllHospitalList/", adminController.getAllHospitalList);
 adminRouter.get("/getAllAgentList/", adminController.getAllAgentList);
+adminRouter.get(
+  "/getListOfSpecialityBodyPartAndDisease",
+  patientController.getSpecialityBodyPartAndDisease
+);
 export default adminRouter;
