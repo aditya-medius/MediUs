@@ -866,11 +866,13 @@ exports.cancelAppointments = cancelAppointments;
 const getDoctorWorkingInHospitals = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let doctorDetails = yield Doctors_Model_1.default
-            .findOne({ _id: req.params.id }, Object.assign(Object.assign({}, exports.excludeDoctorFields), { hospitalDetails: 0 }))
+            .findOne({ _id: req.params.id }, Object.assign({}, exports.excludeDoctorFields))
             .populate("specialization qualification");
+        let hospitalIds_Array = doctorDetails.hospitalDetails.map((e) => e.hospital);
         let workingHourObj = yield WorkingHours_Model_1.default
             .find({
             doctorDetails: req.params.id,
+            hospitalDetails: { $in: hospitalIds_Array },
         })
             .distinct("hospitalDetails");
         let hospitals = yield Hospital_Model_1.default
@@ -943,7 +945,18 @@ const getDoctorWorkingInHospitals = (req, res) => __awaiter(void 0, void 0, void
         yield doctorsWorkingInHospital.forEach((e) => __awaiter(void 0, void 0, void 0, function* () {
             e.workingHours = (0, WorkingHour_helper_1.formatWorkingHour)(e.workingHours);
         }));
-        return (0, response_1.successResponse)({ doctorDetails, doctorsWorkingInHospital }, "Success", res);
+        let fee = doctorDetails.hospitalDetails;
+        doctorsWorkingInHospital.forEach((e) => {
+            let { consultationFee } = fee.filter((elem) => {
+                return elem.hospital.toString() == e.hospital._id.toString();
+            })[0];
+            e["Consultation_Fee"] = consultationFee;
+        });
+        doctorDetails = doctorDetails.toObject();
+        delete doctorDetails.hospitalDetails;
+        return (0, response_1.successResponse)({ doctorDetails, doctorsWorkingInHospital }, 
+        // doctorsWorkingInHospital,
+        "Success", res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);
@@ -1051,16 +1064,12 @@ const getHospitalListByDoctorId = (req, res) => __awaiter(void 0, void 0, void 0
 });
 exports.getHospitalListByDoctorId = getHospitalListByDoctorId;
 const checkDoctorAvailability = (body) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("bodu:", body);
-    console.log("toime:", body.time.date);
     const time = new Date(body.time.date);
-    console.log("time:", time);
     let d = time.getDay();
     let query = {
         doctorDetails: body.doctors,
         hospitalDetails: body.hospital,
     };
-    console.log("D:", d);
     if (d == 0) {
         d = "sunday";
         query["sunday.working"] = true;
@@ -1111,7 +1120,6 @@ const checkDoctorAvailability = (body) => __awaiter(void 0, void 0, void 0, func
         query["saturday.till.time"] = body.time.till.time;
         query["saturday.till.division"] = body.time.till.division;
     }
-    console.log("query:", query);
     // @TODO check if working hour exist first
     let capacity = yield WorkingHours_Model_1.default.findOne(query);
     if (!capacity) {
