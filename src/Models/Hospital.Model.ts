@@ -185,14 +185,6 @@ hospitalSchema.pre("findOneAndUpdate", async function (next) {
   }
 });
 
-hospitalSchema.post("find", async function (result) {
-  // console.log("result:", result);
-});
-
-hospitalSchema.post("findOne", async function (result) {
-  // console.log("result:", Object.keys(result));
-});
-
 const hospitalModel = model(hospital, hospitalSchema);
 
 export default hospitalModel;

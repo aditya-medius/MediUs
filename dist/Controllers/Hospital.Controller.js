@@ -372,6 +372,7 @@ exports.updateHospital = updateHospital;
 const searchHospital = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const term = req.params.term;
+        let regexVar = `/^${term}$/i`;
         const promiseArray = [
             SpecialityBody_Model_1.default.aggregate([
                 {
@@ -561,18 +562,22 @@ const searchHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 },
                 {
                     $project: {
-                        specialisedIn: 1,
-                        _id: 0,
+                        // specialisedIn: 1,
+                        _id: 1,
                     },
                 },
+                { $unwind: "$_id" },
             ]),
         ];
         Promise.all(promiseArray)
             .then((specialityArray) => __awaiter(void 0, void 0, void 0, function* () {
-            specialityArray = specialityArray.flat();
-            specialityArray = underscore_1.default.map(specialityArray, (e) => {
-                return e.speciality ? e.speciality : e.specialisedIn;
-            });
+            let formatArray = (arr) => {
+                arr = arr.flat();
+                return underscore_1.default.map(arr, (e) => e.speciality ? e.speciality.toString() : e._id.toString());
+            };
+            let id = specialityArray.splice(-1, 1);
+            id = formatArray(id);
+            specialityArray = formatArray(specialityArray);
             const hospitalArray = yield Hospital_Model_1.default
                 .find({
                 $or: [
@@ -585,6 +590,9 @@ const searchHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
                     {
                         type: term,
                     },
+                    {
+                        _id: { $in: id },
+                    },
                 ],
             }, {
                 doctors: 0,
@@ -596,6 +604,7 @@ const searchHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 contactNumber: 0,
                 numberOfBed: 0,
             })
+                .sort({ name: 1 })
                 .populate({ path: "anemity" })
                 .populate({
                 path: "address",

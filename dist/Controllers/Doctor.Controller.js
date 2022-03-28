@@ -548,23 +548,33 @@ const searchDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                 },
                 {
                     $project: {
-                        specialization: 1,
-                        _id: 0,
+                        // specialization: 1,
+                        _id: 1,
                     },
                 },
+                { $unwind: "$_id" },
             ]),
         ];
         Promise.all(promiseArray)
             .then((specialityArray) => __awaiter(void 0, void 0, void 0, function* () {
-            specialityArray = specialityArray.flat();
-            specialityArray = underscore_1.default.map(specialityArray, (e) => {
-                return e.speciality ? e.speciality : e.specialization;
-            });
+            let formatArray = (arr) => {
+                arr = arr.flat();
+                return underscore_1.default.map(arr, (e) => e.speciality ? e.speciality.toString() : e._id.toString());
+            };
+            let id = specialityArray.splice(-1, 1);
+            id = formatArray(id);
+            specialityArray = formatArray(specialityArray);
             const doctorArray = yield Doctors_Model_1.default
                 .find({
-                deleted: false,
-                active: true,
-                specialization: { $in: specialityArray },
+                $or: [
+                    {
+                        active: true,
+                        specialization: { $in: specialityArray },
+                    },
+                    {
+                        _id: { $in: id },
+                    },
+                ],
             }, Object.assign(Object.assign({}, exports.excludeDoctorFields), { "hospitalDetails.hospital": 0, "hospitalDetails.workingHours": 0 }))
                 .populate("specialization")
                 // .populate("hospitalDetails.hospital")
