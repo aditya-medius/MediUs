@@ -604,26 +604,39 @@ export const searchDoctor = async (req: Request, res: Response) => {
         },
         {
           $project: {
-            specialization: 1,
-            _id: 0,
+            // specialization: 1,
+            _id: 1,
           },
         },
+        { $unwind: "$_id" },
       ]),
     ];
 
     Promise.all(promiseArray)
       .then(async (specialityArray: Array<any>) => {
-        specialityArray = specialityArray.flat();
-        specialityArray = _.map(specialityArray, (e) => {
-          return e.speciality ? e.speciality : e.specialization;
-        });
+        let formatArray = (arr: Array<any>) => {
+          arr = arr.flat();
+          return _.map(arr, (e) =>
+            e.speciality ? e.speciality.toString() : e._id.toString()
+          );
+        };
 
+        let id = specialityArray.splice(-1, 1);
+        id = formatArray(id);
+
+        specialityArray = formatArray(specialityArray);
         const doctorArray = await doctorModel
           .find(
             {
-              deleted: false,
-              active: true,
-              specialization: { $in: specialityArray },
+              $or: [
+                {
+                  active: true,
+                  specialization: { $in: specialityArray },
+                },
+                {
+                  _id: { $in: id },
+                },
+              ],
             },
             {
               ...excludeDoctorFields,

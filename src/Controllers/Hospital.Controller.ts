@@ -407,6 +407,7 @@ export const updateHospital = async (req: Request, res: Response) => {
 export const searchHospital = async (req: Request, res: Response) => {
   try {
     const term = req.params.term;
+    let regexVar = `/^${term}$/i`;
     const promiseArray: Array<any> = [
       specialityBodyModel.aggregate([
         {
@@ -596,19 +597,27 @@ export const searchHospital = async (req: Request, res: Response) => {
         },
         {
           $project: {
-            specialisedIn: 1,
-            _id: 0,
+            // specialisedIn: 1,
+            _id: 1,
           },
         },
+        { $unwind: "$_id" },
       ]),
     ];
 
     Promise.all(promiseArray)
       .then(async (specialityArray: Array<any>) => {
-        specialityArray = specialityArray.flat();
-        specialityArray = _.map(specialityArray, (e) => {
-          return e.speciality ? e.speciality : e.specialisedIn;
-        });
+        let formatArray = (arr: Array<any>) => {
+          arr = arr.flat();
+          return _.map(arr, (e) =>
+            e.speciality ? e.speciality.toString() : e._id.toString()
+          );
+        };
+
+        let id = specialityArray.splice(-1, 1);
+        id = formatArray(id);
+
+        specialityArray = formatArray(specialityArray);
         const hospitalArray = await hospitalModel
           .find(
             {
@@ -621,6 +630,9 @@ export const searchHospital = async (req: Request, res: Response) => {
                 },
                 {
                   type: term,
+                },
+                {
+                  _id: { $in: id },
                 },
               ],
             },
@@ -635,6 +647,7 @@ export const searchHospital = async (req: Request, res: Response) => {
               numberOfBed: 0,
             }
           )
+          .sort({ name: 1 })
           .populate({ path: "anemity" })
           .populate({
             path: "address",

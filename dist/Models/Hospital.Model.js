@@ -199,15 +199,5 @@ hospitalSchema.pre("findOneAndUpdate", function (next) {
         }
     });
 });
-hospitalSchema.post("find", function (result) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // console.log("result:", result);
-    });
-});
-hospitalSchema.post("findOne", function (result) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // console.log("result:", Object.keys(result));
-    });
-});
 const hospitalModel = (0, mongoose_1.model)(schemaNames_1.hospital, hospitalSchema);
 exports.default = hospitalModel;
