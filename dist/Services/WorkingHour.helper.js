@@ -19,6 +19,7 @@ const formatWorkingHour = (workingHours) => {
                 let returnData = {
                     day: elem,
                     timings: e[elem],
+                    // timings: [...e[elem]],
                 };
                 if (e.workingHourId) {
                     returnData["workingHourId"] = e.workingHourId;
@@ -27,7 +28,6 @@ const formatWorkingHour = (workingHours) => {
             }
         });
     });
-    console.log("working hours:", workingHours);
     workingHours = workingHours.flat().filter((e) => e);
     return workingHours;
 };

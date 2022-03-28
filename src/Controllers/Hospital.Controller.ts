@@ -80,16 +80,38 @@ export const login = async (req: Request, res: Response) => {
             phoneNumber: body.phoneNumber,
             deleted: false,
           },
-          excludeDoctorFields
+          {
+            verified: 0,
+            registrationDate: 0,
+            DOB: 0,
+            registration: 0,
+            KYCDetails: 0,
+          }
         );
         const token = await jwt.sign(
           profile.toJSON(),
           process.env.SECRET_HOSPITAL_KEY as string
         );
-        const { firstName, lastName, gender, phoneNumber, email, _id } =
-          profile.toJSON();
+        const {
+          firstName,
+          lastName,
+          gender,
+          phoneNumber,
+          email,
+          _id,
+          password,
+        } = profile.toJSON();
         return successResponse(
-          { token, firstName, lastName, gender, phoneNumber, email, _id },
+          {
+            token,
+            firstName,
+            lastName,
+            gender,
+            phoneNumber,
+            email,
+            _id,
+            password,
+          },
           "Successfully logged in",
           res
         );
@@ -115,9 +137,10 @@ export const login = async (req: Request, res: Response) => {
               process.env.SECRET_HOSPITAL_KEY as string
             );
             otpData.remove();
-            const { name, contactNumber, _id, numberOfBed } = profile.toJSON();
+            const { name, contactNumber, _id, numberOfBed, password } =
+              profile.toJSON();
             return successResponse(
-              { token, name, contactNumber, _id, numberOfBed },
+              { token, name, contactNumber, _id, numberOfBed, password },
               "Successfully logged in",
               res
             );

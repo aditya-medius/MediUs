@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateSubPatient = exports.getSubPatientById = exports.deleteSubPatient = exports.getSubPatientList = exports.addSubPatient = void 0;
 const response_1 = require("../Services/response");
 const SubPatient_Model_1 = __importDefault(require("../Models/SubPatient.Model"));
+const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
 const addSubPatient = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
@@ -29,9 +30,24 @@ const addSubPatient = (req, res) => __awaiter(void 0, void 0, void 0, function* 
 exports.addSubPatient = addSubPatient;
 const getSubPatientList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const subPatientList = yield SubPatient_Model_1.default.find({
+        const subPatientList = yield SubPatient_Model_1.default
+            .find({
             parentPatient: req.currentPatient,
             deleted: false,
+        })
+            .lean();
+        let query = req.query;
+        if (query.parent === "true") {
+            const parent = yield Patient_Model_1.default
+                .findOne({
+                _id: req.currentPatient,
+            }, "firstName lastName DOB gender deleted")
+                .lean();
+            parent["parentPatient"] = null;
+            subPatientList.push(parent);
+        }
+        subPatientList.forEach((e) => {
+            e["main"] = e.parentPatient ? false : true;
         });
         return (0, response_1.successResponse)(subPatientList, "Success", res);
     }

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { errorResponse, successResponse } from "../Services/response";
 import subPatientModel from "../Models/SubPatient.Model";
+import patientModel from "../Models/Patient.Model";
 
 export const addSubPatient = async (req: Request, res: Response) => {
   try {
@@ -15,9 +16,28 @@ export const addSubPatient = async (req: Request, res: Response) => {
 
 export const getSubPatientList = async (req: Request, res: Response) => {
   try {
-    const subPatientList: Array<any> = await subPatientModel.find({
-      parentPatient: req.currentPatient,
-      deleted: false,
+    const subPatientList: Array<any> = await subPatientModel
+      .find({
+        parentPatient: req.currentPatient,
+        deleted: false,
+      })
+      .lean();
+
+    let query = req.query;
+    if (query.parent === "true") {
+      const parent = await patientModel
+        .findOne(
+          {
+            _id: req.currentPatient,
+          },
+          "firstName lastName DOB gender deleted"
+        )
+        .lean();
+      parent["parentPatient"] = null;
+      subPatientList.push(parent);
+    }
+    subPatientList.forEach((e: any) => {
+      e["main"] = e.parentPatient ? false : true;
     });
     return successResponse(subPatientList, "Success", res);
   } catch (error: any) {

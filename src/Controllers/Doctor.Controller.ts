@@ -961,15 +961,16 @@ export const getDoctorWorkingInHospitals = async (
 ) => {
   try {
     let doctorDetails = await doctorModel
-      .findOne(
-        { _id: req.params.id },
-        { ...excludeDoctorFields, hospitalDetails: 0 }
-      )
+      .findOne({ _id: req.params.id }, { ...excludeDoctorFields })
       .populate("specialization qualification");
+    let hospitalIds_Array = doctorDetails.hospitalDetails.map(
+      (e: any) => e.hospital
+    );
 
     let workingHourObj = await workingHourModel
       .find({
         doctorDetails: req.params.id,
+        hospitalDetails: { $in: hospitalIds_Array },
       })
       .distinct("hospitalDetails");
 
@@ -1053,8 +1054,19 @@ export const getDoctorWorkingInHospitals = async (
       e.workingHours = formatWorkingHour(e.workingHours);
     });
 
+    let fee = doctorDetails.hospitalDetails;
+    doctorsWorkingInHospital.forEach((e: any) => {
+      let { consultationFee } = fee.filter((elem: any) => {
+        return elem.hospital.toString() == e.hospital._id.toString();
+      })[0];
+      e["Consultation_Fee"] = consultationFee;
+    });
+
+    doctorDetails = doctorDetails.toObject();
+    delete doctorDetails.hospitalDetails;
     return successResponse(
       { doctorDetails, doctorsWorkingInHospital },
+      // doctorsWorkingInHospital,
       "Success",
       res
     );
@@ -1186,17 +1198,13 @@ export const checkDoctorAvailability = async (
   status: boolean;
   message: string;
 }> => {
-  console.log("bodu:", body);
-  console.log("toime:", body.time.date);
   const time = new Date(body.time.date);
-  console.log("time:", time);
 
   let d: any = time.getDay();
   let query: any = {
     doctorDetails: body.doctors,
     hospitalDetails: body.hospital,
   };
-  console.log("D:", d);
   if (d == 0) {
     d = "sunday";
     query["sunday.working"] = true;
@@ -1241,7 +1249,6 @@ export const checkDoctorAvailability = async (
     query["saturday.till.time"] = body.time.till.time;
     query["saturday.till.division"] = body.time.till.division;
   }
-  console.log("query:", query);
   // @TODO check if working hour exist first
   let capacity = await workingHourModel.findOne(query);
   if (!capacity) {

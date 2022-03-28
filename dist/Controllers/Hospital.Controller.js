@@ -103,10 +103,25 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 const profile = yield Hospital_Model_1.default.findOne({
                     phoneNumber: body.phoneNumber,
                     deleted: false,
-                }, excludeDoctorFields);
+                }, {
+                    verified: 0,
+                    registrationDate: 0,
+                    DOB: 0,
+                    registration: 0,
+                    KYCDetails: 0,
+                });
                 const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_HOSPITAL_KEY);
-                const { firstName, lastName, gender, phoneNumber, email, _id } = profile.toJSON();
-                return (0, response_1.successResponse)({ token, firstName, lastName, gender, phoneNumber, email, _id }, "Successfully logged in", res);
+                const { firstName, lastName, gender, phoneNumber, email, _id, password, } = profile.toJSON();
+                return (0, response_1.successResponse)({
+                    token,
+                    firstName,
+                    lastName,
+                    gender,
+                    phoneNumber,
+                    email,
+                    _id,
+                    password,
+                }, "Successfully logged in", res);
             }
             const otpData = yield OTP_Model_1.default.findOne({
                 phoneNumber: body.phoneNumber,
@@ -125,8 +140,8 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                     if (profile) {
                         const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_HOSPITAL_KEY);
                         otpData.remove();
-                        const { name, contactNumber, _id, numberOfBed } = profile.toJSON();
-                        return (0, response_1.successResponse)({ token, name, contactNumber, _id, numberOfBed }, "Successfully logged in", res);
+                        const { name, contactNumber, _id, numberOfBed, password } = profile.toJSON();
+                        return (0, response_1.successResponse)({ token, name, contactNumber, _id, numberOfBed, password }, "Successfully logged in", res);
                     }
                     else {
                         otpData.remove();
