@@ -26,12 +26,10 @@ const CountryMapSchema = new mongoose_1.Schema({
         type: mongoose_1.default.Schema.Types.ObjectId,
         ref: schemaNames_1.country,
     },
-    states: [
-        {
-            type: mongoose_1.default.Schema.Types.ObjectId,
-            ref: schemaNames_1.state,
-        },
-    ],
+    state: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        ref: schemaNames_1.state,
+    },
 });
 const CountryMapModel = (0, mongoose_1.model)(schemaNames_1.CountryMap, CountryMapSchema);
 exports.default = CountryMapModel;

@@ -5,12 +5,10 @@ const stateMapSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: state,
   },
-  cities: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: city,
-    },
-  ],
+  city: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: city,
+  },
 });
 
 const StateMapModel = model(stateMap, stateMapSchema);

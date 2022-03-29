@@ -26,12 +26,10 @@ const stateMapSchema = new mongoose_1.Schema({
         type: mongoose_1.default.Schema.Types.ObjectId,
         ref: schemaNames_1.state,
     },
-    cities: [
-        {
-            type: mongoose_1.default.Schema.Types.ObjectId,
-            ref: schemaNames_1.city,
-        },
-    ],
+    city: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        ref: schemaNames_1.city,
+    },
 });
 const StateMapModel = (0, mongoose_1.model)(schemaNames_1.stateMap, stateMapSchema);
 exports.default = StateMapModel;

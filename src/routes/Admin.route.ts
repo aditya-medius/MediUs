@@ -73,4 +73,13 @@ adminRouter.get(
   "/getListOfSpecialityBodyPartAndDisease",
   patientController.getSpecialityBodyPartAndDisease
 );
+
+adminRouter.post(
+  "/setCountryMap",
+  adminController.setCountryMap
+);
+adminRouter.get(
+  "/getStateByCountry",
+  adminController.getStateByCountry
+);
 export default adminRouter;

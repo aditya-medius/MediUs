@@ -25,6 +25,7 @@ import doctorModel from "../Models/Doctors.Model";
 import hospitalModel from "../Models/Hospital.Model";
 import { excludeDoctorFields } from "../Controllers/Doctor.Controller";
 import agentModel from "../Models/Agent.Model";
+import * as adminService from "../Services/Admin/Admin.Service";
 
 export const addSpeciality = async (req: Request, res: Response) => {
   try {
@@ -440,9 +441,6 @@ export const create = async (req: Request, res: Response) => {
   }
 };
 
-// Country, State, City ki mapping
-// export const setCountryMap
-
 // Service Controller
 export const addHospitalService = async (req: Request, res: Response) => {
   try {
@@ -591,6 +589,42 @@ export const getAllHospitalList = async (req: Request, res: Response) => {
       "Successfully fetched Hospital's list",
       res
     );
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+/*
+ Country, State, City ki mapping
+*/
+export const setCountryMap = async (req: Request, res: Response) => {
+  try {
+    let map = await adminService.createCountryMap(req.body);
+    return successResponse(map, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const setStateMap = async (req: Request, res: Response) => {
+  try {
+    // let map =
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const setCityMap = async (req: Request, res: Response) => {
+  try {
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getStateByCountry = async (req: Request, res: Response) => {
+  try {
+    let list: any = await adminService.getStateByCountry(req.body);
+    return successResponse(list, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }
