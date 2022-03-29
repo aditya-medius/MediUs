@@ -5,12 +5,10 @@ const CountryMapSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: country,
   },
-  states: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: state,
-    },
-  ],
+  state: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: state,
+  },
 });
 
 const CountryMapModel = model(CountryMap, CountryMapSchema);

@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllHospitalList = exports.getAllAgentList = exports.verifyAgents = exports.getAllDoctorsList = exports.verifyHospitals = exports.verifyDoctors = exports.getUnverifiedDoctors = exports.addHospitalService = exports.create = exports.login = exports.getCityStateLocalityCountry = exports.getPayments = exports.addPayment = exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityDoctorType = exports.addSpecialityDoctorType = exports.addDoctorType = exports.addToSpecialityDisease = exports.addSpecialityDisease = exports.addDisease = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
+exports.getCityByState = exports.getStateByCountry = exports.setCityMap = exports.setStateMap = exports.setCountryMap = exports.getAllHospitalList = exports.getAllAgentList = exports.verifyAgents = exports.getAllDoctorsList = exports.verifyHospitals = exports.verifyDoctors = exports.getUnverifiedDoctors = exports.addHospitalService = exports.create = exports.login = exports.getCityStateLocalityCountry = exports.getPayments = exports.addPayment = exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityDoctorType = exports.addSpecialityDoctorType = exports.addDoctorType = exports.addToSpecialityDisease = exports.addSpecialityDisease = exports.addDisease = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
 const BodyPart_Model_1 = __importDefault(require("./BodyPart.Model"));
 const SpecialityBody_Model_1 = __importDefault(require("./SpecialityBody.Model"));
 const SpecialityDisease_Model_1 = __importDefault(require("./SpecialityDisease.Model"));
@@ -53,6 +53,7 @@ const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
 const Doctor_Controller_1 = require("../Controllers/Doctor.Controller");
 const Agent_Model_1 = __importDefault(require("../Models/Agent.Model"));
+const adminService = __importStar(require("../Services/Admin/Admin.Service"));
 const addSpeciality = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const body = req.body;
@@ -452,8 +453,6 @@ const create = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.create = create;
-// Country, State, City ki mapping
-// export const setCountryMap
 // Service Controller
 const addHospitalService = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -599,3 +598,54 @@ const getAllHospitalList = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.getAllHospitalList = getAllHospitalList;
+/*
+ Country, State, City ki mapping
+*/
+const setCountryMap = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let map = yield adminService.createCountryMap(req.body);
+        return (0, response_1.successResponse)(map, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.setCountryMap = setCountryMap;
+const setStateMap = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let map = yield adminService.createStateMap(req.body);
+        return (0, response_1.successResponse)(map, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.setStateMap = setStateMap;
+const setCityMap = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.setCityMap = setCityMap;
+const getStateByCountry = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let list = yield adminService.getStateByCountry(req.body);
+        return (0, response_1.successResponse)(list, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getStateByCountry = getStateByCountry;
+const getCityByState = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let list = yield adminService.getCityByState(req.body);
+        return (0, response_1.successResponse)(list, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getCityByState = getCityByState;
