@@ -52,6 +52,10 @@ const workingHoursSchema = new Schema({
         type: Number,
         required: true,
       },
+      appointmentsBooked: {
+        type: Number,
+        default: 0,
+      },
     },
     // required: true,
   },
@@ -91,6 +95,10 @@ const workingHoursSchema = new Schema({
       capacity: {
         type: Number,
         required: true,
+      },
+      appointmentsBooked: {
+        type: Number,
+        default: 0,
       },
     },
     // required: true,
@@ -132,6 +140,10 @@ const workingHoursSchema = new Schema({
         type: Number,
         required: true,
       },
+      appointmentsBooked: {
+        type: Number,
+        default: 0,
+      },
     },
     // required: true,
   },
@@ -171,6 +183,10 @@ const workingHoursSchema = new Schema({
       capacity: {
         type: Number,
         required: true,
+      },
+      appointmentsBooked: {
+        type: Number,
+        default: 0,
       },
     },
     // required: true,
@@ -212,6 +228,10 @@ const workingHoursSchema = new Schema({
         type: Number,
         required: true,
       },
+      appointmentsBooked: {
+        type: Number,
+        default: 0,
+      },
     },
     // required: true,
   },
@@ -252,6 +272,10 @@ const workingHoursSchema = new Schema({
         type: Number,
         required: true,
       },
+      appointmentsBooked: {
+        type: Number,
+        default: 0,
+      },
     },
     // required: true,
   },
@@ -291,6 +315,10 @@ const workingHoursSchema = new Schema({
       capacity: {
         type: Number,
         required: true,
+      },
+      appointmentsBooked: {
+        type: Number,
+        default: 0,
       },
     },
     // required: true,

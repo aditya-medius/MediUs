@@ -6,6 +6,8 @@ import {
   hospital,
   subPatient,
 } from "../Services/schemaNames";
+import { formatWorkingHourDayForAppointment } from "../Services/Utils";
+import workingHourModel from "./WorkingHours.Model";
 // import schemaOptions from "../Services/schemaOptions";
 const appointmentSchema = new Schema({
   patient: {
@@ -86,6 +88,54 @@ const appointmentSchema = new Schema({
   },
 });
 
+appointmentSchema.post("save", async function (result: any) {
+  let { doctors, hospital } = result;
+  let { workingHour, day } = formatWorkingHourDayForAppointment(result);
+
+  let updateQuery: any = {};
+  if (result.done || result.cancelled) {
+    /* Agar doctor ki appointment DONE ya CANCEL hone pe 
+       appointmentBooked ko decrement krna hai to isko uncomment krdo
+     */
+    // updateQuery[`${day}.appointmentsBooked`] = -1;
+    // await decrementWorkingHoursAppointmentBooked(
+    //   {
+    //     doctorDetails: doctors,
+    //     hospitalDetails: hospital,
+    //     ...workingHour,
+    //   },
+    //   {
+    //     $inc: updateQuery,
+    //   }
+    // );
+  } else {
+    updateQuery[`${day}.appointmentsBooked`] = 1;
+    await incrementWorkingHoursAppointmentBooked(
+      {
+        doctorDetails: doctors,
+        hospitalDetails: hospital,
+        ...workingHour,
+      },
+      {
+        $inc: updateQuery,
+      }
+    );
+  }
+});
+
+let incrementWorkingHoursAppointmentBooked = async (
+  query: Object,
+  increment: Object
+) => {
+  await workingHourModel.findOneAndUpdate(query, increment);
+};
+
+let decrementWorkingHoursAppointmentBooked = async (
+  query: Object,
+  decrement: Object
+) => {
+  await workingHourModel.findOneAndUpdate(query, decrement);
+};
 const appointmentModel = model(appointment, appointmentSchema);
 
 export default appointmentModel;

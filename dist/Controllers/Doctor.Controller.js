@@ -864,7 +864,9 @@ const cancelAppointments = (req, res) => __awaiter(void 0, void 0, void 0, funct
         }
         else {
             // If not, cancel the appointment and return the success response
-            const updatedAppointment = yield Appointment_Model_1.default.findOneAndUpdate({ _id: body.appointmentId }, { $set: { cancelled: true } }, { new: true });
+            const updatedAppointment = yield Appointment_Model_1.default.findOne({ _id: body.appointmentId });
+            updatedAppointment.cancelled = true;
+            yield updatedAppointment.save();
             return (0, response_1.successResponse)(updatedAppointment, "Successfully cancelled appointment", res);
         }
     }

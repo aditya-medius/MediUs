@@ -317,7 +317,8 @@ const BookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
         let capacity = yield WorkingHours_Model_1.default.findOne(Object.assign({ doctorDetails: body.doctors, hospitalDetails: body.hospital }, query));
         if (!capacity) {
             let error = new Error("Error");
-            error.message = "Cannot create appointment";
+            error.message =
+                "Working hours does not exist for this hospital and doctor at this time. Please ask doctor to create one";
             // return errorResponse(error, res);
             throw error;
         }
@@ -356,6 +357,8 @@ const BookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
             hospital: body.hospital,
             "time.from.time": capacity.from.time,
             "time.till.time": capacity.till.time,
+            cancelled: false,
+            done: false,
         });
         let appCount = 0;
         appointmentCount = appointmentCount.map((e) => {
@@ -490,10 +493,16 @@ const doneAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
                 parentPatient: 0,
             },
         });
+        if (!appointmentDone) {
+            return (0, response_1.errorResponse)(new Error("Cannot find appointment with this id"), res, 404);
+        }
         if (appointmentDone.cancelled) {
             return (0, response_1.successResponse)({}, "Appointment has already been cancelled", res);
         }
         if (appointmentDone) {
+            if (appointmentDone.done === true) {
+                return (0, response_1.successResponse)({}, "Appointment is already done", res);
+            }
             appointmentDone.done = true;
             yield appointmentDone.save();
             return (0, response_1.successResponse)({}, "Appointment done successfully", res);
@@ -519,6 +528,9 @@ const CancelAppointment = (req, res) => __awaiter(void 0, void 0, void 0, functi
             return (0, response_1.successResponse)({}, "Appointment has already done", res);
         }
         if (appointmentCancel) {
+            if (appointmentCancel.cancelled === true) {
+                return (0, response_1.successResponse)({}, "Appointment is already cancelled", res);
+            }
             appointmentCancel.cancelled = true;
             yield appointmentCancel.save();
             return (0, response_1.successResponse)({}, "Appoinment cancelled successfully", res);

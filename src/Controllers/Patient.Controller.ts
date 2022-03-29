@@ -343,7 +343,8 @@ export const BookAppointment = async (req: Request, res: Response) => {
     });
     if (!capacity) {
       let error: Error = new Error("Error");
-      error.message = "Cannot create appointment";
+      error.message =
+        "Working hours does not exist for this hospital and doctor at this time. Please ask doctor to create one";
       // return errorResponse(error, res);
       throw error;
     }
@@ -377,6 +378,8 @@ export const BookAppointment = async (req: Request, res: Response) => {
       hospital: body.hospital,
       "time.from.time": capacity.from.time,
       "time.till.time": capacity.till.time,
+      cancelled: false,
+      done: false,
     });
 
     let appCount = 0;
@@ -529,10 +532,20 @@ export const doneAppointment = async (req: Request, res: Response) => {
           parentPatient: 0,
         },
       });
+    if (!appointmentDone) {
+      return errorResponse(
+        new Error("Cannot find appointment with this id"),
+        res,
+        404
+      );
+    }
     if (appointmentDone.cancelled) {
       return successResponse({}, "Appointment has already been cancelled", res);
     }
     if (appointmentDone) {
+      if (appointmentDone.done === true) {
+        return successResponse({}, "Appointment is already done", res);
+      }
       appointmentDone.done = true;
       await appointmentDone.save();
       return successResponse({}, "Appointment done successfully", res);
@@ -557,6 +570,9 @@ export const CancelAppointment = async (req: Request, res: Response) => {
       return successResponse({}, "Appointment has already done", res);
     }
     if (appointmentCancel) {
+      if (appointmentCancel.cancelled === true) {
+        return successResponse({}, "Appointment is already cancelled", res);
+      }
       appointmentCancel.cancelled = true;
       await appointmentCancel.save();
       return successResponse({}, "Appoinment cancelled successfully", res);

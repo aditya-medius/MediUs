@@ -81,6 +81,10 @@ const workingHoursSchema = new mongoose_1.Schema({
                 type: Number,
                 required: true,
             },
+            appointmentsBooked: {
+                type: Number,
+                default: 0,
+            },
         },
         // required: true,
     },
@@ -120,6 +124,10 @@ const workingHoursSchema = new mongoose_1.Schema({
             capacity: {
                 type: Number,
                 required: true,
+            },
+            appointmentsBooked: {
+                type: Number,
+                default: 0,
             },
         },
         // required: true,
@@ -161,6 +169,10 @@ const workingHoursSchema = new mongoose_1.Schema({
                 type: Number,
                 required: true,
             },
+            appointmentsBooked: {
+                type: Number,
+                default: 0,
+            },
         },
         // required: true,
     },
@@ -200,6 +212,10 @@ const workingHoursSchema = new mongoose_1.Schema({
             capacity: {
                 type: Number,
                 required: true,
+            },
+            appointmentsBooked: {
+                type: Number,
+                default: 0,
             },
         },
         // required: true,
@@ -241,6 +257,10 @@ const workingHoursSchema = new mongoose_1.Schema({
                 type: Number,
                 required: true,
             },
+            appointmentsBooked: {
+                type: Number,
+                default: 0,
+            },
         },
         // required: true,
     },
@@ -281,6 +301,10 @@ const workingHoursSchema = new mongoose_1.Schema({
                 type: Number,
                 required: true,
             },
+            appointmentsBooked: {
+                type: Number,
+                default: 0,
+            },
         },
         // required: true,
     },
@@ -320,6 +344,10 @@ const workingHoursSchema = new mongoose_1.Schema({
             capacity: {
                 type: Number,
                 required: true,
+            },
+            appointmentsBooked: {
+                type: Number,
+                default: 0,
             },
         },
         // required: true,

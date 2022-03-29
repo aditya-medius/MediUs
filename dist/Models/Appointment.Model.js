@@ -18,9 +18,23 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const schemaNames_1 = require("../Services/schemaNames");
+const Utils_1 = require("../Services/Utils");
+const WorkingHours_Model_1 = __importDefault(require("./WorkingHours.Model"));
 // import schemaOptions from "../Services/schemaOptions";
 const appointmentSchema = new mongoose_1.Schema({
     patient: {
@@ -99,6 +113,41 @@ const appointmentSchema = new mongoose_1.Schema({
         type: Boolean,
         default: false,
     },
+});
+appointmentSchema.post("save", function (result) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let { doctors, hospital } = result;
+        let { workingHour, day } = (0, Utils_1.formatWorkingHourDayForAppointment)(result);
+        let updateQuery = {};
+        if (result.done || result.cancelled) {
+            /* Agar doctor ki appointment DONE ya CANCEL hone pe
+               appointmentBooked ko decrement krna hai to isko uncomment krdo
+             */
+            // updateQuery[`${day}.appointmentsBooked`] = -1;
+            // await decrementWorkingHoursAppointmentBooked(
+            //   {
+            //     doctorDetails: doctors,
+            //     hospitalDetails: hospital,
+            //     ...workingHour,
+            //   },
+            //   {
+            //     $inc: updateQuery,
+            //   }
+            // );
+        }
+        else {
+            updateQuery[`${day}.appointmentsBooked`] = 1;
+            yield incrementWorkingHoursAppointmentBooked(Object.assign({ doctorDetails: doctors, hospitalDetails: hospital }, workingHour), {
+                $inc: updateQuery,
+            });
+        }
+    });
+});
+let incrementWorkingHoursAppointmentBooked = (query, increment) => __awaiter(void 0, void 0, void 0, function* () {
+    yield WorkingHours_Model_1.default.findOneAndUpdate(query, increment);
+});
+let decrementWorkingHoursAppointmentBooked = (query, decrement) => __awaiter(void 0, void 0, void 0, function* () {
+    yield WorkingHours_Model_1.default.findOneAndUpdate(query, decrement);
 });
 const appointmentModel = (0, mongoose_1.model)(schemaNames_1.appointment, appointmentSchema);
 exports.default = appointmentModel;

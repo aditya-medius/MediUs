@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAge = exports.generateOTPtoken = exports.generateOTP = exports.encryptPassword = exports.phoneNumberRegex = void 0;
+exports.updateWorkingHour = exports.formatWorkingHourDayForAppointment = exports.setFormatForWorkingHours = exports.getDayFromWorkingHours = exports.getAge = exports.generateOTPtoken = exports.generateOTP = exports.encryptPassword = exports.phoneNumberRegex = void 0;
 const bcrypt = __importStar(require("bcrypt"));
 const jwt = __importStar(require("jsonwebtoken"));
 const moment_1 = __importDefault(require("moment"));
@@ -79,3 +79,80 @@ const getAge = (dob) => {
     return age;
 };
 exports.getAge = getAge;
+const getDayFromWorkingHours = (body) => {
+    const rd = new Date(body.time.date);
+    const d = rd.getDay();
+    return d;
+};
+exports.getDayFromWorkingHours = getDayFromWorkingHours;
+const setFormatForWorkingHours = (day, b) => {
+    let dayArr = [
+        "sunday",
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+    ];
+    let query = {};
+    query[`${dayArr[day]}.working`] = true;
+    query[`${dayArr[day]}.from.time`] = b.time.from.time;
+    query[`${dayArr[day]}.from.division`] = b.time.from.division;
+    query[`${dayArr[day]}.till.time`] = b.time.till.time;
+    query[`${dayArr[day]}.till.division`] = b.time.till.division;
+    return { workingHour: query, day: dayArr[day] };
+};
+exports.setFormatForWorkingHours = setFormatForWorkingHours;
+const formatWorkingHourDayForAppointment = (body) => {
+    const d = (0, exports.getDayFromWorkingHours)(body);
+    let b = body;
+    let query = (0, exports.setFormatForWorkingHours)(d, b);
+    // if (d == 0) {
+    //   query["sunday.working"] = true;
+    //   query["sunday.from.time"] = b.time.from.time;
+    //   query["sunday.from.division"] = b.time.from.division;
+    //   query["sunday.till.time"] = b.time.till.time;
+    //   query["sunday.till.division"] = b.time.till.division;
+    // } else if (d == 1) {
+    //   query["monday.working"] = true;
+    //   query["monday.from.time"] = b.time.from.time;
+    //   query["monday.from.division"] = b.time.from.division;
+    //   query["monday.till.time"] = b.time.till.time;
+    //   query["monday.till.division"] = b.time.till.division;
+    // } else if (d == 2) {
+    //   query["tuesday.working"] = true;
+    //   query["tuesday.from.time"] = b.time.from.time;
+    //   query["tuesday.from.division"] = b.time.from.division;
+    //   query["tuesday.till.time"] = b.time.till.time;
+    //   query["tuesday.till.division"] = b.time.till.division;
+    // } else if (d == 3) {
+    //   query["wednesday.working"] = true;
+    //   query["wednesday.from.time"] = b.time.from.time;
+    //   query["wednesday.from.division"] = b.time.from.division;
+    //   query["wednesday.till.time"] = b.time.till.time;
+    //   query["wednesday.till.division"] = b.time.till.division;
+    // } else if (d == 4) {
+    //   query["thursday.working"] = true;
+    //   query["thursday.from.time"] = b.time.from.time;
+    //   query["thursday.from.division"] = b.time.from.division;
+    //   query["thursday.till.time"] = b.time.till.time;
+    //   query["thursday.till.division"] = b.time.till.division;
+    // } else if (d == 5) {
+    //   query["friday.working"] = true;
+    //   query["friday.from.time"] = b.time.from.time;
+    //   query["friday.from.division"] = b.time.from.division;
+    //   query["friday.till.time"] = b.time.till.time;
+    //   query["friday.till.division"] = b.time.till.division;
+    // } else if (d == 6) {
+    //   query["saturday.working"] = true;
+    //   query["saturday.from.time"] = b.time.from.time;
+    //   query["saturday.from.division"] = b.time.from.division;
+    //   query["saturday.till.time"] = b.time.till.time;
+    //   query["saturday.till.division"] = b.time.till.division;
+    // }
+    return query;
+};
+exports.formatWorkingHourDayForAppointment = formatWorkingHourDayForAppointment;
+const updateWorkingHour = (query, cb) => { };
+exports.updateWorkingHour = updateWorkingHour;
