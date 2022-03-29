@@ -608,7 +608,8 @@ export const setCountryMap = async (req: Request, res: Response) => {
 
 export const setStateMap = async (req: Request, res: Response) => {
   try {
-    // let map =
+    let map = await adminService.createStateMap(req.body);
+    return successResponse(map, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }
@@ -624,6 +625,14 @@ export const setCityMap = async (req: Request, res: Response) => {
 export const getStateByCountry = async (req: Request, res: Response) => {
   try {
     let list: any = await adminService.getStateByCountry(req.body);
+    return successResponse(list, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+export const getCityByState = async (req: Request, res: Response) => {
+  try {
+    let list: any = await adminService.getCityByState(req.body);
     return successResponse(list, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);

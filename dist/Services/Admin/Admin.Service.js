@@ -12,11 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getStateByCountry = exports.createCityMap = exports.createStateMap = exports.createCountryMap = void 0;
+exports.getCityByState = exports.getStateByCountry = exports.createCityMap = exports.createStateMap = exports.createCountryMap = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const State_Map_Model_1 = __importDefault(require("../../Admin Controlled Models/State.Map.Model"));
 const Country_Map_Model_1 = __importDefault(require("../../Admin Controlled Models/Country.Map.Model"));
 const City_Map_Model_1 = __importDefault(require("../../Admin Controlled Models/City.Map.Model"));
+const schemaNames_1 = require("../schemaNames");
 const createCountryMap = (body) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let countryMap = yield checkIfCountryMapExist(body.country, body.state);
@@ -33,6 +34,10 @@ const createCountryMap = (body) => __awaiter(void 0, void 0, void 0, function* (
 exports.createCountryMap = createCountryMap;
 const createStateMap = (body) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        let stateMap = yield checkIfStateMapExist(body.state, body.city);
+        if (stateMap) {
+            return Promise.reject(new Error("State-City Map already exist"));
+        }
         const stateObj = yield new State_Map_Model_1.default(body).save();
         return Promise.resolve(stateObj);
     }
@@ -62,7 +67,7 @@ const getStateByCountry = (body) => __awaiter(void 0, void 0, void 0, function* 
             },
             {
                 $lookup: {
-                    from: "countries",
+                    from: country,
                     localField: "country",
                     foreignField: "_id",
                     as: "country",
@@ -75,7 +80,7 @@ const getStateByCountry = (body) => __awaiter(void 0, void 0, void 0, function* 
             },
             {
                 $lookup: {
-                    from: "states",
+                    from: schemaNames_1.state,
                     localField: "state",
                     foreignField: "_id",
                     as: "state",
@@ -110,7 +115,70 @@ const getStateByCountry = (body) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.getStateByCountry = getStateByCountry;
+const getCityByState = (body) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let state = body.state;
+        let stateList = yield State_Map_Model_1.default.aggregate([
+            {
+                $match: {
+                    state: new mongoose_1.default.Types.ObjectId(state),
+                },
+            },
+            {
+                $lookup: {
+                    from: state,
+                    localField: "state",
+                    foreignField: "_id",
+                    as: "state",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$state",
+                },
+            },
+            {
+                $lookup: {
+                    from: schemaNames_1.city,
+                    localField: "city",
+                    foreignField: "_id",
+                    as: "city",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$city",
+                },
+            },
+            {
+                $project: {
+                    "city.__v": 0,
+                },
+            },
+            {
+                $group: {
+                    _id: "$state._id",
+                    country: {
+                        $first: "$state.name",
+                    },
+                    state: {
+                        $addToSet: "$city",
+                    },
+                },
+            },
+        ]);
+        return Promise.resolve(stateList);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.getCityByState = getCityByState;
 const checkIfCountryMapExist = (country, state) => __awaiter(void 0, void 0, void 0, function* () {
     let exist = yield Country_Map_Model_1.default.exists({ country, state });
+    return Promise.resolve(exist);
+});
+const checkIfStateMapExist = (state, city) => __awaiter(void 0, void 0, void 0, function* () {
+    let exist = yield State_Map_Model_1.default.exists({ state, city });
     return Promise.resolve(exist);
 });

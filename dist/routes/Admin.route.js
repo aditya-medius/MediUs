@@ -61,5 +61,7 @@ adminRouter.get("/getAllHospitalList/", adminController.getAllHospitalList);
 adminRouter.get("/getAllAgentList/", adminController.getAllAgentList);
 adminRouter.get("/getListOfSpecialityBodyPartAndDisease", patientController.getSpecialityBodyPartAndDisease);
 adminRouter.post("/setCountryMap", adminController.setCountryMap);
+adminRouter.post("/setStateMap", adminController.setStateMap);
 adminRouter.get("/getStateByCountry", adminController.getStateByCountry);
+adminRouter.get("/getCityByState", adminController.getCityByState);
 exports.default = adminRouter;
