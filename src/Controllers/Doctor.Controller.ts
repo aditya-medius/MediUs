@@ -951,11 +951,13 @@ export const cancelAppointments = async (req: Request, res: Response) => {
       return errorResponse(error, res);
     } else {
       // If not, cancel the appointment and return the success response
-      const updatedAppointment = await appointmentModel.findOneAndUpdate(
+      const updatedAppointment = await appointmentModel.findOne(
         { _id: body.appointmentId },
-        { $set: { cancelled: true } },
-        { new: true }
+        // { $set: { cancelled: true } },
+        // { new: true }
       );
+      updatedAppointment.cancelled = true
+      await updatedAppointment.save()
 
       return successResponse(
         updatedAppointment,
