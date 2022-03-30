@@ -100,7 +100,6 @@ export const addToSpecialityBody = async (req: Request, res: Response) => {
 export const addDisease = async (req: Request, res: Response) => {
   try {
     let body = req.body;
-    console.log("jdnjdndd", body);
     let exist = await diseaseModel.exists(body);
     if (exist) {
       return errorResponse(new Error("Disease already exist"), res);
@@ -597,9 +596,25 @@ export const getAllHospitalList = async (req: Request, res: Response) => {
 /*
  Country, State, City ki mapping
 */
+import CountryMapModel from "../Admin Controlled Models/Country.Map.Model";
+import StateMapModel from "../Admin Controlled Models/State.Map.Model";
+import CityMapModel from "../Admin Controlled Models/City.Map.Model";
+
 export const setCountryMap = async (req: Request, res: Response) => {
   try {
-    let map = await adminService.createCountryMap(req.body);
+    let body = req.body;
+    let countryMap: any = await adminService.checkIfMapExist(
+      {
+        country: body.country,
+        state: { $in: body.state },
+      },
+      CountryMapModel
+    );
+    if (typeof countryMap === "boolean" && countryMap === true) {
+      return errorResponse(new Error("Country-State map already exist"), res);
+    }
+    body.state = countryMap;
+    let map = await adminService.createCountryMap(body);
     return successResponse(map, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
@@ -608,7 +623,19 @@ export const setCountryMap = async (req: Request, res: Response) => {
 
 export const setStateMap = async (req: Request, res: Response) => {
   try {
-    let map = await adminService.createStateMap(req.body);
+    let body = req.body;
+    let stateMap: any = await adminService.checkIfMapExist(
+      {
+        state: body.state,
+        city: { $in: body.city },
+      },
+      StateMapModel
+    );
+    if (typeof stateMap === "boolean" && stateMap === true) {
+      return errorResponse(new Error("State-City Map already exist"), res);
+    }
+    body.city = stateMap;
+    let map = await adminService.createStateMap(body);
     return successResponse(map, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
@@ -617,6 +644,20 @@ export const setStateMap = async (req: Request, res: Response) => {
 
 export const setCityMap = async (req: Request, res: Response) => {
   try {
+    let body = req.body;
+    let cityMap: any = await adminService.checkIfMapExist(
+      {
+        city: body.city,
+        locality: { $in: body.locality },
+      },
+      CityMapModel
+    );
+    if (typeof cityMap === "boolean" && cityMap === true) {
+      return errorResponse(new Error("City-Locality Map already exist"), res);
+    }
+    body.locality = cityMap;
+    let map = await adminService.createCityMap(body);
+    return successResponse(map, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }
@@ -633,6 +674,15 @@ export const getStateByCountry = async (req: Request, res: Response) => {
 export const getCityByState = async (req: Request, res: Response) => {
   try {
     let list: any = await adminService.getCityByState(req.body);
+    return successResponse(list, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getLocalityByCity = async (req: Request, res: Response) => {
+  try {
+    let list: any = await adminService.getLocalityByCity(req.body);
     return successResponse(list, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);

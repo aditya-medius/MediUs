@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCityByState = exports.getStateByCountry = exports.setCityMap = exports.setStateMap = exports.setCountryMap = exports.getAllHospitalList = exports.getAllAgentList = exports.verifyAgents = exports.getAllDoctorsList = exports.verifyHospitals = exports.verifyDoctors = exports.getUnverifiedDoctors = exports.addHospitalService = exports.create = exports.login = exports.getCityStateLocalityCountry = exports.getPayments = exports.addPayment = exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityDoctorType = exports.addSpecialityDoctorType = exports.addDoctorType = exports.addToSpecialityDisease = exports.addSpecialityDisease = exports.addDisease = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
+exports.getLocalityByCity = exports.getCityByState = exports.getStateByCountry = exports.setCityMap = exports.setStateMap = exports.setCountryMap = exports.getAllHospitalList = exports.getAllAgentList = exports.verifyAgents = exports.getAllDoctorsList = exports.verifyHospitals = exports.verifyDoctors = exports.getUnverifiedDoctors = exports.addHospitalService = exports.create = exports.login = exports.getCityStateLocalityCountry = exports.getPayments = exports.addPayment = exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityDoctorType = exports.addSpecialityDoctorType = exports.addDoctorType = exports.addToSpecialityDisease = exports.addSpecialityDisease = exports.addDisease = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
 const BodyPart_Model_1 = __importDefault(require("./BodyPart.Model"));
 const SpecialityBody_Model_1 = __importDefault(require("./SpecialityBody.Model"));
 const SpecialityDisease_Model_1 = __importDefault(require("./SpecialityDisease.Model"));
@@ -127,7 +127,6 @@ exports.addToSpecialityBody = addToSpecialityBody;
 const addDisease = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
-        console.log("jdnjdndd", body);
         let exist = yield Disease_Model_1.default.exists(body);
         if (exist) {
             return (0, response_1.errorResponse)(new Error("Disease already exist"), res);
@@ -601,9 +600,21 @@ exports.getAllHospitalList = getAllHospitalList;
 /*
  Country, State, City ki mapping
 */
+const Country_Map_Model_1 = __importDefault(require("../Admin Controlled Models/Country.Map.Model"));
+const State_Map_Model_1 = __importDefault(require("../Admin Controlled Models/State.Map.Model"));
+const City_Map_Model_1 = __importDefault(require("../Admin Controlled Models/City.Map.Model"));
 const setCountryMap = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let map = yield adminService.createCountryMap(req.body);
+        let body = req.body;
+        let countryMap = yield adminService.checkIfMapExist({
+            country: body.country,
+            state: { $in: body.state },
+        }, Country_Map_Model_1.default);
+        if (typeof countryMap === "boolean" && countryMap === true) {
+            return (0, response_1.errorResponse)(new Error("Country-State map already exist"), res);
+        }
+        body.state = countryMap;
+        let map = yield adminService.createCountryMap(body);
         return (0, response_1.successResponse)(map, "Success", res);
     }
     catch (error) {
@@ -613,7 +624,16 @@ const setCountryMap = (req, res) => __awaiter(void 0, void 0, void 0, function* 
 exports.setCountryMap = setCountryMap;
 const setStateMap = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let map = yield adminService.createStateMap(req.body);
+        let body = req.body;
+        let stateMap = yield adminService.checkIfMapExist({
+            state: body.state,
+            city: { $in: body.city },
+        }, State_Map_Model_1.default);
+        if (typeof stateMap === "boolean" && stateMap === true) {
+            return (0, response_1.errorResponse)(new Error("State-City Map already exist"), res);
+        }
+        body.city = stateMap;
+        let map = yield adminService.createStateMap(body);
         return (0, response_1.successResponse)(map, "Success", res);
     }
     catch (error) {
@@ -623,6 +643,17 @@ const setStateMap = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 exports.setStateMap = setStateMap;
 const setCityMap = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        let body = req.body;
+        let cityMap = yield adminService.checkIfMapExist({
+            city: body.city,
+            locality: { $in: body.locality },
+        }, City_Map_Model_1.default);
+        if (typeof cityMap === "boolean" && cityMap === true) {
+            return (0, response_1.errorResponse)(new Error("City-Locality Map already exist"), res);
+        }
+        body.locality = cityMap;
+        let map = yield adminService.createCityMap(body);
+        return (0, response_1.successResponse)(map, "Success", res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);
@@ -649,3 +680,13 @@ const getCityByState = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.getCityByState = getCityByState;
+const getLocalityByCity = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let list = yield adminService.getLocalityByCity(req.body);
+        return (0, response_1.successResponse)(list, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getLocalityByCity = getLocalityByCity;

@@ -74,22 +74,11 @@ adminRouter.get(
   patientController.getSpecialityBodyPartAndDisease
 );
 
-adminRouter.post(
-  "/setCountryMap",
-  adminController.setCountryMap
-);
-adminRouter.post(
-  "/setStateMap",
-  adminController.setStateMap
-);
+adminRouter.post("/setCountryMap", adminController.setCountryMap);
+adminRouter.post("/setStateMap", adminController.setStateMap);
+adminRouter.post("/setCityMap", adminController.setCityMap);
 
-
-adminRouter.get(
-  "/getStateByCountry",
-  adminController.getStateByCountry
-);
-adminRouter.get(
-  "/getCityByState",
-  adminController.getCityByState
-);
+adminRouter.get("/getStateByCountry", adminController.getStateByCountry);
+adminRouter.get("/getCityByState", adminController.getCityByState);
+adminRouter.get("/getLocalityByCity", adminController.getLocalityByCity);
 export default adminRouter;

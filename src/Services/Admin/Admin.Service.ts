@@ -7,17 +7,16 @@ import mongoose from "mongoose";
 import StateMapModel from "../../Admin Controlled Models/State.Map.Model";
 import CountryMapModel from "../../Admin Controlled Models/Country.Map.Model";
 import cityMapModel from "../../Admin Controlled Models/City.Map.Model";
-import { country, state, city } from "../schemaNames";
+import { country, state, city, locality } from "../schemaNames";
 export const createCountryMap = async (body: any) => {
   try {
-    let countryMap: Boolean = await checkIfCountryMapExist(
-      body.country,
-      body.state
-    );
-    if (countryMap) {
-      return Promise.reject(new Error("Country-State map already exist"));
-    }
-    const countryObj = await new CountryMapModel(body).save();
+    let mapArray = body.state.map((e: any) => {
+      return {
+        country: body.country,
+        state: e,
+      };
+    });
+    const countryObj = await CountryMapModel.insertMany(mapArray);
     return Promise.resolve(countryObj);
   } catch (error: any) {
     return Promise.reject(error);
@@ -26,11 +25,13 @@ export const createCountryMap = async (body: any) => {
 
 export const createStateMap = async (body: any) => {
   try {
-    let stateMap: Boolean = await checkIfStateMapExist(body.state, body.city);
-    if (stateMap) {
-      return Promise.reject(new Error("State-City Map already exist"));
-    }
-    const stateObj = await new StateMapModel(body).save();
+    let mapArray = body.city.map((e: any) => {
+      return {
+        state: body.state,
+        city: e,
+      };
+    });
+    const stateObj = await StateMapModel.insertMany(mapArray);
     return Promise.resolve(stateObj);
   } catch (error: any) {
     return Promise.reject(error);
@@ -39,7 +40,13 @@ export const createStateMap = async (body: any) => {
 
 export const createCityMap = async (body: any) => {
   try {
-    const cityObj = await new cityMapModel(body).save();
+    let mapArray = body.locality.map((e: any) => {
+      return {
+        city: body.city,
+        locality: e,
+      };
+    });
+    const cityObj = await cityMapModel.insertMany(mapArray);
     return Promise.resolve(cityObj);
   } catch (error: any) {
     return Promise.reject(error);
@@ -106,12 +113,12 @@ export const getStateByCountry = async (body: any) => {
 };
 export const getCityByState = async (body: any) => {
   try {
-    let state = body.state;
+    let stateId = body.state;
 
-    let stateList = await StateMapModel.aggregate([
+    let cityList = await StateMapModel.aggregate([
       {
         $match: {
-          state: new mongoose.Types.ObjectId(state),
+          state: new mongoose.Types.ObjectId(stateId),
         },
       },
       {
@@ -148,33 +155,122 @@ export const getCityByState = async (body: any) => {
       {
         $group: {
           _id: "$state._id",
-          country: {
+          state: {
             $first: "$state.name",
           },
-          state: {
+          city: {
             $addToSet: "$city",
           },
         },
       },
     ]);
-    return Promise.resolve(stateList);
+    return Promise.resolve(cityList);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+export const getLocalityByCity = async (body: any) => {
+  try {
+    let cityId = body.city;
+
+    let locationList = await cityMapModel.aggregate([
+      [
+        {
+          $match: {
+            city: new mongoose.Types.ObjectId(cityId),
+          },
+        },
+        {
+          $lookup: {
+            from: city,
+            localField: "city",
+            foreignField: "_id",
+            as: "city",
+          },
+        },
+        {
+          $unwind: {
+            path: "$city",
+          },
+        },
+        {
+          $lookup: {
+            from: locality,
+            localField: "locality",
+            foreignField: "_id",
+            as: "locality",
+          },
+        },
+        {
+          $unwind: {
+            path: "$locality",
+          },
+        },
+        {
+          $group: {
+            _id: "$city._id",
+            city: {
+              $first: "$city.name",
+            },
+            locality: {
+              $addToSet: "$locality",
+            },
+          },
+        },
+      ],
+    ]);
+    return Promise.resolve(locationList);
   } catch (error: any) {
     return Promise.reject(error);
   }
 };
 
-const checkIfCountryMapExist = async (
-  country: string,
-  state: string
-): Promise<any> => {
-  let exist = await CountryMapModel.exists({ country, state });
-  return Promise.resolve(exist);
+export const checkIfMapExist = async (
+  query: any,
+  model: mongoose.Model<any, {}, {}, {}>
+) => {
+  let children: string = Object.keys(query)[1];
+  let exist: any = (await model.find(query).lean()).map((e: any) =>
+    e[children].toString()
+  );
+
+  if (exist.length === query[children]["$in"].length) {
+    return Promise.resolve(true);
+  }
+
+  return Promise.resolve(
+    query[children]["$in"].filter((e: any) => !exist.includes(e))
+  );
 };
 
-const checkIfStateMapExist = async (
-  state: string,
-  city: string
-): Promise<any> => {
-  let exist = await StateMapModel.exists({ state, city });
-  return Promise.resolve(exist);
-};
+// export const checkIfCountryMapExist = async (
+//   country: string,
+//   state: Array<string>
+// ): Promise<any> => {
+//   let exist: any = await CountryMapModel.find({
+//     country,
+//     state: { $in: state },
+//   }).lean();
+//   exist = exist.map((e: any) => e.state.toString());
+
+//   if (exist.length === state.length) {
+//     return Promise.resolve(true);
+//   }
+//   return Promise.resolve(state.filter((e: any) => !exist.includes(e)));
+// };
+
+// export const checkIfStateMapExist = async (
+//   state: string,
+//   city: string
+// ): Promise<any> => {
+//   let exist = await StateMapModel.exists({ state, city });
+//   return Promise.resolve(exist);
+// };
+
+// export const checkIfCityMapExist = async (
+//   city: string,
+//   locality: string
+// ): Promise<any> => {
+//   let exist = await cityMapModel.exists({ city, locality });
+//   return Promise.resolve(exist);
+// };
