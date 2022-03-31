@@ -733,11 +733,15 @@ const getAppointmentByDate = (req, res) => __awaiter(void 0, void 0, void 0, fun
             path: "hospital",
             select: Patient_Controller_1.excludeHospitalFields,
         })
+            .populate({ path: "subPatient", select: { parentPatient: 0 } })
             .lean();
         // appointmenObj = appointmenObj.toObject();
         appointmenObj.forEach((e) => {
             e.patient["age"] = (0, Utils_1.getAge)(e.patient.DOB);
             e.doctors["age"] = (0, Utils_1.getAge)(e.doctors.DOB);
+            if (e.subPatient) {
+                e.subPatient["age"] = (0, Utils_1.getAge)(e.subPatient.DOB);
+            }
         });
         return (0, response_1.successResponse)(appointmenObj, "Success", res);
     }

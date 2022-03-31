@@ -75,6 +75,10 @@ const getAge = (dob) => {
     let age = currentDate.diff(exp, "years", true);
     if (age < 1) {
         age = currentDate.diff(exp, "months");
+        age = `${age} Months`;
+    }
+    else {
+        age = `${age} Years`;
     }
     return age;
 };
