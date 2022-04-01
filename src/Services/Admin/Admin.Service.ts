@@ -274,3 +274,20 @@ export const checkIfMapExist = async (
 //   let exist = await cityMapModel.exists({ city, locality });
 //   return Promise.resolve(exist);
 // };
+
+import * as path from "path";
+// import * as csv from "csvtojson";
+const csv = require("csvtojson");
+export const handleCSV = async (body: any) => {
+  try {
+    // console.log("csv:", csv.fromFile());
+    // console.log("dssdsdsd:", body);
+    let csvResult = await csv().fromFile(
+      path.join(body.destination, body.filename)
+    );
+
+    return Promise.resolve(csvResult);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
