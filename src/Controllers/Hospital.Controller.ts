@@ -825,12 +825,16 @@ export const getAppointmentByDate = async (req: Request, res: Response) => {
         path: "hospital",
         select: excludeHospitalFields,
       })
+      .populate({ path: "subPatient", select: { parentPatient: 0 } })
       .lean();
 
     // appointmenObj = appointmenObj.toObject();
     appointmenObj.forEach((e: any) => {
       e.patient["age"] = getAge(e.patient.DOB);
       e.doctors["age"] = getAge(e.doctors.DOB);
+      if (e.subPatient) {
+        e.subPatient["age"] = getAge(e.subPatient.DOB);
+      }
     });
     return successResponse(appointmenObj, "Success", res);
   } catch (error: any) {
