@@ -5,8 +5,17 @@ const schemaNames_1 = require("../Services/schemaNames");
 const LocalitySchema = new mongoose_1.Schema({
     name: {
         type: String,
-        required: true
-    }
+        // required: true,
+    },
+    localityid: {
+        type: String,
+    },
+    locality_city: {
+        type: String,
+    },
+    url: {
+        type: String,
+    },
 });
 const LocalityModel = (0, mongoose_1.model)(schemaNames_1.locality, LocalitySchema);
 exports.default = LocalityModel;

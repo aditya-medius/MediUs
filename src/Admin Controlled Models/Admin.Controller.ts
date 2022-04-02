@@ -689,9 +689,27 @@ export const getLocalityByCity = async (req: Request, res: Response) => {
   }
 };
 
-export const uploadCSV = async (req: Request, res: Response) => {
+export const uploadCSV_state = async (req: Request, res: Response) => {
   try {
-    let data = await adminService.handleCSV(req.file);
+    let data = await adminService.handleCSV_state(req.file);
+    return successResponse(data, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const uploadCSV_city = async (req: Request, res: Response) => {
+  try {
+    let data = await adminService.handleCSV_city(req.file);
+    return successResponse(data, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const uploadCSV_locality = async (req: Request, res: Response) => {
+  try {
+    let data = await adminService.handleCSV_locality(req.file);
     return successResponse(data, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);

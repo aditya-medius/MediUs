@@ -81,14 +81,25 @@ adminRouter.post("/setCountryMap", adminController.setCountryMap);
 adminRouter.post("/setStateMap", adminController.setStateMap);
 adminRouter.post("/setCityMap", adminController.setCityMap);
 
-adminRouter.get("/getStateByCountry", adminController.getStateByCountry);
-adminRouter.get("/getCityByState", adminController.getCityByState);
-adminRouter.get("/getLocalityByCity", adminController.getLocalityByCity);
+adminRouter.post("/getStateByCountry", adminController.getStateByCountry);
+adminRouter.post("/getCityByState", adminController.getCityByState);
+adminRouter.post("/getLocalityByCity", adminController.getLocalityByCity);
 
 adminRouter.post(
-  "/uploadCSV",
+  "/uploadCSV_state",
   upload.single("file"),
-  adminController.uploadCSV
+  adminController.uploadCSV_state
+);
+
+adminRouter.post(
+  "/uploadCSV_city",
+  upload.single("file"),
+  adminController.uploadCSV_city
+);
+adminRouter.post(
+  "/uploadCSV_locality",
+  upload.single("file"),
+  adminController.uploadCSV_locality
 );
 
 export default adminRouter;

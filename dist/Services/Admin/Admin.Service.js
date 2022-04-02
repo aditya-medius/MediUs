@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.handleCSV = exports.checkIfMapExist = exports.getLocalityByCity = exports.getCityByState = exports.getStateByCountry = exports.createCityMap = exports.createStateMap = exports.createCountryMap = void 0;
+exports.handleCSV_locality = exports.handleCSV_city = exports.handleCSV_state = exports.checkIfMapExist = exports.getLocalityByCity = exports.getCityByState = exports.getStateByCountry = exports.createCityMap = exports.createStateMap = exports.createCountryMap = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const State_Map_Model_1 = __importDefault(require("../../Admin Controlled Models/State.Map.Model"));
 const Country_Map_Model_1 = __importDefault(require("../../Admin Controlled Models/Country.Map.Model"));
@@ -268,46 +268,76 @@ const checkIfMapExist = (query, model) => __awaiter(void 0, void 0, void 0, func
     return Promise.resolve(query[children]["$in"].filter((e) => !exist.includes(e)));
 });
 exports.checkIfMapExist = checkIfMapExist;
-// export const checkIfCountryMapExist = async (
-//   country: string,
-//   state: Array<string>
-// ): Promise<any> => {
-//   let exist: any = await CountryMapModel.find({
-//     country,
-//     state: { $in: state },
-//   }).lean();
-//   exist = exist.map((e: any) => e.state.toString());
-//   if (exist.length === state.length) {
-//     return Promise.resolve(true);
-//   }
-//   return Promise.resolve(state.filter((e: any) => !exist.includes(e)));
-// };
-// export const checkIfStateMapExist = async (
-//   state: string,
-//   city: string
-// ): Promise<any> => {
-//   let exist = await StateMapModel.exists({ state, city });
-//   return Promise.resolve(exist);
-// };
-// export const checkIfCityMapExist = async (
-//   city: string,
-//   locality: string
-// ): Promise<any> => {
-//   let exist = await cityMapModel.exists({ city, locality });
-//   return Promise.resolve(exist);
-// };
 const path = __importStar(require("path"));
 // import * as csv from "csvtojson";
+const lodash_1 = __importDefault(require("lodash"));
 const csv = require("csvtojson");
-const handleCSV = (body) => __awaiter(void 0, void 0, void 0, function* () {
+const State_Model_1 = __importDefault(require("../../Admin Controlled Models/State.Model"));
+const City_Model_1 = __importDefault(require("../../Admin Controlled Models/City.Model"));
+const Locality_Model_1 = __importDefault(require("../../Admin Controlled Models/Locality.Model"));
+const handleCSV_state = (body) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        // console.log("csv:", csv.fromFile());
-        // console.log("dssdsdsd:", body);
         let csvResult = yield csv().fromFile(path.join(body.destination, body.filename));
-        return Promise.resolve(csvResult);
+        let states = yield State_Model_1.default.insertMany(csvResult);
+        return Promise.resolve(states);
     }
     catch (error) {
         return Promise.reject(error);
     }
 });
-exports.handleCSV = handleCSV;
+exports.handleCSV_state = handleCSV_state;
+const handleCSV_city = (body) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let csvResult = yield csv().fromFile(path.join(body.destination, body.filename));
+        let cities = yield City_Model_1.default.insertMany(csvResult);
+        let states = yield State_Model_1.default
+            .find({
+            state_id: { $in: [...cities.map((e) => e.city_state)] },
+        }, {
+            state_id: 1,
+        })
+            .lean();
+        let cityStateMapping = lodash_1.default.chain(cities)
+            .groupBy("city_state")
+            .map((value, key) => ({
+            state: states.filter((e) => (e.state_id === key ? e._id : null))[0]
+                ._id,
+            city: value.map((e) => e._id),
+        }))
+            .value();
+        cityStateMapping.forEach((e) => (0, exports.createStateMap)(e));
+        return Promise.resolve({});
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.handleCSV_city = handleCSV_city;
+const handleCSV_locality = (body) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let csvResult = yield csv().fromFile(path.join(body.destination, body.filename));
+        let locality = yield Locality_Model_1.default.insertMany(csvResult);
+        let citites = yield City_Model_1.default
+            .find({
+            "city-id": {
+                $in: [...locality.map((e) => e.locality_city)],
+            },
+        }, {
+            "city-id": 1,
+        })
+            .lean();
+        let localityCityMapping = lodash_1.default.chain(locality)
+            .groupBy("locality_city")
+            .map((value, key) => ({
+            city: citites.filter((e) => e["city-id"] === key ? e["city-id"] : null)[0]._id,
+            locality: value.map((e) => e._id),
+        }))
+            .value();
+        localityCityMapping.forEach((e) => (0, exports.createCityMap)(e));
+        return Promise.resolve({});
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.handleCSV_locality = handleCSV_locality;

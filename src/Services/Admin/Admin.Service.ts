@@ -23,7 +23,10 @@ export const createCountryMap = async (body: any) => {
   }
 };
 
-export const createStateMap = async (body: any) => {
+export const createStateMap = async (body: {
+  state: string;
+  city: Array<string>;
+}) => {
   try {
     let mapArray = body.city.map((e: any) => {
       return {
@@ -243,50 +246,96 @@ export const checkIfMapExist = async (
   );
 };
 
-// export const checkIfCountryMapExist = async (
-//   country: string,
-//   state: Array<string>
-// ): Promise<any> => {
-//   let exist: any = await CountryMapModel.find({
-//     country,
-//     state: { $in: state },
-//   }).lean();
-//   exist = exist.map((e: any) => e.state.toString());
-
-//   if (exist.length === state.length) {
-//     return Promise.resolve(true);
-//   }
-//   return Promise.resolve(state.filter((e: any) => !exist.includes(e)));
-// };
-
-// export const checkIfStateMapExist = async (
-//   state: string,
-//   city: string
-// ): Promise<any> => {
-//   let exist = await StateMapModel.exists({ state, city });
-//   return Promise.resolve(exist);
-// };
-
-// export const checkIfCityMapExist = async (
-//   city: string,
-//   locality: string
-// ): Promise<any> => {
-//   let exist = await cityMapModel.exists({ city, locality });
-//   return Promise.resolve(exist);
-// };
-
 import * as path from "path";
 // import * as csv from "csvtojson";
+import _ from "lodash";
 const csv = require("csvtojson");
-export const handleCSV = async (body: any) => {
+import stateModel from "../../Admin Controlled Models/State.Model";
+import cityModel from "../../Admin Controlled Models/City.Model";
+import localityModel from "../../Admin Controlled Models/Locality.Model";
+
+import { groupBy, map } from "lodash";
+export const handleCSV_state = async (body: any) => {
   try {
-    // console.log("csv:", csv.fromFile());
-    // console.log("dssdsdsd:", body);
     let csvResult = await csv().fromFile(
       path.join(body.destination, body.filename)
     );
 
-    return Promise.resolve(csvResult);
+    let states = await stateModel.insertMany(csvResult);
+
+    return Promise.resolve(states);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const handleCSV_city = async (body: any) => {
+  try {
+    let csvResult = await csv().fromFile(
+      path.join(body.destination, body.filename)
+    );
+
+    let cities = await cityModel.insertMany(csvResult);
+
+    let states = await stateModel
+      .find(
+        {
+          state_id: { $in: [...cities.map((e: any) => e.city_state)] },
+        },
+        {
+          state_id: 1,
+        }
+      )
+      .lean();
+
+    let cityStateMapping = _.chain(cities)
+      .groupBy("city_state")
+      .map((value, key) => ({
+        state: states.filter((e: any) => (e.state_id === key ? e._id : null))[0]
+          ._id,
+        city: value.map((e: any) => e._id),
+      }))
+      .value();
+
+    cityStateMapping.forEach((e: any) => createStateMap(e));
+    return Promise.resolve({});
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const handleCSV_locality = async (body: any) => {
+  try {
+    let csvResult = await csv().fromFile(
+      path.join(body.destination, body.filename)
+    );
+
+    let locality = await localityModel.insertMany(csvResult);
+
+    let citites = await cityModel
+      .find(
+        {
+          "city-id": {
+            $in: [...locality.map((e: any) => e.locality_city)],
+          },
+        },
+        {
+          "city-id": 1,
+        }
+      )
+      .lean();
+
+    let localityCityMapping = _.chain(locality)
+      .groupBy("locality_city")
+      .map((value, key) => ({
+        city: citites.filter((e: any) =>
+          e["city-id"] === key ? e["city-id"] : null
+        )[0]._id,
+        locality: value.map((e: any) => e._id),
+      }))
+      .value();
+    localityCityMapping.forEach((e: any) => createCityMap(e));
+    return Promise.resolve({});
   } catch (error: any) {
     return Promise.reject(error);
   }
