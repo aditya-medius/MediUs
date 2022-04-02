@@ -688,3 +688,12 @@ export const getLocalityByCity = async (req: Request, res: Response) => {
     return errorResponse(error, res);
   }
 };
+
+export const uploadCSV = async (req: Request, res: Response) => {
+  try {
+    let data = await adminService.handleCSV(req.file);
+    return successResponse(data, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};

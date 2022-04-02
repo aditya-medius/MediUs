@@ -31,10 +31,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateWorkingHour = exports.formatWorkingHourDayForAppointment = exports.setFormatForWorkingHours = exports.getDayFromWorkingHours = exports.getAge = exports.generateOTPtoken = exports.generateOTP = exports.encryptPassword = exports.phoneNumberRegex = void 0;
+exports.initUpload = exports.updateWorkingHour = exports.formatWorkingHourDayForAppointment = exports.setFormatForWorkingHours = exports.getDayFromWorkingHours = exports.getAge = exports.generateOTPtoken = exports.generateOTP = exports.encryptPassword = exports.phoneNumberRegex = void 0;
 const bcrypt = __importStar(require("bcrypt"));
 const jwt = __importStar(require("jsonwebtoken"));
 const moment_1 = __importDefault(require("moment"));
+const multer_1 = __importDefault(require("multer"));
+const path = __importStar(require("path"));
 exports.phoneNumberRegex = /^[0]?[6789]\d{9}$/;
 const encryptPassword = (password) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -160,3 +162,17 @@ const formatWorkingHourDayForAppointment = (body) => {
 exports.formatWorkingHourDayForAppointment = formatWorkingHourDayForAppointment;
 const updateWorkingHour = (query, cb) => { };
 exports.updateWorkingHour = updateWorkingHour;
+const initUpload = (filepath) => {
+    const storage = multer_1.default.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, `uploads/${filepath}`);
+        },
+        filename: function (req, file, cb) {
+            const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+            cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
+        },
+    });
+    const upload = (0, multer_1.default)({ storage });
+    return upload;
+};
+exports.initUpload = initUpload;

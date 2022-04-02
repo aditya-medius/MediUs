@@ -1,6 +1,8 @@
 import * as bcrypt from "bcrypt";
 import * as jwt from "jsonwebtoken";
 import moment from "moment";
+import multer from "multer";
+import * as path from "path";
 
 export const phoneNumberRegex: RegExp = /^[0]?[6789]\d{9}$/;
 
@@ -130,3 +132,22 @@ export const formatWorkingHourDayForAppointment = (body: any) => {
 };
 
 export const updateWorkingHour = (query: any, cb: Function) => {};
+
+export const initUpload = (filepath: string) => {
+  const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, `uploads/${filepath}`);
+    },
+    filename: function (req, file, cb) {
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      cb(
+        null,
+        file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname)
+      );
+    },
+  });
+
+  const upload = multer({ storage });
+
+  return upload;
+};
