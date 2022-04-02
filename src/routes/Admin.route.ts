@@ -3,7 +3,10 @@ import * as adminController from "../Admin Controlled Models/Admin.Controller";
 import { oneOf } from "../Services/middlewareHelper";
 import { authenticateAdmin } from "../authentication/Admin.auth";
 import * as patientController from "../Controllers/Patient.Controller";
+import { initUpload } from "../Services/Utils";
 const adminRouter = Router();
+
+const upload = initUpload("admin");
 
 adminRouter.post("/addSpeciality", adminController.addSpeciality);
 
@@ -81,4 +84,11 @@ adminRouter.post("/setCityMap", adminController.setCityMap);
 adminRouter.get("/getStateByCountry", adminController.getStateByCountry);
 adminRouter.get("/getCityByState", adminController.getCityByState);
 adminRouter.get("/getLocalityByCity", adminController.getLocalityByCity);
+
+adminRouter.post(
+  "/uploadCSV",
+  upload.single("file"),
+  adminController.uploadCSV
+);
+
 export default adminRouter;

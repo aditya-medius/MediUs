@@ -22,7 +22,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const adminController = __importStar(require("../Admin Controlled Models/Admin.Controller"));
 const patientController = __importStar(require("../Controllers/Patient.Controller"));
+const Utils_1 = require("../Services/Utils");
 const adminRouter = (0, express_1.Router)();
+const upload = (0, Utils_1.initUpload)("admin");
 adminRouter.post("/addSpeciality", adminController.addSpeciality);
 // Body part
 adminRouter.post("/addBodyPart", adminController.addBodyPart);
@@ -66,4 +68,5 @@ adminRouter.post("/setCityMap", adminController.setCityMap);
 adminRouter.get("/getStateByCountry", adminController.getStateByCountry);
 adminRouter.get("/getCityByState", adminController.getCityByState);
 adminRouter.get("/getLocalityByCity", adminController.getLocalityByCity);
+adminRouter.post("/uploadCSV", upload.single("file"), adminController.uploadCSV);
 exports.default = adminRouter;
