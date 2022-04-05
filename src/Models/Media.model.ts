@@ -1,5 +1,12 @@
 import mongoose, { Schema, model } from "mongoose";
-import { agent, doctor, hospital, media, patient } from "../Services/schemaNames";
+import {
+  agent,
+  doctor,
+  hospital,
+  media,
+  patient,
+  specialization,
+} from "../Services/schemaNames";
 const mediaSchema = new Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -8,7 +15,7 @@ const mediaSchema = new Schema({
   userType: {
     type: String,
     required: true,
-    enum: [patient, doctor, hospital, agent],
+    enum: [patient, doctor, hospital, agent, specialization],
   },
   image: {
     type: String,
