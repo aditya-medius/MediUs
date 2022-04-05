@@ -618,21 +618,47 @@ export const searchHospital = async (req: Request, res: Response) => {
         id = formatArray(id);
 
         specialityArray = formatArray(specialityArray);
+        const doctorArray = await doctorModel
+          .find(
+            {
+              $or: [
+                {
+                  active: true,
+                  specialization: { $in: specialityArray },
+                },
+                {
+                  _id: { $in: id },
+                },
+              ],
+            },
+            {
+              ...excludeDoctorFields,
+              // "hospitalDetails.hospital": 0,
+              "hospitalDetails.workingHours": 0,
+            }
+          )
+          .populate("specialization")
+          // .populate("hospitalDetails.hospital")
+          .populate({ path: "qualification", select: { duration: 0 } });
+
+        let hospitalIds: any = doctorArray
+          .map((e: any) =>
+            e.hospitalDetails.map((elem: any) => elem.hospital.toString())
+          )
+          .flat();
+
+        hospitalIds = new Set(hospitalIds);
+
         const hospitalArray = await hospitalModel
           .find(
             {
               $or: [
                 {
                   deleted: false,
-                  // active: true,
-                  specialisedIn: { $in: specialityArray },
-                  // doctors: {specialization: {$in: specialityArray}}
+                  _id: { $in: [...hospitalIds] },
                 },
                 {
                   type: term,
-                },
-                {
-                  _id: { $in: id },
                 },
               ],
             },
@@ -663,7 +689,6 @@ export const searchHospital = async (req: Request, res: Response) => {
               hospitalDetails: 0,
             },
           });
-        // .populate("anemity")
         return successResponse(hospitalArray, "Success", res);
       })
       .catch((error) => {
