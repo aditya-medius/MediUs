@@ -578,20 +578,36 @@ const searchHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
             let id = specialityArray.splice(-1, 1);
             id = formatArray(id);
             specialityArray = formatArray(specialityArray);
+            const doctorArray = yield Doctors_Model_1.default
+                .find({
+                $or: [
+                    {
+                        active: true,
+                        specialization: { $in: specialityArray },
+                    },
+                    {
+                        _id: { $in: id },
+                    },
+                ],
+            }, Object.assign(Object.assign({}, excludeDoctorFields), { 
+                // "hospitalDetails.hospital": 0,
+                "hospitalDetails.workingHours": 0 }))
+                .populate("specialization")
+                // .populate("hospitalDetails.hospital")
+                .populate({ path: "qualification", select: { duration: 0 } });
+            let hospitalIds = doctorArray
+                .map((e) => e.hospitalDetails.map((elem) => elem.hospital.toString()))
+                .flat();
+            hospitalIds = new Set(hospitalIds);
             const hospitalArray = yield Hospital_Model_1.default
                 .find({
                 $or: [
                     {
                         deleted: false,
-                        // active: true,
-                        specialisedIn: { $in: specialityArray },
-                        // doctors: {specialization: {$in: specialityArray}}
+                        _id: { $in: [...hospitalIds] },
                     },
                     {
                         type: term,
-                    },
-                    {
-                        _id: { $in: id },
                     },
                 ],
             }, {
@@ -620,7 +636,6 @@ const searchHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
                     hospitalDetails: 0,
                 },
             });
-            // .populate("anemity")
             return (0, response_1.successResponse)(hospitalArray, "Success", res);
         }))
             .catch((error) => {

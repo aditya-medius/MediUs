@@ -5,8 +5,17 @@ const schemaNames_1 = require("../Services/schemaNames");
 const citySchema = new mongoose_1.Schema({
     name: {
         type: String,
-        required: true
-    }
+        required: true,
+    },
+    "city-id": {
+        type: String,
+    },
+    city_state: {
+        type: String,
+    },
+    url: {
+        type: String,
+    },
 });
 const cityModel = (0, mongoose_1.model)(schemaNames_1.city, citySchema);
 exports.default = cityModel;
