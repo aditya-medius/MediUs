@@ -1,10 +1,11 @@
 import mongoose, { Schema, model } from "mongoose";
-import { qualification } from "../Services/schemaNames";
+import { qualification, qualificationNames } from "../Services/schemaNames";
 import validator from "validator";
 const qualificationSchema = new Schema({
   qualificationName: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     required: [true, "Qualification name is required"],
+    ref: qualificationNames,
   },
   certificationOrganisation: {
     type: String,

@@ -69,4 +69,6 @@ adminRouter.get("/getStateByCountry", adminController.getStateByCountry);
 adminRouter.get("/getCityByState", adminController.getCityByState);
 adminRouter.get("/getLocalityByCity", adminController.getLocalityByCity);
 adminRouter.post("/uploadCSV", upload.single("file"), adminController.uploadCSV);
+/* Qualification */
+adminRouter.post("addQualification", adminController.addQualificationn);
 exports.default = adminRouter;

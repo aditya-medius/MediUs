@@ -221,4 +221,11 @@ doctorRouter.post(
   doctorController.addHospitalInDoctorProfile
 );
 
+/* Qualification List */
+doctorRouter.get(
+  "/getQualificationList",
+  oneOf(authenticateDoctor),
+  qualificationController.getQualificationList
+);
+
 export default doctorRouter;

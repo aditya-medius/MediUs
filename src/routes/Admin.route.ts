@@ -91,4 +91,7 @@ adminRouter.post(
   adminController.uploadCSV
 );
 
+/* Qualification */
+adminRouter.post("addQualification", adminController.addQualificationn);
+
 export default adminRouter;

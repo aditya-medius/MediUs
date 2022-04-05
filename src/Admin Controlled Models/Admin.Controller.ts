@@ -599,6 +599,7 @@ export const getAllHospitalList = async (req: Request, res: Response) => {
 import CountryMapModel from "../Admin Controlled Models/Country.Map.Model";
 import StateMapModel from "../Admin Controlled Models/State.Map.Model";
 import CityMapModel from "../Admin Controlled Models/City.Map.Model";
+import qualificationNameModel from "./QualificationName.Model";
 
 export const setCountryMap = async (req: Request, res: Response) => {
   try {
@@ -692,6 +693,17 @@ export const getLocalityByCity = async (req: Request, res: Response) => {
 export const uploadCSV = async (req: Request, res: Response) => {
   try {
     let data = await adminService.handleCSV(req.file);
+    return successResponse(data, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+/* Qualification add kro */
+export const addQualificationn = async (req: Request, res: Response) => {
+  try {
+    let body = req.body;
+    let data = await new qualificationNameModel(body).save();
     return successResponse(data, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
