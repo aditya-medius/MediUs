@@ -41,6 +41,10 @@ const appointmentPaymentSchema = new mongoose_1.Schema({
     paymentSignature: {
         type: String,
     },
+    Type: {
+        type: String,
+        enum: ["Offline", "Online"],
+    },
 });
 const appointmentPaymentModel = (0, mongoose_1.model)(schemaNames_1.appointmentPayment, appointmentPaymentSchema);
 exports.default = appointmentPaymentModel;
