@@ -400,6 +400,12 @@ export const BookAppointment = async (req: Request, res: Response) => {
         res
       );
     }
+
+    if (req.currentHospital) {
+      body["Type"] = "Offline";
+    } else if (req.currentPatient) {
+      body["Type"] = "Online";
+    }
     let appointmentBook = await new appointmentModel(body).save();
     await appointmentBook.populate({
       path: "subPatient",
@@ -412,12 +418,6 @@ export const BookAppointment = async (req: Request, res: Response) => {
       "Appoinment has been successfully booked",
       res
     );
-
-    // console.log("body:", body);
-    // body.time.date = new Date(body.time.date);
-    // console.log("body:", body);
-
-    // return successResponse({}, "Aaaa:", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

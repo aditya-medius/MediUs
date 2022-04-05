@@ -372,6 +372,12 @@ const BookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
         if (appCount == capacity.capacity) {
             return (0, response_1.errorResponse)(new Error("Doctor cannot take any more appointments"), res);
         }
+        if (req.currentHospital) {
+            body["Type"] = "Offline";
+        }
+        else if (req.currentPatient) {
+            body["Type"] = "Online";
+        }
         let appointmentBook = yield new Appointment_Model_1.default(body).save();
         yield appointmentBook.populate({
             path: "subPatient",
@@ -380,10 +386,6 @@ const BookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
             },
         });
         return (0, response_1.successResponse)(appointmentBook, "Appoinment has been successfully booked", res);
-        // console.log("body:", body);
-        // body.time.date = new Date(body.time.date);
-        // console.log("body:", body);
-        // return successResponse({}, "Aaaa:", res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);

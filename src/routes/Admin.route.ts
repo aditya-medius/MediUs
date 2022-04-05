@@ -102,4 +102,7 @@ adminRouter.post(
   adminController.uploadCSV_locality
 );
 
+/* Qualification */
+adminRouter.post("addQualification", adminController.addQualificationn);
+
 export default adminRouter;

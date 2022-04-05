@@ -71,4 +71,6 @@ adminRouter.post("/getLocalityByCity", adminController.getLocalityByCity);
 adminRouter.post("/uploadCSV_state", upload.single("file"), adminController.uploadCSV_state);
 adminRouter.post("/uploadCSV_city", upload.single("file"), adminController.uploadCSV_city);
 adminRouter.post("/uploadCSV_locality", upload.single("file"), adminController.uploadCSV_locality);
+/* Qualification */
+adminRouter.post("addQualification", adminController.addQualificationn);
 exports.default = adminRouter;
