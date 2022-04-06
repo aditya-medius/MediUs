@@ -36,6 +36,7 @@ const Hospital_auth_1 = require("../authentication/Hospital.auth");
 const mediaController = __importStar(require("../Controllers/Media.Controller"));
 const multer_1 = __importDefault(require("multer"));
 const path = __importStar(require("path"));
+const Admin_auth_1 = require("../authentication/Admin.auth");
 const storage = multer_1.default.diskStorage({
     destination: function (req, file, cb) {
         cb(null, "uploads/user");
@@ -90,7 +91,7 @@ doctorRouter.post("/updatePharma/:id", Doctor_auth_1.authenticateDoctor, preferr
 doctorRouter.post("/setKYC", kycController.addKYC);
 doctorRouter.post("/updateKyc", kycController.updateKyc);
 // Media
-doctorRouter.post("/uploadImage", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), upload.single("profileImage"), mediaController.uploadImage);
+doctorRouter.post("/uploadImage", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital, Patient_auth_1.authenticatePatient, Admin_auth_1.authenticateAdmin), upload.single("profileImage"), mediaController.uploadImage);
 // Doctors ki kamayi
 doctorRouter.get("/getTotalEarnings", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getTotalEarnings);
 // Account se paise nikalna

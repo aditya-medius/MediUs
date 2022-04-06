@@ -12,6 +12,7 @@ import { authenticateHospital } from "../authentication/Hospital.auth";
 import * as mediaController from "../Controllers/Media.Controller";
 import multer from "multer";
 import * as path from "path";
+import { authenticateAdmin } from "../authentication/Admin.auth";
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -158,7 +159,12 @@ doctorRouter.post("/updateKyc", kycController.updateKyc);
 // Media
 doctorRouter.post(
   "/uploadImage",
-  oneOf(authenticateDoctor),
+  oneOf(
+    authenticateDoctor,
+    authenticateHospital,
+    authenticatePatient,
+    authenticateAdmin
+  ),
   upload.single("profileImage"),
   mediaController.uploadImage
 );

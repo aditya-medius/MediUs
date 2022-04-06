@@ -8,6 +8,7 @@ import StateMapModel from "../../Admin Controlled Models/State.Map.Model";
 import CountryMapModel from "../../Admin Controlled Models/Country.Map.Model";
 import cityMapModel from "../../Admin Controlled Models/City.Map.Model";
 import { country, state, city, locality } from "../schemaNames";
+dotenv.config();
 export const createCountryMap = async (body: any) => {
   try {
     let mapArray = body.state.map((e: any) => {
@@ -339,4 +340,10 @@ export const handleCSV_locality = async (body: any) => {
   } catch (error: any) {
     return Promise.reject(error);
   }
+};
+
+/* Token */
+export const getAdminToken = async (body: any) => {
+  const token = await jwt.sign(body, process.env.SECRET_ADMIN_KEY as string);
+  return token;
 };
