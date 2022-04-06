@@ -2,6 +2,8 @@ import mongoose, { Schema, model } from "mongoose";
 import { type } from "os";
 import schemaOptions from "../Services/schemaOptions";
 import { patient, doctor, hospital, address } from "../Services/schemaNames";
+import hospitalModel from "./Hospital.Model";
+import doctorModel from "./Doctors.Model";
 
 const patientSchema = new Schema({
   ...schemaOptions,
@@ -36,8 +38,39 @@ patientSchema.pre("save", async function (next) {
       { deleted: false },
     ],
   });
+
+  const hospitalExist = await hospitalModel.findOne({
+    $and: [
+      {
+        $or: [
+          // {
+          //   email: this.email,
+          // },
+          { contactNumber: this.phoneNumber },
+        ],
+      },
+      { deleted: false },
+    ],
+  });
+
+  const doctorExist = await doctorModel.findOne({
+    $and: [
+      {
+        $or: [
+          // {
+          //   email: this.email,
+          // },
+          { phoneNumber: this.phoneNumber },
+        ],
+      },
+      { deleted: false },
+    ],
+  });
   if (/^[0]?[6789]\d{9}$/.test(this.phoneNumber)) {
-    if (!profileExist || this.phoneNumber == "9999999999") {
+    if (
+      !(profileExist || hospitalExist || doctorExist) ||
+      this.phoneNumber == "9999999999"
+    ) {
       return next();
     } else {
       throw new Error(

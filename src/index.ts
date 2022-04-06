@@ -15,7 +15,7 @@ import { oneOf, tokenNikalo } from "./Services/middlewareHelper";
 import { authenticateDoctor } from "./authentication/Doctor.auth";
 import { authenticateHospital } from "./authentication/Hospital.auth";
 import { authenticatePatient } from "./authentication/Patient.auth";
-
+import mongoose from "mongoose";
 import * as cronJobService from "./Services/Cron-Jobs.Service";
 
 // Cron Jobs

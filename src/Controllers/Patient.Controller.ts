@@ -23,6 +23,7 @@ import hospitalModel from "../Models/Hospital.Model";
 import addressModel from "../Models/Address.Model";
 import prescriptionModel from "../Models/Prescription.Model";
 import * as doctorController from "../Controllers/Doctor.Controller";
+import mongoose from "mongoose";
 import {
   phoneNumberValidation,
   emailValidation,
@@ -763,17 +764,24 @@ export const getDoctorByDay = async (req: Request, res: Response) => {
   }
 };
 
+// import * as connection from "../Services/connection.db";
 // Get speciality, body part and disease
 export const getSpecialityBodyPartAndDisease = async (
   _req: Request,
   res: Response
 ) => {
   try {
-    const speciality = specialityModel.find();
+    /*  
+      connect to database
+    */
+    const Conn = mongoose.createConnection();
+    await Conn.openUri(<string>process.env.DB_PATH);
+
+    const speciality = Conn.collection("special").find();
     const bodyParts = bodyPartModel.find();
     const disease = diseaseModel.find();
 
-    const SBD = await Promise.all([speciality, bodyParts, disease]);
+    const SBD = await Promise.all([speciality.toArray(), bodyParts, disease]);
     const [S, B, D] = SBD;
 
     return successResponse(
