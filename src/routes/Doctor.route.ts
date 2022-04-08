@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { authenticateDoctor } from "../authentication/Doctor.auth";
 // import * as doctorController from "../Controllers/Doctor.Controller";
 import * as doctorController from "../Controllers/Doctor.Controller";
@@ -13,6 +13,15 @@ import * as mediaController from "../Controllers/Media.Controller";
 import multer from "multer";
 import * as path from "path";
 import { authenticateAdmin } from "../authentication/Admin.auth";
+import {
+  checkDoctorsApprovalStatus,
+  checkHospitalsApprovalStatus,
+} from "../Services/Approval-Request/Approval-Request.Service";
+import { errorResponse, successResponse } from "../Services/response";
+import {
+  approveHospitalRequest,
+  requestApprovalFromHospital,
+} from "../Controllers/Approval-Request.Controller";
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -64,6 +73,33 @@ doctorRouter.get(
 doctorRouter.post(
   "/updateProfile",
   oneOf(authenticateDoctor),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      let { hospitalDetails } = req.body;
+      if (hospitalDetails) {
+        let hospitalId = hospitalDetails[0].hospital,
+          doctorId = req.currentDoctor;
+        let response = await checkDoctorsApprovalStatus(doctorId, hospitalId);
+        switch (response) {
+          case "Pending": {
+            return successResponse({}, "Your request is pending", res);
+          }
+          case "Denied": {
+            return successResponse(
+              {},
+              "Your request for this hospital is denied",
+              res
+            );
+          }
+          case "Approved": {
+            next();
+          }
+        }
+      }
+    } catch (error: any) {
+      return errorResponse(error, res);
+    }
+  },
   doctorController.updateDoctorProfile
 );
 doctorRouter.delete(
@@ -224,6 +260,32 @@ doctorRouter.put(
 doctorRouter.post(
   "/addHospitalInDoctorProfile",
   oneOf(authenticateHospital),
+  async (req: Request, res: Response, next: NextFunction) => {
+    let { doctorId } = req.body,
+      hospitalId = req.currentHospital;
+
+    try {
+      let response = await checkHospitalsApprovalStatus(doctorId, hospitalId);
+
+      switch (response) {
+        case "Pending": {
+          return successResponse({}, "Your request is pending", res);
+        }
+        case "Denied": {
+          return successResponse(
+            {},
+            "Your request for this doctor is denied",
+            res
+          );
+        }
+        case "Approved": {
+          next();
+        }
+      }
+    } catch (error: any) {
+      return errorResponse(error, res);
+    }
+  },
   doctorController.addHospitalInDoctorProfile
 );
 
@@ -232,6 +294,18 @@ doctorRouter.get(
   "/getQualificationList",
   oneOf(authenticateDoctor),
   qualificationController.getQualificationList
+);
+
+doctorRouter.put(
+  "/requestApprovalFromHospital",
+  oneOf(authenticateDoctor),
+  requestApprovalFromHospital
+);
+ 
+doctorRouter.put(
+  "/approveHospitalRequest",
+  oneOf(authenticateDoctor),
+  approveHospitalRequest
 );
 
 export default doctorRouter;
