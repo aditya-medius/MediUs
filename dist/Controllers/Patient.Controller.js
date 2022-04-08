@@ -52,6 +52,7 @@ const Prescription_Model_1 = __importDefault(require("../Models/Prescription.Mod
 const doctorController = __importStar(require("../Controllers/Doctor.Controller"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const Validation_Service_1 = require("../Services/Validation.Service");
+const Appointment_Service_1 = require("../Services/Appointment/Appointment.Service");
 exports.excludePatientFields = {
     password: 0,
     verified: 0,
@@ -378,6 +379,12 @@ const BookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
         else if (req.currentPatient) {
             body["Type"] = "Online";
         }
+        /* Appointment ka token Number */
+        let appointmentTokenNumber = yield (0, Appointment_Service_1.getTokenNumber)(body);
+        /* Appointment ki Id */
+        let appointmentId = (0, Appointment_Service_1.generateAppointmentId)();
+        body["appointmentToken"] = appointmentTokenNumber;
+        body["appointmentId"] = appointmentId;
         let appointmentBook = yield new Appointment_Model_1.default(body).save();
         yield appointmentBook.populate({
             path: "subPatient",

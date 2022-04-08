@@ -347,3 +347,5 @@ export const getAdminToken = async (body: any) => {
   const token = await jwt.sign(body, process.env.SECRET_ADMIN_KEY as string);
   return token;
 };
+
+export const convenienceFee = 1;

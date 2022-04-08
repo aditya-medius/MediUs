@@ -113,6 +113,12 @@ const appointmentSchema = new mongoose_1.Schema({
         type: Boolean,
         default: false,
     },
+    appointmentToken: {
+        type: Number,
+    },
+    appointmentId: {
+        type: String,
+    },
 });
 appointmentSchema.post("save", function (result) {
     return __awaiter(this, void 0, void 0, function* () {

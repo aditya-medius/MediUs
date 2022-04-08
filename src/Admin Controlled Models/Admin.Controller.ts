@@ -409,7 +409,8 @@ export const login = async (req: Request, res: Response) => {
 
     let compRes = await bcrypt.compare(body.password, profile.password);
     if (compRes) {
-      return successResponse({}, "Success", res);
+      let token = await adminService.getAdminToken(profile.toObject());
+      return successResponse(token, "Success", res);
     } else {
       return errorResponse(new Error("Invalid password"), res, 400);
     }

@@ -424,7 +424,8 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         });
         let compRes = yield bcrypt.compare(body.password, profile.password);
         if (compRes) {
-            return (0, response_1.successResponse)({}, "Success", res);
+            let token = yield adminService.getAdminToken(profile.toObject());
+            return (0, response_1.successResponse)(token, "Success", res);
         }
         else {
             return (0, response_1.errorResponse)(new Error("Invalid password"), res, 400);

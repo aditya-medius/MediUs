@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAdminToken = exports.handleCSV_locality = exports.handleCSV_city = exports.handleCSV_state = exports.checkIfMapExist = exports.getLocalityByCity = exports.getCityByState = exports.getStateByCountry = exports.createCityMap = exports.createStateMap = exports.createCountryMap = void 0;
+exports.convenienceFee = exports.getAdminToken = exports.handleCSV_locality = exports.handleCSV_city = exports.handleCSV_state = exports.checkIfMapExist = exports.getLocalityByCity = exports.getCityByState = exports.getStateByCountry = exports.createCityMap = exports.createStateMap = exports.createCountryMap = void 0;
 const dotenv = __importStar(require("dotenv"));
 const jwt = __importStar(require("jsonwebtoken"));
 const mongoose_1 = __importDefault(require("mongoose"));
@@ -350,3 +350,4 @@ const getAdminToken = (body) => __awaiter(void 0, void 0, void 0, function* () {
     return token;
 });
 exports.getAdminToken = getAdminToken;
+exports.convenienceFee = 1;

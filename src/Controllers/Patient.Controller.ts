@@ -28,6 +28,10 @@ import {
   phoneNumberValidation,
   emailValidation,
 } from "../Services/Validation.Service";
+import {
+  generateAppointmentId,
+  getTokenNumber,
+} from "../Services/Appointment/Appointment.Service";
 export const excludePatientFields = {
   password: 0,
   verified: 0,
@@ -407,6 +411,16 @@ export const BookAppointment = async (req: Request, res: Response) => {
     } else if (req.currentPatient) {
       body["Type"] = "Online";
     }
+
+    /* Appointment ka token Number */
+    let appointmentTokenNumber = await getTokenNumber(body);
+
+    /* Appointment ki Id */
+    let appointmentId = generateAppointmentId();
+
+    body["appointmentToken"] = appointmentTokenNumber;
+    body["appointmentId"] = appointmentId;
+
     let appointmentBook = await new appointmentModel(body).save();
     await appointmentBook.populate({
       path: "subPatient",
