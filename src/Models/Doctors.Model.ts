@@ -17,6 +17,8 @@ import {
   media,
 } from "../Services/schemaNames";
 import mediaModel from "./Media.model";
+import hospitalModel from "./Hospital.Model";
+import patientModel from "./Patient.Model";
 const doctorSchema = new Schema(
   {
     ...schemaOptions,
@@ -122,8 +124,39 @@ doctorSchema.pre("save", async function (next) {
     ],
     queryType: "save",
   });
+
+  const hospitalExist = await hospitalModel.findOne({
+    $and: [
+      {
+        $or: [
+          {
+            email: this.email,
+          },
+          { contactNumber: this.phoneNumber },
+        ],
+      },
+      { deleted: false },
+    ],
+  });
+
+  const patientExist = await patientModel.findOne({
+    $and: [
+      {
+        $or: [
+          {
+            email: this.email,
+          },
+          { phoneNumber: this.phoneNumber },
+        ],
+      },
+      { deleted: false },
+    ],
+  });
   if (/^[0]?[789]\d{9}$/.test(this.phoneNumber)) {
-    if (!profileExist || this.phoneNumber == "9999999999") {
+    if (
+      !(profileExist || hospitalExist || patientExist) ||
+      this.phoneNumber == "9999999999"
+    ) {
       return next();
     } else if (!profileExist.verified) {
       throw new Error("Your profile is under verification process");

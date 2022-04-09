@@ -2,15 +2,8 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 dotenv.config();
 const db_path: string = <string>process.env.DB_PATH;
-// mongoose.connect(db_path, async () => {
-//   console.log("Connected to MongoDBdatabase");
-//   console.log(await mongoose.connection.collection("special").aggregate());
-//   // (async () => {
-//   //   console.log(
-//   //     "Cossss:",
-//   //   );
-//   // })();
-// });
+
+const Conn = mongoose.createConnection();
 
 let connection;
 (async () => {
@@ -21,7 +14,11 @@ let connection;
 
   // connect to database
   await Conn.openUri(<string>process.env.DB_PATH);
-  const addresses = Conn.collection("special").find();
+  // Conn.collection("special").find();
+  module.exports = Conn;
 })();
 
-module.exports = { dbConnection: mongoose };
+// export connection;
+
+// connect to database
+// Conn.collection("special").find();

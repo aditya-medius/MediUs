@@ -14,6 +14,8 @@ export const uploadImage = async (req: Request, res: Response) => {
       user = hospital;
     } else if (req.currentPatient) {
       user = patient;
+    } else if (req.currentAdmin) {
+      user = body.user;
     }
     body.userType = user;
     body.user = req.body.userId;

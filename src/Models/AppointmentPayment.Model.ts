@@ -25,6 +25,10 @@ const appointmentPaymentSchema = new Schema({
   paymentSignature: {
     type: String,
   },
+  Type: {
+    type: String,
+    enum: ["Offline", "Online"],
+  },
 });
 
 const appointmentPaymentModel = model(

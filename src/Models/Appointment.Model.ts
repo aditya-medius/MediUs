@@ -86,6 +86,12 @@ const appointmentSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  appointmentToken: {
+    type: Number,
+  },
+  appointmentId: {
+    type: String,
+  },
 });
 
 appointmentSchema.post("save", async function (result: any) {

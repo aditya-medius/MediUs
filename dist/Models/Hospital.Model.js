@@ -27,9 +27,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const schemaNames_1 = require("../Services/schemaNames");
+const Doctors_Model_1 = __importDefault(require("./Doctors.Model"));
+const Patient_Model_1 = __importDefault(require("./Patient.Model"));
 const hospitalSchema = new mongoose_1.Schema({
     name: {
         type: String,
@@ -147,8 +152,25 @@ hospitalSchema.pre("save", function (next) {
                 { deleted: false },
             ],
         });
+        const patientProfile = yield Patient_Model_1.default.findOne({
+            $and: [
+                {
+                    $or: [{ phoneNumber: this.contactNumber }],
+                },
+                { deleted: false },
+            ],
+        });
+        const doctorProfile = yield Doctors_Model_1.default.findOne({
+            $and: [
+                {
+                    $or: [{ phoneNumber: this.contactNumber }],
+                },
+                { deleted: false },
+            ],
+        });
         if (/^[0]?[789]\d{9}$/.test(this.contactNumber)) {
-            if (!hospitalExist || this.contactNumber == "9999999999") {
+            if (!(hospitalExist || patientProfile || doctorProfile) ||
+                this.contactNumber == "9999999999") {
                 return next();
             }
             else {

@@ -21,35 +21,38 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const schemaNames_1 = require("../Services/schemaNames");
-const qualificationSchema = new mongoose_1.Schema({
-    qualificationName: {
+const approvalSchema = new mongoose_1.Schema({
+    /* Kisne request ki hai */
+    requestFrom: {
         type: mongoose_1.default.Schema.Types.ObjectId,
-        required: [true, "Qualification name is required"],
-        ref: schemaNames_1.qualificationNames,
+        required: true,
+        refPath: "ref_From",
     },
-    certificationOrganisation: {
+    ref_From: {
         type: String,
-        required: [true, "Certification Organisation is required"],
+        enum: [schemaNames_1.doctor, schemaNames_1.hospital],
     },
-    duration: {
-        type: {
-            from: {
-                type: Date,
-                required: true,
-            },
-            till: {
-                type: Date,
-                required: true,
-            },
+    /* Kiske liye request ki hai */
+    requestTo: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        required: true,
+        refPath: "ref_To",
+    },
+    ref_To: {
+        type: String,
+        enum: [schemaNames_1.doctor, schemaNames_1.hospital],
+    },
+    approvalStatus: {
+        type: String,
+        default: "Pending",
+        enum: ["Approved", "Pending", "Denied"],
+    },
+    delData: {
+        deleted: { type: Boolean, default: false },
+        deletedAt: {
+            type: Date,
         },
-        // required: [true, "Duration is required"],
-    },
-    email: {
-        type: String,
-        // required: [true, "Email is required"],
-        // validate: [validator.isEmail, "Email isn't valid"],
-        // unique: true,
     },
 });
-const qualificationModel = (0, mongoose_1.model)(schemaNames_1.qualification, qualificationSchema);
-exports.default = qualificationModel;
+const approvalModel = (0, mongoose_1.model)(schemaNames_1.approvalRequest, approvalSchema);
+exports.default = approvalModel;

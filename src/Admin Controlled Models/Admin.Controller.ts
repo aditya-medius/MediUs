@@ -409,7 +409,8 @@ export const login = async (req: Request, res: Response) => {
 
     let compRes = await bcrypt.compare(body.password, profile.password);
     if (compRes) {
-      return successResponse({}, "Success", res);
+      let token = await adminService.getAdminToken(profile.toObject());
+      return successResponse(token, "Success", res);
     } else {
       return errorResponse(new Error("Invalid password"), res, 400);
     }
@@ -599,6 +600,7 @@ export const getAllHospitalList = async (req: Request, res: Response) => {
 import CountryMapModel from "../Admin Controlled Models/Country.Map.Model";
 import StateMapModel from "../Admin Controlled Models/State.Map.Model";
 import CityMapModel from "../Admin Controlled Models/City.Map.Model";
+import qualificationNameModel from "./QualificationName.Model";
 
 export const setCountryMap = async (req: Request, res: Response) => {
   try {
@@ -711,6 +713,17 @@ export const uploadCSV_city = async (req: Request, res: Response) => {
 export const uploadCSV_locality = async (req: Request, res: Response) => {
   try {
     let data = await adminService.handleCSV_locality(req.file);
+    return successResponse(data, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+/* Qualification add kro */
+export const addQualificationn = async (req: Request, res: Response) => {
+  try {
+    let body = req.body;
+    let data = await new qualificationNameModel(body).save();
     return successResponse(data, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);

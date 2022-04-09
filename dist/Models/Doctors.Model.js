@@ -47,6 +47,8 @@ const schemaOptions_1 = __importDefault(require("../Services/schemaOptions"));
 const lodash_1 = __importDefault(require("lodash"));
 const moment_1 = __importDefault(require("moment"));
 const schemaNames_1 = require("../Services/schemaNames");
+const Hospital_Model_1 = __importDefault(require("./Hospital.Model"));
+const Patient_Model_1 = __importDefault(require("./Patient.Model"));
 const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schemaOptions_1.default), { hospitalDetails: [
         {
             type: {
@@ -137,8 +139,35 @@ doctorSchema.pre("save", function (next) {
             ],
             queryType: "save",
         });
+        const hospitalExist = yield Hospital_Model_1.default.findOne({
+            $and: [
+                {
+                    $or: [
+                        {
+                            email: this.email,
+                        },
+                        { contactNumber: this.phoneNumber },
+                    ],
+                },
+                { deleted: false },
+            ],
+        });
+        const patientExist = yield Patient_Model_1.default.findOne({
+            $and: [
+                {
+                    $or: [
+                        {
+                            email: this.email,
+                        },
+                        { phoneNumber: this.phoneNumber },
+                    ],
+                },
+                { deleted: false },
+            ],
+        });
         if (/^[0]?[789]\d{9}$/.test(this.phoneNumber)) {
-            if (!profileExist || this.phoneNumber == "9999999999") {
+            if (!(profileExist || hospitalExist || patientExist) ||
+                this.phoneNumber == "9999999999") {
                 return next();
             }
             else if (!profileExist.verified) {

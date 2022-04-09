@@ -23,10 +23,15 @@ import hospitalModel from "../Models/Hospital.Model";
 import addressModel from "../Models/Address.Model";
 import prescriptionModel from "../Models/Prescription.Model";
 import * as doctorController from "../Controllers/Doctor.Controller";
+import mongoose from "mongoose";
 import {
   phoneNumberValidation,
   emailValidation,
 } from "../Services/Validation.Service";
+import {
+  generateAppointmentId,
+  getTokenNumber,
+} from "../Services/Appointment/Appointment.Service";
 export const excludePatientFields = {
   password: 0,
   verified: 0,
@@ -400,6 +405,22 @@ export const BookAppointment = async (req: Request, res: Response) => {
         res
       );
     }
+
+    if (req.currentHospital) {
+      body["Type"] = "Offline";
+    } else if (req.currentPatient) {
+      body["Type"] = "Online";
+    }
+
+    /* Appointment ka token Number */
+    let appointmentTokenNumber = await getTokenNumber(body);
+
+    /* Appointment ki Id */
+    let appointmentId = generateAppointmentId();
+
+    body["appointmentToken"] = appointmentTokenNumber;
+    body["appointmentId"] = appointmentId;
+
     let appointmentBook = await new appointmentModel(body).save();
     await appointmentBook.populate({
       path: "subPatient",
@@ -412,12 +433,6 @@ export const BookAppointment = async (req: Request, res: Response) => {
       "Appoinment has been successfully booked",
       res
     );
-
-    // console.log("body:", body);
-    // body.time.date = new Date(body.time.date);
-    // console.log("body:", body);
-
-    // return successResponse({}, "Aaaa:", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }
@@ -763,17 +778,24 @@ export const getDoctorByDay = async (req: Request, res: Response) => {
   }
 };
 
+// import * as connection from "../Services/connection.db";
 // Get speciality, body part and disease
 export const getSpecialityBodyPartAndDisease = async (
   _req: Request,
   res: Response
 ) => {
   try {
-    const speciality = specialityModel.find();
+    /*  
+      connect to database
+    */
+    const Conn = mongoose.createConnection();
+    await Conn.openUri(<string>process.env.DB_PATH);
+
+    const speciality = Conn.collection("special").find();
     const bodyParts = bodyPartModel.find();
     const disease = diseaseModel.find();
 
-    const SBD = await Promise.all([speciality, bodyParts, disease]);
+    const SBD = await Promise.all([speciality.toArray(), bodyParts, disease]);
     const [S, B, D] = SBD;
 
     return successResponse(

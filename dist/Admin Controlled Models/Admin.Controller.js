@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uploadCSV_locality = exports.uploadCSV_city = exports.uploadCSV_state = exports.getLocalityByCity = exports.getCityByState = exports.getStateByCountry = exports.setCityMap = exports.setStateMap = exports.setCountryMap = exports.getAllHospitalList = exports.getAllAgentList = exports.verifyAgents = exports.getAllDoctorsList = exports.verifyHospitals = exports.verifyDoctors = exports.getUnverifiedDoctors = exports.addHospitalService = exports.create = exports.login = exports.getCityStateLocalityCountry = exports.getPayments = exports.addPayment = exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityDoctorType = exports.addSpecialityDoctorType = exports.addDoctorType = exports.addToSpecialityDisease = exports.addSpecialityDisease = exports.addDisease = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
+exports.addQualificationn = exports.uploadCSV_locality = exports.uploadCSV_city = exports.uploadCSV_state = exports.getLocalityByCity = exports.getCityByState = exports.getStateByCountry = exports.setCityMap = exports.setStateMap = exports.setCountryMap = exports.getAllHospitalList = exports.getAllAgentList = exports.verifyAgents = exports.getAllDoctorsList = exports.verifyHospitals = exports.verifyDoctors = exports.getUnverifiedDoctors = exports.addHospitalService = exports.create = exports.login = exports.getCityStateLocalityCountry = exports.getPayments = exports.addPayment = exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityDoctorType = exports.addSpecialityDoctorType = exports.addDoctorType = exports.addToSpecialityDisease = exports.addSpecialityDisease = exports.addDisease = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
 const BodyPart_Model_1 = __importDefault(require("./BodyPart.Model"));
 const SpecialityBody_Model_1 = __importDefault(require("./SpecialityBody.Model"));
 const SpecialityDisease_Model_1 = __importDefault(require("./SpecialityDisease.Model"));
@@ -424,7 +424,8 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         });
         let compRes = yield bcrypt.compare(body.password, profile.password);
         if (compRes) {
-            return (0, response_1.successResponse)({}, "Success", res);
+            let token = yield adminService.getAdminToken(profile.toObject());
+            return (0, response_1.successResponse)(token, "Success", res);
         }
         else {
             return (0, response_1.errorResponse)(new Error("Invalid password"), res, 400);
@@ -603,6 +604,7 @@ exports.getAllHospitalList = getAllHospitalList;
 const Country_Map_Model_1 = __importDefault(require("../Admin Controlled Models/Country.Map.Model"));
 const State_Map_Model_1 = __importDefault(require("../Admin Controlled Models/State.Map.Model"));
 const City_Map_Model_1 = __importDefault(require("../Admin Controlled Models/City.Map.Model"));
+const QualificationName_Model_1 = __importDefault(require("./QualificationName.Model"));
 const setCountryMap = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
@@ -721,3 +723,15 @@ const uploadCSV_locality = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.uploadCSV_locality = uploadCSV_locality;
+/* Qualification add kro */
+const addQualificationn = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.body;
+        let data = yield new QualificationName_Model_1.default(body).save();
+        return (0, response_1.successResponse)(data, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.addQualificationn = addQualificationn;

@@ -46,12 +46,13 @@ const Doctor_Controller_1 = require("./Doctor.Controller");
 const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
 const BodyPart_Model_1 = __importDefault(require("../Admin Controlled Models/BodyPart.Model"));
 const Disease_Model_1 = __importDefault(require("../Admin Controlled Models/Disease.Model"));
-const Specialization_Model_1 = __importDefault(require("../Admin Controlled Models/Specialization.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Prescription_Model_1 = __importDefault(require("../Models/Prescription.Model"));
 const doctorController = __importStar(require("../Controllers/Doctor.Controller"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const Validation_Service_1 = require("../Services/Validation.Service");
+const Appointment_Service_1 = require("../Services/Appointment/Appointment.Service");
 exports.excludePatientFields = {
     password: 0,
     verified: 0,
@@ -372,6 +373,18 @@ const BookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
         if (appCount == capacity.capacity) {
             return (0, response_1.errorResponse)(new Error("Doctor cannot take any more appointments"), res);
         }
+        if (req.currentHospital) {
+            body["Type"] = "Offline";
+        }
+        else if (req.currentPatient) {
+            body["Type"] = "Online";
+        }
+        /* Appointment ka token Number */
+        let appointmentTokenNumber = yield (0, Appointment_Service_1.getTokenNumber)(body);
+        /* Appointment ki Id */
+        let appointmentId = (0, Appointment_Service_1.generateAppointmentId)();
+        body["appointmentToken"] = appointmentTokenNumber;
+        body["appointmentId"] = appointmentId;
         let appointmentBook = yield new Appointment_Model_1.default(body).save();
         yield appointmentBook.populate({
             path: "subPatient",
@@ -380,10 +393,6 @@ const BookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
             },
         });
         return (0, response_1.successResponse)(appointmentBook, "Appoinment has been successfully booked", res);
-        // console.log("body:", body);
-        // body.time.date = new Date(body.time.date);
-        // console.log("body:", body);
-        // return successResponse({}, "Aaaa:", res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);
@@ -686,13 +695,19 @@ const getDoctorByDay = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.getDoctorByDay = getDoctorByDay;
+// import * as connection from "../Services/connection.db";
 // Get speciality, body part and disease
 const getSpecialityBodyPartAndDisease = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const speciality = Specialization_Model_1.default.find();
+        /*
+          connect to database
+        */
+        const Conn = mongoose_1.default.createConnection();
+        yield Conn.openUri(process.env.DB_PATH);
+        const speciality = Conn.collection("special").find();
         const bodyParts = BodyPart_Model_1.default.find();
         const disease = Disease_Model_1.default.find();
-        const SBD = yield Promise.all([speciality, bodyParts, disease]);
+        const SBD = yield Promise.all([speciality.toArray(), bodyParts, disease]);
         const [S, B, D] = SBD;
         return (0, response_1.successResponse)({ Speciality: S, BodyPart: B, Disease: D }, "Success", res);
     }
