@@ -16,15 +16,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const db_path = process.env.DB_PATH;
-// mongoose.connect(db_path, async () => {
-//   console.log("Connected to MongoDBdatabase");
-//   console.log(await mongoose.connection.collection("special").aggregate());
-//   // (async () => {
-//   //   console.log(
-//   //     "Cossss:",
-//   //   );
-//   // })();
-// });
+const Conn = mongoose_1.default.createConnection();
 let connection;
 (() => __awaiter(void 0, void 0, void 0, function* () {
     mongoose_1.default.connect(db_path, () => __awaiter(void 0, void 0, void 0, function* () {
@@ -33,6 +25,9 @@ let connection;
     const Conn = mongoose_1.default.createConnection();
     // connect to database
     yield Conn.openUri(process.env.DB_PATH);
-    const addresses = Conn.collection("special").find();
+    // Conn.collection("special").find();
+    module.exports = Conn;
 }))();
-module.exports = { dbConnection: mongoose_1.default };
+// export connection;
+// connect to database
+// Conn.collection("special").find();

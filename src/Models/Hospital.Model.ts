@@ -16,6 +16,7 @@ import {
 import { errorResponse, successResponse } from "../Services/response";
 import { query } from "express";
 import doctorModel from "./Doctors.Model";
+import patientModel from "./Patient.Model";
 const hospitalSchema = new Schema({
   name: {
     type: String,
@@ -136,8 +137,30 @@ hospitalSchema.pre("save", async function (next) {
       { deleted: false },
     ],
   });
+
+  const patientProfile = await patientModel.findOne({
+    $and: [
+      {
+        $or: [{ phoneNumber: this.contactNumber }],
+      },
+      { deleted: false },
+    ],
+  });
+
+  const doctorProfile = await doctorModel.findOne({
+    $and: [
+      {
+        $or: [{ phoneNumber: this.contactNumber }],
+      },
+      { deleted: false },
+    ],
+  });
+
   if (/^[0]?[789]\d{9}$/.test(this.contactNumber)) {
-    if (!hospitalExist || this.contactNumber == "9999999999") {
+    if (
+      !(hospitalExist || patientProfile || doctorProfile) ||
+      this.contactNumber == "9999999999"
+    ) {
       return next();
     } else {
       throw new Error(

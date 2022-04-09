@@ -31,12 +31,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.handleCSV_locality = exports.handleCSV_city = exports.handleCSV_state = exports.checkIfMapExist = exports.getLocalityByCity = exports.getCityByState = exports.getStateByCountry = exports.createCityMap = exports.createStateMap = exports.createCountryMap = void 0;
+exports.convenienceFee = exports.getAdminToken = exports.handleCSV_locality = exports.handleCSV_city = exports.handleCSV_state = exports.checkIfMapExist = exports.getLocalityByCity = exports.getCityByState = exports.getStateByCountry = exports.createCityMap = exports.createStateMap = exports.createCountryMap = void 0;
+const dotenv = __importStar(require("dotenv"));
+const jwt = __importStar(require("jsonwebtoken"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const State_Map_Model_1 = __importDefault(require("../../Admin Controlled Models/State.Map.Model"));
 const Country_Map_Model_1 = __importDefault(require("../../Admin Controlled Models/Country.Map.Model"));
 const City_Map_Model_1 = __importDefault(require("../../Admin Controlled Models/City.Map.Model"));
 const schemaNames_1 = require("../schemaNames");
+dotenv.config();
 const createCountryMap = (body) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let mapArray = body.state.map((e) => {
@@ -341,3 +344,10 @@ const handleCSV_locality = (body) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.handleCSV_locality = handleCSV_locality;
+/* Token */
+const getAdminToken = (body) => __awaiter(void 0, void 0, void 0, function* () {
+    const token = yield jwt.sign(body, process.env.SECRET_ADMIN_KEY);
+    return token;
+});
+exports.getAdminToken = getAdminToken;
+exports.convenienceFee = 1;

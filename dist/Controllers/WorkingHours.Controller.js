@@ -112,7 +112,6 @@ const getWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function
                     }
                 }
             });
-            console.log("dsjbsjbdsaasd:", WHObj2);
             WHObj2 = (0, WorkingHour_helper_1.formatWorkingHour)([WHObj2]);
             return (0, response_1.successResponse)({ workingHours: WHObj2 }, "Success", res);
         }

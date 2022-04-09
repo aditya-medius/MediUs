@@ -34,6 +34,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const schemaOptions_1 = __importDefault(require("../Services/schemaOptions"));
 const schemaNames_1 = require("../Services/schemaNames");
+const Hospital_Model_1 = __importDefault(require("./Hospital.Model"));
+const Doctors_Model_1 = __importDefault(require("./Doctors.Model"));
 const patientSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schemaOptions_1.default), { location: {
         type: {
             type: String,
@@ -63,8 +65,35 @@ patientSchema.pre("save", function (next) {
                 { deleted: false },
             ],
         });
+        const hospitalExist = yield Hospital_Model_1.default.findOne({
+            $and: [
+                {
+                    $or: [
+                        // {
+                        //   email: this.email,
+                        // },
+                        { contactNumber: this.phoneNumber },
+                    ],
+                },
+                { deleted: false },
+            ],
+        });
+        const doctorExist = yield Doctors_Model_1.default.findOne({
+            $and: [
+                {
+                    $or: [
+                        // {
+                        //   email: this.email,
+                        // },
+                        { phoneNumber: this.phoneNumber },
+                    ],
+                },
+                { deleted: false },
+            ],
+        });
         if (/^[0]?[6789]\d{9}$/.test(this.phoneNumber)) {
-            if (!profileExist || this.phoneNumber == "9999999999") {
+            if (!(profileExist || hospitalExist || doctorExist) ||
+                this.phoneNumber == "9999999999") {
                 return next();
             }
             else {

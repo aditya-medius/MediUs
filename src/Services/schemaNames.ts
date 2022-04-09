@@ -41,3 +41,4 @@ export const agent: string = "agents";
 export const approveStatus: string = "approvestatus";
 export const notifications: string = "notifications";
 export const qualificationNames: string = "qualificationnames";
+export const approvalRequest: string = "approvalrequests";
