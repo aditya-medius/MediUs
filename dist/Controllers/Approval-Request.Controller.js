@@ -34,6 +34,7 @@ const response_1 = require("../Services/response");
 const requestApprovalFromDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { doctorId, hospitalId } = req.body;
+        let exist = yield approvalService.doctorKLiyeHospitalKiRequestExistKrtiHai(doctorId, hospitalId);
         let response = yield approvalService.requestApprovalFromDoctor(doctorId, hospitalId);
         return (0, response_1.successResponse)(response, "Success", res);
     }
@@ -45,8 +46,14 @@ exports.requestApprovalFromDoctor = requestApprovalFromDoctor;
 const approveHospitalRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { requestId } = req.body;
-        let response = yield approvalService.approveHospitalRequest(requestId);
-        return (0, response_1.successResponse)(response, "Success", res);
+        let requestExist = yield approvalService.canThisDoctorApproveThisRequest(requestId, req.currentDoctor);
+        if (requestExist) {
+            let response = yield approvalService.approveHospitalRequest(requestId);
+            return (0, response_1.successResponse)(response, "Success", res);
+        }
+        else {
+            throw new Error("Either this request does not exist or you are trying to approve someone else's request");
+        }
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);
@@ -67,6 +74,8 @@ exports.denyHospitalRequest = denyHospitalRequest;
 const requestApprovalFromHospital = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { doctorId, hospitalId } = req.body;
+        let exist = yield approvalService.hospitalKLiyeDoctorKiRequestExistKrtiHai(doctorId, hospitalId);
+        console.log("exit 2:", exist);
         let response = yield approvalService.requestApprovalFromHospital(doctorId, hospitalId);
         return (0, response_1.successResponse)(response, "Success", res);
     }
@@ -78,8 +87,14 @@ exports.requestApprovalFromHospital = requestApprovalFromHospital;
 const approveDoctorRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { requestId } = req.body;
-        let response = yield approvalService.approveDoctorRequest(requestId);
-        return (0, response_1.successResponse)(response, "Success", res);
+        let requestExist = yield approvalService.canThisHospitalApproveThisRequest(requestId, req.currentHospital);
+        if (requestExist) {
+            let response = yield approvalService.approveDoctorRequest(requestId);
+            return (0, response_1.successResponse)(response, "Success", res);
+        }
+        else {
+            throw new Error("Either this request does not exist or you are trying to approve someone else's request");
+        }
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);

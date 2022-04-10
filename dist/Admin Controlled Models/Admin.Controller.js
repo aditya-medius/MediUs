@@ -694,6 +694,7 @@ const getLocalityByCity = (req, res) => __awaiter(void 0, void 0, void 0, functi
 exports.getLocalityByCity = getLocalityByCity;
 const uploadCSV_state = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        console.log("wwwww:", req.body);
         let data = yield adminService.handleCSV_state(req.file);
         return (0, response_1.successResponse)(data, "Success", res);
     }

@@ -2,7 +2,7 @@ import express, { NextFunction, Request, Response } from "express";
 import { authenticateDoctor } from "../authentication/Doctor.auth";
 import { authenticateHospital } from "../authentication/Hospital.auth";
 import { authenticatePatient } from "../authentication/Patient.auth";
-import { requestApprovalFromDoctor } from "../Controllers/Approval-Request.Controller";
+import { approveDoctorRequest, denyDoctorRequest, requestApprovalFromDoctor } from "../Controllers/Approval-Request.Controller";
 import * as hospitalController from "../Controllers/Hospital.Controller";
 import {
   createWorkingHours,
@@ -131,4 +131,19 @@ hospitalRouter.put(
   oneOf(authenticateHospital),
   requestApprovalFromDoctor
 );
+
+/* Doctor k approval ki request approve kro */
+hospitalRouter.put(
+  "/approveDoctorRequest",
+  oneOf(authenticateHospital),
+  approveDoctorRequest
+);
+
+hospitalRouter.put(
+  "/denyDoctorRequest",
+  oneOf(authenticateHospital),
+  denyDoctorRequest
+);
+
+
 export default hospitalRouter;
