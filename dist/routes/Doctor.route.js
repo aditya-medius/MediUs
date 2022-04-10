@@ -164,4 +164,5 @@ doctorRouter.post("/addHospitalInDoctorProfile", (0, middlewareHelper_1.oneOf)(H
 doctorRouter.get("/getQualificationList", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), qualificationController.getQualificationList);
 doctorRouter.put("/requestApprovalFromHospital", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), Approval_Request_Controller_1.requestApprovalFromHospital);
 doctorRouter.put("/approveHospitalRequest", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), Approval_Request_Controller_1.approveHospitalRequest);
+doctorRouter.put("/denyHospitalRequest", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), Approval_Request_Controller_1.denyHospitalRequest);
 exports.default = doctorRouter;

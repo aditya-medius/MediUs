@@ -1,5 +1,5 @@
 import approvalModel from "../../Models/Approval-Request.Model";
-import { hospital, doctor } from "../schemaNames";
+import { hospital, doctor, approvalRequest } from "../schemaNames";
 
 export const requestApprovalFromDoctor = async (
   doctorId: string,
@@ -125,6 +125,133 @@ const changeRequestStatus = async (requestId: string, status: String) => {
     return Promise.resolve({
       message: `Successfully ${status} the request`,
     });
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const canThisDoctorApproveThisRequest = async (
+  requestId: string,
+  doctorId: string
+) => {
+  try {
+    const requestExist = await approvalModel.findOne({
+      _id: requestId,
+      requestTo: doctorId,
+    });
+    return Promise.resolve(requestExist);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const canThisHospitalApproveThisRequest = async (
+  requestId: string,
+  hospitalId: string
+) => {
+  try {
+    const requestExist = await approvalModel.findOne({
+      _id: requestId,
+      requestTo: hospitalId,
+    });
+
+    return Promise.resolve(requestExist);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const hospitalKLiyeDoctorKiRequestExistKrtiHai = async (
+  doctorId: string,
+  hospitalId: string
+) => {
+  try {
+    let exist = await approvalModel.exists({
+      requestFrom: doctorId,
+      requestTo: hospitalId,
+    });
+    if (exist) {
+      throw new Error("A request for this already exist. Please wait");
+    } else {
+      return Promise.resolve(true);
+    }
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const doctorKLiyeHospitalKiRequestExistKrtiHai = async (
+  doctorId: string,
+  hospitalId: string
+) => {
+  try {
+    let exist = await approvalModel.exists({
+      requestFrom: hospitalId,
+      requestTo: doctorId,
+    });
+    if (exist) {
+      throw new Error("A request for this already exist. Please wait");
+    } else {
+      return Promise.resolve(true);
+    }
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+/* Doctor ko kitno ne approval k liye request ki hai */
+export const getListOfRequestedApprovals_OfDoctor = async (
+  doctorId: string
+) => {
+  try {
+    let requestedApprovals = await approvalModel.find({
+      requestTo: doctorId,
+      "delData.deleted": false,
+    });
+    return Promise.resolve(requestedApprovals);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+/* Doctor ne kitno se approval ki request ki hai */
+export const getListOfRequestedApprovals_ByDoctor = async (
+  doctorId: string
+) => {
+  try {
+    let requestedApprovals = await approvalModel.find({
+      requestFrom: doctorId,
+    });
+    return Promise.resolve(requestedApprovals);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+/* Hospital ko kitno ne approval k liye request ki hai */
+export const getListOfRequestedApprovals_OfHospital = async (
+  hospitalId: string
+) => {
+  try {
+    let requestedApprovals = await approvalModel.find({
+      requestTo: hospitalId,
+      "delData.deleted": false,
+    });
+    return Promise.resolve(requestedApprovals);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+/* Hospital ne kitno se approval ki request ki hai */
+export const getListOfRequestedApprovals_ByHospital = async (
+  hospitalId: string
+) => {
+  try {
+    let requestedApprovals = await approvalModel.find({
+      requestFrom: hospitalId,
+    });
+    return Promise.resolve(requestedApprovals);
   } catch (error: any) {
     return Promise.reject(error);
   }

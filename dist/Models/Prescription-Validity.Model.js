@@ -22,30 +22,24 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const schemaNames_1 = require("../Services/schemaNames");
 const prescriptionSchema = new mongoose_1.Schema({
-    doctor: {
-        type: mongoose_1.default.Types.ObjectId,
+    doctorId: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
         ref: schemaNames_1.doctor,
+        required: true,
     },
-    patient: {
-        type: mongoose_1.default.Types.ObjectId,
-        ref: schemaNames_1.patient,
+    hospitalId: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        ref: schemaNames_1.hospital,
+        required: true,
     },
-    pharma: {
-        type: mongoose_1.default.Types.ObjectId,
-        ref: schemaNames_1.preferredPharma,
-    },
-    prescription: {
-        data: Buffer,
-        contentType: String,
-    },
-    createDate: {
+    createdAt: {
         type: Date,
-        default: Date.now,
+        default: Date.now(),
     },
-    deleted: {
-        type: Boolean,
-        default: false,
+    validateTill: {
+        type: Number,
+        required: true,
     },
 });
-const prescriptionModel = (0, mongoose_1.model)(schemaNames_1.prescription, prescriptionSchema);
-exports.default = prescriptionModel;
+const prescriptionValidityModel = (0, mongoose_1.model)(schemaNames_1.prescriptionValidity, prescriptionSchema);
+exports.default = prescriptionValidityModel;

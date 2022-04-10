@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkHospitalsApprovalStatus = exports.checkDoctorsApprovalStatus = exports.denyDoctorRequest = exports.approveDoctorRequest = exports.requestApprovalFromHospital = exports.denyHospitalRequest = exports.approveHospitalRequest = exports.requestApprovalFromDoctor = void 0;
+exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.doctorKLiyeHospitalKiRequestExistKrtiHai = exports.hospitalKLiyeDoctorKiRequestExistKrtiHai = exports.canThisHospitalApproveThisRequest = exports.canThisDoctorApproveThisRequest = exports.checkHospitalsApprovalStatus = exports.checkDoctorsApprovalStatus = exports.denyDoctorRequest = exports.approveDoctorRequest = exports.requestApprovalFromHospital = exports.denyHospitalRequest = exports.approveHospitalRequest = exports.requestApprovalFromDoctor = void 0;
 const Approval_Request_Model_1 = __importDefault(require("../../Models/Approval-Request.Model"));
 const schemaNames_1 = require("../schemaNames");
 const requestApprovalFromDoctor = (doctorId, hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
@@ -136,3 +136,119 @@ const changeRequestStatus = (requestId, status) => __awaiter(void 0, void 0, voi
         return Promise.reject(error);
     }
 });
+const canThisDoctorApproveThisRequest = (requestId, doctorId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const requestExist = yield Approval_Request_Model_1.default.findOne({
+            _id: requestId,
+            requestTo: doctorId,
+        });
+        return Promise.resolve(requestExist);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.canThisDoctorApproveThisRequest = canThisDoctorApproveThisRequest;
+const canThisHospitalApproveThisRequest = (requestId, hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const requestExist = yield Approval_Request_Model_1.default.findOne({
+            _id: requestId,
+            requestTo: hospitalId,
+        });
+        return Promise.resolve(requestExist);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.canThisHospitalApproveThisRequest = canThisHospitalApproveThisRequest;
+const hospitalKLiyeDoctorKiRequestExistKrtiHai = (doctorId, hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let exist = yield Approval_Request_Model_1.default.exists({
+            requestFrom: doctorId,
+            requestTo: hospitalId,
+        });
+        if (exist) {
+            throw new Error("A request for this already exist. Please wait");
+        }
+        else {
+            return Promise.resolve(true);
+        }
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.hospitalKLiyeDoctorKiRequestExistKrtiHai = hospitalKLiyeDoctorKiRequestExistKrtiHai;
+const doctorKLiyeHospitalKiRequestExistKrtiHai = (doctorId, hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let exist = yield Approval_Request_Model_1.default.exists({
+            requestFrom: hospitalId,
+            requestTo: doctorId,
+        });
+        if (exist) {
+            throw new Error("A request for this already exist. Please wait");
+        }
+        else {
+            return Promise.resolve(true);
+        }
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.doctorKLiyeHospitalKiRequestExistKrtiHai = doctorKLiyeHospitalKiRequestExistKrtiHai;
+/* Doctor ko kitno ne approval k liye request ki hai */
+const getListOfRequestedApprovals_OfDoctor = (doctorId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let requestedApprovals = yield Approval_Request_Model_1.default.find({
+            requestTo: doctorId,
+            "delData.deleted": false,
+        });
+        return Promise.resolve(requestedApprovals);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.getListOfRequestedApprovals_OfDoctor = getListOfRequestedApprovals_OfDoctor;
+/* Doctor ne kitno se approval ki request ki hai */
+const getListOfRequestedApprovals_ByDoctor = (doctorId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let requestedApprovals = yield Approval_Request_Model_1.default.find({
+            requestFrom: doctorId,
+        });
+        return Promise.resolve(requestedApprovals);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.getListOfRequestedApprovals_ByDoctor = getListOfRequestedApprovals_ByDoctor;
+/* Hospital ko kitno ne approval k liye request ki hai */
+const getListOfRequestedApprovals_OfHospital = (hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let requestedApprovals = yield Approval_Request_Model_1.default.find({
+            requestTo: hospitalId,
+            "delData.deleted": false,
+        });
+        return Promise.resolve(requestedApprovals);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.getListOfRequestedApprovals_OfHospital = getListOfRequestedApprovals_OfHospital;
+/* Hospital ne kitno se approval ki request ki hai */
+const getListOfRequestedApprovals_ByHospital = (hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let requestedApprovals = yield Approval_Request_Model_1.default.find({
+            requestFrom: hospitalId,
+        });
+        return Promise.resolve(requestedApprovals);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.getListOfRequestedApprovals_ByHospital = getListOfRequestedApprovals_ByHospital;

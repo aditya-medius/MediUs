@@ -93,4 +93,7 @@ hospitalRouter.post("/getAppointmentByDate", (0, middlewareHelper_1.oneOf)(Hospi
 hospitalRouter.put("/checkVerificationStatus", hospitalController.checkVerificationStatus);
 /* Doctor se approval ki request */
 hospitalRouter.put("/requestApprovalFromDoctor", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), Approval_Request_Controller_1.requestApprovalFromDoctor);
+/* Doctor k approval ki request approve kro */
+hospitalRouter.put("/approveDoctorRequest", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), Approval_Request_Controller_1.approveDoctorRequest);
+hospitalRouter.put("/denyDoctorRequest", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), Approval_Request_Controller_1.denyDoctorRequest);
 exports.default = hospitalRouter;

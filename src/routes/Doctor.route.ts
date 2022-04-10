@@ -20,6 +20,7 @@ import {
 import { errorResponse, successResponse } from "../Services/response";
 import {
   approveHospitalRequest,
+  denyHospitalRequest,
   requestApprovalFromHospital,
 } from "../Controllers/Approval-Request.Controller";
 
@@ -301,11 +302,17 @@ doctorRouter.put(
   oneOf(authenticateDoctor),
   requestApprovalFromHospital
 );
- 
+
 doctorRouter.put(
   "/approveHospitalRequest",
   oneOf(authenticateDoctor),
   approveHospitalRequest
+);
+
+doctorRouter.put(
+  "/denyHospitalRequest",
+  oneOf(authenticateDoctor),
+  denyHospitalRequest
 );
 
 export default doctorRouter;
