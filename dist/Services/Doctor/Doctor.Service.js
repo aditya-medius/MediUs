@@ -175,20 +175,12 @@ const setConsultationFeeForDoctor = (doctorId, hospitalId, consultationFee) => _
     try {
         let response = yield Doctors_Model_1.default.findOneAndUpdate({
             _id: doctorId,
-            "hospitalDetails.hospitalId": hospitalId,
+            "hospitalDetails.hospital": hospitalId,
         }, {
             $set: {
                 "hospitalDetails.$.consultationFee": consultationFee,
             },
         });
-        // console.log("SDdssdsd:", response);
-        // response.hospitalDetails.map((e: any) => {
-        //   if (e.hospital === hospitalId) {
-        //     e["consultationFee"] = consultationFee;
-        //   }
-        // });
-        // console.log("SDdssdsd:1", response);
-        // await response.save();
         return Promise.resolve(true);
     }
     catch (error) {

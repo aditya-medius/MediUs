@@ -155,7 +155,7 @@ export const setConsultationFeeForDoctor = async (
     let response = await doctorModel.findOneAndUpdate(
       {
         _id: doctorId,
-        "hospitalDetails.hospitalId": hospitalId,
+        "hospitalDetails.hospital": hospitalId,
       },
       {
         $set: {
@@ -163,15 +163,6 @@ export const setConsultationFeeForDoctor = async (
         },
       }
     );
-    // console.log("SDdssdsd:", response);
-    // response.hospitalDetails.map((e: any) => {
-    //   if (e.hospital === hospitalId) {
-    //     e["consultationFee"] = consultationFee;
-    //   }
-    // });
-
-    // console.log("SDdssdsd:1", response);
-    // await response.save();
     return Promise.resolve(true);
   } catch (error: any) {
     return Promise.reject(error);
