@@ -1,4 +1,6 @@
 import approvalModel from "../../Models/Approval-Request.Model";
+import doctorModel from "../../Models/Doctors.Model";
+import hospitalModel from "../../Models/Hospital.Model";
 import { hospital, doctor, approvalRequest } from "../schemaNames";
 
 export const requestApprovalFromDoctor = async (
@@ -24,7 +26,18 @@ export const requestApprovalFromDoctor = async (
 
 export const approveHospitalRequest = async (requestId: string) => {
   try {
-    return Promise.resolve(await changeRequestStatus(requestId, "Approved"));
+    await changeRequestStatus(requestId, "Approved");
+    let request = await approvalModel.findOne(
+      { _id: requestId },
+      "requestFrom requestTo"
+    );
+    await addDoctorAndHospitalToEachOthersProfile(
+      request.requestTo,
+      request.requestFrom
+    );
+
+    // return Promise.resolve(await changeRequestStatus(requestId, "Approved"));
+    return Promise.resolve("Success");
   } catch (error: any) {
     return Promise.reject(error);
   }
@@ -60,7 +73,17 @@ export const requestApprovalFromHospital = async (
 
 export const approveDoctorRequest = async (requestId: string) => {
   try {
-    return Promise.resolve(await changeRequestStatus(requestId, "Approved"));
+    await changeRequestStatus(requestId, "Approved");
+    let request = await approvalModel.findOne(
+      { _id: requestId },
+      "requestFrom requestTo"
+    );
+    await addDoctorAndHospitalToEachOthersProfile(
+      request.requestFrom,
+      request.requestTo
+    );
+    return Promise.resolve("Success");
+    // return Promise.resolve(await changeRequestStatus(requestId, "Approved"));
   } catch (error: any) {
     return Promise.reject(error);
   }
@@ -252,6 +275,57 @@ export const getListOfRequestedApprovals_ByHospital = async (
       requestFrom: hospitalId,
     });
     return Promise.resolve(requestedApprovals);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+const addHospitalToDoctorProfile = async (
+  doctorId: string,
+  hospitalId: string
+) => {
+  try {
+    let response = await doctorModel.findOneAndUpdate(
+      { _id: doctorId },
+      { $addToSet: { hospitalDetails: { hospital: hospitalId } } }
+    );
+
+    return Promise.resolve(true);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+const addDoctorToHospitalProfile = async (
+  doctorId: string,
+  hospitalId: string
+) => {
+  try {
+    let response = await hospitalModel.findOneAndUpdate(
+      { _id: hospitalId },
+      { $addToSet: { doctors: doctorId } }
+    );
+    return Promise.resolve(true);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+const addDoctorAndHospitalToEachOthersProfile = async (
+  doctorId: string,
+  hospitalId: string
+) => {
+  try {
+    let response = await Promise.all([
+      addHospitalToDoctorProfile(doctorId, hospitalId),
+      addDoctorToHospitalProfile(doctorId, hospitalId),
+    ]);
+    if (response.includes(false)) {
+      throw new Error("Unexpected error occured");
+    } else {
+      return Promise.resolve(true);
+    }
+    return Promise.resolve(response);
   } catch (error: any) {
     return Promise.reject(error);
   }

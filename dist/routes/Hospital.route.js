@@ -18,15 +18,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -38,9 +29,7 @@ const Patient_auth_1 = require("../authentication/Patient.auth");
 const Approval_Request_Controller_1 = require("../Controllers/Approval-Request.Controller");
 const hospitalController = __importStar(require("../Controllers/Hospital.Controller"));
 const WorkingHours_Controller_1 = require("../Controllers/WorkingHours.Controller");
-const Approval_Request_Service_1 = require("../Services/Approval-Request/Approval-Request.Service");
 const middlewareHelper_1 = require("../Services/middlewareHelper");
-const response_1 = require("../Services/response");
 const hospitalRouter = express_1.default.Router();
 hospitalRouter.get("/", 
 // oneOf(authenticateHospital),
@@ -51,29 +40,35 @@ hospitalRouter.get("/myHospital", Hospital_auth_1.authenticateHospital, hospital
 // hospitalRouter.get("/", authenticateHospital, hospitalController.getAllHospitalsList);
 hospitalRouter.post("/", hospitalController.createHospital);
 hospitalRouter.post("/deleteHospital", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.deleteHospital);
-hospitalRouter.post("/updateHospital", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    let { doctors } = req.body;
-    if (doctors) {
-        try {
-            let doctorId = doctors[0], hospitalId = req.currentHospital;
-            let response = yield (0, Approval_Request_Service_1.checkHospitalsApprovalStatus)(doctorId, hospitalId);
-            switch (response) {
-                case "Pending": {
-                    return (0, response_1.successResponse)({}, "Your request is pending", res);
-                }
-                case "Denied": {
-                    return (0, response_1.successResponse)({}, "Your request for this doctor is denied", res);
-                }
-                case "Approved": {
-                    next();
-                }
-            }
-        }
-        catch (error) {
-            return (0, response_1.errorResponse)(error, res);
-        }
-    }
-}), hospitalController.updateHospital);
+hospitalRouter.post("/updateHospital", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), 
+// async (req: Request, res: Response, next: NextFunction) => {
+//   let { doctors } = req.body;
+//   if (doctors) {
+//     try {
+//       let doctorId = doctors[0],
+//         hospitalId = req.currentHospital;
+//       let response = await checkHospitalsApprovalStatus(doctorId, hospitalId);
+//       switch (response) {
+//         case "Pending": {
+//           return successResponse({}, "Your request is pending", res);
+//         }
+//         case "Denied": {
+//           return successResponse(
+//             {},
+//             "Your request for this doctor is denied",
+//             res
+//           );
+//         }
+//         case "Approved": {
+//           next();
+//         }
+//       }
+//     } catch (error: any) {
+//       return errorResponse(error, res);
+//     }
+//   }
+// },
+hospitalController.updateHospital);
 hospitalRouter.post("/anemity", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.createHospitalAnemity);
 hospitalRouter.get("/getAnemities", hospitalController.getAnemities);
 hospitalRouter.get("/getServices", hospitalController.getServices);

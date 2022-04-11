@@ -37,11 +37,11 @@ const doctorSchema = new Schema(
           },
           consultationFee: {
             min: {
-              required: [true, "Minimum consultation fee is required"],
+              // required: [true, "Minimum consultation fee is required"],
               type: Number,
             },
             max: {
-              required: [true, "Maximum consultation fee is required"],
+              // required: [true, "Maximum consultation fee is required"],
               type: Number,
             },
           },
@@ -274,10 +274,10 @@ doctorSchema.pre("findOneAndUpdate", async function (next) {
   if (updateQuery && "hospitalDetails" in updateQuery) {
     const currentDoc = await this.model.findOne({ _id: this.getQuery()._id });
     const incomingHospitals = _.map(updateQuery.hospitalDetails, (e) =>
-      e.hospital.toString()
+      e.hospital ? e.hospital.toString() : []
     );
     const currentHospitals = _.map(currentDoc.hospitalDetails, (e) =>
-      e.hospital.toString()
+      e.hospital ? e.hospital.toString() : []
     );
 
     const combinedHospitals: Array<string> = [

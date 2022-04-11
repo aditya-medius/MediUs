@@ -952,12 +952,12 @@ export const cancelAppointments = async (req: Request, res: Response) => {
     } else {
       // If not, cancel the appointment and return the success response
       const updatedAppointment = await appointmentModel.findOne(
-        { _id: body.appointmentId },
+        { _id: body.appointmentId }
         // { $set: { cancelled: true } },
         // { new: true }
       );
-      updatedAppointment.cancelled = true
-      await updatedAppointment.save()
+      updatedAppointment.cancelled = true;
+      await updatedAppointment.save();
 
       return successResponse(
         updatedAppointment,
@@ -1702,6 +1702,22 @@ export const addHospitalInDoctorProfile = async (
     } else {
       return errorResponse(new Error("Doctor doesn't exist"), res, 404);
     }
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const setConsultationFeeForDoctor = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    let response = await doctorService.setConsultationFeeForDoctor(
+      req.currentDoctor,
+      req.body.hospitalId,
+      req.body.consultationFee
+    );
+    return successResponse({}, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

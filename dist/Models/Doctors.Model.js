@@ -64,11 +64,11 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
                 },
                 consultationFee: {
                     min: {
-                        required: [true, "Minimum consultation fee is required"],
+                        // required: [true, "Minimum consultation fee is required"],
                         type: Number,
                     },
                     max: {
-                        required: [true, "Maximum consultation fee is required"],
+                        // required: [true, "Maximum consultation fee is required"],
                         type: Number,
                     },
                 },
@@ -284,8 +284,8 @@ doctorSchema.pre("findOneAndUpdate", function (next) {
         updateQuery = updateQuery["$addToSet"];
         if (updateQuery && "hospitalDetails" in updateQuery) {
             const currentDoc = yield this.model.findOne({ _id: this.getQuery()._id });
-            const incomingHospitals = lodash_1.default.map(updateQuery.hospitalDetails, (e) => e.hospital.toString());
-            const currentHospitals = lodash_1.default.map(currentDoc.hospitalDetails, (e) => e.hospital.toString());
+            const incomingHospitals = lodash_1.default.map(updateQuery.hospitalDetails, (e) => e.hospital ? e.hospital.toString() : []);
+            const currentHospitals = lodash_1.default.map(currentDoc.hospitalDetails, (e) => e.hospital ? e.hospital.toString() : []);
             const combinedHospitals = [
                 ...incomingHospitals,
                 ...currentHospitals,

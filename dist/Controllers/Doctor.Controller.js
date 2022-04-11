@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addHospitalInDoctorProfile = exports.checkVerificationStatus = exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
+exports.setConsultationFeeForDoctor = exports.addHospitalInDoctorProfile = exports.checkVerificationStatus = exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -864,7 +864,10 @@ const cancelAppointments = (req, res) => __awaiter(void 0, void 0, void 0, funct
         }
         else {
             // If not, cancel the appointment and return the success response
-            const updatedAppointment = yield Appointment_Model_1.default.findOne({ _id: body.appointmentId });
+            const updatedAppointment = yield Appointment_Model_1.default.findOne({ _id: body.appointmentId }
+            // { $set: { cancelled: true } },
+            // { new: true }
+            );
             updatedAppointment.cancelled = true;
             yield updatedAppointment.save();
             return (0, response_1.successResponse)(updatedAppointment, "Successfully cancelled appointment", res);
@@ -1503,3 +1506,13 @@ const addHospitalInDoctorProfile = (req, res) => __awaiter(void 0, void 0, void 
     }
 });
 exports.addHospitalInDoctorProfile = addHospitalInDoctorProfile;
+const setConsultationFeeForDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let response = yield doctorService.setConsultationFeeForDoctor(req.currentDoctor, req.body.hospitalId, req.body.consultationFee);
+        return (0, response_1.successResponse)({}, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.setConsultationFeeForDoctor = setConsultationFeeForDoctor;
