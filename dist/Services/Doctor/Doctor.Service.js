@@ -31,13 +31,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = void 0;
+exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const CreditAmount_Model_1 = __importDefault(require("../../Models/CreditAmount.Model"));
 const Withdrawal_Model_1 = __importDefault(require("../../Models/Withdrawal.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
 const dotenv = __importStar(require("dotenv"));
 const moment_1 = __importDefault(require("moment"));
+const Doctors_Model_1 = __importDefault(require("../../Models/Doctors.Model"));
 dotenv.config();
 const getUser = (req) => __awaiter(void 0, void 0, void 0, function* () {
     return req.currentDoctor ? req.currentDoctor : req.currentHospital;
@@ -170,3 +171,28 @@ const getAgeOfDoctor = (dob) => {
     return age;
 };
 exports.getAgeOfDoctor = getAgeOfDoctor;
+const setConsultationFeeForDoctor = (doctorId, hospitalId, consultationFee) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let response = yield Doctors_Model_1.default.findOneAndUpdate({
+            _id: doctorId,
+            "hospitalDetails.hospitalId": hospitalId,
+        }, {
+            $set: {
+                "hospitalDetails.$.consultationFee": consultationFee,
+            },
+        });
+        // console.log("SDdssdsd:", response);
+        // response.hospitalDetails.map((e: any) => {
+        //   if (e.hospital === hospitalId) {
+        //     e["consultationFee"] = consultationFee;
+        //   }
+        // });
+        // console.log("SDdssdsd:1", response);
+        // await response.save();
+        return Promise.resolve(true);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.setConsultationFeeForDoctor = setConsultationFeeForDoctor;

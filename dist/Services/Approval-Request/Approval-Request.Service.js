@@ -14,6 +14,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.doctorKLiyeHospitalKiRequestExistKrtiHai = exports.hospitalKLiyeDoctorKiRequestExistKrtiHai = exports.canThisHospitalApproveThisRequest = exports.canThisDoctorApproveThisRequest = exports.checkHospitalsApprovalStatus = exports.checkDoctorsApprovalStatus = exports.denyDoctorRequest = exports.approveDoctorRequest = exports.requestApprovalFromHospital = exports.denyHospitalRequest = exports.approveHospitalRequest = exports.requestApprovalFromDoctor = void 0;
 const Approval_Request_Model_1 = __importDefault(require("../../Models/Approval-Request.Model"));
+const Doctors_Model_1 = __importDefault(require("../../Models/Doctors.Model"));
+const Hospital_Model_1 = __importDefault(require("../../Models/Hospital.Model"));
 const schemaNames_1 = require("../schemaNames");
 const requestApprovalFromDoctor = (doctorId, hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -34,7 +36,11 @@ const requestApprovalFromDoctor = (doctorId, hospitalId) => __awaiter(void 0, vo
 exports.requestApprovalFromDoctor = requestApprovalFromDoctor;
 const approveHospitalRequest = (requestId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        return Promise.resolve(yield changeRequestStatus(requestId, "Approved"));
+        yield changeRequestStatus(requestId, "Approved");
+        let request = yield Approval_Request_Model_1.default.findOne({ _id: requestId }, "requestFrom requestTo");
+        yield addDoctorAndHospitalToEachOthersProfile(request.requestTo, request.requestFrom);
+        // return Promise.resolve(await changeRequestStatus(requestId, "Approved"));
+        return Promise.resolve("Success");
     }
     catch (error) {
         return Promise.reject(error);
@@ -69,7 +75,11 @@ const requestApprovalFromHospital = (doctorId, hospitalId) => __awaiter(void 0, 
 exports.requestApprovalFromHospital = requestApprovalFromHospital;
 const approveDoctorRequest = (requestId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        return Promise.resolve(yield changeRequestStatus(requestId, "Approved"));
+        yield changeRequestStatus(requestId, "Approved");
+        let request = yield Approval_Request_Model_1.default.findOne({ _id: requestId }, "requestFrom requestTo");
+        yield addDoctorAndHospitalToEachOthersProfile(request.requestFrom, request.requestTo);
+        return Promise.resolve("Success");
+        // return Promise.resolve(await changeRequestStatus(requestId, "Approved"));
     }
     catch (error) {
         return Promise.reject(error);
@@ -252,3 +262,39 @@ const getListOfRequestedApprovals_ByHospital = (hospitalId) => __awaiter(void 0,
     }
 });
 exports.getListOfRequestedApprovals_ByHospital = getListOfRequestedApprovals_ByHospital;
+const addHospitalToDoctorProfile = (doctorId, hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let response = yield Doctors_Model_1.default.findOneAndUpdate({ _id: doctorId }, { $addToSet: { hospitalDetails: { hospital: hospitalId } } });
+        return Promise.resolve(true);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+const addDoctorToHospitalProfile = (doctorId, hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let response = yield Hospital_Model_1.default.findOneAndUpdate({ _id: hospitalId }, { $addToSet: { doctors: doctorId } });
+        return Promise.resolve(true);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+const addDoctorAndHospitalToEachOthersProfile = (doctorId, hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let response = yield Promise.all([
+            addHospitalToDoctorProfile(doctorId, hospitalId),
+            addDoctorToHospitalProfile(doctorId, hospitalId),
+        ]);
+        if (response.includes(false)) {
+            throw new Error("Unexpected error occured");
+        }
+        else {
+            return Promise.resolve(true);
+        }
+        return Promise.resolve(response);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});

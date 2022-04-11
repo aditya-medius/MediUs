@@ -18,15 +18,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -46,8 +37,6 @@ const mediaController = __importStar(require("../Controllers/Media.Controller"))
 const multer_1 = __importDefault(require("multer"));
 const path = __importStar(require("path"));
 const Admin_auth_1 = require("../authentication/Admin.auth");
-const Approval_Request_Service_1 = require("../Services/Approval-Request/Approval-Request.Service");
-const response_1 = require("../Services/response");
 const Approval_Request_Controller_1 = require("../Controllers/Approval-Request.Controller");
 const storage = multer_1.default.diskStorage({
     destination: function (req, file, cb) {
@@ -73,29 +62,35 @@ doctorRouter.post("/", doctorController.createDoctor);
 doctorRouter.get("/", doctorController.getAllDoctorsList);
 doctorRouter.post("/getDoctorById/:id", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.getDoctorById);
 doctorRouter.get("/getHospitalListByDoctorId/:id", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.getHospitalListByDoctorId);
-doctorRouter.post("/updateProfile", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        let { hospitalDetails } = req.body;
-        if (hospitalDetails) {
-            let hospitalId = hospitalDetails[0].hospital, doctorId = req.currentDoctor;
-            let response = yield (0, Approval_Request_Service_1.checkDoctorsApprovalStatus)(doctorId, hospitalId);
-            switch (response) {
-                case "Pending": {
-                    return (0, response_1.successResponse)({}, "Your request is pending", res);
-                }
-                case "Denied": {
-                    return (0, response_1.successResponse)({}, "Your request for this hospital is denied", res);
-                }
-                case "Approved": {
-                    next();
-                }
-            }
-        }
-    }
-    catch (error) {
-        return (0, response_1.errorResponse)(error, res);
-    }
-}), doctorController.updateDoctorProfile);
+doctorRouter.post("/updateProfile", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), 
+// async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     let { hospitalDetails } = req.body;
+//     if (hospitalDetails) {
+//       let hospitalId = hospitalDetails[0].hospital,
+//         doctorId = req.currentDoctor;
+//       let response = await checkDoctorsApprovalStatus(doctorId, hospitalId);
+//       switch (response) {
+//         case "Pending": {
+//           return successResponse({}, "Your request is pending", res);
+//         }
+//         case "Denied": {
+//           return successResponse(
+//             {},
+//             "Your request for this hospital is denied",
+//             res
+//           );
+//         }
+//         case "Approved": {
+//           next();
+//         }
+//       }
+//     }
+//   } catch (error: any) {
+//     return errorResponse(error, res);
+//   }
+// },
+doctorController.updateDoctorProfile);
 doctorRouter.delete("/deleteProfile", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.deleteProfile);
 doctorRouter.post("/findDoctorBySpecialityOrBodyPart/:term", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.searchDoctor);
 doctorRouter.get("/searchDoctorByPhoneNumberOrEmail/:term", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital), doctorController.searchDoctorByPhoneNumberOrEmail);
@@ -140,29 +135,36 @@ doctorRouter.delete("/deleteHospitalFromDoctor", (0, middlewareHelper_1.oneOf)(D
 doctorRouter.put("/updateQualification/:qualificationId", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.updateQualification);
 doctorRouter.put("/checkVerificationStatus", doctorController.checkVerificationStatus);
 /* Hospital khud ko doctor ki profile me add kr ske */
-doctorRouter.post("/addHospitalInDoctorProfile", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    let { doctorId } = req.body, hospitalId = req.currentHospital;
-    try {
-        let response = yield (0, Approval_Request_Service_1.checkHospitalsApprovalStatus)(doctorId, hospitalId);
-        switch (response) {
-            case "Pending": {
-                return (0, response_1.successResponse)({}, "Your request is pending", res);
-            }
-            case "Denied": {
-                return (0, response_1.successResponse)({}, "Your request for this doctor is denied", res);
-            }
-            case "Approved": {
-                next();
-            }
-        }
-    }
-    catch (error) {
-        return (0, response_1.errorResponse)(error, res);
-    }
-}), doctorController.addHospitalInDoctorProfile);
+doctorRouter.post("/addHospitalInDoctorProfile", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), 
+// async (req: Request, res: Response, next: NextFunction) => {
+//   let { doctorId } = req.body,
+//     hospitalId = req.currentHospital;
+//   try {
+//     let response = await checkHospitalsApprovalStatus(doctorId, hospitalId);
+//     switch (response) {
+//       case "Pending": {
+//         return successResponse({}, "Your request is pending", res);
+//       }
+//       case "Denied": {
+//         return successResponse(
+//           {},
+//           "Your request for this doctor is denied",
+//           res
+//         );
+//       }
+//       case "Approved": {
+//         next();
+//       }
+//     }
+//   } catch (error: any) {
+//     return errorResponse(error, res);
+//   }
+// },
+doctorController.addHospitalInDoctorProfile);
 /* Qualification List */
 doctorRouter.get("/getQualificationList", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), qualificationController.getQualificationList);
 doctorRouter.put("/requestApprovalFromHospital", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), Approval_Request_Controller_1.requestApprovalFromHospital);
 doctorRouter.put("/approveHospitalRequest", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), Approval_Request_Controller_1.approveHospitalRequest);
 doctorRouter.put("/denyHospitalRequest", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), Approval_Request_Controller_1.denyHospitalRequest);
+doctorRouter.put("/setConsultationFeeForDoctor", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.setConsultationFeeForDoctor);
 exports.default = doctorRouter;

@@ -6,6 +6,7 @@ import withdrawModel from "../../Models/Withdrawal.Model";
 import * as jwt from "jsonwebtoken";
 import * as dotenv from "dotenv";
 import moment from "moment";
+import doctorModel from "../../Models/Doctors.Model";
 
 dotenv.config();
 
@@ -143,4 +144,36 @@ export const getAgeOfDoctor = (dob: Date) => {
   }
   console.log("dsjnbdsDS:", age);
   return age;
+};
+
+export const setConsultationFeeForDoctor = async (
+  doctorId: string,
+  hospitalId: string,
+  consultationFee: Object
+) => {
+  try {
+    let response = await doctorModel.findOneAndUpdate(
+      {
+        _id: doctorId,
+        "hospitalDetails.hospitalId": hospitalId,
+      },
+      {
+        $set: {
+          "hospitalDetails.$.consultationFee": consultationFee,
+        },
+      }
+    );
+    // console.log("SDdssdsd:", response);
+    // response.hospitalDetails.map((e: any) => {
+    //   if (e.hospital === hospitalId) {
+    //     e["consultationFee"] = consultationFee;
+    //   }
+    // });
+
+    // console.log("SDdssdsd:1", response);
+    // await response.save();
+    return Promise.resolve(true);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
 };

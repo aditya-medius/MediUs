@@ -38,33 +38,33 @@ hospitalRouter.post(
 hospitalRouter.post(
   "/updateHospital",
   oneOf(authenticateHospital),
-  async (req: Request, res: Response, next: NextFunction) => {
-    let { doctors } = req.body;
-    if (doctors) {
-      try {
-        let doctorId = doctors[0],
-          hospitalId = req.currentHospital;
-        let response = await checkHospitalsApprovalStatus(doctorId, hospitalId);
-        switch (response) {
-          case "Pending": {
-            return successResponse({}, "Your request is pending", res);
-          }
-          case "Denied": {
-            return successResponse(
-              {},
-              "Your request for this doctor is denied",
-              res
-            );
-          }
-          case "Approved": {
-            next();
-          }
-        }
-      } catch (error: any) {
-        return errorResponse(error, res);
-      }
-    }
-  },
+  // async (req: Request, res: Response, next: NextFunction) => {
+  //   let { doctors } = req.body;
+  //   if (doctors) {
+  //     try {
+  //       let doctorId = doctors[0],
+  //         hospitalId = req.currentHospital;
+  //       let response = await checkHospitalsApprovalStatus(doctorId, hospitalId);
+  //       switch (response) {
+  //         case "Pending": {
+  //           return successResponse({}, "Your request is pending", res);
+  //         }
+  //         case "Denied": {
+  //           return successResponse(
+  //             {},
+  //             "Your request for this doctor is denied",
+  //             res
+  //           );
+  //         }
+  //         case "Approved": {
+  //           next();
+  //         }
+  //       }
+  //     } catch (error: any) {
+  //       return errorResponse(error, res);
+  //     }
+  //   }
+  // },
   hospitalController.updateHospital
 );
 

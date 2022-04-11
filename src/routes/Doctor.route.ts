@@ -23,6 +23,7 @@ import {
   denyHospitalRequest,
   requestApprovalFromHospital,
 } from "../Controllers/Approval-Request.Controller";
+import { setConsultationFeeForDoctor } from "../Services/Doctor/Doctor.Service";
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -74,33 +75,33 @@ doctorRouter.get(
 doctorRouter.post(
   "/updateProfile",
   oneOf(authenticateDoctor),
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      let { hospitalDetails } = req.body;
-      if (hospitalDetails) {
-        let hospitalId = hospitalDetails[0].hospital,
-          doctorId = req.currentDoctor;
-        let response = await checkDoctorsApprovalStatus(doctorId, hospitalId);
-        switch (response) {
-          case "Pending": {
-            return successResponse({}, "Your request is pending", res);
-          }
-          case "Denied": {
-            return successResponse(
-              {},
-              "Your request for this hospital is denied",
-              res
-            );
-          }
-          case "Approved": {
-            next();
-          }
-        }
-      }
-    } catch (error: any) {
-      return errorResponse(error, res);
-    }
-  },
+  // async (req: Request, res: Response, next: NextFunction) => {
+  //   try {
+  //     let { hospitalDetails } = req.body;
+  //     if (hospitalDetails) {
+  //       let hospitalId = hospitalDetails[0].hospital,
+  //         doctorId = req.currentDoctor;
+  //       let response = await checkDoctorsApprovalStatus(doctorId, hospitalId);
+  //       switch (response) {
+  //         case "Pending": {
+  //           return successResponse({}, "Your request is pending", res);
+  //         }
+  //         case "Denied": {
+  //           return successResponse(
+  //             {},
+  //             "Your request for this hospital is denied",
+  //             res
+  //           );
+  //         }
+  //         case "Approved": {
+  //           next();
+  //         }
+  //       }
+  //     }
+  //   } catch (error: any) {
+  //     return errorResponse(error, res);
+  //   }
+  // },
   doctorController.updateDoctorProfile
 );
 doctorRouter.delete(
@@ -261,32 +262,32 @@ doctorRouter.put(
 doctorRouter.post(
   "/addHospitalInDoctorProfile",
   oneOf(authenticateHospital),
-  async (req: Request, res: Response, next: NextFunction) => {
-    let { doctorId } = req.body,
-      hospitalId = req.currentHospital;
+  // async (req: Request, res: Response, next: NextFunction) => {
+  //   let { doctorId } = req.body,
+  //     hospitalId = req.currentHospital;
 
-    try {
-      let response = await checkHospitalsApprovalStatus(doctorId, hospitalId);
+  //   try {
+  //     let response = await checkHospitalsApprovalStatus(doctorId, hospitalId);
 
-      switch (response) {
-        case "Pending": {
-          return successResponse({}, "Your request is pending", res);
-        }
-        case "Denied": {
-          return successResponse(
-            {},
-            "Your request for this doctor is denied",
-            res
-          );
-        }
-        case "Approved": {
-          next();
-        }
-      }
-    } catch (error: any) {
-      return errorResponse(error, res);
-    }
-  },
+  //     switch (response) {
+  //       case "Pending": {
+  //         return successResponse({}, "Your request is pending", res);
+  //       }
+  //       case "Denied": {
+  //         return successResponse(
+  //           {},
+  //           "Your request for this doctor is denied",
+  //           res
+  //         );
+  //       }
+  //       case "Approved": {
+  //         next();
+  //       }
+  //     }
+  //   } catch (error: any) {
+  //     return errorResponse(error, res);
+  //   }
+  // },
   doctorController.addHospitalInDoctorProfile
 );
 
@@ -313,6 +314,12 @@ doctorRouter.put(
   "/denyHospitalRequest",
   oneOf(authenticateDoctor),
   denyHospitalRequest
+);
+
+doctorRouter.put(
+  "/setConsultationFeeForDoctor",
+  oneOf(authenticateDoctor),
+  doctorController.setConsultationFeeForDoctor
 );
 
 export default doctorRouter;
