@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkVerificationStatus = exports.getDoctorsInHospital = exports.getHospitalById = exports.getAppointmentByDate = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
+exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.checkVerificationStatus = exports.getDoctorsInHospital = exports.getHospitalById = exports.getAppointmentByDate = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Anemities_Model_1 = __importDefault(require("../Models/Anemities.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
@@ -64,6 +64,7 @@ const bcrypt = __importStar(require("bcrypt"));
 const Services_Model_1 = __importDefault(require("../Admin Controlled Models/Services.Model"));
 const Hospital_Service_1 = require("../Services/Hospital/Hospital.Service");
 const Utils_1 = require("../Services/Utils");
+const approvalService = __importStar(require("../Services/Approval-Request/Approval-Request.Service"));
 const excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -931,3 +932,25 @@ const checkVerificationStatus = (req, res) => __awaiter(void 0, void 0, void 0, 
     }
 });
 exports.checkVerificationStatus = checkVerificationStatus;
+const getListOfRequestedApprovals_OfHospital = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let hospitalId = req.currentHospital;
+        let data = approvalService.getListOfRequestedApprovals_OfHospital(hospitalId);
+        return (0, response_1.successResponse)(data, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getListOfRequestedApprovals_OfHospital = getListOfRequestedApprovals_OfHospital;
+const getListOfRequestedApprovals_ByHospital = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let hospitalId = req.currentHospital;
+        let data = approvalService.getListOfRequestedApprovals_ByHospital(hospitalId);
+        return (0, response_1.successResponse)(data, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getListOfRequestedApprovals_ByHospital = getListOfRequestedApprovals_ByHospital;

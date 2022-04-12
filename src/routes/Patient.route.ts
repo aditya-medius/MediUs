@@ -145,4 +145,10 @@ patientRouter.get(
   oneOf(authenticateDoctor, authenticatePatient, authenticateHospital),
   patientController.searchPatientByPhoneNumberOrEmail
 );
+
+patientRouter.put(
+  "/checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod",
+  oneOf(authenticatePatient),
+  patientController.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod
+);
 export default patientRouter;

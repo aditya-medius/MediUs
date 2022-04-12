@@ -227,6 +227,7 @@ const getListOfRequestedApprovals_ByDoctor = (doctorId) => __awaiter(void 0, voi
     try {
         let requestedApprovals = yield Approval_Request_Model_1.default.find({
             requestFrom: doctorId,
+            "delData.deleted": false,
         });
         return Promise.resolve(requestedApprovals);
     }

@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setConsultationFeeForDoctor = exports.addHospitalInDoctorProfile = exports.checkVerificationStatus = exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
+exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.setConsultationFeeForDoctor = exports.addHospitalInDoctorProfile = exports.checkVerificationStatus = exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -64,6 +64,7 @@ const doctorService = __importStar(require("../Services/Doctor/Doctor.Service"))
 const Withdrawal_Model_1 = __importDefault(require("../Models/Withdrawal.Model"));
 const Qualification_Model_1 = __importDefault(require("../Models/Qualification.Model"));
 const Patient_Service_1 = require("../Services/Patient/Patient.Service");
+const approvalService = __importStar(require("../Services/Approval-Request/Approval-Request.Service"));
 exports.excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -1516,3 +1517,25 @@ const setConsultationFeeForDoctor = (req, res) => __awaiter(void 0, void 0, void
     }
 });
 exports.setConsultationFeeForDoctor = setConsultationFeeForDoctor;
+const getListOfRequestedApprovals_OfDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let doctorId = req.currentDoctor;
+        let data = yield approvalService.getListOfRequestedApprovals_OfDoctor(doctorId);
+        return (0, response_1.successResponse)(data, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getListOfRequestedApprovals_OfDoctor = getListOfRequestedApprovals_OfDoctor;
+const getListOfRequestedApprovals_ByDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let doctorId = req.currentDoctor;
+        let data = yield approvalService.getListOfRequestedApprovals_ByDoctor(doctorId);
+        return (0, response_1.successResponse)(data, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getListOfRequestedApprovals_ByDoctor = getListOfRequestedApprovals_ByDoctor;

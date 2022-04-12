@@ -244,6 +244,7 @@ export const getListOfRequestedApprovals_ByDoctor = async (
   try {
     let requestedApprovals = await approvalModel.find({
       requestFrom: doctorId,
+      "delData.deleted": false,
     });
     return Promise.resolve(requestedApprovals);
   } catch (error: any) {

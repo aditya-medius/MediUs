@@ -30,6 +30,7 @@ import { request } from "http";
 import { getHospitalToken } from "../Services/Hospital/Hospital.Service";
 import { getAgeOfDoctor } from "../Services/Doctor/Doctor.Service";
 import { getAge } from "../Services/Utils";
+import * as approvalService from "../Services/Approval-Request/Approval-Request.Service";
 
 const excludeDoctorFields = {
   password: 0,
@@ -1053,6 +1054,33 @@ export const checkVerificationStatus = async (req: Request, res: Response) => {
       "Your profile is verified",
       res
     );
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getListOfRequestedApprovals_OfHospital = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    let hospitalId = req.currentHospital;
+    let data =
+      approvalService.getListOfRequestedApprovals_OfHospital(hospitalId);
+    return successResponse(data, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+export const getListOfRequestedApprovals_ByHospital = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    let hospitalId = req.currentHospital;
+    let data =
+      approvalService.getListOfRequestedApprovals_ByHospital(hospitalId);
+    return successResponse(data, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

@@ -119,6 +119,10 @@ const appointmentSchema = new mongoose_1.Schema({
     appointmentId: {
         type: String,
     },
+    Type: {
+        type: String,
+        enum: ["Offline", "Online"],
+    },
 });
 appointmentSchema.post("save", function (result) {
     return __awaiter(this, void 0, void 0, function* () {
