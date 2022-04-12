@@ -32,6 +32,9 @@ import {
   generateAppointmentId,
   getTokenNumber,
 } from "../Services/Appointment/Appointment.Service";
+
+import * as prescriptionValidityController from "../Controllers/Prescription-Validity.Controller";
+
 export const excludePatientFields = {
   password: 0,
   verified: 0,
@@ -947,3 +950,17 @@ export const searchPatientByPhoneNumberOrEmail = async (
     return errorResponse(error, res);
   }
 };
+
+export const checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod =
+  async (req: Request, res: Response) => {
+    try {
+      let { doctorId, patientId, hospitalId, subPatientId } = req.body;
+      const response =
+        await prescriptionValidityController.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod(
+          { doctorId, patientId, hospitalId, subPatientId }
+        );
+      return successResponse(response, "Success", res);
+    } catch (error: any) {
+      return errorResponse(error, res);
+    }
+  };

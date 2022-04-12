@@ -16,6 +16,7 @@ import { authenticateAdmin } from "../authentication/Admin.auth";
 import {
   checkDoctorsApprovalStatus,
   checkHospitalsApprovalStatus,
+  getListOfRequestedApprovals_OfDoctor,
 } from "../Services/Approval-Request/Approval-Request.Service";
 import { errorResponse, successResponse } from "../Services/response";
 import {
@@ -24,6 +25,7 @@ import {
   requestApprovalFromHospital,
 } from "../Controllers/Approval-Request.Controller";
 import { setConsultationFeeForDoctor } from "../Services/Doctor/Doctor.Service";
+import { setPrescriptionValidity } from "../Controllers/Prescription-Validity.Controller";
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -322,4 +324,24 @@ doctorRouter.put(
   doctorController.setConsultationFeeForDoctor
 );
 
+/* Doctor ko kitno ne approval k liye request ki hai  */
+doctorRouter.put(
+  "/getListOfRequestedApprovals_OfDoctor",
+  oneOf(authenticateDoctor),
+  doctorController.getListOfRequestedApprovals_OfDoctor
+);
+
+/* Doctor ne kitno se approval ki request ki hai */
+doctorRouter.put(
+  "/getListOfRequestedApprovals_ByDoctor",
+  oneOf(authenticateDoctor),
+  doctorController.getListOfRequestedApprovals_ByDoctor
+);
+
+/* Doctor ka presciprtion validity */
+doctorRouter.put(
+  "/setPrescriptionValidity",
+  oneOf(authenticateDoctor),
+  setPrescriptionValidity
+);
 export default doctorRouter;

@@ -91,4 +91,8 @@ hospitalRouter.put("/requestApprovalFromDoctor", (0, middlewareHelper_1.oneOf)(H
 /* Doctor k approval ki request approve kro */
 hospitalRouter.put("/approveDoctorRequest", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), Approval_Request_Controller_1.approveDoctorRequest);
 hospitalRouter.put("/denyDoctorRequest", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), Approval_Request_Controller_1.denyDoctorRequest);
+/* Hospital ko kitno ne approval k liye request ki hai */
+hospitalRouter.put("/getListOfRequestedApprovals_OfHospital", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getListOfRequestedApprovals_OfHospital);
+/* Hospital ne kitno se approval ki request ki hai */
+hospitalRouter.put("/getListOfRequestedApprovals_ByHospital", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getListOfRequestedApprovals_ByHospital);
 exports.default = hospitalRouter;

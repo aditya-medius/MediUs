@@ -36,7 +36,7 @@ import * as doctorService from "../Services/Doctor/Doctor.Service";
 import withdrawModel from "../Models/Withdrawal.Model";
 import qualificationModel from "../Models/Qualification.Model";
 import { calculateAge } from "../Services/Patient/Patient.Service";
-
+import * as approvalService from "../Services/Approval-Request/Approval-Request.Service";
 export const excludeDoctorFields = {
   password: 0,
   // panCard: 0,
@@ -1718,6 +1718,35 @@ export const setConsultationFeeForDoctor = async (
       req.body.consultationFee
     );
     return successResponse({}, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getListOfRequestedApprovals_OfDoctor = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    let doctorId = req.currentDoctor;
+    let data = await approvalService.getListOfRequestedApprovals_OfDoctor(
+      doctorId
+    );
+    return successResponse(data, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+export const getListOfRequestedApprovals_ByDoctor = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    let doctorId = req.currentDoctor;
+    let data = await approvalService.getListOfRequestedApprovals_ByDoctor(
+      doctorId
+    );
+    return successResponse(data, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

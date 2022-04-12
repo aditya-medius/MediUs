@@ -17,11 +17,13 @@ const Appointment_Model_1 = __importDefault(require("../Models/Appointment.Model
 const Prescription_Validity_Model_1 = __importDefault(require("../Models/Prescription-Validity.Model"));
 const response_1 = require("../Services/response");
 const moment_1 = __importDefault(require("moment"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const setPrescriptionValidity = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let { doctorId, validateTill } = req.body;
+        let { doctorId = req.currentDoctor, validateTill, hospitalId } = req.body;
         let prescription = yield new Prescription_Validity_Model_1.default({
             doctorId,
+            hospitalId,
             validateTill,
         }).save();
         return (0, response_1.successResponse)(prescription, "Success", res);
@@ -33,16 +35,17 @@ const setPrescriptionValidity = (req, res) => __awaiter(void 0, void 0, void 0, 
 exports.setPrescriptionValidity = setPrescriptionValidity;
 const checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod = (body) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let { doctorId, patientId, hospitalId } = body;
+        let { doctorId, patientId, hospitalId, subPatientId } = body;
         const PV = yield Prescription_Validity_Model_1.default.findOne({
             doctorId,
         });
-        const appointment = (yield Appointment_Model_1.default.aggregate([
+        let appointment = (yield Appointment_Model_1.default.aggregate([
             {
                 $match: {
-                    patient: patientId,
-                    doctors: doctorId,
-                    hospital: hospitalId,
+                    patient: new mongoose_1.default.Types.ObjectId(patientId),
+                    doctors: new mongoose_1.default.Types.ObjectId(doctorId),
+                    hospital: new mongoose_1.default.Types.ObjectId(hospitalId),
+                    subPatient: new mongoose_1.default.Types.ObjectId(subPatientId),
                 },
             },
             {
@@ -53,16 +56,15 @@ const checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod = (body) => __
         ]))[0];
         if (PV) {
             // const date = new Date(appointment.time.date).getDate();
-            const date = (0, moment_1.default)(new Date(appointment.time.date).getDate(), "DD.MM.YYYY");
+            const date = (0, moment_1.default)(appointment.time.date, "DD.MM.YYY");
             const currentDate = (0, moment_1.default)(new Date(), "DD.MM.YYYY");
-            let difference = date.diff(currentDate, "days");
+            let difference = currentDate.diff(date, "days");
             if (difference > PV.validateTill) {
-                return Promise.reject(false);
+                return Promise.resolve(false);
             }
             else {
                 return Promise.resolve(true);
             }
-            return Promise.resolve(PV.validateTill);
         }
         else {
             return Promise.resolve(true);

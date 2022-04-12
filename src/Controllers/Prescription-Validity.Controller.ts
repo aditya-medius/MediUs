@@ -3,12 +3,13 @@ import appointmentModel from "../Models/Appointment.Model";
 import prescriptionValidityModel from "../Models/Prescription-Validity.Model";
 import { errorResponse, successResponse } from "../Services/response";
 import moment from "moment";
-
+import mongoose from "mongoose";
 export const setPrescriptionValidity = async (req: Request, res: Response) => {
   try {
-    let { doctorId, validateTill } = req.body;
+    let { doctorId = req.currentDoctor, validateTill, hospitalId } = req.body;
     let prescription = await new prescriptionValidityModel({
       doctorId,
+      hospitalId,
       validateTill,
     }).save();
     return successResponse(prescription, "Success", res);
@@ -20,18 +21,19 @@ export const setPrescriptionValidity = async (req: Request, res: Response) => {
 export const checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod =
   async (body: any) => {
     try {
-      let { doctorId, patientId, hospitalId } = body;
+      let { doctorId, patientId, hospitalId, subPatientId } = body;
       const PV = await prescriptionValidityModel.findOne({
         doctorId,
       });
 
-      const appointment = (
+      let appointment = (
         await appointmentModel.aggregate([
           {
             $match: {
-              patient: patientId,
-              doctors: doctorId,
-              hospital: hospitalId,
+              patient: new mongoose.Types.ObjectId(patientId),
+              doctors: new mongoose.Types.ObjectId(doctorId),
+              hospital: new mongoose.Types.ObjectId(hospitalId),
+              subPatient: new mongoose.Types.ObjectId(subPatientId),
             },
           },
           {
@@ -43,19 +45,14 @@ export const checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod =
       )[0];
       if (PV) {
         // const date = new Date(appointment.time.date).getDate();
-        const date = moment(
-          new Date(appointment.time.date).getDate(),
-          "DD.MM.YYYY"
-        );
+        const date = moment(appointment.time.date, "DD.MM.YYY");
         const currentDate = moment(new Date(), "DD.MM.YYYY");
-        let difference = date.diff(currentDate, "days");
-
+        let difference = currentDate.diff(date, "days");
         if (difference > PV.validateTill) {
-          return Promise.reject(false);
+          return Promise.resolve(false);
         } else {
           return Promise.resolve(true);
         }
-        return Promise.resolve(PV.validateTill);
       } else {
         return Promise.resolve(true);
       }

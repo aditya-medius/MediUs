@@ -38,6 +38,7 @@ const multer_1 = __importDefault(require("multer"));
 const path = __importStar(require("path"));
 const Admin_auth_1 = require("../authentication/Admin.auth");
 const Approval_Request_Controller_1 = require("../Controllers/Approval-Request.Controller");
+const Prescription_Validity_Controller_1 = require("../Controllers/Prescription-Validity.Controller");
 const storage = multer_1.default.diskStorage({
     destination: function (req, file, cb) {
         cb(null, "uploads/user");
@@ -167,4 +168,10 @@ doctorRouter.put("/requestApprovalFromHospital", (0, middlewareHelper_1.oneOf)(D
 doctorRouter.put("/approveHospitalRequest", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), Approval_Request_Controller_1.approveHospitalRequest);
 doctorRouter.put("/denyHospitalRequest", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), Approval_Request_Controller_1.denyHospitalRequest);
 doctorRouter.put("/setConsultationFeeForDoctor", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.setConsultationFeeForDoctor);
+/* Doctor ko kitno ne approval k liye request ki hai  */
+doctorRouter.put("/getListOfRequestedApprovals_OfDoctor", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getListOfRequestedApprovals_OfDoctor);
+/* Doctor ne kitno se approval ki request ki hai */
+doctorRouter.put("/getListOfRequestedApprovals_ByDoctor", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getListOfRequestedApprovals_ByDoctor);
+/* Doctor ka presciprtion validity */
+doctorRouter.put("/setPrescriptionValidity", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), Prescription_Validity_Controller_1.setPrescriptionValidity);
 exports.default = doctorRouter;
