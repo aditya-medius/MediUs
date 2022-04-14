@@ -7,6 +7,7 @@ import * as jwt from "jsonwebtoken";
 import * as dotenv from "dotenv";
 import moment from "moment";
 import doctorModel from "../../Models/Doctors.Model";
+import appointmentModel from "../../Models/Appointment.Model";
 
 dotenv.config();
 
@@ -164,6 +165,22 @@ export const setConsultationFeeForDoctor = async (
       }
     );
     return Promise.resolve(true);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const getDoctorsOfflineAndOnlineAppointments = async (
+  doctorId: string
+) => {
+  try {
+    if (!doctorId) {
+      return Promise.reject("Give a doctor's Id");
+    }
+    let appointments = await appointmentModel.find({
+      doctors: doctorId,
+    });
+    return Promise.resolve(appointments);
   } catch (error: any) {
     return Promise.reject(error);
   }

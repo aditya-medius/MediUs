@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = void 0;
+exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const CreditAmount_Model_1 = __importDefault(require("../../Models/CreditAmount.Model"));
 const Withdrawal_Model_1 = __importDefault(require("../../Models/Withdrawal.Model"));
@@ -39,6 +39,7 @@ const jwt = __importStar(require("jsonwebtoken"));
 const dotenv = __importStar(require("dotenv"));
 const moment_1 = __importDefault(require("moment"));
 const Doctors_Model_1 = __importDefault(require("../../Models/Doctors.Model"));
+const Appointment_Model_1 = __importDefault(require("../../Models/Appointment.Model"));
 dotenv.config();
 const getUser = (req) => __awaiter(void 0, void 0, void 0, function* () {
     return req.currentDoctor ? req.currentDoctor : req.currentHospital;
@@ -188,3 +189,18 @@ const setConsultationFeeForDoctor = (doctorId, hospitalId, consultationFee) => _
     }
 });
 exports.setConsultationFeeForDoctor = setConsultationFeeForDoctor;
+const getDoctorsOfflineAndOnlineAppointments = (doctorId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        if (!doctorId) {
+            return Promise.reject("Give a doctor's Id");
+        }
+        let appointments = yield Appointment_Model_1.default.find({
+            doctors: doctorId,
+        });
+        return Promise.resolve(appointments);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.getDoctorsOfflineAndOnlineAppointments = getDoctorsOfflineAndOnlineAppointments;

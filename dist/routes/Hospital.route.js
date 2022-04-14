@@ -95,4 +95,6 @@ hospitalRouter.put("/denyDoctorRequest", (0, middlewareHelper_1.oneOf)(Hospital_
 hospitalRouter.put("/getListOfRequestedApprovals_OfHospital", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getListOfRequestedApprovals_OfHospital);
 /* Hospital ne kitno se approval ki request ki hai */
 hospitalRouter.put("/getListOfRequestedApprovals_ByHospital", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getListOfRequestedApprovals_ByHospital);
+/* Doctors ki offline aur online appointment */
+hospitalRouter.get("/getDoctorsOfflineAndOnlineAppointments", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getDoctorsOfflineAndOnlineAppointments);
 exports.default = hospitalRouter;

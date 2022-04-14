@@ -1751,3 +1751,18 @@ export const getListOfRequestedApprovals_ByDoctor = async (
     return errorResponse(error, res);
   }
 };
+
+export const getDoctorsOfflineAndOnlineAppointments = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    let appointments =
+      await doctorService.getDoctorsOfflineAndOnlineAppointments(
+        req.currentDoctor
+      );
+    return successResponse(appointments, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};

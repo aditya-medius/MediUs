@@ -126,6 +126,20 @@ const hospitalSchema = new Schema({
       enum: ["Offline", "Online"],
     },
   ],
+
+  registrationDetails: {
+    registrationNumber: String,
+    registrationCouncil: String,
+    registrationDate: Date,
+  },
+
+  paymentDetails: {
+    accountHolderName: String,
+    accountNumber: String,
+    bankName: String,
+    IFSC: String,
+    PAN: String,
+  },
 });
 
 hospitalSchema.pre("save", async function (next) {
