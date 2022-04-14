@@ -141,6 +141,18 @@ const hospitalSchema = new mongoose_1.Schema({
             enum: ["Offline", "Online"],
         },
     ],
+    registrationDetails: {
+        registrationNumber: String,
+        registrationCouncil: String,
+        registrationDate: Date,
+    },
+    paymentDetails: {
+        accountHolderName: String,
+        accountNumber: String,
+        bankName: String,
+        IFSC: String,
+        PAN: String,
+    },
 });
 hospitalSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {

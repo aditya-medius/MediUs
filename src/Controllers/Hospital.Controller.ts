@@ -1085,3 +1085,21 @@ export const getListOfRequestedApprovals_ByHospital = async (
     return errorResponse(error, res);
   }
 };
+
+import * as doctorService from "../Services/Doctor/Doctor.Service";
+
+export const getDoctorsOfflineAndOnlineAppointments = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    let appointments =
+      await doctorService.getDoctorsOfflineAndOnlineAppointments(
+        req.query.doctorId as string
+      );
+
+    return successResponse(appointments, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};

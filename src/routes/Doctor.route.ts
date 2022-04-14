@@ -344,4 +344,11 @@ doctorRouter.put(
   oneOf(authenticateDoctor),
   setPrescriptionValidity
 );
+
+/* Doctors ki offline aur online appointment */
+doctorRouter.get(
+  "/getDoctorsOfflineAndOnlineAppointments",
+  oneOf(authenticateDoctor),
+  doctorController.getDoctorsOfflineAndOnlineAppointments
+);
 export default doctorRouter;
