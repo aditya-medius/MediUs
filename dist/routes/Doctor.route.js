@@ -176,4 +176,6 @@ doctorRouter.put("/getListOfRequestedApprovals_ByDoctor", (0, middlewareHelper_1
 doctorRouter.put("/setPrescriptionValidity", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), Prescription_Validity_Controller_1.setPrescriptionValidity);
 /* Doctors ki offline aur online appointment */
 doctorRouter.get("/getDoctorsOfflineAndOnlineAppointments", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getDoctorsOfflineAndOnlineAppointments);
+/* Doctors k liye kya notification hai */
+doctorRouter.get("/getDoctorsNotification", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getDoctorsNotification);
 exports.default = doctorRouter;

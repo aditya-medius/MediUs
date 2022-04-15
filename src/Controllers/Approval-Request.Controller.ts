@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import * as approvalService from "../Services/Approval-Request/Approval-Request.Service";
 import { errorResponse, successResponse } from "../Services/response";
+import * as notificationService from "../Services/Notification/Notification.Service";
 
 export const requestApprovalFromDoctor = async (
   req: Request,
@@ -16,6 +17,11 @@ export const requestApprovalFromDoctor = async (
     let response = await approvalService.requestApprovalFromDoctor(
       doctorId,
       hospitalId
+    );
+
+    notificationService.sendApprovalRequestNotificationToDoctor_FromHospital(
+      hospitalId,
+      doctorId
     );
     return successResponse(response, "Success", res);
   } catch (error: any) {
@@ -64,8 +70,12 @@ export const requestApprovalFromHospital = async (
       doctorId,
       hospitalId
     );
-    console.log("exit 2:", exist);
     let response = await approvalService.requestApprovalFromHospital(
+      doctorId,
+      hospitalId
+    );
+
+    notificationService.sendApprovalRequestNotificationToHospital_FromDoctor(
       doctorId,
       hospitalId
     );

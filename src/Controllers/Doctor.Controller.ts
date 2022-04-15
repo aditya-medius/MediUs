@@ -1766,3 +1766,16 @@ export const getDoctorsOfflineAndOnlineAppointments = async (
     return errorResponse(error, res);
   }
 };
+
+import * as notificationService from "../Services/Notification/Notification.Service";
+
+export const getDoctorsNotification = async (req: Request, res: Response) => {
+  try {
+    let notifications = await notificationService.getDoctorsNotification(
+      req.currentDoctor
+    );
+    return successResponse(notification, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};

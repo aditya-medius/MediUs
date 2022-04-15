@@ -25,7 +25,6 @@ export const checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod =
       const PV = await prescriptionValidityModel.findOne({
         doctorId,
       });
-
       let appointment = (
         await appointmentModel.aggregate([
           {
@@ -45,13 +44,20 @@ export const checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod =
       )[0];
       if (PV) {
         // const date = new Date(appointment.time.date).getDate();
-        const date = moment(appointment.time.date, "DD.MM.YYY");
-        const currentDate = moment(new Date(), "DD.MM.YYYY");
-        let difference = currentDate.diff(date, "days");
-        if (difference > PV.validateTill) {
-          return Promise.resolve(false);
+        if (appointment) {
+          const date = moment(appointment.time.date, "DD.MM.YYY");
+          const currentDate = moment(new Date(), "DD.MM.YYYY");
+          let difference = currentDate.diff(date, "days");
+          if (difference > PV.validateTill) {
+            /* Fresh appointment */
+            return Promise.resolve(false);
+          } else {
+            /* Follow up appointment */
+            return Promise.resolve(true);
+          }
         } else {
-          return Promise.resolve(true);
+          /* Fresh appointment */
+          return Promise.resolve(false);
         }
       } else {
         return Promise.resolve(true);
