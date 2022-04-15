@@ -19,7 +19,7 @@ export const requestApprovalFromDoctor = async (
       hospitalId
     );
 
-    await notificationService.sendApprovalRequestNotificationToDoctor_FromHospital(
+    notificationService.sendApprovalRequestNotificationToDoctor_FromHospital(
       hospitalId,
       doctorId
     );

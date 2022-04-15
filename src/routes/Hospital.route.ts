@@ -169,4 +169,8 @@ hospitalRouter.get(
   oneOf(authenticateHospital),
   hospitalController.getDoctorsOfflineAndOnlineAppointments
 );
+
+
+/* Hospital k liye notifications */
+// hospitalR
 export default hospitalRouter;

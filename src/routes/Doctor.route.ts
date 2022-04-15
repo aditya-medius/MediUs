@@ -351,4 +351,11 @@ doctorRouter.get(
   oneOf(authenticateDoctor),
   doctorController.getDoctorsOfflineAndOnlineAppointments
 );
+
+/* Doctors k liye kya notification hai */
+doctorRouter.get(
+  "/getDoctorsNotification",
+  oneOf(authenticateDoctor),
+  doctorController.getDoctorsNotification
+);
 export default doctorRouter;

@@ -37,7 +37,7 @@ const requestApprovalFromDoctor = (req, res) => __awaiter(void 0, void 0, void 0
         let { doctorId, hospitalId } = req.body;
         let exist = yield approvalService.doctorKLiyeHospitalKiRequestExistKrtiHai(doctorId, hospitalId);
         let response = yield approvalService.requestApprovalFromDoctor(doctorId, hospitalId);
-        yield notificationService.sendApprovalRequestNotificationToDoctor_FromHospital(hospitalId, doctorId);
+        notificationService.sendApprovalRequestNotificationToDoctor_FromHospital(hospitalId, doctorId);
         return (0, response_1.successResponse)(response, "Success", res);
     }
     catch (error) {

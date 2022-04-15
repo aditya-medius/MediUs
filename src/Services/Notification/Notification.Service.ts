@@ -1,6 +1,7 @@
 import notificationsModel from "../../Models/Notification.Model";
 import notificationTypeModel from "../../Models/Notification-Type.Model";
-import { hospital, doctor } from "../schemaNames";
+import { hospital, doctor, patient } from "../schemaNames";
+import { NotificationContext } from "twilio/lib/rest/api/v2010/account/notification";
 
 export const sendApprovalRequestNotificationToDoctor_FromHospital = async (
   hospitalId: string,
@@ -54,6 +55,65 @@ export const sendApprovalRequestNotificationToHospital_FromDoctor = async (
     }).save();
 
     return Promise.resolve(notification);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const sendAppointmentNotificationToHospitalAndDoctor_FromPatient =
+  async (doctorId: string, hospitalId: string, patientId: string) => {
+    try {
+      let notificationType = await getRelevantNotificationType(
+        "New Appointment"
+      );
+      let doc = [
+        {
+          notificationId: generateNotificationId(),
+          notificationType,
+          sender: patientId,
+          sender_ref: patient,
+          receiver: doctorId,
+          receiver_ref: doctor,
+        },
+        {
+          notificationId: generateNotificationId(),
+          notificationType,
+          sender: patientId,
+          sender_ref: patient,
+          receiver: hospitalId,
+          receiver_ref: hospital,
+        },
+      ];
+
+      let notification = await notificationTypeModel.insertMany(doc);
+      return Promise.resolve(NotificationContext);
+    } catch (error: any) {
+      return Promise.reject(error);
+    }
+  };
+
+export const sendAppointmentConfirmationNotificationToPatient = async (
+  patientId: string
+) => {
+  try {
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const getHospitalsNotification = async (hospitalId: string) => {
+  try {
+    let notifications = await notificationsModel.find({ receiver: hospitalId });
+    return Promise.resolve(notifications);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const getDoctorsNotification = async (doctorId: string) => {
+  try {
+    let notifications = await notificationsModel.find({ receiver: doctorId });
+    return Promise.resolve(notifications);
   } catch (error: any) {
     return Promise.reject(error);
   }
