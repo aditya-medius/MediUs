@@ -36,6 +36,10 @@ const approvalSchema = new Schema({
       type: Date,
     },
   },
+  createdAt: {
+    type: Date,
+    default: new Date(),
+  },
 });
 
 const approvalModel = model(approvalRequest, approvalSchema);

@@ -31,11 +31,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.denyDoctorRequest = exports.approveDoctorRequest = exports.requestApprovalFromHospital = exports.denyHospitalRequest = exports.approveHospitalRequest = exports.requestApprovalFromDoctor = void 0;
 const approvalService = __importStar(require("../Services/Approval-Request/Approval-Request.Service"));
 const response_1 = require("../Services/response");
+const notificationService = __importStar(require("../Services/Notification/Notification.Service"));
 const requestApprovalFromDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { doctorId, hospitalId } = req.body;
         let exist = yield approvalService.doctorKLiyeHospitalKiRequestExistKrtiHai(doctorId, hospitalId);
         let response = yield approvalService.requestApprovalFromDoctor(doctorId, hospitalId);
+        yield notificationService.sendApprovalRequestNotificationToDoctor_FromHospital(hospitalId, doctorId);
         return (0, response_1.successResponse)(response, "Success", res);
     }
     catch (error) {
@@ -75,8 +77,8 @@ const requestApprovalFromHospital = (req, res) => __awaiter(void 0, void 0, void
     try {
         let { doctorId, hospitalId } = req.body;
         let exist = yield approvalService.hospitalKLiyeDoctorKiRequestExistKrtiHai(doctorId, hospitalId);
-        console.log("exit 2:", exist);
         let response = yield approvalService.requestApprovalFromHospital(doctorId, hospitalId);
+        notificationService.sendApprovalRequestNotificationToHospital_FromDoctor(doctorId, hospitalId);
         return (0, response_1.successResponse)(response, "Success", res);
     }
     catch (error) {

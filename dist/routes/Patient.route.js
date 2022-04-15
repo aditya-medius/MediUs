@@ -18,6 +18,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -31,6 +40,7 @@ const middlewareHelper_1 = require("../Services/middlewareHelper");
 const Doctor_auth_1 = require("../authentication/Doctor.auth");
 const subPatientController = __importStar(require("../Controllers/SubPatient.Controller"));
 const Hospital_auth_1 = require("../authentication/Hospital.auth");
+const response_1 = require("../Services/response");
 const patientRouter = express_1.default.Router();
 const upload = (0, multer_1.default)({ dest: "./src/uploads" });
 patientRouter.post("/login", patientController.patientLogin);
@@ -39,7 +49,18 @@ patientRouter.get("/", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticate
 patientRouter.post("/getPatientById/:id", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.getPatientById);
 patientRouter.post("/updateProfile", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.updatePatientProfile);
 patientRouter.post("/deleteProfile", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.deleteProfile);
-patientRouter.post("/BookAppointment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital), patientController.BookAppointment);
+const prescriptionValidtiyService = __importStar(require("../Controllers/Prescription-Validity.Controller"));
+patientRouter.post("/BookAppointment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let doctorId = req.body.doctors, patientId = req.body.patient, hospitalId = req.body.hospital, subPatientId = req.body.subPatient;
+        let valid = yield prescriptionValidtiyService.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod({ doctorId, patientId, hospitalId, subPatientId });
+        req.body["appointmentType"] = valid ? "Follow up" : "Fresh";
+        next();
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+}), patientController.BookAppointment);
 patientRouter.post("/rescheduleAppointment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.rescheduleAppointment);
 patientRouter.post("/CancelAppointment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.CancelAppointment);
 patientRouter.post("/doneAppointment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.doneAppointment);

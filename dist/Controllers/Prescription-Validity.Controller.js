@@ -56,14 +56,22 @@ const checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod = (body) => __
         ]))[0];
         if (PV) {
             // const date = new Date(appointment.time.date).getDate();
-            const date = (0, moment_1.default)(appointment.time.date, "DD.MM.YYY");
-            const currentDate = (0, moment_1.default)(new Date(), "DD.MM.YYYY");
-            let difference = currentDate.diff(date, "days");
-            if (difference > PV.validateTill) {
-                return Promise.resolve(false);
+            if (appointment) {
+                const date = (0, moment_1.default)(appointment.time.date, "DD.MM.YYY");
+                const currentDate = (0, moment_1.default)(new Date(), "DD.MM.YYYY");
+                let difference = currentDate.diff(date, "days");
+                if (difference > PV.validateTill) {
+                    /* Fresh appointment */
+                    return Promise.resolve(false);
+                }
+                else {
+                    /* Follow up appointment */
+                    return Promise.resolve(true);
+                }
             }
             else {
-                return Promise.resolve(true);
+                /* Fresh appointment */
+                return Promise.resolve(false);
             }
         }
         else {

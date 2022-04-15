@@ -195,6 +195,7 @@ const doctorKLiyeHospitalKiRequestExistKrtiHai = (doctorId, hospitalId) => __awa
         let exist = yield Approval_Request_Model_1.default.exists({
             requestFrom: hospitalId,
             requestTo: doctorId,
+            approvalStatus: { $ne: "Approved" },
         });
         if (exist) {
             throw new Error("A request for this already exist. Please wait");

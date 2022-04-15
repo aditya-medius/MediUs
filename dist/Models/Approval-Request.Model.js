@@ -53,6 +53,10 @@ const approvalSchema = new mongoose_1.Schema({
             type: Date,
         },
     },
+    createdAt: {
+        type: Date,
+        default: new Date(),
+    },
 });
 const approvalModel = (0, mongoose_1.model)(schemaNames_1.approvalRequest, approvalSchema);
 exports.default = approvalModel;

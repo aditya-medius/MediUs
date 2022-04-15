@@ -96,6 +96,10 @@ const appointmentSchema = new Schema({
     type: String,
     enum: ["Offline", "Online"],
   },
+  appointmentType: {
+    type: String,
+    enum: ["Fresh", "Follow up"],
+  },
 });
 
 appointmentSchema.post("save", async function (result: any) {

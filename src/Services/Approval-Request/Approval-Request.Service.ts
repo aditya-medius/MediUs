@@ -211,6 +211,7 @@ export const doctorKLiyeHospitalKiRequestExistKrtiHai = async (
     let exist = await approvalModel.exists({
       requestFrom: hospitalId,
       requestTo: doctorId,
+      approvalStatus: { $ne: "Approved" },
     });
     if (exist) {
       throw new Error("A request for this already exist. Please wait");

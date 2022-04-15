@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { authenticatePatient } from "../authentication/Patient.auth";
 import * as patientController from "../Controllers/Patient.Controller";
 import * as paymentController from "../Controllers/AppointmentPayment.Controller";
@@ -6,8 +6,13 @@ import multer from "multer";
 import { oneOf } from "../Services/middlewareHelper";
 import { authenticateDoctor } from "../authentication/Doctor.auth";
 import * as subPatientController from "../Controllers/SubPatient.Controller";
-import { patient, subPatient } from "../Services/schemaNames";
+import {
+  patient,
+  prescriptionValidity,
+  subPatient,
+} from "../Services/schemaNames";
 import { authenticateHospital } from "../authentication/Hospital.auth";
+import { errorResponse } from "../Services/response";
 const patientRouter = express.Router();
 const upload = multer({ dest: "./src/uploads" });
 patientRouter.post("/login", patientController.patientLogin);
@@ -32,9 +37,28 @@ patientRouter.post(
   oneOf(authenticatePatient),
   patientController.deleteProfile
 );
+
+import * as prescriptionValidtiyService from "../Controllers/Prescription-Validity.Controller";
 patientRouter.post(
   "/BookAppointment",
   oneOf(authenticatePatient, authenticateHospital),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      let doctorId = req.body.doctors,
+        patientId = req.body.patient,
+        hospitalId = req.body.hospital,
+        subPatientId = req.body.subPatient;
+      let valid =
+        await prescriptionValidtiyService.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod(
+          { doctorId, patientId, hospitalId, subPatientId }
+        );
+
+      req.body["appointmentType"] = valid ? "Follow up" : "Fresh";
+      next();
+    } catch (error: any) {
+      return errorResponse(error, res);
+    }
+  },
   patientController.BookAppointment
 );
 patientRouter.post(
