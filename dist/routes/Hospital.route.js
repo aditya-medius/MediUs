@@ -98,5 +98,7 @@ hospitalRouter.put("/getListOfRequestedApprovals_ByHospital", (0, middlewareHelp
 /* Doctors ki offline aur online appointment */
 hospitalRouter.get("/getDoctorsOfflineAndOnlineAppointments", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getDoctorsOfflineAndOnlineAppointments);
 /* Hospital k liye notifications */
-// hospitalR
+hospitalRouter.get("/getHospitalsNotification", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getHospitalsNotification);
+/* Update hospital Address */
+hospitalRouter.put("/updateHospitalAddress", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.updateHospitalAddress);
 exports.default = hospitalRouter;

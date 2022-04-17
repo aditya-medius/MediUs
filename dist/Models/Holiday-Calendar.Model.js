@@ -19,41 +19,30 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const mongoose_1 = __importStar(require("mongoose"));
 const schemaNames_1 = require("../Services/schemaNames");
-const addressSchema = new mongoose_1.Schema({
-    city: {
+const mongoose_1 = __importStar(require("mongoose"));
+const holidaySchema = new mongoose_1.Schema({
+    doctorId: {
         type: mongoose_1.default.Schema.Types.ObjectId,
-        required: true,
-        ref: schemaNames_1.city,
+        ref: schemaNames_1.doctor,
     },
-    state: {
-        type: mongoose_1.default.Schema.Types.ObjectId,
-        required: true,
-        ref: schemaNames_1.state,
-    },
-    locality: {
-        type: mongoose_1.default.Schema.Types.ObjectId,
-        required: true,
-        ref: schemaNames_1.locality,
-    },
-    country: {
-        type: mongoose_1.default.Schema.Types.ObjectId,
-        required: true,
-        ref: schemaNames_1.country,
-    },
-    pincode: {
-        type: String,
+    date: {
+        type: Date,
         required: true,
     },
-    addressLine_1: {
-        type: String,
-        required: true,
+    createdAt: {
+        type: Date,
+        default: new Date(),
     },
-    addressLine_2: {
-        type: String,
-        // required: true
+    delData: {
+        deleted: {
+            type: Boolean,
+            default: false,
+        },
+        deletedAt: {
+            type: Date,
+        },
     },
 });
-const addressModel = (0, mongoose_1.model)(schemaNames_1.address, addressSchema);
-exports.default = addressModel;
+const holidayModel = (0, mongoose_1.model)(schemaNames_1.holidayCalendar, holidaySchema);
+exports.default = holidayModel;

@@ -2,6 +2,11 @@ import notificationsModel from "../../Models/Notification.Model";
 import notificationTypeModel from "../../Models/Notification-Type.Model";
 import { hospital, doctor, patient } from "../schemaNames";
 import { NotificationContext } from "twilio/lib/rest/api/v2010/account/notification";
+import { excludeDoctorFields } from "../../Controllers/Doctor.Controller";
+import {
+  excludeHospitalFields,
+  excludePatientFields,
+} from "../../Controllers/Patient.Controller";
 
 export const sendApprovalRequestNotificationToDoctor_FromHospital = async (
   hospitalId: string,
@@ -85,7 +90,7 @@ export const sendAppointmentNotificationToHospitalAndDoctor_FromPatient =
         },
       ];
 
-      let notification = await notificationTypeModel.insertMany(doc);
+      let notification = await notificationsModel.insertMany(doc);
       return Promise.resolve(NotificationContext);
     } catch (error: any) {
       return Promise.reject(error);
@@ -101,24 +106,114 @@ export const sendAppointmentConfirmationNotificationToPatient = async (
   }
 };
 
-export const getHospitalsNotification = async (hospitalId: string) => {
+const hospitalFields = { ...excludeHospitalFields, services: 0 };
+const doctorFields = {
+  ...excludeDoctorFields,
+  hospitalDetails: 0,
+  overallExperience: 0,
+  qualification: 0,
+  specialization: 0,
+};
+export const getHospitalsNotification_whenSenderIsDoctor = async (
+  hospitalId: string
+) => {
   try {
-    let notifications = await notificationsModel.find({ receiver: hospitalId });
+    let notifications = await notificationsModel
+      .find({ receiver: hospitalId, sender_ref: doctor })
+      .populate({
+        path: "sender",
+        select: doctorFields,
+      })
+      .populate({
+        path: "receiver",
+        select: hospitalFields,
+      });
     return Promise.resolve(notifications);
   } catch (error: any) {
     return Promise.reject(error);
   }
 };
 
-export const getDoctorsNotification = async (doctorId: string) => {
+export const getHospitalsNotification_whenSenderIsPatient = async (
+  hospitalId: string
+) => {
   try {
-    let notifications = await notificationsModel.find({ receiver: doctorId });
+    let notifications = await notificationsModel
+      .find({ receiver: hospitalId, sender_ref: patient })
+      .populate({
+        path: "sender",
+        select: {
+          ...excludePatientFields,
+        },
+      })
+      .populate({
+        path: "receiver",
+        select: hospitalFields,
+      });
     return Promise.resolve(notifications);
   } catch (error: any) {
     return Promise.reject(error);
   }
 };
 
+export const getDoctorsNotification_whenSenderIsHospital = async (
+  doctorId: string
+) => {
+  try {
+    let notifications = await notificationsModel
+      .find({ receiver: doctorId, sender: hospital })
+      .populate({
+        path: "sender",
+        select: hospitalFields,
+      })
+      .populate({
+        path: "receiver",
+        select: doctorFields,
+      });
+    return Promise.resolve(notifications);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const getDoctorsNotification_whenSenderIsPatient = async (
+  doctorId: string
+) => {
+  try {
+    let notifications = await notificationsModel
+      .find({ receiver: doctorId })
+      .populate({
+        path: "sender",
+        select: {
+          ...excludePatientFields,
+        },
+      })
+      .populate({
+        path: "receiver",
+        select: doctorFields,
+      });
+    return Promise.resolve(notifications);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const getPatientsNotification = async (patientId: string) => {
+  try {
+    let notifications = await notificationsModel
+      .find({ receiver: patientId })
+      .populate({
+        path: "sender",
+      })
+      .populate({
+        path: "receiver",
+        select: doctorFields,
+      });
+    return Promise.resolve(notifications);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
 const generateNotificationId = () => {
   var characters = "ABCDEFGHIJKLMONPQRSTUVWXYZ0123456789";
   var result = "";

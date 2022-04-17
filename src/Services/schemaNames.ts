@@ -44,3 +44,4 @@ export const notificationType: string = "notificationtypes";
 export const qualificationNames: string = "qualificationnames";
 export const approvalRequest: string = "approvalrequests";
 export const prescriptionValidity: string = "prescriptions";
+export const holidayCalendar: string = "holidaycalendars";

@@ -24,6 +24,7 @@ import addressModel from "../Models/Address.Model";
 import prescriptionModel from "../Models/Prescription.Model";
 import * as doctorController from "../Controllers/Doctor.Controller";
 import mongoose from "mongoose";
+import * as notificationService from "../Services/Notification/Notification.Service";
 import {
   phoneNumberValidation,
   emailValidation,
@@ -343,6 +344,7 @@ export const BookAppointment = async (req: Request, res: Response) => {
       query["saturday.till.division"] = b.time.till.division;
     }
 
+    console.log("ssss:", query);
     // @TODO check if working hour exist first
     let capacity = await workingHourModel.findOne({
       doctorDetails: body.doctors,
@@ -352,7 +354,7 @@ export const BookAppointment = async (req: Request, res: Response) => {
     if (!capacity) {
       let error: Error = new Error("Error");
       error.message =
-        "Working hours does not exist for this hospital and doctor at this time. Please ask doctor to create one";
+        "Working hours does not exist for this hospital and doctor at this time. Please ask doctor to create one or its possible that doctor isn't working on this day";
       // return errorResponse(error, res);
       throw error;
     }
@@ -431,6 +433,18 @@ export const BookAppointment = async (req: Request, res: Response) => {
         parentPatient: 0,
       },
     });
+
+    /* Appointment notification doctor or hospital ko */
+    notificationService.sendAppointmentNotificationToHospitalAndDoctor_FromPatient(
+      body.doctors,
+      body.hospital,
+      body.patient
+    );
+    /* Appointment notification patient ko */
+    notificationService.sendAppointmentConfirmationNotificationToPatient(
+      body.patient
+    );
+
     return successResponse(
       appointmentBook,
       "Appoinment has been successfully booked",
@@ -964,3 +978,19 @@ export const checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod =
       return errorResponse(error, res);
     }
   };
+export const getPatientsNotification = async (req: Request, res: Response) => {
+  try {
+    let notification = notificationService.getPatientsNotification(
+      req.currentPatient
+    );
+
+    Promise.all([notification])
+      .then((result: Array<any>) => {
+        let notifications = result.map((e: any) => e[0]);
+        return successResponse(notifications, "Success", res);
+      })
+      .catch((error: any) => errorResponse(error, res));
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};

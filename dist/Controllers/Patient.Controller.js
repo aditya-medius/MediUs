@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod = exports.searchPatientByPhoneNumberOrEmail = exports.checkDoctorAvailability = exports.uploadPrescription = exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.CancelAppointment = exports.doneAppointment = exports.rescheduleAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = exports.excludeHospitalFields = exports.excludePatientFields = void 0;
+exports.getPatientsNotification = exports.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod = exports.searchPatientByPhoneNumberOrEmail = exports.checkDoctorAvailability = exports.uploadPrescription = exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.CancelAppointment = exports.doneAppointment = exports.rescheduleAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = exports.excludeHospitalFields = exports.excludePatientFields = void 0;
 const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
 // import { excludePatientFields } from "./Patient.Controller";
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
@@ -51,6 +51,7 @@ const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Prescription_Model_1 = __importDefault(require("../Models/Prescription.Model"));
 const doctorController = __importStar(require("../Controllers/Doctor.Controller"));
 const mongoose_1 = __importDefault(require("mongoose"));
+const notificationService = __importStar(require("../Services/Notification/Notification.Service"));
 const Validation_Service_1 = require("../Services/Validation.Service");
 const Appointment_Service_1 = require("../Services/Appointment/Appointment.Service");
 const prescriptionValidityController = __importStar(require("../Controllers/Prescription-Validity.Controller"));
@@ -315,12 +316,13 @@ const BookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
             query["saturday.till.time"] = b.time.till.time;
             query["saturday.till.division"] = b.time.till.division;
         }
+        console.log("ssss:", query);
         // @TODO check if working hour exist first
         let capacity = yield WorkingHours_Model_1.default.findOne(Object.assign({ doctorDetails: body.doctors, hospitalDetails: body.hospital }, query));
         if (!capacity) {
             let error = new Error("Error");
             error.message =
-                "Working hours does not exist for this hospital and doctor at this time. Please ask doctor to create one";
+                "Working hours does not exist for this hospital and doctor at this time. Please ask doctor to create one or its possible that doctor isn't working on this day";
             // return errorResponse(error, res);
             throw error;
         }
@@ -393,6 +395,10 @@ const BookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
                 parentPatient: 0,
             },
         });
+        /* Appointment notification doctor or hospital ko */
+        notificationService.sendAppointmentNotificationToHospitalAndDoctor_FromPatient(body.doctors, body.hospital, body.patient);
+        /* Appointment notification patient ko */
+        notificationService.sendAppointmentConfirmationNotificationToPatient(body.patient);
         return (0, response_1.successResponse)(appointmentBook, "Appoinment has been successfully booked", res);
     }
     catch (error) {
@@ -838,3 +844,18 @@ const checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod = (req, res) =
     }
 });
 exports.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod = checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod;
+const getPatientsNotification = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let notification = notificationService.getPatientsNotification(req.currentPatient);
+        Promise.all([notification])
+            .then((result) => {
+            let notifications = result.map((e) => e[0]);
+            return (0, response_1.successResponse)(notifications, "Success", res);
+        })
+            .catch((error) => (0, response_1.errorResponse)(error, res));
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getPatientsNotification = getPatientsNotification;

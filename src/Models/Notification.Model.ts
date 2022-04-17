@@ -46,6 +46,12 @@ const notificationsSchema = new Schema({
   },
 });
 
+["find", "findOne"].forEach((e: string) => {
+  notificationsSchema.pre(e, async function (next) {
+    this.populate("notificationType");
+  });
+});
+
 const notificationsModel = model(notifications, notificationsSchema);
 
 export default notificationsModel;

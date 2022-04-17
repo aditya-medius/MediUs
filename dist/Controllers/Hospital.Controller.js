@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getHospitalsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.checkVerificationStatus = exports.getDoctorsInHospital = exports.getHospitalById = exports.getAppointmentByDate = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
+exports.updateHospitalAddress = exports.getHospitalsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.checkVerificationStatus = exports.getDoctorsInHospital = exports.getHospitalById = exports.getAppointmentByDate = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Anemities_Model_1 = __importDefault(require("../Models/Anemities.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
@@ -65,6 +65,7 @@ const Services_Model_1 = __importDefault(require("../Admin Controlled Models/Ser
 const Hospital_Service_1 = require("../Services/Hospital/Hospital.Service");
 const Utils_1 = require("../Services/Utils");
 const approvalService = __importStar(require("../Services/Approval-Request/Approval-Request.Service"));
+const addressService = __importStar(require("../Services/Address/Address.Service"));
 const excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -968,11 +969,31 @@ exports.getDoctorsOfflineAndOnlineAppointments = getDoctorsOfflineAndOnlineAppoi
 const notificationService = __importStar(require("../Services/Notification/Notification.Service"));
 const getHospitalsNotification = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let notifications = yield notificationService.getHospitalsNotification(req.currentHospital);
-        return (0, response_1.successResponse)(notification, "Success", res);
+        /* Notification jaha pe sender hospital hai */
+        let notifications_whereSenderIsDoctor = notificationService.getHospitalsNotification_whenSenderIsDoctor(req.currentHospital);
+        /* Notification jaha pe sender patient hai */
+        let notification_whereSenderIsPatient = notificationService.getHospitalsNotification_whenSenderIsPatient(req.currentHospital);
+        Promise.all([
+            notifications_whereSenderIsDoctor,
+            notification_whereSenderIsPatient,
+        ]).then((result) => {
+            let notifications = result.map((e) => e[0]);
+            notifications = notifications.sort((a, b) => a.createdAt - b.createdAt);
+            return (0, response_1.successResponse)(notifications, "Success", res);
+        });
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);
     }
 });
 exports.getHospitalsNotification = getHospitalsNotification;
+const updateHospitalAddress = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let updatedAddress = yield addressService.updateAddress(Object.assign(Object.assign({}, req.body), { hospitalId: req.currentHospital }));
+        return (0, response_1.successResponse)(updatedAddress, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.updateHospitalAddress = updateHospitalAddress;
