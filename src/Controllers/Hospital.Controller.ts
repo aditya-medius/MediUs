@@ -31,7 +31,7 @@ import { getHospitalToken } from "../Services/Hospital/Hospital.Service";
 import { getAgeOfDoctor } from "../Services/Doctor/Doctor.Service";
 import { getAge } from "../Services/Utils";
 import * as approvalService from "../Services/Approval-Request/Approval-Request.Service";
-
+import * as addressService from "../Services/Address/Address.Service";
 const excludeDoctorFields = {
   password: 0,
   // panCard: 0,
@@ -1108,10 +1108,40 @@ import * as notificationService from "../Services/Notification/Notification.Serv
 
 export const getHospitalsNotification = async (req: Request, res: Response) => {
   try {
-    let notifications = await notificationService.getHospitalsNotification(
-      req.currentHospital
-    );
-    return successResponse(notification, "Success", res);
+    /* Notification jaha pe sender hospital hai */
+    let notifications_whereSenderIsDoctor =
+      notificationService.getHospitalsNotification_whenSenderIsDoctor(
+        req.currentHospital
+      );
+
+    /* Notification jaha pe sender patient hai */
+    let notification_whereSenderIsPatient =
+      notificationService.getHospitalsNotification_whenSenderIsPatient(
+        req.currentHospital
+      );
+
+    Promise.all([
+      notifications_whereSenderIsDoctor,
+      notification_whereSenderIsPatient,
+    ]).then((result: Array<any>) => {
+      let notifications = result.map((e: any) => e[0]);
+      notifications = notifications.sort(
+        (a: any, b: any) => a.createdAt - b.createdAt
+      );
+      return successResponse(notifications, "Success", res);
+    });
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const updateHospitalAddress = async (req: Request, res: Response) => {
+  try {
+    let updatedAddress = await addressService.updateAddress({
+      ...req.body,
+      hospitalId: req.currentHospital,
+    });
+    return successResponse(updatedAddress, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

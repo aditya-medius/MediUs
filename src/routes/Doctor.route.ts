@@ -358,4 +358,20 @@ doctorRouter.get(
   oneOf(authenticateDoctor),
   doctorController.getDoctorsNotification
 );
+
+doctorRouter.post(
+  "/setHolidayCalendar",
+  oneOf(authenticateDoctor),
+  doctorController.setHolidayCalendar
+);
+doctorRouter.get(
+  "/getDoctorsHolidayList",
+  oneOf(authenticateDoctor),
+  doctorController.getDoctorsHolidayList
+);
+doctorRouter.put(
+  "/deleteHolidayCalendar",
+  oneOf(authenticateDoctor),
+  doctorController.deleteHolidayCalendar
+);
 export default doctorRouter;

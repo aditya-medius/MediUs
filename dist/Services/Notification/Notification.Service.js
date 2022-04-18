@@ -12,11 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDoctorsNotification = exports.getHospitalsNotification = exports.sendAppointmentConfirmationNotificationToPatient = exports.sendAppointmentNotificationToHospitalAndDoctor_FromPatient = exports.sendApprovalRequestNotificationToHospital_FromDoctor = exports.sendApprovalRequestNotificationToDoctor_FromHospital = void 0;
+exports.getPatientsNotification = exports.getDoctorsNotification_whenSenderIsPatient = exports.getDoctorsNotification_whenSenderIsHospital = exports.getHospitalsNotification_whenSenderIsPatient = exports.getHospitalsNotification_whenSenderIsDoctor = exports.sendAppointmentConfirmationNotificationToPatient = exports.sendAppointmentNotificationToHospitalAndDoctor_FromPatient = exports.sendApprovalRequestNotificationToHospital_FromDoctor = exports.sendApprovalRequestNotificationToDoctor_FromHospital = void 0;
 const Notification_Model_1 = __importDefault(require("../../Models/Notification.Model"));
 const Notification_Type_Model_1 = __importDefault(require("../../Models/Notification-Type.Model"));
 const schemaNames_1 = require("../schemaNames");
 const notification_1 = require("twilio/lib/rest/api/v2010/account/notification");
+const Doctor_Controller_1 = require("../../Controllers/Doctor.Controller");
+const Patient_Controller_1 = require("../../Controllers/Patient.Controller");
 const sendApprovalRequestNotificationToDoctor_FromHospital = (hospitalId, doctorId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let notificationId = generateNotificationId();
@@ -77,7 +79,7 @@ const sendAppointmentNotificationToHospitalAndDoctor_FromPatient = (doctorId, ho
                 receiver_ref: schemaNames_1.hospital,
             },
         ];
-        let notification = yield Notification_Type_Model_1.default.insertMany(doc);
+        let notification = yield Notification_Model_1.default.insertMany(doc);
         return Promise.resolve(notification_1.NotificationContext);
     }
     catch (error) {
@@ -93,26 +95,102 @@ const sendAppointmentConfirmationNotificationToPatient = (patientId) => __awaite
     }
 });
 exports.sendAppointmentConfirmationNotificationToPatient = sendAppointmentConfirmationNotificationToPatient;
-const getHospitalsNotification = (hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
+const hospitalFields = Object.assign(Object.assign({}, Patient_Controller_1.excludeHospitalFields), { services: 0 });
+const doctorFields = Object.assign(Object.assign({}, Doctor_Controller_1.excludeDoctorFields), { hospitalDetails: 0, overallExperience: 0, qualification: 0, specialization: 0 });
+const getHospitalsNotification_whenSenderIsDoctor = (hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let notifications = yield Notification_Model_1.default.find({ receiver: hospitalId });
+        let notifications = yield Notification_Model_1.default
+            .find({ receiver: hospitalId, sender_ref: schemaNames_1.doctor })
+            .populate({
+            path: "sender",
+            select: doctorFields,
+        })
+            .populate({
+            path: "receiver",
+            select: hospitalFields,
+        });
         return Promise.resolve(notifications);
     }
     catch (error) {
         return Promise.reject(error);
     }
 });
-exports.getHospitalsNotification = getHospitalsNotification;
-const getDoctorsNotification = (doctorId) => __awaiter(void 0, void 0, void 0, function* () {
+exports.getHospitalsNotification_whenSenderIsDoctor = getHospitalsNotification_whenSenderIsDoctor;
+const getHospitalsNotification_whenSenderIsPatient = (hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let notifications = yield Notification_Model_1.default.find({ receiver: doctorId });
+        let notifications = yield Notification_Model_1.default
+            .find({ receiver: hospitalId, sender_ref: schemaNames_1.patient })
+            .populate({
+            path: "sender",
+            select: Object.assign({}, Patient_Controller_1.excludePatientFields),
+        })
+            .populate({
+            path: "receiver",
+            select: hospitalFields,
+        });
         return Promise.resolve(notifications);
     }
     catch (error) {
         return Promise.reject(error);
     }
 });
-exports.getDoctorsNotification = getDoctorsNotification;
+exports.getHospitalsNotification_whenSenderIsPatient = getHospitalsNotification_whenSenderIsPatient;
+const getDoctorsNotification_whenSenderIsHospital = (doctorId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let notifications = yield Notification_Model_1.default
+            .find({ receiver: doctorId, sender: schemaNames_1.hospital })
+            .populate({
+            path: "sender",
+            select: hospitalFields,
+        })
+            .populate({
+            path: "receiver",
+            select: doctorFields,
+        });
+        return Promise.resolve(notifications);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.getDoctorsNotification_whenSenderIsHospital = getDoctorsNotification_whenSenderIsHospital;
+const getDoctorsNotification_whenSenderIsPatient = (doctorId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let notifications = yield Notification_Model_1.default
+            .find({ receiver: doctorId })
+            .populate({
+            path: "sender",
+            select: Object.assign({}, Patient_Controller_1.excludePatientFields),
+        })
+            .populate({
+            path: "receiver",
+            select: doctorFields,
+        });
+        return Promise.resolve(notifications);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.getDoctorsNotification_whenSenderIsPatient = getDoctorsNotification_whenSenderIsPatient;
+const getPatientsNotification = (patientId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let notifications = yield Notification_Model_1.default
+            .find({ receiver: patientId })
+            .populate({
+            path: "sender",
+        })
+            .populate({
+            path: "receiver",
+            select: doctorFields,
+        });
+        return Promise.resolve(notifications);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.getPatientsNotification = getPatientsNotification;
 const generateNotificationId = () => {
     var characters = "ABCDEFGHIJKLMONPQRSTUVWXYZ0123456789";
     var result = "";

@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDoctorsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.setConsultationFeeForDoctor = exports.addHospitalInDoctorProfile = exports.checkVerificationStatus = exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
+exports.deleteHolidayCalendar = exports.getDoctorsHolidayList = exports.setHolidayCalendar = exports.getDoctorsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.setConsultationFeeForDoctor = exports.addHospitalInDoctorProfile = exports.checkVerificationStatus = exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -65,6 +65,7 @@ const Withdrawal_Model_1 = __importDefault(require("../Models/Withdrawal.Model")
 const Qualification_Model_1 = __importDefault(require("../Models/Qualification.Model"));
 const Patient_Service_1 = require("../Services/Patient/Patient.Service");
 const approvalService = __importStar(require("../Services/Approval-Request/Approval-Request.Service"));
+const holidayService = __importStar(require("../Services/Holiday-Calendar/Holiday-Calendar.Service"));
 exports.excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -1552,11 +1553,64 @@ exports.getDoctorsOfflineAndOnlineAppointments = getDoctorsOfflineAndOnlineAppoi
 const notificationService = __importStar(require("../Services/Notification/Notification.Service"));
 const getDoctorsNotification = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let notifications = yield notificationService.getDoctorsNotification(req.currentDoctor);
-        return (0, response_1.successResponse)(notification, "Success", res);
+        /* Notification jaha pe sender hospital hai */
+        let notifications_whereSenderIsHospital = notificationService.getDoctorsNotification_whenSenderIsHospital(req.currentDoctor);
+        /* Notification jaha pe sender patient hai */
+        let notifications_whereSenderIsPatient = notificationService.getDoctorsNotification_whenSenderIsPatient(req.currentDoctor);
+        Promise.all([
+            notifications_whereSenderIsHospital,
+            notifications_whereSenderIsPatient,
+        ])
+            .then((result) => {
+            let notifications = result.map((e) => e[0]);
+            notifications = notifications.sort((a, b) => a.createdAt - b.createdAt);
+            return (0, response_1.successResponse)(notifications, "Success", res);
+        })
+            .catch((error) => (0, response_1.errorResponse)(error, res));
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);
     }
 });
 exports.getDoctorsNotification = getDoctorsNotification;
+/* Holiday calendar */
+const setHolidayCalendar = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let holiday = yield holidayService.addHolidayCalendar({
+            doctorId: req.currentDoctor,
+            date: req.body.date,
+        });
+        return (0, response_1.successResponse)(holiday, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.setHolidayCalendar = setHolidayCalendar;
+const getDoctorsHolidayList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let doctorId = "";
+        if (req.currentDoctor) {
+            doctorId = req.currentDoctor;
+        }
+        else {
+            doctorId = req.body.doctorId;
+        }
+        let holidayList = yield holidayService.getDoctorsHolidayList(doctorId);
+        return (0, response_1.successResponse)(holidayList, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getDoctorsHolidayList = getDoctorsHolidayList;
+const deleteHolidayCalendar = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        yield holidayService.deleteHolidayCalendar(req.body.holidayId);
+        return (0, response_1.successResponse)({}, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.deleteHolidayCalendar = deleteHolidayCalendar;

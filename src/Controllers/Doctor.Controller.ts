@@ -37,6 +37,8 @@ import withdrawModel from "../Models/Withdrawal.Model";
 import qualificationModel from "../Models/Qualification.Model";
 import { calculateAge } from "../Services/Patient/Patient.Service";
 import * as approvalService from "../Services/Approval-Request/Approval-Request.Service";
+import * as holidayService from "../Services/Holiday-Calendar/Holiday-Calendar.Service";
+
 export const excludeDoctorFields = {
   password: 0,
   // panCard: 0,
@@ -1771,10 +1773,67 @@ import * as notificationService from "../Services/Notification/Notification.Serv
 
 export const getDoctorsNotification = async (req: Request, res: Response) => {
   try {
-    let notifications = await notificationService.getDoctorsNotification(
-      req.currentDoctor
-    );
-    return successResponse(notification, "Success", res);
+    /* Notification jaha pe sender hospital hai */
+    let notifications_whereSenderIsHospital =
+      notificationService.getDoctorsNotification_whenSenderIsHospital(
+        req.currentDoctor
+      );
+
+    /* Notification jaha pe sender patient hai */
+    let notifications_whereSenderIsPatient =
+      notificationService.getDoctorsNotification_whenSenderIsPatient(
+        req.currentDoctor
+      );
+
+    Promise.all([
+      notifications_whereSenderIsHospital,
+      notifications_whereSenderIsPatient,
+    ])
+      .then((result: Array<any>) => {
+        let notifications = result.map((e: any) => e[0]);
+        notifications = notifications.sort(
+          (a: any, b: any) => a.createdAt - b.createdAt
+        );
+        return successResponse(notifications, "Success", res);
+      })
+      .catch((error: any) => errorResponse(error, res));
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+/* Holiday calendar */
+export const setHolidayCalendar = async (req: Request, res: Response) => {
+  try {
+    let holiday = await holidayService.addHolidayCalendar({
+      doctorId: req.currentDoctor,
+      date: req.body.date,
+    });
+    return successResponse(holiday, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getDoctorsHolidayList = async (req: Request, res: Response) => {
+  try {
+    let doctorId: string = "";
+    if (req.currentDoctor) {
+      doctorId = req.currentDoctor;
+    } else {
+      doctorId = req.body.doctorId;
+    }
+    let holidayList = await holidayService.getDoctorsHolidayList(doctorId);
+    return successResponse(holidayList, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const deleteHolidayCalendar = async (req: Request, res: Response) => {
+  try {
+    await holidayService.deleteHolidayCalendar(req.body.holidayId);
+    return successResponse({}, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

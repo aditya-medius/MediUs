@@ -87,4 +87,5 @@ patientRouter.post("/checkDoctorAvailability", (0, middlewareHelper_1.oneOf)(Doc
 // Search patient
 patientRouter.get("/searchPatientByPhoneNumberOrEmail/:term", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital), patientController.searchPatientByPhoneNumberOrEmail);
 patientRouter.put("/checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod);
+patientRouter.get("/getPatientsNotification", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.getPatientsNotification);
 exports.default = patientRouter;
