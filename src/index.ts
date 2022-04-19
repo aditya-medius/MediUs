@@ -18,6 +18,7 @@ import { authenticateHospital } from "./authentication/Hospital.auth";
 import { authenticatePatient } from "./authentication/Patient.auth";
 import mongoose from "mongoose";
 import * as cronJobService from "./Services/Cron-Jobs.Service";
+import commonRouter from "./routes/Common.route";
 
 // Cron Jobs
 // cronJobService.cronFunctions.forEach((e: Function) => {
@@ -37,6 +38,7 @@ app.use("/admin", adminRouter);
 app.use("/patient", patientRouter);
 app.use("/common", commonRouter);
 app.use("/feedback", feedbackRouter);
+app.use("/common", commonRouter);
 app.use("/agent", agentRouter);
 
 app.use("/static", express.static(path.join(__dirname, "./src/uploads")));
