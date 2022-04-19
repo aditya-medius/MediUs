@@ -9,7 +9,8 @@ import { initUpload } from "../Services/Utils";
 
 const commonRouter = express.Router();
 
-const upload = initUpload("admin");
+let paths = "admin";
+const upload = initUpload(paths);
 
 commonRouter.post(
   "/uploadImage",
@@ -20,7 +21,9 @@ commonRouter.post(
     authenticateAdmin
   ),
   upload.single("profileImage"),
-  mediaController.uploadImage
+  (req: Request, res: Response) => {
+    mediaController.uploadImage(req, res, paths);
+  }
 );
 
 export default commonRouter;

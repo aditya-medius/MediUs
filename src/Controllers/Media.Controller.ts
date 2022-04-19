@@ -4,7 +4,11 @@ import mediaModel from "../Models/Media.model";
 import { errorResponse, successResponse } from "../Services/response";
 import { doctor, hospital, patient } from "../Services/schemaNames";
 import { excludeDoctorFields } from "./Doctor.Controller";
-export const uploadImage = async (req: Request, res: Response) => {
+export const uploadImage = async (
+  req: Request,
+  res: Response,
+  paths: string = "user"
+) => {
   try {
     let body = req.body;
     let user: string = "";
@@ -20,7 +24,7 @@ export const uploadImage = async (req: Request, res: Response) => {
     body.userType = user;
     body.user = req.body.userId;
     body.image = req.file
-      ? `${process.env.MEDIA_DIR as string}/user/${req.file.filename}`
+      ? `${process.env.MEDIA_DIR as string}/${paths}/${req.file.filename}`
       : "";
     let mediaObj = await new mediaModel(body).save();
 
