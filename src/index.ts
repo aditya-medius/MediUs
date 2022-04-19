@@ -9,6 +9,7 @@ import hospitalRouter from "./routes/Hospital.route";
 import adminRouter from "./routes/Admin.route";
 import patientRouter from "./routes/Patient.route";
 import agentRouter from "./routes/Agent.route";
+import commonRouter from "./routes/Common.route";
 import path from "path";
 import feedbackRouter from "./routes/Feedback.route";
 import { oneOf, tokenNikalo } from "./Services/middlewareHelper";
@@ -34,6 +35,7 @@ app.use("/doctor", doctorRouter);
 app.use("/hospital", hospitalRouter);
 app.use("/admin", adminRouter);
 app.use("/patient", patientRouter);
+app.use("/common", commonRouter);
 app.use("/feedback", feedbackRouter);
 app.use("/agent", agentRouter);
 
