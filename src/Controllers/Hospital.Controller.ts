@@ -1065,8 +1065,9 @@ export const getListOfRequestedApprovals_OfHospital = async (
 ) => {
   try {
     let hospitalId = req.currentHospital;
-    let data =
-      approvalService.getListOfRequestedApprovals_OfHospital(hospitalId);
+    let data = await approvalService.getListOfRequestedApprovals_OfHospital(
+      hospitalId
+    );
     return successResponse(data, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
@@ -1078,8 +1079,9 @@ export const getListOfRequestedApprovals_ByHospital = async (
 ) => {
   try {
     let hospitalId = req.currentHospital;
-    let data =
-      approvalService.getListOfRequestedApprovals_ByHospital(hospitalId);
+    let data = await approvalService.getListOfRequestedApprovals_ByHospital(
+      hospitalId
+    );
     return successResponse(data, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);

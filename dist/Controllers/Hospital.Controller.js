@@ -936,7 +936,7 @@ exports.checkVerificationStatus = checkVerificationStatus;
 const getListOfRequestedApprovals_OfHospital = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let hospitalId = req.currentHospital;
-        let data = approvalService.getListOfRequestedApprovals_OfHospital(hospitalId);
+        let data = yield approvalService.getListOfRequestedApprovals_OfHospital(hospitalId);
         return (0, response_1.successResponse)(data, "Success", res);
     }
     catch (error) {
@@ -947,7 +947,7 @@ exports.getListOfRequestedApprovals_OfHospital = getListOfRequestedApprovals_OfH
 const getListOfRequestedApprovals_ByHospital = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let hospitalId = req.currentHospital;
-        let data = approvalService.getListOfRequestedApprovals_ByHospital(hospitalId);
+        let data = yield approvalService.getListOfRequestedApprovals_ByHospital(hospitalId);
         return (0, response_1.successResponse)(data, "Success", res);
     }
     catch (error) {
