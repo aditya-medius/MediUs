@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getQualificationList = exports.addDoctorQualification = void 0;
+exports.addQualificationName = exports.getQualificationList = exports.addDoctorQualification = void 0;
 const Qualification_Model_1 = __importDefault(require("../Models/Qualification.Model"));
 const QualificationName_Model_1 = __importDefault(require("../Admin Controlled Models/QualificationName.Model"));
 const response_1 = require("../Services/response");
@@ -36,3 +36,11 @@ const getQualificationList = (req, res) => __awaiter(void 0, void 0, void 0, fun
     }
 });
 exports.getQualificationList = getQualificationList;
+const addQualificationName = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let body = req.body;
+        return (0, response_1.successResponse)(yield new QualificationName_Model_1.default(body).save(), "Success", res);
+    }
+    catch (error) { }
+});
+exports.addQualificationName = addQualificationName;
