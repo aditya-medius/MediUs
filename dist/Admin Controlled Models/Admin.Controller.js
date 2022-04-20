@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addQualificationn = exports.uploadCSV_locality = exports.uploadCSV_city = exports.uploadCSV_state = exports.getLocalityByCity = exports.getCityByState = exports.getStateByCountry = exports.setCityMap = exports.setStateMap = exports.setCountryMap = exports.getAllHospitalList = exports.getAllAgentList = exports.verifyAgents = exports.getAllDoctorsList = exports.verifyHospitals = exports.verifyDoctors = exports.getUnverifiedDoctors = exports.addHospitalService = exports.create = exports.login = exports.getCityStateLocalityCountry = exports.getPayments = exports.addPayment = exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityDoctorType = exports.addSpecialityDoctorType = exports.addDoctorType = exports.addToSpecialityDisease = exports.addSpecialityDisease = exports.addDisease = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
+exports.getAllAppointments = exports.addQualificationn = exports.uploadCSV_locality = exports.uploadCSV_city = exports.uploadCSV_state = exports.getLocalityByCity = exports.getCityByState = exports.getStateByCountry = exports.setCityMap = exports.setStateMap = exports.setCountryMap = exports.getAllHospitalList = exports.getAllAgentList = exports.getAllPatientList = exports.verifyAgents = exports.getAllDoctorsList = exports.verifyHospitals = exports.verifyDoctors = exports.getUnverifiedDoctors = exports.addHospitalService = exports.create = exports.login = exports.getCityStateLocalityCountry = exports.getPayments = exports.addPayment = exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityDoctorType = exports.addSpecialityDoctorType = exports.addDoctorType = exports.addToSpecialityDisease = exports.addSpecialityDisease = exports.addDisease = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
 const BodyPart_Model_1 = __importDefault(require("./BodyPart.Model"));
 const SpecialityBody_Model_1 = __importDefault(require("./SpecialityBody.Model"));
 const SpecialityDisease_Model_1 = __importDefault(require("./SpecialityDisease.Model"));
@@ -54,6 +54,8 @@ const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
 const Doctor_Controller_1 = require("../Controllers/Doctor.Controller");
 const Agent_Model_1 = __importDefault(require("../Models/Agent.Model"));
 const adminService = __importStar(require("../Services/Admin/Admin.Service"));
+const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
+const Appointment_Model_1 = __importDefault(require("../Models/Appointment.Model"));
 const addSpeciality = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const body = req.body;
@@ -572,6 +574,16 @@ const verifyAgents = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.verifyAgents = verifyAgents;
+const getAllPatientList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const patientList = yield Patient_Model_1.default.find({});
+        return (0, response_1.successResponse)(patientList, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getAllPatientList = getAllPatientList;
 const getAllAgentList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const agentList = yield Agent_Model_1.default.find({
@@ -735,3 +747,27 @@ const addQualificationn = (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.addQualificationn = addQualificationn;
+const getAllAppointments = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let appointments = yield Appointment_Model_1.default
+            .find()
+            .populate({
+            path: "patient",
+        })
+            .populate({
+            path: "doctors",
+            select: Doctor_Controller_1.excludeDoctorFields,
+        })
+            .populate({
+            path: "hospital",
+        })
+            .populate({
+            path: "subPatient",
+        });
+        return (0, response_1.successResponse)(appointments, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getAllAppointments = getAllAppointments;
