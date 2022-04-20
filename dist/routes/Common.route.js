@@ -31,6 +31,9 @@ const Admin_auth_1 = require("../authentication/Admin.auth");
 const middlewareHelper_1 = require("../Services/middlewareHelper");
 const Utils_1 = require("../Services/Utils");
 const commonRouter = express_1.default.Router();
-const upload = (0, Utils_1.initUpload)("admin");
-commonRouter.post("/uploadImage", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital, Patient_auth_1.authenticatePatient, Admin_auth_1.authenticateAdmin), upload.single("profileImage"), mediaController.uploadImage);
+let paths = "admin";
+const upload = (0, Utils_1.initUpload)(paths);
+commonRouter.post("/uploadImage", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital, Patient_auth_1.authenticatePatient, Admin_auth_1.authenticateAdmin), upload.single("profileImage"), (req, res) => {
+    mediaController.uploadImage(req, res, paths);
+});
 exports.default = commonRouter;

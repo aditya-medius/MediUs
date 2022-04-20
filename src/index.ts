@@ -9,6 +9,7 @@ import hospitalRouter from "./routes/Hospital.route";
 import adminRouter from "./routes/Admin.route";
 import patientRouter from "./routes/Patient.route";
 import agentRouter from "./routes/Agent.route";
+import commonRouter from "./routes/Common.route";
 import path from "path";
 import feedbackRouter from "./routes/Feedback.route";
 import { oneOf, tokenNikalo } from "./Services/middlewareHelper";
@@ -17,7 +18,7 @@ import { authenticateHospital } from "./authentication/Hospital.auth";
 import { authenticatePatient } from "./authentication/Patient.auth";
 import mongoose from "mongoose";
 import * as cronJobService from "./Services/Cron-Jobs.Service";
-import commonRouter from "./routes/Common.route";
+import { authenticateAdmin } from "./authentication/Admin.auth";
 
 // Cron Jobs
 // cronJobService.cronFunctions.forEach((e: Function) => {
@@ -43,7 +44,12 @@ app.use("/static", express.static(path.join(__dirname, "./src/uploads")));
 app.use(
   "/static",
   tokenNikalo,
-  oneOf(authenticateDoctor, authenticateHospital, authenticatePatient),
+  oneOf(
+    authenticateDoctor,
+    authenticateHospital,
+    authenticatePatient,
+    authenticateAdmin
+  ),
   express.static(path.join(__dirname, "../uploads"))
 );
 app.get("test", (req: Request, res: Response) => {

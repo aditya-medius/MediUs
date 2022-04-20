@@ -18,7 +18,7 @@ const Media_model_1 = __importDefault(require("../Models/Media.model"));
 const response_1 = require("../Services/response");
 const schemaNames_1 = require("../Services/schemaNames");
 const Doctor_Controller_1 = require("./Doctor.Controller");
-const uploadImage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const uploadImage = (req, res, paths = "user") => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
         let user = "";
@@ -37,7 +37,7 @@ const uploadImage = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         body.userType = user;
         body.user = req.body.userId;
         body.image = req.file
-            ? `${process.env.MEDIA_DIR}/user/${req.file.filename}`
+            ? `${process.env.MEDIA_DIR}/${paths}/${req.file.filename}`
             : "";
         let mediaObj = yield new Media_model_1.default(body).save();
         yield Doctors_Model_1.default.findOneAndUpdate({

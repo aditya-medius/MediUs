@@ -24,3 +24,14 @@ export const getQualificationList = async (req: Request, res: Response) => {
     return errorResponse(error, res);
   }
 };
+
+export const addQualificationName = async (req: Request, res: Response) => {
+  try {
+    let body = req.body;
+    return successResponse(
+      await new qualificationNamesModel(body).save(),
+      "Success",
+      res
+    );
+  } catch (error: any) {}
+};

@@ -121,7 +121,9 @@ doctorRouter.post("/updatePharma/:id", Doctor_auth_1.authenticateDoctor, preferr
 doctorRouter.post("/setKYC", kycController.addKYC);
 doctorRouter.post("/updateKyc", kycController.updateKyc);
 // Media
-doctorRouter.post("/uploadImage", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital, Patient_auth_1.authenticatePatient, Admin_auth_1.authenticateAdmin), upload.single("profileImage"), mediaController.uploadImage);
+doctorRouter.post("/uploadImage", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital, Patient_auth_1.authenticatePatient, Admin_auth_1.authenticateAdmin), upload.single("profileImage"), (req, res) => {
+    mediaController.uploadImage(req, res);
+});
 // Doctors ki kamayi
 doctorRouter.get("/getTotalEarnings", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getTotalEarnings);
 // Account se paise nikalna

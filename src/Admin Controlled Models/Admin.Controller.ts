@@ -26,7 +26,8 @@ import hospitalModel from "../Models/Hospital.Model";
 import { excludeDoctorFields } from "../Controllers/Doctor.Controller";
 import agentModel from "../Models/Agent.Model";
 import * as adminService from "../Services/Admin/Admin.Service";
-
+import patientModel from "../Models/Patient.Model";
+import appointmentModel from "../Models/Appointment.Model";
 export const addSpeciality = async (req: Request, res: Response) => {
   try {
     const body = req.body;
@@ -567,6 +568,15 @@ export const verifyAgents = async (req: Request, res: Response) => {
   }
 };
 
+export const getAllPatientList = async (req: Request, res: Response) => {
+  try {
+    const patientList = await patientModel.find({});
+    return successResponse(patientList, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
 export const getAllAgentList = async (req: Request, res: Response) => {
   try {
     const agentList = await agentModel.find({
@@ -725,6 +735,29 @@ export const addQualificationn = async (req: Request, res: Response) => {
     let body = req.body;
     let data = await new qualificationNameModel(body).save();
     return successResponse(data, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getAllAppointments = async (req: Request, res: Response) => {
+  try {
+    let appointments = await appointmentModel
+      .find()
+      .populate({
+        path: "patient",
+      })
+      .populate({
+        path: "doctors",
+        select: excludeDoctorFields,
+      })
+      .populate({
+        path: "hospital",
+      })
+      .populate({
+        path: "subPatient",
+      });
+    return successResponse(appointments, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

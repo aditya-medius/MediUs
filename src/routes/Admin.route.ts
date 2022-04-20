@@ -4,6 +4,7 @@ import { oneOf } from "../Services/middlewareHelper";
 import { authenticateAdmin } from "../authentication/Admin.auth";
 import * as patientController from "../Controllers/Patient.Controller";
 import { initUpload } from "../Services/Utils";
+import * as qualificationController from "../Controllers/Qualification.Controller";
 const adminRouter = Router();
 
 const upload = initUpload("admin");
@@ -69,9 +70,10 @@ adminRouter.put("/verifyHospital/:hospitalId", adminController.verifyHospitals);
 
 adminRouter.put("/verifyAgent/:agentId", adminController.verifyAgents);
 
-adminRouter.get("/getAllDoctorsList/", adminController.getAllDoctorsList);
-adminRouter.get("/getAllHospitalList/", adminController.getAllHospitalList);
-adminRouter.get("/getAllAgentList/", adminController.getAllAgentList);
+adminRouter.get("/getAllDoctorsList", adminController.getAllDoctorsList);
+adminRouter.get("/getAllHospitalList", adminController.getAllHospitalList);
+adminRouter.get("/getAllAgentList", adminController.getAllAgentList);
+adminRouter.get("/getAllPatientList", adminController.getAllPatientList);
 adminRouter.get(
   "/getListOfSpecialityBodyPartAndDisease",
   patientController.getSpecialityBodyPartAndDisease
@@ -85,6 +87,7 @@ adminRouter.post("/getStateByCountry", adminController.getStateByCountry);
 adminRouter.post("/getCityByState", adminController.getCityByState);
 adminRouter.post("/getLocalityByCity", adminController.getLocalityByCity);
 
+adminRouter.get("/getAllAppointments", adminController.getAllAppointments);
 adminRouter.post(
   "/uploadCSV_state",
   upload.single("file"),
@@ -102,6 +105,16 @@ adminRouter.post(
   adminController.uploadCSV_locality
 );
 
+adminRouter.get(
+  "/getQualificationList",
+  oneOf(authenticateAdmin),
+  qualificationController.getQualificationList
+);
+adminRouter.post(
+  "/addQualificationName",
+  oneOf(authenticateAdmin),
+  qualificationController.addQualificationName
+);
 /* Qualification */
 adminRouter.post("addQualification", adminController.addQualificationn);
 

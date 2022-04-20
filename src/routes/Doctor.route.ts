@@ -206,7 +206,9 @@ doctorRouter.post(
     authenticateAdmin
   ),
   upload.single("profileImage"),
-  mediaController.uploadImage
+  (req: Request, res: Response) => {
+    mediaController.uploadImage(req, res);
+  }
 );
 
 // Doctors ki kamayi
