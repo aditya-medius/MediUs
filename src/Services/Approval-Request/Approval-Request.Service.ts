@@ -1,3 +1,4 @@
+import { excludeDoctorFields } from "../../Controllers/Doctor.Controller";
 import approvalModel from "../../Models/Approval-Request.Model";
 import doctorModel from "../../Models/Doctors.Model";
 import hospitalModel from "../../Models/Hospital.Model";
@@ -254,15 +255,30 @@ export const getListOfRequestedApprovals_ByDoctor = async (
   }
 };
 
+const doctorFields = {
+  ...excludeDoctorFields,
+  hospitalDetails: 0,
+  registration: 0,
+  KYCDetails: 0,
+  password: 0,
+};
 /* Hospital ko kitno ne approval k liye request ki hai */
 export const getListOfRequestedApprovals_OfHospital = async (
   hospitalId: string
 ) => {
   try {
-    let requestedApprovals = await approvalModel.find({
-      requestTo: hospitalId,
-      "delData.deleted": false,
-    });
+    let requestedApprovals = await approvalModel
+      .find({
+        requestTo: hospitalId,
+        "delData.deleted": false,
+      })
+      .populate({
+        path: "requestFrom",
+        select: doctorFields,
+        populate: {
+          path: "qualification specialization",
+        },
+      });
     return Promise.resolve(requestedApprovals);
   } catch (error: any) {
     return Promise.reject(error);
@@ -274,9 +290,17 @@ export const getListOfRequestedApprovals_ByHospital = async (
   hospitalId: string
 ) => {
   try {
-    let requestedApprovals = await approvalModel.find({
-      requestFrom: hospitalId,
-    });
+    let requestedApprovals = await approvalModel
+      .find({
+        requestFrom: hospitalId,
+      })
+      .populate({
+        path: "requestTo",
+        select: doctorFields,
+        populate: {
+          path: "qualification specialization",
+        },
+      });
     return Promise.resolve(requestedApprovals);
   } catch (error: any) {
     return Promise.reject(error);
