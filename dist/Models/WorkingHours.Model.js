@@ -390,8 +390,27 @@ workingHoursSchema.pre("save", function (next) {
     workingHoursSchema.pre(e, function (next) {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.get("deleted")) {
-                this.where({ "deleted.isDeleted": false });
+                let query = {
+                    "deleted.isDeleted": false,
+                };
+                // this.where({ "deleted.isDeleted": false });
             }
+            this.where({
+                $and: [
+                    { "deleted.isDeleted": false },
+                    {
+                        $or: [
+                            { "monday.working": true },
+                            { "tuesday.working": true },
+                            { "wednesday.working": true },
+                            { "thursday.working": true },
+                            { "friday.working": true },
+                            { "saturday.working": true },
+                            { "sunday.working": true },
+                        ],
+                    },
+                ],
+            });
             next();
         });
     });
