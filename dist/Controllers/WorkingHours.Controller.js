@@ -93,7 +93,6 @@ const getWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function
             hospitalDetails: req.body.hospitalDetails,
         }, "-byHospital -doctorDetails -hospitalDetails")
             .lean();
-        console.log("dsjbdssd:", WHObj);
         let WHObj2 = {};
         if (WHObj) {
             WHObj.map((e) => {

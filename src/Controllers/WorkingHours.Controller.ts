@@ -88,7 +88,6 @@ export const getWorkingHours = async (req: Request, res: Response) => {
       )
       .lean();
 
-    console.log("dsjbdssd:", WHObj);
     let WHObj2: any = {};
     if (WHObj) {
       WHObj.map((e) => {
