@@ -78,7 +78,7 @@ export const createOpeningHours = async (req: Request, res: Response) => {
 // Get working hours
 export const getWorkingHours = async (req: Request, res: Response) => {
   try {
-    const WHObj = await workingHourModel
+    const WHObj: any = await workingHourModel
       .find(
         {
           doctorDetails: req.body.doctorDetails,
@@ -88,23 +88,53 @@ export const getWorkingHours = async (req: Request, res: Response) => {
       )
       .lean();
 
-    let WHObj2: any = {};
+    let WHObj2: any = [];
     if (WHObj) {
-      WHObj.map((e) => {
+      // WHObj.map((e: any) => {
+      //   for (let data in e) {
+      //     if (dayArray.includes(data)) {
+      //       e[data] = { ...e[data], workingHour: e["_id"] };
+      //       if (WHObj2[data]) {
+      //         WHObj2[data] = [...WHObj2[data], e[data]];
+      //       } else {
+      //         WHObj2[data] = [e[data]];
+      //       }
+      //     } else {
+      //       WHObj2[data] = e[data];
+      //     }
+      //   }
+      // });
+      // WHObj2 = formatWorkingHour([WHObj2]);
+
+      WHObj.map((e: any) => {
         for (let data in e) {
           if (dayArray.includes(data)) {
-            e[data] = { ...e[data], workingHour: e["_id"] };
-            if (WHObj2[data]) {
-              WHObj2[data] = [...WHObj2[data], e[data]];
+            let index = WHObj2.findIndex((elem: any) => {
+              return (
+                elem.from.time === e[data].from.time &&
+                elem.from.division === e[data].from.division &&
+                elem.till.time === e[data].till.time &&
+                elem.till.division === e[data].till.division
+              );
+            });
+            if (index < 0) {
+              WHObj2.push({
+                from: e[data].from,
+                till: e[data].till,
+                Days: [
+                  { day: data, capacity: e[data].capacity, id: e[data]._id },
+                ],
+              });
             } else {
-              WHObj2[data] = [e[data]];
+              WHObj2[index].Days.push({
+                day: data,
+                capacity: e[data].capacity,
+                id: e[data]._id,
+              });
             }
-          } else {
-            WHObj2[data] = e[data];
           }
         }
       });
-      WHObj2 = formatWorkingHour([WHObj2]);
       return successResponse({ workingHours: WHObj2 }, "Success", res);
     } else {
       return successResponse({}, "No data found", res);

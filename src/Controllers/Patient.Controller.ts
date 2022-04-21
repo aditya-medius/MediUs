@@ -344,7 +344,6 @@ export const BookAppointment = async (req: Request, res: Response) => {
       query["saturday.till.division"] = b.time.till.division;
     }
 
-    console.log("ssss:", query);
     // @TODO check if working hour exist first
     let capacity = await workingHourModel.findOne({
       doctorDetails: body.doctors,

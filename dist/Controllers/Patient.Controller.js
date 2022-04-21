@@ -316,7 +316,6 @@ const BookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
             query["saturday.till.time"] = b.time.till.time;
             query["saturday.till.division"] = b.time.till.division;
         }
-        console.log("ssss:", query);
         // @TODO check if working hour exist first
         let capacity = yield WorkingHours_Model_1.default.findOne(Object.assign({ doctorDetails: body.doctors, hospitalDetails: body.hospital }, query));
         if (!capacity) {
