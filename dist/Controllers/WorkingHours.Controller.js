@@ -28,6 +28,9 @@ const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Mod
 const response_1 = require("../Services/response");
 const time_class_1 = require("../Services/time.class");
 const WorkingHour_helper_1 = require("../Services/WorkingHour.helper");
+const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
+const Prescription_Model_1 = __importDefault(require("../Models/Prescription.Model"));
+const mongoose_1 = __importDefault(require("mongoose"));
 // For Doctors
 const createWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -138,7 +141,45 @@ const getWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function
                     }
                 }
             });
-            return (0, response_1.successResponse)({ workingHours: WHObj2 }, "Success", res);
+            let fee = (yield Doctors_Model_1.default.aggregate([
+                {
+                    $match: {
+                        _id: new mongoose_1.default.Types.ObjectId(req.body.doctorDetails),
+                    },
+                },
+                {
+                    $project: {
+                        hospitalDetails: {
+                            $filter: {
+                                input: "$hospitalDetails",
+                                as: "hd",
+                                cond: {
+                                    $eq: [
+                                        "$$hd.hospital",
+                                        new mongoose_1.default.Types.ObjectId(req.body.hospitalDetails),
+                                    ],
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    $unwind: {
+                        path: "$hospitalDetails",
+                    },
+                },
+                {
+                    $project: {
+                        "hospitalDetails._id": 0,
+                        "hospitalDetails.hospital": 0,
+                    },
+                },
+            ]))[0];
+            let prescriptionValidity = yield Prescription_Model_1.default.findOne({
+                doctorId: req.body.doctorDetails,
+                hospitalId: req.body.hospitalDetails,
+            }, "validateTill");
+            return (0, response_1.successResponse)({ workingHours: WHObj2, prescriptionValidity, fee }, "Success", res);
         }
         else {
             return (0, response_1.successResponse)({}, "No data found", res);

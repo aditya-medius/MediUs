@@ -26,6 +26,7 @@ const Admin_auth_1 = require("../authentication/Admin.auth");
 const patientController = __importStar(require("../Controllers/Patient.Controller"));
 const Utils_1 = require("../Services/Utils");
 const qualificationController = __importStar(require("../Controllers/Qualification.Controller"));
+const hospitalController = __importStar(require("../Controllers/Hospital.Controller"));
 const adminRouter = (0, express_1.Router)();
 const upload = (0, Utils_1.initUpload)("admin");
 adminRouter.post("/addSpeciality", adminController.addSpeciality);
@@ -79,5 +80,7 @@ adminRouter.post("/uploadCSV_locality", upload.single("file"), adminController.u
 adminRouter.get("/getQualificationList", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), qualificationController.getQualificationList);
 adminRouter.post("/addQualificationName", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), qualificationController.addQualificationName);
 /* Qualification */
-adminRouter.post("addQualification", adminController.addQualificationn);
+adminRouter.post("/addQualification", adminController.addQualificationn);
+adminRouter.post("/addAnemities", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), hospitalController.createHospitalAnemity);
+adminRouter.get("/getAllAnemities", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), hospitalController.getAnemities);
 exports.default = adminRouter;

@@ -5,6 +5,7 @@ import { authenticateAdmin } from "../authentication/Admin.auth";
 import * as patientController from "../Controllers/Patient.Controller";
 import { initUpload } from "../Services/Utils";
 import * as qualificationController from "../Controllers/Qualification.Controller";
+import * as hospitalController from "../Controllers/Hospital.Controller";
 const adminRouter = Router();
 
 const upload = initUpload("admin");
@@ -116,6 +117,18 @@ adminRouter.post(
   qualificationController.addQualificationName
 );
 /* Qualification */
-adminRouter.post("addQualification", adminController.addQualificationn);
+adminRouter.post("/addQualification", adminController.addQualificationn);
+
+adminRouter.post(
+  "/addAnemities",
+  oneOf(authenticateAdmin),
+  hospitalController.createHospitalAnemity
+);
+
+adminRouter.get(
+  "/getAllAnemities",
+  oneOf(authenticateAdmin),
+  hospitalController.getAnemities
+);
 
 export default adminRouter;

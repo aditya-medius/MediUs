@@ -5,6 +5,9 @@ import { addBodyPart } from "../Admin Controlled Models/Admin.Controller";
 import { time } from "../Services/time.class";
 import { dayArray, formatWorkingHour } from "../Services/WorkingHour.helper";
 import { strict as assert } from "assert";
+import doctorModel from "../Models/Doctors.Model";
+import prescriptionModel from "../Models/Prescription.Model";
+import mongoose, { ObjectId } from "mongoose";
 // For Doctors
 export const createWorkingHours = async (req: Request, res: Response) => {
   try {
@@ -135,7 +138,55 @@ export const getWorkingHours = async (req: Request, res: Response) => {
           }
         }
       });
-      return successResponse({ workingHours: WHObj2 }, "Success", res);
+
+      let fee = (
+        await doctorModel.aggregate([
+          {
+            $match: {
+              _id: new mongoose.Types.ObjectId(req.body.doctorDetails),
+            },
+          },
+          {
+            $project: {
+              hospitalDetails: {
+                $filter: {
+                  input: "$hospitalDetails",
+                  as: "hd",
+                  cond: {
+                    $eq: [
+                      "$$hd.hospital",
+                      new mongoose.Types.ObjectId(req.body.hospitalDetails),
+                    ],
+                  },
+                },
+              },
+            },
+          },
+          {
+            $unwind: {
+              path: "$hospitalDetails",
+            },
+          },
+          {
+            $project: {
+              "hospitalDetails._id": 0,
+              "hospitalDetails.hospital": 0,
+            },
+          },
+        ])
+      )[0];
+      let prescriptionValidity = await prescriptionModel.findOne(
+        {
+          doctorId: req.body.doctorDetails,
+          hospitalId: req.body.hospitalDetails,
+        },
+        "validateTill"
+      );
+      return successResponse(
+        { workingHours: WHObj2, prescriptionValidity, fee },
+        "Success",
+        res
+      );
     } else {
       return successResponse({}, "No data found", res);
     }
