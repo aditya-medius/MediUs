@@ -1597,7 +1597,8 @@ const getDoctorsHolidayList = (req, res) => __awaiter(void 0, void 0, void 0, fu
         else {
             doctorId = req.body.doctorId;
         }
-        let holidayList = yield holidayService.getDoctorsHolidayList(doctorId);
+        let { year, month } = req.body;
+        let holidayList = yield holidayService.getDoctorsHolidayList(doctorId, year, month);
         return (0, response_1.successResponse)(holidayList, "Success", res);
     }
     catch (error) {

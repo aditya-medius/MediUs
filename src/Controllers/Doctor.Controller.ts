@@ -1824,7 +1824,13 @@ export const getDoctorsHolidayList = async (req: Request, res: Response) => {
     } else {
       doctorId = req.body.doctorId;
     }
-    let holidayList = await holidayService.getDoctorsHolidayList(doctorId);
+
+    let { year, month } = req.body;
+    let holidayList = await holidayService.getDoctorsHolidayList(
+      doctorId,
+      year,
+      month
+    );
     return successResponse(holidayList, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
