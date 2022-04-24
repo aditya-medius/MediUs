@@ -372,8 +372,14 @@ const BookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
                 appCount++;
             }
         });
-        if (appCount == capacity.capacity) {
-            return (0, response_1.errorResponse)(new Error("Doctor cannot take any more appointments"), res);
+        let message = "Successfully booked appointment";
+        if (!(appCount < capacity.capacity)) {
+            if (req.currentHospital) {
+                message = `Doctor's appointment have exceeded doctor's capacity for the day by ${appCount - capacity.capacity + 1}`;
+            }
+            else {
+                return (0, response_1.errorResponse)(new Error("Doctor cannot take any more appointments"), res);
+            }
         }
         if (req.currentHospital) {
             body["Type"] = "Offline";
@@ -398,7 +404,7 @@ const BookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
         notificationService.sendAppointmentNotificationToHospitalAndDoctor_FromPatient(body.doctors, body.hospital, body.patient);
         /* Appointment notification patient ko */
         notificationService.sendAppointmentConfirmationNotificationToPatient(body.patient);
-        return (0, response_1.successResponse)(appointmentBook, "Appoinment has been successfully booked", res);
+        return (0, response_1.successResponse)(appointmentBook, message, res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);
@@ -633,7 +639,6 @@ const ViewSchedule = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             doctorDetails: body.doctors,
             hospitalDetails: body.hospital,
         });
-        // console.log(schedule)
         const requestDate = new Date(body.time);
         let query = {};
         if (body.day == "monday") {

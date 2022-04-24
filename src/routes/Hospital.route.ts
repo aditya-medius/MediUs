@@ -164,7 +164,7 @@ hospitalRouter.put(
 );
 
 /* Doctors ki offline aur online appointment */
-hospitalRouter.get(
+hospitalRouter.post(
   "/getDoctorsOfflineAndOnlineAppointments",
   oneOf(authenticateHospital),
   hospitalController.getDoctorsOfflineAndOnlineAppointments
@@ -182,5 +182,16 @@ hospitalRouter.put(
   "/updateHospitalAddress",
   oneOf(authenticateHospital),
   hospitalController.updateHospitalAddress
+);
+
+hospitalRouter.put(
+  "/getHospitalsSpecilization_AccordingToDoctor",
+  oneOf(authenticateHospital),
+  hospitalController.getHospitalsSpecilization_AccordingToDoctor
+);
+hospitalRouter.put(
+  "/getDoctorsListInHospital_withApprovalStatus",
+  oneOf(authenticateHospital),
+  hospitalController.getDoctorsListInHospital_withApprovalStatus
 );
 export default hospitalRouter;

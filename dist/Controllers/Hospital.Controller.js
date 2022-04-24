@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateHospitalAddress = exports.getHospitalsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.checkVerificationStatus = exports.getDoctorsInHospital = exports.getHospitalById = exports.getAppointmentByDate = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
+exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.updateHospitalAddress = exports.getHospitalsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.checkVerificationStatus = exports.getDoctorsInHospital = exports.getHospitalById = exports.getAppointmentByDate = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Anemities_Model_1 = __importDefault(require("../Models/Anemities.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
@@ -66,6 +66,7 @@ const Hospital_Service_1 = require("../Services/Hospital/Hospital.Service");
 const Utils_1 = require("../Services/Utils");
 const approvalService = __importStar(require("../Services/Approval-Request/Approval-Request.Service"));
 const addressService = __importStar(require("../Services/Address/Address.Service"));
+const hospitalService = __importStar(require("../Services/Hospital/Hospital.Service"));
 const excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -958,7 +959,7 @@ exports.getListOfRequestedApprovals_ByHospital = getListOfRequestedApprovals_ByH
 const doctorService = __importStar(require("../Services/Doctor/Doctor.Service"));
 const getDoctorsOfflineAndOnlineAppointments = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let appointments = yield doctorService.getDoctorsOfflineAndOnlineAppointments(req.query.doctorId);
+        let appointments = yield doctorService.getDoctorsOfflineAndOnlineAppointments(req.query.doctorId, req.body.date);
         return (0, response_1.successResponse)(appointments, "Success", res);
     }
     catch (error) {
@@ -997,3 +998,23 @@ const updateHospitalAddress = (req, res) => __awaiter(void 0, void 0, void 0, fu
     }
 });
 exports.updateHospitalAddress = updateHospitalAddress;
+const getHospitalsSpecilization_AccordingToDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let data = yield hospitalService.getHospitalsSpecilization_AccordingToDoctor(req.body.hospitalId);
+        return (0, response_1.successResponse)(data, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getHospitalsSpecilization_AccordingToDoctor = getHospitalsSpecilization_AccordingToDoctor;
+const getDoctorsListInHospital_withApprovalStatus = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let data = yield hospitalService.getDoctorsListInHospital_withApprovalStatus(req.body.hospitalId);
+        return (0, response_1.successResponse)(data, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getDoctorsListInHospital_withApprovalStatus = getDoctorsListInHospital_withApprovalStatus;

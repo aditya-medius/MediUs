@@ -38,6 +38,7 @@ import qualificationModel from "../Models/Qualification.Model";
 import { calculateAge } from "../Services/Patient/Patient.Service";
 import * as approvalService from "../Services/Approval-Request/Approval-Request.Service";
 import * as holidayService from "../Services/Holiday-Calendar/Holiday-Calendar.Service";
+import * as hospitalService from "../Services/Hospital/Hospital.Service";
 
 export const excludeDoctorFields = {
   password: 0,
@@ -1834,6 +1835,23 @@ export const deleteHolidayCalendar = async (req: Request, res: Response) => {
   try {
     await holidayService.deleteHolidayCalendar(req.body.holidayId);
     return successResponse({}, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getHospitalsOfflineAndOnlineAppointments = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    let appointments =
+      await hospitalService.getHospitalsOfflineAndOnlineAppointments(
+        req.query.hospitalId as string,
+        req.body.date
+      );
+
+    return successResponse(appointments, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

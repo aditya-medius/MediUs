@@ -366,14 +366,20 @@ doctorRouter.post(
   oneOf(authenticateDoctor),
   doctorController.setHolidayCalendar
 );
-doctorRouter.get(
+doctorRouter.put(
   "/getDoctorsHolidayList",
-  oneOf(authenticateDoctor),
+  oneOf(authenticateDoctor, authenticateHospital),
   doctorController.getDoctorsHolidayList
 );
 doctorRouter.put(
   "/deleteHolidayCalendar",
   oneOf(authenticateDoctor),
   doctorController.deleteHolidayCalendar
+);
+
+doctorRouter.post(
+  "/getHospitalsOfflineAndOnlineAppointments",
+  oneOf(authenticateDoctor),
+  doctorController.getHospitalsOfflineAndOnlineAppointments
 );
 export default doctorRouter;
