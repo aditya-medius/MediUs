@@ -13,20 +13,20 @@ export const addHolidayCalendar = async (body: any) => {
 export const getDoctorsHolidayList = async (
   doctorId: string,
   year: number,
-  month: number
+  month: number,
+  hospitalId: string
 ) => {
   try {
     let [startDate, endDate] = getRangeOfDates(year, month);
-    let holidayList = await holidayModel.find(
-      {
-        doctorId,
-        date: { $gte: startDate, $lt: endDate },
-        "delData.deleted": false,
-      },
-      {
-        delData: 0,
-      }
-    );
+    let query = {
+      doctorId,
+      hospitalId,
+      date: { $gte: startDate, $lt: endDate },
+      "delData.deleted": false,
+    };
+    let holidayList = await holidayModel.find(query, {
+      delData: 0,
+    });
     return Promise.resolve(holidayList);
   } catch (error: any) {
     return Promise.reject(error);

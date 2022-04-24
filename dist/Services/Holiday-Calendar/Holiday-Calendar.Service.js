@@ -25,14 +25,16 @@ const addHolidayCalendar = (body) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.addHolidayCalendar = addHolidayCalendar;
-const getDoctorsHolidayList = (doctorId, year, month) => __awaiter(void 0, void 0, void 0, function* () {
+const getDoctorsHolidayList = (doctorId, year, month, hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let [startDate, endDate] = (0, Utils_1.getRangeOfDates)(year, month);
-        let holidayList = yield Holiday_Calendar_Model_1.default.find({
+        let query = {
             doctorId,
+            hospitalId,
             date: { $gte: startDate, $lt: endDate },
             "delData.deleted": false,
-        }, {
+        };
+        let holidayList = yield Holiday_Calendar_Model_1.default.find(query, {
             delData: 0,
         });
         return Promise.resolve(holidayList);

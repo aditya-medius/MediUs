@@ -1807,7 +1807,8 @@ export const getDoctorsNotification = async (req: Request, res: Response) => {
 export const setHolidayCalendar = async (req: Request, res: Response) => {
   try {
     let holiday = await holidayService.addHolidayCalendar({
-      doctorId: req.currentDoctor,
+      doctorId: req.body.doctorId,
+      hospitalId: req.body.hospitalId,
       date: req.body.date,
     });
     return successResponse(holiday, "Success", res);
@@ -1818,18 +1819,21 @@ export const setHolidayCalendar = async (req: Request, res: Response) => {
 
 export const getDoctorsHolidayList = async (req: Request, res: Response) => {
   try {
-    let doctorId: string = "";
+    let doctorId: string = "",
+      hospitalId: string = "";
     if (req.currentDoctor) {
       doctorId = req.currentDoctor;
     } else {
       doctorId = req.body.doctorId;
+      hospitalId = req.body.hospitalId;
     }
 
     let { year, month } = req.body;
     let holidayList = await holidayService.getDoctorsHolidayList(
       doctorId,
       year,
-      month
+      month,
+      hospitalId
     );
     return successResponse(holidayList, "Success", res);
   } catch (error: any) {

@@ -1578,7 +1578,8 @@ exports.getDoctorsNotification = getDoctorsNotification;
 const setHolidayCalendar = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let holiday = yield holidayService.addHolidayCalendar({
-            doctorId: req.currentDoctor,
+            doctorId: req.body.doctorId,
+            hospitalId: req.body.hospitalId,
             date: req.body.date,
         });
         return (0, response_1.successResponse)(holiday, "Success", res);
@@ -1590,15 +1591,16 @@ const setHolidayCalendar = (req, res) => __awaiter(void 0, void 0, void 0, funct
 exports.setHolidayCalendar = setHolidayCalendar;
 const getDoctorsHolidayList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let doctorId = "";
+        let doctorId = "", hospitalId = "";
         if (req.currentDoctor) {
             doctorId = req.currentDoctor;
         }
         else {
             doctorId = req.body.doctorId;
+            hospitalId = req.body.hospitalId;
         }
         let { year, month } = req.body;
-        let holidayList = yield holidayService.getDoctorsHolidayList(doctorId, year, month);
+        let holidayList = yield holidayService.getDoctorsHolidayList(doctorId, year, month, hospitalId);
         return (0, response_1.successResponse)(holidayList, "Success", res);
     }
     catch (error) {
