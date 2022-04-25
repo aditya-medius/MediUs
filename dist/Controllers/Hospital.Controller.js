@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.updateHospitalAddress = exports.getHospitalsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.checkVerificationStatus = exports.getDoctorsInHospital = exports.getHospitalById = exports.getAppointmentByDate = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
+exports.searchHospitalByPhoneNumber = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.updateHospitalAddress = exports.getHospitalsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.checkVerificationStatus = exports.getDoctorsInHospital = exports.getHospitalById = exports.getAppointmentByDate = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Anemities_Model_1 = __importDefault(require("../Models/Anemities.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
@@ -67,6 +67,7 @@ const Utils_1 = require("../Services/Utils");
 const approvalService = __importStar(require("../Services/Approval-Request/Approval-Request.Service"));
 const addressService = __importStar(require("../Services/Address/Address.Service"));
 const hospitalService = __importStar(require("../Services/Hospital/Hospital.Service"));
+const Validation_Service_1 = require("../Services/Validation.Service");
 const excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -1018,3 +1019,30 @@ const getDoctorsListInHospital_withApprovalStatus = (req, res) => __awaiter(void
     }
 });
 exports.getDoctorsListInHospital_withApprovalStatus = getDoctorsListInHospital_withApprovalStatus;
+const searchHospitalByPhoneNumber = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const term = req.params.term;
+        const phone = (0, Validation_Service_1.phoneNumberValidation)(term);
+        if (!phone) {
+            const error = new Error("Enter a valid phone number or email");
+            error.name = "Invalid Term";
+            return (0, response_1.errorResponse)(error, res);
+        }
+        let hospitalObj;
+        if (phone) {
+            hospitalObj = yield Hospital_Model_1.default
+                .findOne({
+                contactNumber: term,
+            })
+                .lean();
+        }
+        if (hospitalObj) {
+            return (0, response_1.successResponse)(hospitalObj, "Success", res);
+        }
+        throw new Error("No data found");
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.searchHospitalByPhoneNumber = searchHospitalByPhoneNumber;

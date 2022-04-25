@@ -1591,13 +1591,12 @@ const setHolidayCalendar = (req, res) => __awaiter(void 0, void 0, void 0, funct
 exports.setHolidayCalendar = setHolidayCalendar;
 const getDoctorsHolidayList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let doctorId = "", hospitalId = "";
+        let doctorId = "", hospitalId = req.body.hospitalId;
         if (req.currentDoctor) {
             doctorId = req.currentDoctor;
         }
         else {
             doctorId = req.body.doctorId;
-            hospitalId = req.body.hospitalId;
         }
         let { year, month } = req.body;
         let holidayList = yield holidayService.getDoctorsHolidayList(doctorId, year, month, hospitalId);

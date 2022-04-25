@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.holidayCalendar = exports.prescriptionValidity = exports.approvalRequest = exports.qualificationNames = exports.notificationType = exports.notifications = exports.approveStatus = exports.agent = exports.services = exports.withdraw = exports.creditAmount = exports.order = exports.media = exports.feedback = exports.kycDetails = exports.cityMap = exports.stateMap = exports.CountryMap = exports.prescription = exports.preferredPharma = exports.appointmentPayment = exports.doctorType = exports.disease = exports.openingHour = exports.country = exports.BodyPart = exports.OTP = exports.treatmentType = exports.locality = exports.state = exports.city = exports.payment = exports.address = exports.anemity = exports.admin = exports.subPatient = exports.patient = exports.doctor = exports.workingHour = exports.hospital = exports.like = exports.specialization = exports.specialityDoctorType = exports.specialityDisease = exports.speciality = exports.qualification = exports.appointment = void 0;
+exports.fee = exports.holidayCalendar = exports.prescriptionValidity = exports.approvalRequest = exports.qualificationNames = exports.notificationType = exports.notifications = exports.approveStatus = exports.agent = exports.services = exports.withdraw = exports.creditAmount = exports.order = exports.media = exports.feedback = exports.kycDetails = exports.cityMap = exports.stateMap = exports.CountryMap = exports.prescription = exports.preferredPharma = exports.appointmentPayment = exports.doctorType = exports.disease = exports.openingHour = exports.country = exports.BodyPart = exports.OTP = exports.treatmentType = exports.locality = exports.state = exports.city = exports.payment = exports.address = exports.anemity = exports.admin = exports.subPatient = exports.patient = exports.doctor = exports.workingHour = exports.hospital = exports.like = exports.specialization = exports.specialityDoctorType = exports.specialityDisease = exports.speciality = exports.qualification = exports.appointment = void 0;
 exports.appointment = "appointments";
 exports.qualification = "qualifications";
 exports.speciality = "specialities";
@@ -48,3 +48,4 @@ exports.qualificationNames = "qualificationnames";
 exports.approvalRequest = "approvalrequests";
 exports.prescriptionValidity = "prescriptions";
 exports.holidayCalendar = "holidaycalendars";
+exports.fee = "fees";

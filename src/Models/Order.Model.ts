@@ -20,5 +20,7 @@ const orderSchema = new Schema({
   },
 });
 
+orderSchema.pre("save", function (next) {});
+
 const orderModel = model(order, orderSchema);
 export default orderModel;

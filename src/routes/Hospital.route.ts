@@ -194,4 +194,10 @@ hospitalRouter.put(
   oneOf(authenticateHospital),
   hospitalController.getDoctorsListInHospital_withApprovalStatus
 );
+
+hospitalRouter.get(
+  "/searchHospitalByPhoneNumber/:term",
+  oneOf(authenticateHospital, authenticateDoctor, authenticatePatient),
+  hospitalController.searchHospitalByPhoneNumber
+);
 export default hospitalRouter;

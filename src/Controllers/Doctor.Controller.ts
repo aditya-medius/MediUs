@@ -1820,12 +1820,11 @@ export const setHolidayCalendar = async (req: Request, res: Response) => {
 export const getDoctorsHolidayList = async (req: Request, res: Response) => {
   try {
     let doctorId: string = "",
-      hospitalId: string = "";
+      hospitalId = req.body.hospitalId;
     if (req.currentDoctor) {
       doctorId = req.currentDoctor;
     } else {
       doctorId = req.body.doctorId;
-      hospitalId = req.body.hospitalId;
     }
 
     let { year, month } = req.body;

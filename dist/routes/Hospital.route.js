@@ -103,4 +103,5 @@ hospitalRouter.get("/getHospitalsNotification", (0, middlewareHelper_1.oneOf)(Ho
 hospitalRouter.put("/updateHospitalAddress", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.updateHospitalAddress);
 hospitalRouter.put("/getHospitalsSpecilization_AccordingToDoctor", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getHospitalsSpecilization_AccordingToDoctor);
 hospitalRouter.put("/getDoctorsListInHospital_withApprovalStatus", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getDoctorsListInHospital_withApprovalStatus);
+hospitalRouter.get("/searchHospitalByPhoneNumber/:term", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital, Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), hospitalController.searchHospitalByPhoneNumber);
 exports.default = hospitalRouter;
