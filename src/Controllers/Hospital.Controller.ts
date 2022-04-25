@@ -33,6 +33,10 @@ import { getAge } from "../Services/Utils";
 import * as approvalService from "../Services/Approval-Request/Approval-Request.Service";
 import * as addressService from "../Services/Address/Address.Service";
 import * as hospitalService from "../Services/Hospital/Hospital.Service";
+import {
+  emailValidation,
+  phoneNumberValidation,
+} from "../Services/Validation.Service";
 const excludeDoctorFields = {
   password: 0,
   // panCard: 0,
@@ -1176,6 +1180,37 @@ export const getDoctorsListInHospital_withApprovalStatus = async (
         req.body.hospitalId
       );
     return successResponse(data, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const searchHospitalByPhoneNumber = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const term = req.params.term;
+    const phone = phoneNumberValidation(term);
+
+    if (!phone) {
+      const error: Error = new Error("Enter a valid phone number or email");
+      error.name = "Invalid Term";
+      return errorResponse(error, res);
+    }
+
+    let hospitalObj;
+    if (phone) {
+      hospitalObj = await hospitalModel
+        .findOne({
+          contactNumber: term,
+        })
+        .lean();
+    }
+    if (hospitalObj) {
+      return successResponse(hospitalObj, "Success", res);
+    }
+    throw new Error("No data found");
   } catch (error: any) {
     return errorResponse(error, res);
   }
