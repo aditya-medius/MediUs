@@ -8,6 +8,7 @@ import * as dotenv from "dotenv";
 import moment from "moment";
 import doctorModel from "../../Models/Doctors.Model";
 import appointmentModel from "../../Models/Appointment.Model";
+import { getRangeOfDates } from "../Utils";
 
 dotenv.config();
 
@@ -171,16 +172,120 @@ export const setConsultationFeeForDoctor = async (
 };
 
 export const getDoctorsOfflineAndOnlineAppointments = async (
-  doctorId: string
+  doctorId: string,
+  body?: any
 ) => {
   try {
     if (!doctorId) {
       return Promise.reject("Give a doctor's Id");
     }
-    let appointments = await appointmentModel.find({
-      doctors: doctorId,
-    });
-    return Promise.resolve(appointments);
+
+    let [startDate, endDate] = getRangeOfDates(body.year, body.month);
+
+    let offlineAppointments = appointmentModel.aggregate([
+      {
+        $match: {
+          $and: [
+            {
+              doctors: new mongoose.Types.ObjectId(doctorId),
+            },
+            {
+              Type: "Offline",
+            },
+            {
+              "time.date": { $gte: startDate, $lt: endDate },
+            },
+          ],
+        },
+      },
+      {
+        $count: "offline",
+      },
+      {
+        $unwind: "$offline",
+      },
+    ]);
+
+    let onlineAppointments = appointmentModel.aggregate([
+      {
+        $match: {
+          $and: [
+            {
+              doctors: new mongoose.Types.ObjectId(doctorId),
+            },
+            {
+              Type: "Online",
+            },
+            {
+              "time.date": { $gte: startDate, $lt: endDate },
+            },
+          ],
+        },
+      },
+      {
+        $count: "online",
+      },
+      {
+        $unwind: "$online",
+      },
+    ]);
+
+    // let appointments = await appointmentModel.aggregate([
+    //   {
+    //     $facet: {
+    //       offline: [
+    //         {
+    //           $match: {
+    //             $and: [
+    //               {
+    //                 Type: "Offline",
+    //               },
+    //               {
+    //                 "time.date": { $gte: startDate, $lt: endDate },
+    //               },
+    //             ],
+    //           },
+    //         },
+    //         // {
+    //         //   $count: "offline",
+    //         // },
+    //       ],
+    //       online: [
+    //         {
+    //           $match: {
+    //             $and: [
+    //               {
+    //                 Type: "Online",
+    //               },
+    //               {
+    //                 "time.date": { $gte: startDate, $lt: endDate },
+    //               },
+    //             ],
+    //           },
+    //         },
+    //         // {
+    //         //   $count: "online",
+    //         // },
+    //       ],
+    //     },
+    //   },
+    //   {
+    //     $unwind: {
+    //       path: "$offline",
+    //     },
+    //   },
+    //   {
+    //     $unwind: {
+    //       path: "$online",
+    //     },
+    //   },
+    // ]);
+
+    let appointments = await Promise.all([
+      offlineAppointments,
+      onlineAppointments,
+    ]);
+    return Promise.resolve(appointments.map((e: any) => e[0]));
   } catch (error: any) {
     return Promise.reject(error);
   }

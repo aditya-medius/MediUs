@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteHolidayCalendar = exports.getDoctorsHolidayList = exports.addHolidayCalendar = void 0;
 const Holiday_Calendar_Model_1 = __importDefault(require("../../Models/Holiday-Calendar.Model"));
+const Utils_1 = require("../Utils");
 const addHolidayCalendar = (body) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let holidayData = yield new Holiday_Calendar_Model_1.default(body).save();
@@ -24,12 +25,16 @@ const addHolidayCalendar = (body) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.addHolidayCalendar = addHolidayCalendar;
-const getDoctorsHolidayList = (doctorId) => __awaiter(void 0, void 0, void 0, function* () {
+const getDoctorsHolidayList = (doctorId, year, month, hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let holidayList = yield Holiday_Calendar_Model_1.default.find({
+        let [startDate, endDate] = (0, Utils_1.getRangeOfDates)(year, month);
+        let query = {
             doctorId,
+            hospitalId,
+            date: { $gte: startDate, $lt: endDate },
             "delData.deleted": false,
-        }, {
+        };
+        let holidayList = yield Holiday_Calendar_Model_1.default.find(query, {
             delData: 0,
         });
         return Promise.resolve(holidayList);

@@ -96,9 +96,11 @@ hospitalRouter.put("/getListOfRequestedApprovals_OfHospital", (0, middlewareHelp
 /* Hospital ne kitno se approval ki request ki hai */
 hospitalRouter.put("/getListOfRequestedApprovals_ByHospital", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getListOfRequestedApprovals_ByHospital);
 /* Doctors ki offline aur online appointment */
-hospitalRouter.get("/getDoctorsOfflineAndOnlineAppointments", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getDoctorsOfflineAndOnlineAppointments);
+hospitalRouter.post("/getDoctorsOfflineAndOnlineAppointments", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getDoctorsOfflineAndOnlineAppointments);
 /* Hospital k liye notifications */
 hospitalRouter.get("/getHospitalsNotification", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getHospitalsNotification);
 /* Update hospital Address */
 hospitalRouter.put("/updateHospitalAddress", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.updateHospitalAddress);
+hospitalRouter.put("/getHospitalsSpecilization_AccordingToDoctor", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getHospitalsSpecilization_AccordingToDoctor);
+hospitalRouter.put("/getDoctorsListInHospital_withApprovalStatus", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getDoctorsListInHospital_withApprovalStatus);
 exports.default = hospitalRouter;

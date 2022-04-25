@@ -403,11 +403,19 @@ export const BookAppointment = async (req: Request, res: Response) => {
       }
     });
 
-    if (appCount == capacity.capacity) {
-      return errorResponse(
-        new Error("Doctor cannot take any more appointments"),
-        res
-      );
+    let message = "Successfully booked appointment";
+
+    if (!(appCount < capacity.capacity)) {
+      if (req.currentHospital) {
+        message = `Doctor's appointment have exceeded doctor's capacity for the day by ${
+          appCount - capacity.capacity + 1
+        }`;
+      } else {
+        return errorResponse(
+          new Error("Doctor cannot take any more appointments"),
+          res
+        );
+      }
     }
 
     if (req.currentHospital) {
@@ -444,11 +452,7 @@ export const BookAppointment = async (req: Request, res: Response) => {
       body.patient
     );
 
-    return successResponse(
-      appointmentBook,
-      "Appoinment has been successfully booked",
-      res
-    );
+    return successResponse(appointmentBook, message, res);
   } catch (error: any) {
     return errorResponse(error, res);
   }
@@ -730,7 +734,6 @@ export const ViewSchedule = async (req: Request, res: Response) => {
       doctorDetails: body.doctors,
       hospitalDetails: body.hospital,
     });
-    // console.log(schedule)
     const requestDate: Date = new Date(body.time);
     let query: Object = {};
     if (body.day == "monday") {

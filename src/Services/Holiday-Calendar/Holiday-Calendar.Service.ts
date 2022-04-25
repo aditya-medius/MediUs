@@ -1,4 +1,5 @@
 import holidayModel from "../../Models/Holiday-Calendar.Model";
+import { getRangeOfDates } from "../Utils";
 
 export const addHolidayCalendar = async (body: any) => {
   try {
@@ -9,17 +10,23 @@ export const addHolidayCalendar = async (body: any) => {
   }
 };
 
-export const getDoctorsHolidayList = async (doctorId: string) => {
+export const getDoctorsHolidayList = async (
+  doctorId: string,
+  year: number,
+  month: number,
+  hospitalId: string
+) => {
   try {
-    let holidayList = await holidayModel.find(
-      {
-        doctorId,
-        "delData.deleted": false,
-      },
-      {
-        delData: 0,
-      }
-    );
+    let [startDate, endDate] = getRangeOfDates(year, month);
+    let query = {
+      doctorId,
+      hospitalId,
+      date: { $gte: startDate, $lt: endDate },
+      "delData.deleted": false,
+    };
+    let holidayList = await holidayModel.find(query, {
+      delData: 0,
+    });
     return Promise.resolve(holidayList);
   } catch (error: any) {
     return Promise.reject(error);

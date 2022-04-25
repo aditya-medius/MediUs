@@ -32,6 +32,7 @@ import { getAgeOfDoctor } from "../Services/Doctor/Doctor.Service";
 import { getAge } from "../Services/Utils";
 import * as approvalService from "../Services/Approval-Request/Approval-Request.Service";
 import * as addressService from "../Services/Address/Address.Service";
+import * as hospitalService from "../Services/Hospital/Hospital.Service";
 const excludeDoctorFields = {
   password: 0,
   // panCard: 0,
@@ -1097,7 +1098,8 @@ export const getDoctorsOfflineAndOnlineAppointments = async (
   try {
     let appointments =
       await doctorService.getDoctorsOfflineAndOnlineAppointments(
-        req.query.doctorId as string
+        req.query.doctorId as string,
+        req.body.date
       );
 
     return successResponse(appointments, "Success", res);
@@ -1144,6 +1146,36 @@ export const updateHospitalAddress = async (req: Request, res: Response) => {
       hospitalId: req.currentHospital,
     });
     return successResponse(updatedAddress, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getHospitalsSpecilization_AccordingToDoctor = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    let data =
+      await hospitalService.getHospitalsSpecilization_AccordingToDoctor(
+        req.body.hospitalId
+      );
+    return successResponse(data, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getDoctorsListInHospital_withApprovalStatus = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    let data =
+      await hospitalService.getDoctorsListInHospital_withApprovalStatus(
+        req.body.hospitalId
+      );
+    return successResponse(data, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

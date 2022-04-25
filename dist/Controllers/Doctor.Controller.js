@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteHolidayCalendar = exports.getDoctorsHolidayList = exports.setHolidayCalendar = exports.getDoctorsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.setConsultationFeeForDoctor = exports.addHospitalInDoctorProfile = exports.checkVerificationStatus = exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
+exports.getHospitalsOfflineAndOnlineAppointments = exports.deleteHolidayCalendar = exports.getDoctorsHolidayList = exports.setHolidayCalendar = exports.getDoctorsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.setConsultationFeeForDoctor = exports.addHospitalInDoctorProfile = exports.checkVerificationStatus = exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -66,6 +66,7 @@ const Qualification_Model_1 = __importDefault(require("../Models/Qualification.M
 const Patient_Service_1 = require("../Services/Patient/Patient.Service");
 const approvalService = __importStar(require("../Services/Approval-Request/Approval-Request.Service"));
 const holidayService = __importStar(require("../Services/Holiday-Calendar/Holiday-Calendar.Service"));
+const hospitalService = __importStar(require("../Services/Hospital/Hospital.Service"));
 exports.excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -1577,7 +1578,8 @@ exports.getDoctorsNotification = getDoctorsNotification;
 const setHolidayCalendar = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let holiday = yield holidayService.addHolidayCalendar({
-            doctorId: req.currentDoctor,
+            doctorId: req.body.doctorId,
+            hospitalId: req.body.hospitalId,
             date: req.body.date,
         });
         return (0, response_1.successResponse)(holiday, "Success", res);
@@ -1589,14 +1591,16 @@ const setHolidayCalendar = (req, res) => __awaiter(void 0, void 0, void 0, funct
 exports.setHolidayCalendar = setHolidayCalendar;
 const getDoctorsHolidayList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let doctorId = "";
+        let doctorId = "", hospitalId = "";
         if (req.currentDoctor) {
             doctorId = req.currentDoctor;
         }
         else {
             doctorId = req.body.doctorId;
+            hospitalId = req.body.hospitalId;
         }
-        let holidayList = yield holidayService.getDoctorsHolidayList(doctorId);
+        let { year, month } = req.body;
+        let holidayList = yield holidayService.getDoctorsHolidayList(doctorId, year, month, hospitalId);
         return (0, response_1.successResponse)(holidayList, "Success", res);
     }
     catch (error) {
@@ -1614,3 +1618,13 @@ const deleteHolidayCalendar = (req, res) => __awaiter(void 0, void 0, void 0, fu
     }
 });
 exports.deleteHolidayCalendar = deleteHolidayCalendar;
+const getHospitalsOfflineAndOnlineAppointments = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let appointments = yield hospitalService.getHospitalsOfflineAndOnlineAppointments(req.query.hospitalId, req.body.date);
+        return (0, response_1.successResponse)(appointments, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getHospitalsOfflineAndOnlineAppointments = getHospitalsOfflineAndOnlineAppointments;

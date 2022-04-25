@@ -158,3 +158,15 @@ export const groupBy = function (xs: Array<any>, key: string) {
     return rv;
   }, {});
 };
+
+export const getRangeOfDates = (year: number, month: number): [Date, Date] => {
+  let startDate: Date = new Date(
+    new Date(year, month - 1, 1, 6, 30, 0).toUTCString()
+  );
+
+  let endDate: Date = new Date(
+    new Date(year, month, 1, 6, 30, 0).toUTCString()
+  );
+
+  return [startDate, endDate];
+};

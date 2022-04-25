@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.groupBy = exports.initUpload = exports.updateWorkingHour = exports.formatWorkingHourDayForAppointment = exports.setFormatForWorkingHours = exports.getDayFromWorkingHours = exports.getAge = exports.generateOTPtoken = exports.generateOTP = exports.encryptPassword = exports.phoneNumberRegex = void 0;
+exports.getRangeOfDates = exports.groupBy = exports.initUpload = exports.updateWorkingHour = exports.formatWorkingHourDayForAppointment = exports.setFormatForWorkingHours = exports.getDayFromWorkingHours = exports.getAge = exports.generateOTPtoken = exports.generateOTP = exports.encryptPassword = exports.phoneNumberRegex = void 0;
 const bcrypt = __importStar(require("bcrypt"));
 const jwt = __importStar(require("jsonwebtoken"));
 const moment_1 = __importDefault(require("moment"));
@@ -183,3 +183,9 @@ const groupBy = function (xs, key) {
     }, {});
 };
 exports.groupBy = groupBy;
+const getRangeOfDates = (year, month) => {
+    let startDate = new Date(new Date(year, month - 1, 1, 6, 30, 0).toUTCString());
+    let endDate = new Date(new Date(year, month, 1, 6, 30, 0).toUTCString());
+    return [startDate, endDate];
+};
+exports.getRangeOfDates = getRangeOfDates;

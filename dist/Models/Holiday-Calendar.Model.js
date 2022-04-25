@@ -26,6 +26,10 @@ const holidaySchema = new mongoose_1.Schema({
         type: mongoose_1.default.Schema.Types.ObjectId,
         ref: schemaNames_1.doctor,
     },
+    hospitalId: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        ref: schemaNames_1.hospital,
+    },
     date: {
         type: Date,
         required: true,
