@@ -131,4 +131,11 @@ adminRouter.get(
   hospitalController.getAnemities
 );
 
+adminRouter.post(
+  "/createFee",
+  oneOf(authenticateAdmin),
+  adminController.createFee
+);
+
+adminRouter.get("/getFees", oneOf(authenticateAdmin), adminController.getFees);
 export default adminRouter;

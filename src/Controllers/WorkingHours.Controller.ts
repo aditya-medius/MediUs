@@ -55,7 +55,7 @@ export const createWorkingHours = async (req: Request, res: Response) => {
     let tb = { ...tempBody.workingHour };
 
     const WHObj = await new workingHourModel({
-      doctorDetails: req.currentDoctor,
+      doctorDetails: req.currentDoctor ? req.currentDoctor : body.doctorId,
       hospitalDetails: body.hospitalId,
       ...tb,
     }).save();

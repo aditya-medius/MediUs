@@ -1034,6 +1034,7 @@ const searchHospitalByPhoneNumber = (req, res) => __awaiter(void 0, void 0, void
                 .findOne({
                 contactNumber: term,
             })
+                .populate("address")
                 .lean();
         }
         if (hospitalObj) {

@@ -18,6 +18,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -30,6 +39,8 @@ const Approval_Request_Controller_1 = require("../Controllers/Approval-Request.C
 const hospitalController = __importStar(require("../Controllers/Hospital.Controller"));
 const WorkingHours_Controller_1 = require("../Controllers/WorkingHours.Controller");
 const middlewareHelper_1 = require("../Services/middlewareHelper");
+const response_1 = require("../Services/response");
+const feeService = __importStar(require("../Module/Payment/Service/Fee.Service"));
 const hospitalRouter = express_1.default.Router();
 hospitalRouter.get("/", 
 // oneOf(authenticateHospital),
@@ -104,4 +115,13 @@ hospitalRouter.put("/updateHospitalAddress", (0, middlewareHelper_1.oneOf)(Hospi
 hospitalRouter.put("/getHospitalsSpecilization_AccordingToDoctor", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getHospitalsSpecilization_AccordingToDoctor);
 hospitalRouter.put("/getDoctorsListInHospital_withApprovalStatus", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getDoctorsListInHospital_withApprovalStatus);
 hospitalRouter.get("/searchHospitalByPhoneNumber/:term", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital, Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), hospitalController.searchHospitalByPhoneNumber);
+hospitalRouter.get("/getFees", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let data = yield feeService.getAllFees();
+        return (0, response_1.successResponse)(data, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+}));
 exports.default = hospitalRouter;

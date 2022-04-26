@@ -1205,6 +1205,7 @@ export const searchHospitalByPhoneNumber = async (
         .findOne({
           contactNumber: term,
         })
+        .populate("address")
         .lean();
     }
     if (hospitalObj) {

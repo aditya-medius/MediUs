@@ -28,6 +28,9 @@ import agentModel from "../Models/Agent.Model";
 import * as adminService from "../Services/Admin/Admin.Service";
 import patientModel from "../Models/Patient.Model";
 import appointmentModel from "../Models/Appointment.Model";
+
+import * as feeService from "../Module/Payment/Service/Fee.Service";
+
 export const addSpeciality = async (req: Request, res: Response) => {
   try {
     const body = req.body;
@@ -758,6 +761,24 @@ export const getAllAppointments = async (req: Request, res: Response) => {
         path: "subPatient",
       });
     return successResponse(appointments, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const createFee = async (req: Request, res: Response) => {
+  try {
+    let { name, feeAmount } = req.body;
+    let data = await feeService.setFee(name, feeAmount);
+    return successResponse(data, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getFees = async (req: Request, res: Response) => {
+  try {
+    return successResponse(await feeService.getAllFees(), "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

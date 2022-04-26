@@ -12,7 +12,10 @@ import {
   subPatient,
 } from "../Services/schemaNames";
 import { authenticateHospital } from "../authentication/Hospital.auth";
-import { errorResponse } from "../Services/response";
+import { errorResponse, successResponse } from "../Services/response";
+
+import * as feeService from "../Module/Payment/Service/Fee.Service";
+
 const patientRouter = express.Router();
 const upload = multer({ dest: "./src/uploads" });
 patientRouter.post("/login", patientController.patientLogin);
@@ -180,5 +183,18 @@ patientRouter.get(
   "/getPatientsNotification",
   oneOf(authenticatePatient),
   patientController.getPatientsNotification
+);
+
+patientRouter.get(
+  "/getFees",
+  oneOf(authenticatePatient),
+  async (req: Request, res: Response) => {
+    try {
+      let data = await feeService.getAllFees();
+      return successResponse(data, "Success", res);
+    } catch (error: any) {
+      return errorResponse(error, res);
+    }
+  }
 );
 export default patientRouter;
