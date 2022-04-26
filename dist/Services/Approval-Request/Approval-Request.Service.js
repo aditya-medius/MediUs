@@ -228,9 +228,23 @@ exports.getListOfRequestedApprovals_OfDoctor = getListOfRequestedApprovals_OfDoc
 /* Doctor ne kitno se approval ki request ki hai */
 const getListOfRequestedApprovals_ByDoctor = (doctorId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let requestedApprovals = yield Approval_Request_Model_1.default.find({
+        let requestedApprovals = yield Approval_Request_Model_1.default
+            .find({
             requestFrom: doctorId,
             "delData.deleted": false,
+        })
+            .populate({
+            path: "requestTo",
+            select: {
+                address: 1,
+                name: 1,
+            },
+            populate: {
+                path: "address",
+                populate: {
+                    path: "city state locality country",
+                },
+            },
         });
         return Promise.resolve(requestedApprovals);
     }
