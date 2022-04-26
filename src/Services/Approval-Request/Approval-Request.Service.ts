@@ -245,10 +245,24 @@ export const getListOfRequestedApprovals_ByDoctor = async (
   doctorId: string
 ) => {
   try {
-    let requestedApprovals = await approvalModel.find({
-      requestFrom: doctorId,
-      "delData.deleted": false,
-    });
+    let requestedApprovals = await approvalModel
+      .find({
+        requestFrom: doctorId,
+        "delData.deleted": false,
+      })
+      .populate({
+        path: "requestTo",
+        select: {
+          address: 1,
+          name: 1,
+        },
+        populate: {
+          path: "address",
+          populate: {
+            path: "city state locality country",
+          },
+        },
+      });
     return Promise.resolve(requestedApprovals);
   } catch (error: any) {
     return Promise.reject(error);
