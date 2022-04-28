@@ -124,4 +124,5 @@ hospitalRouter.get("/getFees", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.aut
         return (0, response_1.errorResponse)(error, res);
     }
 }));
+hospitalRouter.put("/getPatientsAppointmentsInThisHospital/:page", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getPatientsAppointmentsInThisHospital);
 exports.default = hospitalRouter;

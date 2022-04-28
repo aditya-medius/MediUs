@@ -6,6 +6,8 @@ import { doctor, specialization } from "../schemaNames";
 import approvalModel from "../../Models/Approval-Request.Model";
 import appointmentModel from "../../Models/Appointment.Model";
 import { getRangeOfDates } from "../Utils";
+import patientModel from "../../Models/Patient.Model";
+import { phoneNumberValidation } from "../Validation.Service";
 dotenv.config();
 
 export const getHospitalToken = async (body: any) => {
@@ -281,6 +283,59 @@ export const getHospitalsOfflineAndOnlineAppointments = async (
       onlineAppointments,
     ]);
     return Promise.resolve(appointments.map((e: any) => e[0]));
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const getPatientFromPhoneNumber = async (phoneNumber: string) => {
+  try {
+    if (phoneNumberValidation(phoneNumber)) {
+      let patientId = await patientModel.findOne({ phoneNumber }, "_id");
+      if (patientId) {
+        return Promise.resolve(patientId);
+      } else {
+        return Promise.reject(
+          new Error("No patient exist with this phone number")
+        );
+      }
+    } else {
+      return Promise.reject(new Error("Invalid phone number"));
+    }
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+export const getPatientsAppointmentsInThisHospital = async (
+  hospitalId: string,
+  phoneNumber_patient: string,
+  page: string
+) => {
+  try {
+    const limit: number = 10;
+    const skip: number = parseInt(page) * limit;
+    let patientId = await getPatientFromPhoneNumber(phoneNumber_patient);
+    let appointmentsInThisHospital = await appointmentModel.aggregate([
+      {
+        $match: {
+          patient: new mongoose.Types.ObjectId(patientId),
+          hospital: new mongoose.Types.ObjectId(hospitalId),
+        },
+      },
+      {
+        $sort: {
+          "time.date": -1,
+        },
+      },
+      {
+        $skip: skip,
+      },
+      {
+        $limit: limit,
+      },
+    ]);
+
+    return Promise.resolve(appointmentsInThisHospital);
   } catch (error: any) {
     return Promise.reject(error);
   }

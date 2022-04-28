@@ -71,13 +71,18 @@ patientRouter.post(
 );
 patientRouter.post(
   "/CancelAppointment",
-  oneOf(authenticatePatient),
+  oneOf(authenticatePatient, authenticateHospital),
   patientController.CancelAppointment
 );
 patientRouter.post(
   "/doneAppointment",
   oneOf(authenticatePatient),
   patientController.doneAppointment
+);
+patientRouter.get(
+  "/viewAppointById/:id",
+  oneOf(authenticateDoctor, authenticateHospital, authenticatePatient),
+  patientController.viewAppointById
 );
 patientRouter.post(
   "/getDoctorByDay",

@@ -213,4 +213,10 @@ hospitalRouter.get(
     }
   }
 );
+
+hospitalRouter.put(
+  "/getPatientsAppointmentsInThisHospital/:page",
+  oneOf(authenticateHospital),
+  hospitalController.getPatientsAppointmentsInThisHospital
+);
 export default hospitalRouter;

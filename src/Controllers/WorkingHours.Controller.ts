@@ -109,6 +109,7 @@ export const getWorkingHours = async (req: Request, res: Response) => {
       // });
       // WHObj2 = formatWorkingHour([WHObj2]);
 
+      console.log("HOW::", WHObj);
       WHObj.map((e: any) => {
         for (let data in e) {
           if (dayArray.includes(data)) {

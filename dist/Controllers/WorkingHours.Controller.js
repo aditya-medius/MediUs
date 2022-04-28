@@ -113,6 +113,7 @@ const getWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function
             //   }
             // });
             // WHObj2 = formatWorkingHour([WHObj2]);
+            console.log("HOW::", WHObj);
             WHObj.map((e) => {
                 for (let data in e) {
                     if (WorkingHour_helper_1.dayArray.includes(data)) {

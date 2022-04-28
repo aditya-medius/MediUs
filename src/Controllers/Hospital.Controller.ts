@@ -1216,3 +1216,21 @@ export const searchHospitalByPhoneNumber = async (
     return errorResponse(error, res);
   }
 };
+
+export const getPatientsAppointmentsInThisHospital = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    let appointments =
+      await hospitalService.getPatientsAppointmentsInThisHospital(
+        req.currentHospital,
+        req.body.phoneNumber,
+        req.params.page
+      );
+
+    return successResponse(appointments, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
