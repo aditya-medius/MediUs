@@ -95,7 +95,7 @@ const sendAppointmentConfirmationNotificationToPatient = (patientId) => __awaite
     }
 });
 exports.sendAppointmentConfirmationNotificationToPatient = sendAppointmentConfirmationNotificationToPatient;
-const hospitalFields = Object.assign(Object.assign({}, Patient_Controller_1.excludeHospitalFields), { services: 0 });
+const hospitalFields = Object.assign(Object.assign({}, Patient_Controller_1.excludeHospitalFields), { services: 0, location: 0 });
 const doctorFields = Object.assign(Object.assign({}, Doctor_Controller_1.excludeDoctorFields), { hospitalDetails: 0, overallExperience: 0, qualification: 0, id: 0, specialization: 0, _id: 0 });
 const getHospitalsNotification_whenSenderIsDoctor = (hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -141,7 +141,7 @@ const getDoctorsNotification_whenSenderIsHospital = (doctorId) => __awaiter(void
             .find({ receiver: doctorId })
             .populate({
             path: "sender",
-            select: hospitalFields,
+            select: Object.assign(Object.assign({}, hospitalFields), Patient_Controller_1.excludePatientFields),
             populate: {
                 path: "address",
                 populate: {
@@ -166,7 +166,7 @@ const getDoctorsNotification_whenSenderIsPatient = (doctorId) => __awaiter(void 
             .find({ receiver: doctorId })
             .populate({
             path: "sender",
-            select: Object.assign({}, Patient_Controller_1.excludePatientFields),
+            select: Object.assign(Object.assign({}, hospitalFields), Patient_Controller_1.excludePatientFields),
             populate: {
                 path: "address",
                 populate: {
