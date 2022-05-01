@@ -36,6 +36,7 @@ const jwt = __importStar(require("jsonwebtoken"));
 const dotenv = __importStar(require("dotenv"));
 const Hospital_Model_1 = __importDefault(require("../../Models/Hospital.Model"));
 const mongoose_1 = __importDefault(require("mongoose"));
+const schemaNames_1 = require("../schemaNames");
 const Appointment_Model_1 = __importDefault(require("../../Models/Appointment.Model"));
 const Utils_1 = require("../Utils");
 const Patient_Model_1 = __importDefault(require("../../Models/Patient.Model"));
@@ -332,6 +333,7 @@ const getPatientFromPhoneNumber = (phoneNumber) => __awaiter(void 0, void 0, voi
 exports.getPatientFromPhoneNumber = getPatientFromPhoneNumber;
 const getPatientsAppointmentsInThisHospital = (hospitalId, phoneNumber_patient, page) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        let formatAge = Utils_1.getAge;
         const limit = 10;
         const skip = parseInt(page) * limit;
         let patientId = yield (0, exports.getPatientFromPhoneNumber)(phoneNumber_patient);
@@ -340,6 +342,98 @@ const getPatientsAppointmentsInThisHospital = (hospitalId, phoneNumber_patient, 
                 $match: {
                     patient: new mongoose_1.default.Types.ObjectId(patientId),
                     hospital: new mongoose_1.default.Types.ObjectId(hospitalId),
+                },
+            },
+            {
+                $lookup: {
+                    from: schemaNames_1.patient,
+                    localField: "patient",
+                    foreignField: "_id",
+                    as: "patient",
+                },
+            },
+            {
+                $unwind: "$patient",
+            },
+            {
+                $unwind: "$hospital",
+            },
+            {
+                $lookup: {
+                    from: schemaNames_1.hospital,
+                    localField: "hospital",
+                    foreignField: "_id",
+                    as: "hospital",
+                },
+            },
+            {
+                $lookup: {
+                    from: schemaNames_1.doctor,
+                    localField: "doctors",
+                    foreignField: "_id",
+                    as: "doctors",
+                },
+            },
+            {
+                $lookup: {
+                    from: schemaNames_1.specialization,
+                    localField: "doctors.specialization",
+                    foreignField: "_id",
+                    as: "specials",
+                },
+            },
+            // {
+            //   $unwind: "doctors.specialization",
+            // },
+            {
+                $unwind: "$doctors",
+            },
+            {
+                $unwind: "$hospital",
+            },
+            {
+                $project: {
+                    "patient.firstName": 1,
+                    "patient.lastName": 1,
+                    "patient.DOB": 1,
+                    "patient.gender": 1,
+                    "hospital.name": 1,
+                    "hospital.address": 1,
+                    "doctors.firstName": 1,
+                    "doctors.lastName": 1,
+                    // "doctors.specialization": 1,
+                    specials: 1,
+                    createdAt: 1,
+                    appointmentToken: 1,
+                    appointmentId: 1,
+                    appointmentType: 1,
+                    Type: 1,
+                    done: 1,
+                    cancelled: 1,
+                    rescheduled: 1,
+                    time: 1,
+                },
+            },
+            {
+                $addFields: {
+                    "patient.age": {
+                        $function: {
+                            body: function (dob) {
+                                let currentDate = new Date();
+                                let age = currentDate.getFullYear() - dob.getFullYear();
+                                if (age > 0) {
+                                    age = `${age} years`;
+                                }
+                                else {
+                                    age = `${age} months`;
+                                }
+                                return age;
+                            },
+                            lang: "js",
+                            args: ["$patient.DOB"],
+                        },
+                    },
+                    "doctors.specialization": "$specials",
                 },
             },
             {

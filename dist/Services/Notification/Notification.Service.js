@@ -96,7 +96,7 @@ const sendAppointmentConfirmationNotificationToPatient = (patientId) => __awaite
 });
 exports.sendAppointmentConfirmationNotificationToPatient = sendAppointmentConfirmationNotificationToPatient;
 const hospitalFields = Object.assign(Object.assign({}, Patient_Controller_1.excludeHospitalFields), { services: 0 });
-const doctorFields = Object.assign(Object.assign({}, Doctor_Controller_1.excludeDoctorFields), { hospitalDetails: 0, overallExperience: 0, qualification: 0, specialization: 0 });
+const doctorFields = Object.assign(Object.assign({}, Doctor_Controller_1.excludeDoctorFields), { hospitalDetails: 0, overallExperience: 0, qualification: 0, id: 0, specialization: 0, _id: 0 });
 const getHospitalsNotification_whenSenderIsDoctor = (hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let notifications = yield Notification_Model_1.default
@@ -138,10 +138,16 @@ exports.getHospitalsNotification_whenSenderIsPatient = getHospitalsNotification_
 const getDoctorsNotification_whenSenderIsHospital = (doctorId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let notifications = yield Notification_Model_1.default
-            .find({ receiver: doctorId, sender: schemaNames_1.hospital })
+            .find({ receiver: doctorId })
             .populate({
             path: "sender",
             select: hospitalFields,
+            populate: {
+                path: "address",
+                populate: {
+                    path: "city state locality country",
+                },
+            },
         })
             .populate({
             path: "receiver",
@@ -161,6 +167,12 @@ const getDoctorsNotification_whenSenderIsPatient = (doctorId) => __awaiter(void 
             .populate({
             path: "sender",
             select: Object.assign({}, Patient_Controller_1.excludePatientFields),
+            populate: {
+                path: "address",
+                populate: {
+                    path: "city state locality country",
+                },
+            },
         })
             .populate({
             path: "receiver",
