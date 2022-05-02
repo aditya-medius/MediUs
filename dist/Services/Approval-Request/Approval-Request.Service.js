@@ -12,11 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.doctorKLiyeHospitalKiRequestExistKrtiHai = exports.hospitalKLiyeDoctorKiRequestExistKrtiHai = exports.canThisHospitalApproveThisRequest = exports.canThisDoctorApproveThisRequest = exports.checkHospitalsApprovalStatus = exports.checkDoctorsApprovalStatus = exports.denyDoctorRequest = exports.approveDoctorRequest = exports.requestApprovalFromHospital = exports.denyHospitalRequest = exports.approveHospitalRequest = exports.requestApprovalFromDoctor = void 0;
+exports.getRequestIdFromNotificationId = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.doctorKLiyeHospitalKiRequestExistKrtiHai = exports.hospitalKLiyeDoctorKiRequestExistKrtiHai = exports.canThisHospitalApproveThisRequest = exports.canThisDoctorApproveThisRequest = exports.checkHospitalsApprovalStatus = exports.checkDoctorsApprovalStatus = exports.denyDoctorRequest = exports.approveDoctorRequest = exports.requestApprovalFromHospital = exports.denyHospitalRequest = exports.approveHospitalRequest = exports.requestApprovalFromDoctor = void 0;
 const Doctor_Controller_1 = require("../../Controllers/Doctor.Controller");
 const Approval_Request_Model_1 = __importDefault(require("../../Models/Approval-Request.Model"));
 const Doctors_Model_1 = __importDefault(require("../../Models/Doctors.Model"));
 const Hospital_Model_1 = __importDefault(require("../../Models/Hospital.Model"));
+const Notification_Model_1 = __importDefault(require("../../Models/Notification.Model"));
 const schemaNames_1 = require("../schemaNames");
 const requestApprovalFromDoctor = (doctorId, hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -197,7 +198,6 @@ const doctorKLiyeHospitalKiRequestExistKrtiHai = (doctorId, hospitalId) => __awa
         let exist = yield Approval_Request_Model_1.default.exists({
             requestFrom: hospitalId,
             requestTo: doctorId,
-            approvalStatus: { $ne: "Approved" },
         });
         if (exist) {
             throw new Error("A request for this already exist. Please wait");
@@ -333,3 +333,23 @@ const addDoctorAndHospitalToEachOthersProfile = (doctorId, hospitalId) => __awai
         return Promise.reject(error);
     }
 });
+const getRequestIdFromNotificationId = (notificationId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let { sender, receiver } = yield Notification_Model_1.default
+            .findOne({
+            _id: notificationId,
+        }, "sender receiver")
+            .lean();
+        let { _id } = yield Approval_Request_Model_1.default
+            .findOne({
+            requestFrom: sender,
+            requestTo: receiver,
+        })
+            .lean();
+        return Promise.resolve(_id);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.getRequestIdFromNotificationId = getRequestIdFromNotificationId;

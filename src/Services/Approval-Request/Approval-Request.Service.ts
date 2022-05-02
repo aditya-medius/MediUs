@@ -2,6 +2,7 @@ import { excludeDoctorFields } from "../../Controllers/Doctor.Controller";
 import approvalModel from "../../Models/Approval-Request.Model";
 import doctorModel from "../../Models/Doctors.Model";
 import hospitalModel from "../../Models/Hospital.Model";
+import notificationsModel from "../../Models/Notification.Model";
 import { hospital, doctor, approvalRequest } from "../schemaNames";
 
 export const requestApprovalFromDoctor = async (
@@ -213,7 +214,6 @@ export const doctorKLiyeHospitalKiRequestExistKrtiHai = async (
     let exist = await approvalModel.exists({
       requestFrom: hospitalId,
       requestTo: doctorId,
-      approvalStatus: { $ne: "Approved" },
     });
     if (exist) {
       throw new Error("A request for this already exist. Please wait");
@@ -367,6 +367,32 @@ const addDoctorAndHospitalToEachOthersProfile = async (
       return Promise.resolve(true);
     }
     return Promise.resolve(response);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const getRequestIdFromNotificationId = async (
+  notificationId: string
+) => {
+  try {
+    let { sender, receiver } = await notificationsModel
+      .findOne(
+        {
+          _id: notificationId,
+        },
+        "sender receiver"
+      )
+      .lean();
+
+    let { _id } = await approvalModel
+      .findOne({
+        requestFrom: sender,
+        requestTo: receiver,
+      })
+      .lean();
+
+    return Promise.resolve(_id);
   } catch (error: any) {
     return Promise.reject(error);
   }

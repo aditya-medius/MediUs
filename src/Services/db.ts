@@ -21,7 +21,6 @@ let connection;
 
   // connect to database
   await Conn.openUri(<string>process.env.DB_PATH);
-  const addresses = Conn.collection("special").find();
 })();
 
 module.exports = { dbConnection: mongoose };

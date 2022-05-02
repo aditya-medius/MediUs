@@ -1,12 +1,13 @@
 import notificationsModel from "../../Models/Notification.Model";
 import notificationTypeModel from "../../Models/Notification-Type.Model";
-import { hospital, doctor, patient } from "../schemaNames";
+import { hospital, doctor, patient, address } from "../schemaNames";
 import { NotificationContext } from "twilio/lib/rest/api/v2010/account/notification";
 import { excludeDoctorFields } from "../../Controllers/Doctor.Controller";
 import {
   excludeHospitalFields,
   excludePatientFields,
 } from "../../Controllers/Patient.Controller";
+import mongoose from "mongoose";
 
 export const sendApprovalRequestNotificationToDoctor_FromHospital = async (
   hospitalId: string,
@@ -158,38 +159,75 @@ export const getHospitalsNotification_whenSenderIsPatient = async (
   }
 };
 
-export const getDoctorsNotification_whenSenderIsHospital = async (
-  doctorId: string
-) => {
-  try {
-    let notifications = await notificationsModel
-      .find({ receiver: doctorId })
-      .populate({
-        path: "sender",
-        select: { ...hospitalFields, ...excludePatientFields },
-        populate: {
-          path: "address",
+export const getDoctorsNotification_whenSenderIsHospital_approvalRequest =
+  async (doctorId: string) => {
+    try {
+      let notifications = await notificationsModel
+        .find({ receiver: doctorId, sender_ref: hospital })
+        .populate({
+          path: "sender",
+          select: { ...hospitalFields, ...excludePatientFields },
           populate: {
-            path: "city state locality country",
+            path: "address",
+            populate: {
+              path: "city state locality country",
+            },
           },
-        },
-      })
-      .populate({
-        path: "receiver",
-        select: doctorFields,
-      });
-    return Promise.resolve(notifications);
-  } catch (error: any) {
-    return Promise.reject(error);
-  }
-};
+        })
+        .populate({
+          path: "receiver",
+          select: doctorFields,
+        });
+
+      // let notifications = await notificationsModel.aggregate([
+      //   {
+      //     $match: {
+      //       receiver: new mongoose.Types.ObjectId(doctorId),
+      //       sender_ref: hospital,
+      //     },
+      //   },
+      //   {
+      //     $lookup: {
+      //       from: doctor,
+      //       localField: "receiver",
+      //       foreignField: "_id",
+      //       as: "receiver",
+      //     },
+      //   },
+      //   {
+      //     $lookup: {
+      //       from: hospital,
+      //       localField: "sender",
+      //       foreignField: "_id",
+      //       as: "sender",
+      //     },
+      //   },
+      //   {
+      //     $lookup: {
+      //       from: address,
+      //       localField: "sender.address",
+      //       foreignField: "_id",
+      //       as: "address",
+      //     },
+      //   },
+      //   {
+      //     $addFields: {
+      //       address: "sender.address",
+      //     },
+      //   },
+      // ]);
+      return Promise.resolve(notifications);
+    } catch (error: any) {
+      return Promise.reject(error);
+    }
+  };
 
 export const getDoctorsNotification_whenSenderIsPatient = async (
   doctorId: string
 ) => {
   try {
     let notifications = await notificationsModel
-      .find({ receiver: doctorId })
+      .find({ receiver: doctorId, sender_ref: patient })
       .populate({
         path: "sender",
         select: { ...hospitalFields, ...excludePatientFields },

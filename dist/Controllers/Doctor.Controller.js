@@ -1555,7 +1555,7 @@ const notificationService = __importStar(require("../Services/Notification/Notif
 const getDoctorsNotification = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         /* Notification jaha pe sender hospital hai */
-        let notifications_whereSenderIsHospital = notificationService.getDoctorsNotification_whenSenderIsHospital(req.currentDoctor);
+        let notifications_whereSenderIsHospital = notificationService.getDoctorsNotification_whenSenderIsHospital_approvalRequest(req.currentDoctor);
         /* Notification jaha pe sender patient hai */
         let notifications_whereSenderIsPatient = notificationService.getDoctorsNotification_whenSenderIsPatient(req.currentDoctor);
         Promise.all([
@@ -1565,6 +1565,7 @@ const getDoctorsNotification = (req, res) => __awaiter(void 0, void 0, void 0, f
             .then((result) => {
             let notifications = result.map((e) => e[0]);
             notifications = notifications.sort((a, b) => a.createdAt - b.createdAt);
+            notifications = notifications.filter((e) => e);
             return (0, response_1.successResponse)(notifications, "Success", res);
         })
             .catch((error) => (0, response_1.errorResponse)(error, res));

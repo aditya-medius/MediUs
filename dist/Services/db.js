@@ -33,6 +33,5 @@ let connection;
     const Conn = mongoose_1.default.createConnection();
     // connect to database
     yield Conn.openUri(process.env.DB_PATH);
-    const addresses = Conn.collection("special").find();
 }))();
 module.exports = { dbConnection: mongoose_1.default };

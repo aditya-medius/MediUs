@@ -30,6 +30,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const schemaNames_1 = require("../Services/schemaNames");
+const options = { discriminatorKey: "kind" };
 const notificationsSchema = new mongoose_1.Schema({
     notificationId: {
         type: String,
@@ -73,7 +74,9 @@ const notificationsSchema = new mongoose_1.Schema({
         type: Date,
         default: Date.now(),
     },
-});
+}
+// options
+);
 ["find", "findOne"].forEach((e) => {
     notificationsSchema.pre(e, function (next) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -82,4 +85,18 @@ const notificationsSchema = new mongoose_1.Schema({
     });
 });
 const notificationsModel = (0, mongoose_1.model)(schemaNames_1.notifications, notificationsSchema);
+// const requestApprovalNotification = notificationsModel.discriminator(
+//   "approvalRequest",
+//   new Schema({
+//     idKey: {
+//       type: mongoose.Schema.Types.ObjectId,
+//       refPath: "idPath",
+//       required: true,
+//     },
+//     idPath: {
+//       type: String,
+//       required: true,
+//     },
+//   })
+// );
 exports.default = notificationsModel;
