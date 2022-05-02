@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPatientsNotification = exports.getDoctorsNotification_whenSenderIsPatient = exports.getDoctorsNotification_whenSenderIsHospital = exports.getHospitalsNotification_whenSenderIsPatient = exports.getHospitalsNotification_whenSenderIsDoctor = exports.sendAppointmentConfirmationNotificationToPatient = exports.sendAppointmentNotificationToHospitalAndDoctor_FromPatient = exports.sendApprovalRequestNotificationToHospital_FromDoctor = exports.sendApprovalRequestNotificationToDoctor_FromHospital = void 0;
+exports.getPatientsNotification = exports.getDoctorsNotification_whenSenderIsPatient = exports.getDoctorsNotification_whenSenderIsHospital_approvalRequest = exports.getHospitalsNotification_whenSenderIsPatient = exports.getHospitalsNotification_whenSenderIsDoctor = exports.sendAppointmentConfirmationNotificationToPatient = exports.sendAppointmentNotificationToHospitalAndDoctor_FromPatient = exports.sendApprovalRequestNotificationToHospital_FromDoctor = exports.sendApprovalRequestNotificationToDoctor_FromHospital = void 0;
 const Notification_Model_1 = __importDefault(require("../../Models/Notification.Model"));
 const Notification_Type_Model_1 = __importDefault(require("../../Models/Notification-Type.Model"));
 const schemaNames_1 = require("../schemaNames");
@@ -135,10 +135,10 @@ const getHospitalsNotification_whenSenderIsPatient = (hospitalId) => __awaiter(v
     }
 });
 exports.getHospitalsNotification_whenSenderIsPatient = getHospitalsNotification_whenSenderIsPatient;
-const getDoctorsNotification_whenSenderIsHospital = (doctorId) => __awaiter(void 0, void 0, void 0, function* () {
+const getDoctorsNotification_whenSenderIsHospital_approvalRequest = (doctorId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let notifications = yield Notification_Model_1.default
-            .find({ receiver: doctorId })
+            .find({ receiver: doctorId, sender_ref: schemaNames_1.hospital })
             .populate({
             path: "sender",
             select: Object.assign(Object.assign({}, hospitalFields), Patient_Controller_1.excludePatientFields),
@@ -153,17 +153,54 @@ const getDoctorsNotification_whenSenderIsHospital = (doctorId) => __awaiter(void
             path: "receiver",
             select: doctorFields,
         });
+        // let notifications = await notificationsModel.aggregate([
+        //   {
+        //     $match: {
+        //       receiver: new mongoose.Types.ObjectId(doctorId),
+        //       sender_ref: hospital,
+        //     },
+        //   },
+        //   {
+        //     $lookup: {
+        //       from: doctor,
+        //       localField: "receiver",
+        //       foreignField: "_id",
+        //       as: "receiver",
+        //     },
+        //   },
+        //   {
+        //     $lookup: {
+        //       from: hospital,
+        //       localField: "sender",
+        //       foreignField: "_id",
+        //       as: "sender",
+        //     },
+        //   },
+        //   {
+        //     $lookup: {
+        //       from: address,
+        //       localField: "sender.address",
+        //       foreignField: "_id",
+        //       as: "address",
+        //     },
+        //   },
+        //   {
+        //     $addFields: {
+        //       address: "sender.address",
+        //     },
+        //   },
+        // ]);
         return Promise.resolve(notifications);
     }
     catch (error) {
         return Promise.reject(error);
     }
 });
-exports.getDoctorsNotification_whenSenderIsHospital = getDoctorsNotification_whenSenderIsHospital;
+exports.getDoctorsNotification_whenSenderIsHospital_approvalRequest = getDoctorsNotification_whenSenderIsHospital_approvalRequest;
 const getDoctorsNotification_whenSenderIsPatient = (doctorId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let notifications = yield Notification_Model_1.default
-            .find({ receiver: doctorId })
+            .find({ receiver: doctorId, sender_ref: schemaNames_1.patient })
             .populate({
             path: "sender",
             select: Object.assign(Object.assign({}, hospitalFields), Patient_Controller_1.excludePatientFields),

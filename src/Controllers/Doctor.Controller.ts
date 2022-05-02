@@ -1776,7 +1776,7 @@ export const getDoctorsNotification = async (req: Request, res: Response) => {
   try {
     /* Notification jaha pe sender hospital hai */
     let notifications_whereSenderIsHospital =
-      notificationService.getDoctorsNotification_whenSenderIsHospital(
+      notificationService.getDoctorsNotification_whenSenderIsHospital_approvalRequest(
         req.currentDoctor
       );
 
@@ -1795,6 +1795,8 @@ export const getDoctorsNotification = async (req: Request, res: Response) => {
         notifications = notifications.sort(
           (a: any, b: any) => a.createdAt - b.createdAt
         );
+
+        notifications = notifications.filter((e: any) => e);
         return successResponse(notifications, "Success", res);
       })
       .catch((error: any) => errorResponse(error, res));

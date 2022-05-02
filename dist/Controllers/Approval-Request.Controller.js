@@ -48,6 +48,7 @@ exports.requestApprovalFromDoctor = requestApprovalFromDoctor;
 const approveHospitalRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { requestId } = req.body;
+        requestId = yield approvalService.getRequestIdFromNotificationId(requestId);
         let requestExist = yield approvalService.canThisDoctorApproveThisRequest(requestId, req.currentDoctor);
         if (requestExist) {
             let response = yield approvalService.approveHospitalRequest(requestId);
@@ -65,6 +66,7 @@ exports.approveHospitalRequest = approveHospitalRequest;
 const denyHospitalRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { requestId } = req.body;
+        requestId = yield approvalService.getRequestIdFromNotificationId(requestId);
         let response = yield approvalService.denyHospitalRequest(requestId);
         return (0, response_1.successResponse)(response, "Success", res);
     }

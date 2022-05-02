@@ -32,6 +32,7 @@ export const requestApprovalFromDoctor = async (
 export const approveHospitalRequest = async (req: Request, res: Response) => {
   try {
     let { requestId } = req.body;
+    requestId = await approvalService.getRequestIdFromNotificationId(requestId);
     let requestExist = await approvalService.canThisDoctorApproveThisRequest(
       requestId,
       req.currentDoctor
@@ -53,6 +54,7 @@ export const approveHospitalRequest = async (req: Request, res: Response) => {
 export const denyHospitalRequest = async (req: Request, res: Response) => {
   try {
     let { requestId } = req.body;
+    requestId = await approvalService.getRequestIdFromNotificationId(requestId);
     let response = await approvalService.denyHospitalRequest(requestId);
     return successResponse(response, "Success", res);
   } catch (error: any) {
