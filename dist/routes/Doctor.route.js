@@ -95,9 +95,21 @@ doctorController.updateDoctorProfile);
 doctorRouter.delete("/deleteProfile", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.deleteProfile);
 doctorRouter.post("/findDoctorBySpecialityOrBodyPart/:term", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.searchDoctor);
 doctorRouter.get("/searchDoctorByPhoneNumberOrEmail/:term", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital), doctorController.searchDoctorByPhoneNumberOrEmail);
-doctorRouter.put("/setSchedule", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), 
+doctorRouter.put("/setSchedule", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), 
 // doctorController.setSchedule
-workingHoursController.createWorkingHours);
+(req, res, next) => {
+    let data = {};
+    req.body.workingHour.forEach((e) => {
+        data[e.name] = {
+            capacity: e.capacity,
+            till: e.till,
+            from: e.from,
+            working: e.working,
+        };
+    });
+    req.body.workingHour = Object.assign({}, data);
+    next();
+}, workingHoursController.createWorkingHours);
 doctorRouter.put("/updateWorkingHour", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), 
 // doctorController.setSchedule
 workingHoursController.updateWorkingHour);

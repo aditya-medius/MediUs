@@ -41,6 +41,7 @@ const Doctor_auth_1 = require("../authentication/Doctor.auth");
 const subPatientController = __importStar(require("../Controllers/SubPatient.Controller"));
 const Hospital_auth_1 = require("../authentication/Hospital.auth");
 const response_1 = require("../Services/response");
+const feeService = __importStar(require("../Module/Payment/Service/Fee.Service"));
 const patientRouter = express_1.default.Router();
 const upload = (0, multer_1.default)({ dest: "./src/uploads" });
 patientRouter.post("/login", patientController.patientLogin);
@@ -62,8 +63,9 @@ patientRouter.post("/BookAppointment", (0, middlewareHelper_1.oneOf)(Patient_aut
     }
 }), patientController.BookAppointment);
 patientRouter.post("/rescheduleAppointment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.rescheduleAppointment);
-patientRouter.post("/CancelAppointment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.CancelAppointment);
+patientRouter.post("/CancelAppointment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital), patientController.CancelAppointment);
 patientRouter.post("/doneAppointment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.doneAppointment);
+patientRouter.get("/viewAppointById/:id", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital, Patient_auth_1.authenticatePatient), patientController.viewAppointById);
 patientRouter.post("/getDoctorByDay", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.getDoctorByDay);
 patientRouter.post("/generateOrderId", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), paymentController.generateOrderId);
 patientRouter.post("/verifyPayment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), paymentController.verifyPayment);
@@ -88,4 +90,13 @@ patientRouter.post("/checkDoctorAvailability", (0, middlewareHelper_1.oneOf)(Doc
 patientRouter.get("/searchPatientByPhoneNumberOrEmail/:term", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital), patientController.searchPatientByPhoneNumberOrEmail);
 patientRouter.put("/checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod);
 patientRouter.get("/getPatientsNotification", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.getPatientsNotification);
+patientRouter.get("/getFees", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let data = yield feeService.getAllFees();
+        return (0, response_1.successResponse)(data, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+}));
 exports.default = patientRouter;

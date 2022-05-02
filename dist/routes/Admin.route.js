@@ -83,4 +83,6 @@ adminRouter.post("/addQualificationName", (0, middlewareHelper_1.oneOf)(Admin_au
 adminRouter.post("/addQualification", adminController.addQualificationn);
 adminRouter.post("/addAnemities", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), hospitalController.createHospitalAnemity);
 adminRouter.get("/getAllAnemities", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), hospitalController.getAnemities);
+adminRouter.post("/createFee", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), adminController.createFee);
+adminRouter.get("/getFees", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), adminController.getFees);
 exports.default = adminRouter;

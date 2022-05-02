@@ -65,7 +65,7 @@ const createWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, funct
             });
         });
         let tb = Object.assign({}, tempBody.workingHour);
-        const WHObj = yield new WorkingHours_Model_1.default(Object.assign({ doctorDetails: req.currentDoctor, hospitalDetails: body.hospitalId }, tb)).save();
+        const WHObj = yield new WorkingHours_Model_1.default(Object.assign({ doctorDetails: req.currentDoctor ? req.currentDoctor : body.doctorId, hospitalDetails: body.hospitalId }, tb)).save();
         return (0, response_1.successResponse)(WHObj, "Successfully created", res);
         // return successResponse({}, "Successfully created", res);
     }
@@ -113,6 +113,7 @@ const getWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function
             //   }
             // });
             // WHObj2 = formatWorkingHour([WHObj2]);
+            console.log("HOW::", WHObj);
             WHObj.map((e) => {
                 for (let data in e) {
                     if (WorkingHour_helper_1.dayArray.includes(data)) {

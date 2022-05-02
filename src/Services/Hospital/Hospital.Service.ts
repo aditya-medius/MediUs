@@ -2,10 +2,13 @@ import * as jwt from "jsonwebtoken";
 import * as dotenv from "dotenv";
 import hospitalModel from "../../Models/Hospital.Model";
 import mongoose from "mongoose";
-import { doctor, specialization } from "../schemaNames";
+import { doctor, hospital, patient, specialization } from "../schemaNames";
 import approvalModel from "../../Models/Approval-Request.Model";
 import appointmentModel from "../../Models/Appointment.Model";
-import { getRangeOfDates } from "../Utils";
+import { getAge, getRangeOfDates } from "../Utils";
+import patientModel from "../../Models/Patient.Model";
+import { phoneNumberValidation } from "../Validation.Service";
+import moment from "moment";
 dotenv.config();
 
 export const getHospitalToken = async (body: any) => {
@@ -281,6 +284,152 @@ export const getHospitalsOfflineAndOnlineAppointments = async (
       onlineAppointments,
     ]);
     return Promise.resolve(appointments.map((e: any) => e[0]));
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const getPatientFromPhoneNumber = async (phoneNumber: string) => {
+  try {
+    if (phoneNumberValidation(phoneNumber)) {
+      let patientId = await patientModel.findOne({ phoneNumber }, "_id");
+      if (patientId) {
+        return Promise.resolve(patientId);
+      } else {
+        return Promise.reject(
+          new Error("No patient exist with this phone number")
+        );
+      }
+    } else {
+      return Promise.reject(new Error("Invalid phone number"));
+    }
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+export const getPatientsAppointmentsInThisHospital = async (
+  hospitalId: string,
+  phoneNumber_patient: string,
+  page: string
+) => {
+  try {
+    let formatAge = getAge;
+    const limit: number = 10;
+    const skip: number = parseInt(page) * limit;
+    let patientId = await getPatientFromPhoneNumber(phoneNumber_patient);
+    let appointmentsInThisHospital = await appointmentModel.aggregate([
+      {
+        $match: {
+          patient: new mongoose.Types.ObjectId(patientId),
+          hospital: new mongoose.Types.ObjectId(hospitalId),
+        },
+      },
+      {
+        $lookup: {
+          from: patient,
+          localField: "patient",
+          foreignField: "_id",
+          as: "patient",
+        },
+      },
+      {
+        $unwind: "$patient",
+      },
+      {
+        $unwind: "$hospital",
+      },
+      {
+        $lookup: {
+          from: hospital,
+          localField: "hospital",
+          foreignField: "_id",
+          as: "hospital",
+        },
+      },
+      {
+        $lookup: {
+          from: doctor,
+          localField: "doctors",
+          foreignField: "_id",
+          as: "doctors",
+        },
+      },
+      {
+        $lookup: {
+          from: specialization,
+          localField: "doctors.specialization",
+          foreignField: "_id",
+          as: "specials",
+        },
+      },
+      // {
+      //   $unwind: "doctors.specialization",
+      // },
+      {
+        $unwind: "$doctors",
+      },
+      {
+        $unwind: "$hospital",
+      },
+      {
+        $project: {
+          "patient.firstName": 1,
+          "patient.lastName": 1,
+          "patient.DOB": 1,
+          "patient.gender": 1,
+          "hospital.name": 1,
+          "hospital.address": 1,
+          "doctors.firstName": 1,
+          "doctors.lastName": 1,
+          // "doctors.specialization": 1,
+          specials: 1,
+          createdAt: 1,
+          appointmentToken: 1,
+          appointmentId: 1,
+          appointmentType: 1,
+          Type: 1,
+          done: 1,
+          cancelled: 1,
+          rescheduled: 1,
+          time: 1,
+        },
+      },
+      {
+        $addFields: {
+          "patient.age": {
+            $function: {
+              body: function (dob: any) {
+                let currentDate = new Date();
+                let age: number | string =
+                  currentDate.getFullYear() - dob.getFullYear();
+                if (age > 0) {
+                  age = `${age} years`;
+                } else {
+                  age = `${age} months`;
+                }
+                return age;
+              },
+              lang: "js",
+              args: ["$patient.DOB"],
+            },
+          },
+          "doctors.specialization": "$specials",
+        },
+      },
+      {
+        $sort: {
+          "time.date": -1,
+        },
+      },
+      {
+        $skip: skip,
+      },
+      {
+        $limit: limit,
+      },
+    ]);
+
+    return Promise.resolve(appointmentsInThisHospital);
   } catch (error: any) {
     return Promise.reject(error);
   }

@@ -106,13 +106,15 @@ export const sendAppointmentConfirmationNotificationToPatient = async (
   }
 };
 
-const hospitalFields = { ...excludeHospitalFields, services: 0 };
+const hospitalFields = { ...excludeHospitalFields, services: 0, location: 0 };
 const doctorFields = {
   ...excludeDoctorFields,
   hospitalDetails: 0,
   overallExperience: 0,
   qualification: 0,
+  id: 0,
   specialization: 0,
+  _id: 0,
 };
 export const getHospitalsNotification_whenSenderIsDoctor = async (
   hospitalId: string
@@ -161,10 +163,16 @@ export const getDoctorsNotification_whenSenderIsHospital = async (
 ) => {
   try {
     let notifications = await notificationsModel
-      .find({ receiver: doctorId, sender: hospital })
+      .find({ receiver: doctorId })
       .populate({
         path: "sender",
-        select: hospitalFields,
+        select: { ...hospitalFields, ...excludePatientFields },
+        populate: {
+          path: "address",
+          populate: {
+            path: "city state locality country",
+          },
+        },
       })
       .populate({
         path: "receiver",
@@ -184,8 +192,12 @@ export const getDoctorsNotification_whenSenderIsPatient = async (
       .find({ receiver: doctorId })
       .populate({
         path: "sender",
-        select: {
-          ...excludePatientFields,
+        select: { ...hospitalFields, ...excludePatientFields },
+        populate: {
+          path: "address",
+          populate: {
+            path: "city state locality country",
+          },
         },
       })
       .populate({

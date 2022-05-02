@@ -15,7 +15,7 @@ import {
 import { checkHospitalsApprovalStatus } from "../Services/Approval-Request/Approval-Request.Service";
 import { oneOf } from "../Services/middlewareHelper";
 import { errorResponse, successResponse } from "../Services/response";
-
+import * as feeService from "../Module/Payment/Service/Fee.Service";
 const hospitalRouter = express.Router();
 
 hospitalRouter.get(
@@ -199,5 +199,24 @@ hospitalRouter.get(
   "/searchHospitalByPhoneNumber/:term",
   oneOf(authenticateHospital, authenticateDoctor, authenticatePatient),
   hospitalController.searchHospitalByPhoneNumber
+);
+
+hospitalRouter.get(
+  "/getFees",
+  oneOf(authenticateHospital),
+  async (req: Request, res: Response) => {
+    try {
+      let data = await feeService.getAllFees();
+      return successResponse(data, "Success", res);
+    } catch (error: any) {
+      return errorResponse(error, res);
+    }
+  }
+);
+
+hospitalRouter.put(
+  "/getPatientsAppointmentsInThisHospital/:page",
+  oneOf(authenticateHospital),
+  hospitalController.getPatientsAppointmentsInThisHospital
 );
 export default hospitalRouter;

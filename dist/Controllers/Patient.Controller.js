@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPatientsNotification = exports.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod = exports.searchPatientByPhoneNumberOrEmail = exports.checkDoctorAvailability = exports.uploadPrescription = exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.CancelAppointment = exports.doneAppointment = exports.rescheduleAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = exports.excludeHospitalFields = exports.excludePatientFields = void 0;
+exports.getPatientsNotification = exports.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod = exports.searchPatientByPhoneNumberOrEmail = exports.checkDoctorAvailability = exports.uploadPrescription = exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.viewAppointById = exports.CancelAppointment = exports.doneAppointment = exports.rescheduleAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = exports.excludeHospitalFields = exports.excludePatientFields = void 0;
 const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
 // import { excludePatientFields } from "./Patient.Controller";
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
@@ -567,6 +567,18 @@ const CancelAppointment = (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.CancelAppointment = CancelAppointment;
+const viewAppointById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let appointment = yield Appointment_Model_1.default
+            .findOne({ _id: req.params.id })
+            .populate("doctors patient hospital");
+        return (0, response_1.successResponse)(appointment, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.viewAppointById = viewAppointById;
 //View Appointment History
 const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {

@@ -125,8 +125,21 @@ doctorRouter.get(
 
 doctorRouter.put(
   "/setSchedule",
-  oneOf(authenticateDoctor),
+  oneOf(authenticateDoctor, authenticateHospital),
   // doctorController.setSchedule
+  (req: Request, res: Response, next: NextFunction) => {
+    let data: any = {};
+    req.body.workingHour.forEach((e: any) => {
+      data[e.name] = {
+        capacity: e.capacity,
+        till: e.till,
+        from: e.from,
+        working: e.working,
+      };
+    });
+    req.body.workingHour = { ...data };
+    next();
+  },
   workingHoursController.createWorkingHours
 );
 

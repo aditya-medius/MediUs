@@ -621,6 +621,17 @@ export const CancelAppointment = async (req: Request, res: Response) => {
   }
 };
 
+export const viewAppointById = async (req: Request, res: Response) => {
+  try {
+    let appointment = await appointmentModel
+      .findOne({ _id: req.params.id })
+      .populate("doctors patient hospital");
+    return successResponse(appointment, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
 //View Appointment History
 export const ViewAppointment = async (req: Request, res: Response) => {
   try {
