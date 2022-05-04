@@ -514,3 +514,10 @@ export const getPatientsAppointmentsInThisHospital = async (
     return Promise.reject(error);
   }
 };
+
+export const verifyPayment = async (body: any) => {
+  try {
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};

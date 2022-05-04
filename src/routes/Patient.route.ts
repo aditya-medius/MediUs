@@ -97,7 +97,7 @@ patientRouter.post(
 );
 patientRouter.post(
   "/verifyPayment",
-  oneOf(authenticatePatient),
+  oneOf(authenticatePatient, authenticateHospital),
   paymentController.verifyPayment
 );
 patientRouter.get(
