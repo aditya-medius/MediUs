@@ -55,6 +55,7 @@ const notificationService = __importStar(require("../Services/Notification/Notif
 const Validation_Service_1 = require("../Services/Validation.Service");
 const Appointment_Service_1 = require("../Services/Appointment/Appointment.Service");
 const prescriptionValidityController = __importStar(require("../Controllers/Prescription-Validity.Controller"));
+const Order_Model_1 = __importDefault(require("../Models/Order.Model"));
 exports.excludePatientFields = {
     password: 0,
     verified: 0,
@@ -571,7 +572,14 @@ const viewAppointById = (req, res) => __awaiter(void 0, void 0, void 0, function
     try {
         let appointment = yield Appointment_Model_1.default
             .findOne({ _id: req.params.id })
-            .populate("doctors patient hospital");
+            .populate("doctors patient hospital")
+            .lean();
+        let orderDetails = yield Order_Model_1.default
+            .findOne({
+            appointmentDetails: appointment._id,
+        })
+            .lean();
+        appointment["order"] = orderDetails;
         return (0, response_1.successResponse)(appointment, "Success", res);
     }
     catch (error) {

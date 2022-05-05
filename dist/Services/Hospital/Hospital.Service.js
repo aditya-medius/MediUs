@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPatientsAppointmentsInThisHospital = exports.getPatientFromPhoneNumber = exports.getHospitalsOfflineAndOnlineAppointments = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.getHospitalToken = void 0;
+exports.verifyPayment = exports.getPatientsAppointmentsInThisHospital = exports.getPatientFromPhoneNumber = exports.getHospitalsOfflineAndOnlineAppointments = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.getHospitalToken = void 0;
 const jwt = __importStar(require("jsonwebtoken"));
 const dotenv = __importStar(require("dotenv"));
 const Hospital_Model_1 = __importDefault(require("../../Models/Hospital.Model"));
@@ -198,8 +198,42 @@ const getDoctorsListInHospital_withApprovalStatus = (hospitalId) => __awaiter(vo
                             },
                         },
                         {
+                            $lookup: {
+                                from: schemaNames_1.qualification,
+                                localField: "doctor.qualification",
+                                foreignField: "_id",
+                                as: "doctor.qualification",
+                            },
+                        },
+                        {
+                            $lookup: {
+                                from: schemaNames_1.specialization,
+                                localField: "doctor.specialization",
+                                foreignField: "_id",
+                                as: "doctor.specialization",
+                            },
+                        },
+                        {
                             $addFields: {
                                 status: "$approved.approvalStatus",
+                                experience: {
+                                    $function: {
+                                        body: function (experience) {
+                                            experience = new Date(experience);
+                                            let currentDate = new Date();
+                                            let age = currentDate.getFullYear() - experience.getFullYear();
+                                            if (age > 0) {
+                                                age = `${age} years`;
+                                            }
+                                            else {
+                                                age = `${age} months`;
+                                            }
+                                            return age;
+                                        },
+                                        lang: "js",
+                                        args: ["$doctor.overallExperience"],
+                                    },
+                                },
                             },
                         },
                         {
@@ -229,6 +263,45 @@ const getDoctorsListInHospital_withApprovalStatus = (hospitalId) => __awaiter(vo
                         },
                         {
                             $unwind: "$doctor",
+                        },
+                        {
+                            $lookup: {
+                                from: schemaNames_1.qualification,
+                                localField: "doctor.qualification",
+                                foreignField: "_id",
+                                as: "doctor.qualification",
+                            },
+                        },
+                        {
+                            $lookup: {
+                                from: schemaNames_1.specialization,
+                                localField: "doctor.specialization",
+                                foreignField: "_id",
+                                as: "doctor.specialization",
+                            },
+                        },
+                        {
+                            $addFields: {
+                                status: "$approved.approvalStatus",
+                                experience: {
+                                    $function: {
+                                        body: function (experience) {
+                                            experience = new Date(experience);
+                                            let currentDate = new Date();
+                                            let age = currentDate.getFullYear() - experience.getFullYear();
+                                            if (age > 0) {
+                                                age = `${age} years`;
+                                            }
+                                            else {
+                                                age = `${age} months`;
+                                            }
+                                            return age;
+                                        },
+                                        lang: "js",
+                                        args: ["$doctor.overallExperience"],
+                                    },
+                                },
+                            },
                         },
                     ],
                 },
@@ -419,6 +492,7 @@ const getPatientsAppointmentsInThisHospital = (hospitalId, phoneNumber_patient, 
                     "patient.age": {
                         $function: {
                             body: function (dob) {
+                                dob = new Date(dob);
                                 let currentDate = new Date();
                                 let age = currentDate.getFullYear() - dob.getFullYear();
                                 if (age > 0) {
@@ -455,3 +529,11 @@ const getPatientsAppointmentsInThisHospital = (hospitalId, phoneNumber_patient, 
     }
 });
 exports.getPatientsAppointmentsInThisHospital = getPatientsAppointmentsInThisHospital;
+const verifyPayment = (body) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.verifyPayment = verifyPayment;

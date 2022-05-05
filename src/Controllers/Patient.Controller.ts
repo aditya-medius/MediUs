@@ -35,6 +35,7 @@ import {
 } from "../Services/Appointment/Appointment.Service";
 
 import * as prescriptionValidityController from "../Controllers/Prescription-Validity.Controller";
+import orderModel from "../Models/Order.Model";
 
 export const excludePatientFields = {
   password: 0,
@@ -625,7 +626,16 @@ export const viewAppointById = async (req: Request, res: Response) => {
   try {
     let appointment = await appointmentModel
       .findOne({ _id: req.params.id })
-      .populate("doctors patient hospital");
+      .populate("doctors patient hospital")
+      .lean();
+
+    let orderDetails = await orderModel
+      .findOne({
+        appointmentDetails: appointment._id,
+      })
+      .lean();
+
+    appointment["order"] = orderDetails;
     return successResponse(appointment, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);

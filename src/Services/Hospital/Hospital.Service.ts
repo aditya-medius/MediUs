@@ -2,7 +2,13 @@ import * as jwt from "jsonwebtoken";
 import * as dotenv from "dotenv";
 import hospitalModel from "../../Models/Hospital.Model";
 import mongoose from "mongoose";
-import { doctor, hospital, patient, specialization } from "../schemaNames";
+import {
+  doctor,
+  hospital,
+  patient,
+  qualification,
+  specialization,
+} from "../schemaNames";
 import approvalModel from "../../Models/Approval-Request.Model";
 import appointmentModel from "../../Models/Appointment.Model";
 import { getAge, getRangeOfDates } from "../Utils";
@@ -172,8 +178,42 @@ export const getDoctorsListInHospital_withApprovalStatus = async (
               },
             },
             {
+              $lookup: {
+                from: qualification,
+                localField: "doctor.qualification",
+                foreignField: "_id",
+                as: "doctor.qualification",
+              },
+            },
+            {
+              $lookup: {
+                from: specialization,
+                localField: "doctor.specialization",
+                foreignField: "_id",
+                as: "doctor.specialization",
+              },
+            },
+            {
               $addFields: {
                 status: "$approved.approvalStatus",
+                experience: {
+                  $function: {
+                    body: function (experience: any) {
+                      experience = new Date(experience);
+                      let currentDate = new Date();
+                      let age: number | string =
+                        currentDate.getFullYear() - experience.getFullYear();
+                      if (age > 0) {
+                        age = `${age} years`;
+                      } else {
+                        age = `${age} months`;
+                      }
+                      return age;
+                    },
+                    lang: "js",
+                    args: ["$doctor.overallExperience"],
+                  },
+                },
               },
             },
             {
@@ -203,6 +243,45 @@ export const getDoctorsListInHospital_withApprovalStatus = async (
             },
             {
               $unwind: "$doctor",
+            },
+            {
+              $lookup: {
+                from: qualification,
+                localField: "doctor.qualification",
+                foreignField: "_id",
+                as: "doctor.qualification",
+              },
+            },
+            {
+              $lookup: {
+                from: specialization,
+                localField: "doctor.specialization",
+                foreignField: "_id",
+                as: "doctor.specialization",
+              },
+            },
+            {
+              $addFields: {
+                status: "$approved.approvalStatus",
+                experience: {
+                  $function: {
+                    body: function (experience: any) {
+                      experience = new Date(experience);
+                      let currentDate = new Date();
+                      let age: number | string =
+                        currentDate.getFullYear() - experience.getFullYear();
+                      if (age > 0) {
+                        age = `${age} years`;
+                      } else {
+                        age = `${age} months`;
+                      }
+                      return age;
+                    },
+                    lang: "js",
+                    args: ["$doctor.overallExperience"],
+                  },
+                },
+              },
             },
           ],
         },
@@ -399,6 +478,7 @@ export const getPatientsAppointmentsInThisHospital = async (
           "patient.age": {
             $function: {
               body: function (dob: any) {
+                dob = new Date(dob);
                 let currentDate = new Date();
                 let age: number | string =
                   currentDate.getFullYear() - dob.getFullYear();
@@ -430,6 +510,13 @@ export const getPatientsAppointmentsInThisHospital = async (
     ]);
 
     return Promise.resolve(appointmentsInThisHospital);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const verifyPayment = async (body: any) => {
+  try {
   } catch (error: any) {
     return Promise.reject(error);
   }
