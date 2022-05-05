@@ -92,7 +92,7 @@ patientRouter.post(
 
 patientRouter.post(
   "/generateOrderId",
-  oneOf(authenticatePatient),
+  oneOf(authenticatePatient, authenticateHospital),
   paymentController.generateOrderId
 );
 patientRouter.post(

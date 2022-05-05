@@ -395,4 +395,15 @@ doctorRouter.post(
   oneOf(authenticateDoctor),
   doctorController.getHospitalsOfflineAndOnlineAppointments
 );
+doctorRouter.post(
+  "/getListOfAllAppointments/:page",
+  oneOf(authenticateDoctor),
+  doctorController.getListOfAllAppointments
+);
+
+doctorRouter.put(
+  "/deleteWorkingHour",
+  oneOf(authenticateDoctor),
+  workingHoursController.deleteWorkingHour
+);
 export default doctorRouter;

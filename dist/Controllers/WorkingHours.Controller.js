@@ -23,7 +23,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateWorkingHour = exports.getWorkingHours = exports.createOpeningHours = exports.createWorkingHours = void 0;
+exports.deleteWorkingHour = exports.updateWorkingHour = exports.getWorkingHours = exports.createOpeningHours = exports.createWorkingHours = void 0;
 const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
 const response_1 = require("../Services/response");
 const time_class_1 = require("../Services/time.class");
@@ -250,6 +250,16 @@ const updateWorkingHour = (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.updateWorkingHour = updateWorkingHour;
+const deleteWorkingHour = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        yield WorkingHours_Model_1.default.findOneAndDelete({ _id: req.body.workingHour });
+        return (0, response_1.successResponse)({}, "Successfully deleted slot", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.deleteWorkingHour = deleteWorkingHour;
 function timeLessThan(t1, t2) {
     if (t1.division == 1 && t2.division == 0) {
         return false;

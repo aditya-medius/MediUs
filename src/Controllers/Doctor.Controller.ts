@@ -1867,3 +1867,14 @@ export const getHospitalsOfflineAndOnlineAppointments = async (
     return errorResponse(error, res);
   }
 };
+export const getListOfAllAppointments = async (req: Request, res: Response) => {
+  try {
+    let appointment = await doctorService.getListOfAllAppointments(
+      req.currentDoctor,
+      req.params.page
+    );
+    return successResponse(appointment, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};

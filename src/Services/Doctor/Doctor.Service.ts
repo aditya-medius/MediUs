@@ -9,6 +9,12 @@ import moment from "moment";
 import doctorModel from "../../Models/Doctors.Model";
 import appointmentModel from "../../Models/Appointment.Model";
 import { getRangeOfDates } from "../Utils";
+import {
+  excludeHospitalFields,
+  excludePatientFields,
+} from "../../Controllers/Patient.Controller";
+import { excludeDoctorFields } from "../../Controllers/Doctor.Controller";
+import { doctor, hospital, patient, specialization } from "../schemaNames";
 
 dotenv.config();
 
@@ -286,6 +292,131 @@ export const getDoctorsOfflineAndOnlineAppointments = async (
       onlineAppointments,
     ]);
     return Promise.resolve(appointments.map((e: any) => e[0]));
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const getListOfAllAppointments = async (
+  doctorId: string,
+  page: string
+) => {
+  try {
+    const limit: number = 10;
+    const skip: number = parseInt(page) * limit;
+    let appointmentsInThisHospital = await appointmentModel.aggregate([
+      {
+        $match: {
+          doctors: new mongoose.Types.ObjectId(doctorId),
+        },
+      },
+      {
+        $lookup: {
+          from: patient,
+          localField: "patient",
+          foreignField: "_id",
+          as: "patient",
+        },
+      },
+      {
+        $unwind: "$patient",
+      },
+      {
+        $unwind: "$hospital",
+      },
+      {
+        $lookup: {
+          from: hospital,
+          localField: "hospital",
+          foreignField: "_id",
+          as: "hospital",
+        },
+      },
+      {
+        $lookup: {
+          from: doctor,
+          localField: "doctors",
+          foreignField: "_id",
+          as: "doctors",
+        },
+      },
+      {
+        $lookup: {
+          from: specialization,
+          localField: "doctors.specialization",
+          foreignField: "_id",
+          as: "specials",
+        },
+      },
+      // {
+      //   $unwind: "doctors.specialization",
+      // },
+      {
+        $unwind: "$doctors",
+      },
+      {
+        $unwind: "$hospital",
+      },
+      {
+        $project: {
+          "patient.firstName": 1,
+          "patient.lastName": 1,
+          "patient.DOB": 1,
+          "patient.gender": 1,
+          "hospital.name": 1,
+          "hospital.address": 1,
+          "doctors.firstName": 1,
+          "doctors.lastName": 1,
+          // "doctors.specialization": 1,
+          specials: 1,
+          createdAt: 1,
+          appointmentToken: 1,
+          appointmentId: 1,
+          appointmentType: 1,
+          Type: 1,
+          done: 1,
+          cancelled: 1,
+          rescheduled: 1,
+          time: 1,
+        },
+      },
+      {
+        $addFields: {
+          "patient.age": {
+            $function: {
+              body: function (dob: any) {
+                dob = new Date(dob);
+                let currentDate = new Date();
+                let age: number | string =
+                  currentDate.getFullYear() - dob.getFullYear();
+                if (age > 0) {
+                  age = `${age} years`;
+                } else {
+                  age = `${age} months`;
+                }
+                return age;
+              },
+              lang: "js",
+              args: ["$patient.DOB"],
+            },
+          },
+          "doctors.specialization": "$specials",
+        },
+      },
+      {
+        $sort: {
+          "time.date": -1,
+        },
+      },
+      {
+        $skip: skip,
+      },
+      {
+        $limit: limit,
+      },
+    ]);
+
+    return Promise.resolve(appointmentsInThisHospital);
   } catch (error: any) {
     return Promise.reject(error);
   }

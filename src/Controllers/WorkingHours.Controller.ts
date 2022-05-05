@@ -283,6 +283,15 @@ export const updateWorkingHour = async (req: Request, res: Response) => {
   }
 };
 
+export const deleteWorkingHour = async (req: Request, res: Response) => {
+  try {
+    await workingHourModel.findOneAndDelete({ _id: req.body.workingHour });
+    return successResponse({}, "Successfully deleted slot", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
 function timeLessThan(t1: any, t2: any) {
   if (t1.division == 1 && t2.division == 0) {
     return false;

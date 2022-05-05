@@ -196,4 +196,6 @@ doctorRouter.post("/setHolidayCalendar", (0, middlewareHelper_1.oneOf)(Doctor_au
 doctorRouter.put("/getDoctorsHolidayList", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), doctorController.getDoctorsHolidayList);
 doctorRouter.put("/deleteHolidayCalendar", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.deleteHolidayCalendar);
 doctorRouter.post("/getHospitalsOfflineAndOnlineAppointments", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getHospitalsOfflineAndOnlineAppointments);
+doctorRouter.post("/getListOfAllAppointments/:page", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getListOfAllAppointments);
+doctorRouter.put("/deleteWorkingHour", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), workingHoursController.deleteWorkingHour);
 exports.default = doctorRouter;
