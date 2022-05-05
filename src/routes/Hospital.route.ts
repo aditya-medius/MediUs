@@ -219,4 +219,10 @@ hospitalRouter.put(
   oneOf(authenticateHospital),
   hospitalController.getPatientsAppointmentsInThisHospital
 );
+
+hospitalRouter.post(
+  "/verifyPayment",
+  oneOf(authenticateHospital),
+  hospitalController.verifyPayment
+);
 export default hospitalRouter;

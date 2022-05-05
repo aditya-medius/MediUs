@@ -1234,3 +1234,12 @@ export const getPatientsAppointmentsInThisHospital = async (
     return errorResponse(error, res);
   }
 };
+
+export const verifyPayment = async (req: Request, res: Response) => {
+  try {
+    await hospitalService.verifyPayment(req.body);
+    return successResponse({}, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};

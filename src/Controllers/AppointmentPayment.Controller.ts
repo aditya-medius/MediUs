@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import RazorPay from "razorpay";
 import { errorResponse, successResponse } from "../Services/response";
-import appointmentPayment from "../Models/AppointmentPayment.Model";
+import appointmentPaymentModel from "../Models/AppointmentPayment.Model";
 import * as orderController from "./Order.Controller";
 import crypto from "crypto";
 import creditAmountModel from "../Models/CreditAmount.Model";
@@ -50,7 +50,7 @@ export const verifyPayment = async (req: Request, res: Response) => {
       const appointmentBook = await BookAppointment(b.appointment);
       const { paymentId, orderId, paymentSignature, orderReceipt } = b;
 
-      const paymentObj = await new appointmentPayment({
+      const paymentObj = await new appointmentPaymentModel({
         paymentId,
         orderId: req.body.appointmentOrderId,
         paymentSignature,
