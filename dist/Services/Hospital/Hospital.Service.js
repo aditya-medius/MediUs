@@ -41,6 +41,9 @@ const Appointment_Model_1 = __importDefault(require("../../Models/Appointment.Mo
 const Utils_1 = require("../Utils");
 const Patient_Model_1 = __importDefault(require("../../Models/Patient.Model"));
 const Validation_Service_1 = require("../Validation.Service");
+const Patient_Service_1 = require("../Patient/Patient.Service");
+const CreditAmount_Model_1 = __importDefault(require("../../Models/CreditAmount.Model"));
+const AppointmentPayment_Model_1 = __importDefault(require("../../Models/AppointmentPayment.Model"));
 dotenv.config();
 const getHospitalToken = (body) => __awaiter(void 0, void 0, void 0, function* () {
     const token = yield jwt.sign(body, process.env.SECRET_HOSPITAL_KEY);
@@ -531,6 +534,22 @@ const getPatientsAppointmentsInThisHospital = (hospitalId, phoneNumber_patient, 
 exports.getPatientsAppointmentsInThisHospital = getPatientsAppointmentsInThisHospital;
 const verifyPayment = (body) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        // payment Id aur payment signature
+        let paymentId = `payment_id_gen_${Math.floor(100000 + Math.random() * 900000).toString()}`;
+        let paymentSignature = `payment_sign_gen_${Math.floor(100000 + Math.random() * 900000).toString()}`;
+        const appointmentBook = yield (0, Patient_Service_1.BookAppointment)(body.appointment);
+        const { orderId, orderReceipt } = body;
+        const paymentObj = yield new AppointmentPayment_Model_1.default({
+            paymentId,
+            orderId: body.appointmentOrderId,
+            paymentSignature,
+            orderReceipt,
+            appointmentId: appointmentBook._id,
+        }).save();
+        yield new CreditAmount_Model_1.default({
+            orderId: body.appointmentOrderId,
+            appointmentDetails: appointmentBook._id,
+        }).save();
     }
     catch (error) {
         return Promise.reject(error);

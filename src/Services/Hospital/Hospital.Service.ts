@@ -15,6 +15,9 @@ import { getAge, getRangeOfDates } from "../Utils";
 import patientModel from "../../Models/Patient.Model";
 import { phoneNumberValidation } from "../Validation.Service";
 import moment from "moment";
+import { BookAppointment } from "../Patient/Patient.Service";
+import creditAmountModel from "../../Models/CreditAmount.Model";
+import appointmentPaymentModel from "../../Models/AppointmentPayment.Model";
 dotenv.config();
 
 export const getHospitalToken = async (body: any) => {
@@ -517,6 +520,29 @@ export const getPatientsAppointmentsInThisHospital = async (
 
 export const verifyPayment = async (body: any) => {
   try {
+    // payment Id aur payment signature
+    let paymentId = `payment_id_gen_${Math.floor(
+      100000 + Math.random() * 900000
+    ).toString()}`;
+
+    let paymentSignature = `payment_sign_gen_${Math.floor(
+      100000 + Math.random() * 900000
+    ).toString()}`;
+
+    const appointmentBook = await BookAppointment(body.appointment);
+    const { orderId, orderReceipt } = body;
+    const paymentObj = await new appointmentPaymentModel({
+      paymentId,
+      orderId: body.appointmentOrderId,
+      paymentSignature,
+      orderReceipt,
+      appointmentId: appointmentBook._id,
+    }).save();
+
+    await new creditAmountModel({
+      orderId: body.appointmentOrderId,
+      appointmentDetails: appointmentBook._id,
+    }).save();
   } catch (error: any) {
     return Promise.reject(error);
   }
