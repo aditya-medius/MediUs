@@ -1716,7 +1716,7 @@ export const setConsultationFeeForDoctor = async (
 ) => {
   try {
     let response = await doctorService.setConsultationFeeForDoctor(
-      req.currentDoctor,
+      req.currentDoctor ? req.currentDoctor : req.body.doctorId,
       req.body.hospitalId,
       req.body.consultationFee
     );
@@ -1874,6 +1874,23 @@ export const getListOfAllAppointments = async (req: Request, res: Response) => {
       req.params.page
     );
     return successResponse(appointment, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getAppointmentFeeFromAppointmentId = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    return successResponse(
+      await doctorService.getAppointmentFeeFromAppointmentId(
+        req.params.appointmentId
+      ),
+      "Success",
+      res
+    );
   } catch (error: any) {
     return errorResponse(error, res);
   }

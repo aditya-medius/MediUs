@@ -363,6 +363,7 @@ export const getListOfAllAppointments = async (
           "patient.lastName": 1,
           "patient.DOB": 1,
           "patient.gender": 1,
+          "patient.phoneNumber": 1,
           "hospital.name": 1,
           "hospital.address": 1,
           "doctors.firstName": 1,
@@ -417,6 +418,22 @@ export const getListOfAllAppointments = async (
     ]);
 
     return Promise.resolve(appointmentsInThisHospital);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const getAppointmentFeeFromAppointmentId = async (
+  appointmentId: string
+) => {
+  try {
+    let appointment = await appointmentPaymentModel
+      .findOne({
+        appointmentId: appointmentId,
+      })
+      .populate("orderId")
+      .lean();
+    return Promise.resolve(appointment);
   } catch (error: any) {
     return Promise.reject(error);
   }

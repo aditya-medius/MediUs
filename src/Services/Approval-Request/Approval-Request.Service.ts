@@ -284,6 +284,7 @@ export const getListOfRequestedApprovals_OfHospital = async (
     let requestedApprovals = await approvalModel
       .find({
         requestTo: hospitalId,
+        approvalStatus: "Pending",
         "delData.deleted": false,
       })
       .populate({
@@ -393,6 +394,27 @@ export const getRequestIdFromNotificationId = async (
       .lean();
 
     return Promise.resolve(_id);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const checkIfHospitalAlreadyExistInDoctor = async (
+  hospitalId: string,
+  doctorId: string
+) => {
+  try {
+    let exist = await doctorModel.exists({
+      _id: doctorId,
+      "hospitalDetails.hospital": hospitalId,
+    });
+    if (exist) {
+      return Promise.resolve(true);
+    } else {
+      return Promise.reject(
+        new Error("This hospital is already in doctor's profile")
+      );
+    }
   } catch (error: any) {
     return Promise.reject(error);
   }

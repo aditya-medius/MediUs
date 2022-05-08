@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifyPayment = exports.getPatientsAppointmentsInThisHospital = exports.getPatientFromPhoneNumber = exports.getHospitalsOfflineAndOnlineAppointments = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.getHospitalToken = void 0;
+exports.generateOrderId = exports.verifyPayment = exports.getPatientsAppointmentsInThisHospital = exports.getPatientFromPhoneNumber = exports.getHospitalsOfflineAndOnlineAppointments = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.getHospitalToken = void 0;
 const jwt = __importStar(require("jsonwebtoken"));
 const dotenv = __importStar(require("dotenv"));
 const Hospital_Model_1 = __importDefault(require("../../Models/Hospital.Model"));
@@ -44,6 +44,7 @@ const Validation_Service_1 = require("../Validation.Service");
 const Patient_Service_1 = require("../Patient/Patient.Service");
 const CreditAmount_Model_1 = __importDefault(require("../../Models/CreditAmount.Model"));
 const AppointmentPayment_Model_1 = __importDefault(require("../../Models/AppointmentPayment.Model"));
+const orderController = __importStar(require("../../Controllers/Order.Controller"));
 dotenv.config();
 const getHospitalToken = (body) => __awaiter(void 0, void 0, void 0, function* () {
     const token = yield jwt.sign(body, process.env.SECRET_HOSPITAL_KEY);
@@ -245,74 +246,74 @@ const getDoctorsListInHospital_withApprovalStatus = (hospitalId) => __awaiter(vo
                             },
                         },
                     ],
-                    doctors: [
-                        {
-                            $lookup: {
-                                from: "doctors",
-                                localField: "doctors",
-                                foreignField: "_id",
-                                as: "doctors",
-                            },
-                        },
-                        {
-                            $addFields: {
-                                doctor: "$doctors",
-                            },
-                        },
-                        {
-                            $project: {
-                                doctor: 1,
-                            },
-                        },
-                        {
-                            $unwind: "$doctor",
-                        },
-                        {
-                            $lookup: {
-                                from: schemaNames_1.qualification,
-                                localField: "doctor.qualification",
-                                foreignField: "_id",
-                                as: "doctor.qualification",
-                            },
-                        },
-                        {
-                            $lookup: {
-                                from: schemaNames_1.specialization,
-                                localField: "doctor.specialization",
-                                foreignField: "_id",
-                                as: "doctor.specialization",
-                            },
-                        },
-                        {
-                            $addFields: {
-                                status: "$approved.approvalStatus",
-                                experience: {
-                                    $function: {
-                                        body: function (experience) {
-                                            experience = new Date(experience);
-                                            let currentDate = new Date();
-                                            let age = currentDate.getFullYear() - experience.getFullYear();
-                                            if (age > 0) {
-                                                age = `${age} years`;
-                                            }
-                                            else {
-                                                age = `${age} months`;
-                                            }
-                                            return age;
-                                        },
-                                        lang: "js",
-                                        args: ["$doctor.overallExperience"],
-                                    },
-                                },
-                            },
-                        },
-                    ],
+                    // doctors: [
+                    //   {
+                    //     $lookup: {
+                    //       from: "doctors",
+                    //       localField: "doctors",
+                    //       foreignField: "_id",
+                    //       as: "doctors",
+                    //     },
+                    //   },
+                    //   {
+                    //     $addFields: {
+                    //       doctor: "$doctors",
+                    //     },
+                    //   },
+                    //   {
+                    //     $project: {
+                    //       doctor: 1,
+                    //     },
+                    //   },
+                    //   {
+                    //     $unwind: "$doctor",
+                    //   },
+                    //   {
+                    //     $lookup: {
+                    //       from: qualification,
+                    //       localField: "doctor.qualification",
+                    //       foreignField: "_id",
+                    //       as: "doctor.qualification",
+                    //     },
+                    //   },
+                    //   {
+                    //     $lookup: {
+                    //       from: specialization,
+                    //       localField: "doctor.specialization",
+                    //       foreignField: "_id",
+                    //       as: "doctor.specialization",
+                    //     },
+                    //   },
+                    //   {
+                    //     $addFields: {
+                    //       status: "$approved.approvalStatus",
+                    //       experience: {
+                    //         $function: {
+                    //           body: function (experience: any) {
+                    //             experience = new Date(experience);
+                    //             let currentDate = new Date();
+                    //             let age: number | string =
+                    //               currentDate.getFullYear() - experience.getFullYear();
+                    //             if (age > 0) {
+                    //               age = `${age} years`;
+                    //             } else {
+                    //               age = `${age} months`;
+                    //             }
+                    //             return age;
+                    //           },
+                    //           lang: "js",
+                    //           args: ["$doctor.overallExperience"],
+                    //         },
+                    //       },
+                    //     },
+                    //   },
+                    // ],
                 },
             },
             {
                 $project: {
                     doctors: {
-                        $setUnion: ["$approved", "$doctors"],
+                        $setUnion: ["$approved"],
                     },
                 },
             },
@@ -514,6 +515,42 @@ const getPatientsAppointmentsInThisHospital = (hospitalId, phoneNumber_patient, 
                 },
             },
             {
+                $lookup: {
+                    from: schemaNames_1.appointmentPayment,
+                    let: { id: "$_id" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: { $eq: ["$appointmentId", "$$id"] },
+                            },
+                        },
+                        {
+                            $lookup: {
+                                from: schemaNames_1.order,
+                                localField: "orderId",
+                                foreignField: "_id",
+                                as: "order",
+                            },
+                        },
+                        {
+                            $unwind: "$order",
+                        },
+                        {
+                            $project: {
+                                order: 1,
+                            },
+                        },
+                    ],
+                    as: "paymentInfo",
+                    // localField: "_id",
+                    // foreignField: "appointmentId",
+                    // as: "paymentInfo",
+                },
+            },
+            {
+                $unwind: "$paymentInfo",
+            },
+            {
                 $sort: {
                     "time.date": -1,
                 },
@@ -556,3 +593,18 @@ const verifyPayment = (body) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.verifyPayment = verifyPayment;
+const generateOrderId = (body) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { appointmentOrderId, options, receiptNumber } = yield orderController.generateOrderId(body);
+        let orderId = `order_${Math.floor(100000 + Math.random() * 900000).toString()}`;
+        return Promise.resolve({
+            appointmentOrderId,
+            orderId: orderId,
+            orderReceipt: `order_rcptid_${receiptNumber}`,
+        });
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.generateOrderId = generateOrderId;

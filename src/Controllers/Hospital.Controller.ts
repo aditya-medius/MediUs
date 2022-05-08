@@ -1235,6 +1235,14 @@ export const getPatientsAppointmentsInThisHospital = async (
   }
 };
 
+export const generateOrderId = async (req: Request, res: Response) => {
+  try {
+    let orderDetails = await hospitalService.generateOrderId(req.body);
+    return successResponse(orderDetails, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
 export const verifyPayment = async (req: Request, res: Response) => {
   try {
     await hospitalService.verifyPayment(req.body);

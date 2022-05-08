@@ -20,7 +20,7 @@ const moment_1 = __importDefault(require("moment"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const setPrescriptionValidity = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let { doctorId = req.currentDoctor, validateTill, hospitalId } = req.body;
+        let { doctorId = req.currentDoctor ? req.currentDoctor : req.body.doctorId, validateTill, hospitalId, } = req.body;
         let prescription = yield new Prescription_Validity_Model_1.default({
             doctorId,
             hospitalId,

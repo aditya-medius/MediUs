@@ -31,8 +31,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = void 0;
+exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
+const AppointmentPayment_Model_1 = __importDefault(require("../../Models/AppointmentPayment.Model"));
 const CreditAmount_Model_1 = __importDefault(require("../../Models/CreditAmount.Model"));
 const Withdrawal_Model_1 = __importDefault(require("../../Models/Withdrawal.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -367,6 +368,7 @@ const getListOfAllAppointments = (doctorId, page) => __awaiter(void 0, void 0, v
                     "patient.lastName": 1,
                     "patient.DOB": 1,
                     "patient.gender": 1,
+                    "patient.phoneNumber": 1,
                     "hospital.name": 1,
                     "hospital.address": 1,
                     "doctors.firstName": 1,
@@ -426,3 +428,18 @@ const getListOfAllAppointments = (doctorId, page) => __awaiter(void 0, void 0, v
     }
 });
 exports.getListOfAllAppointments = getListOfAllAppointments;
+const getAppointmentFeeFromAppointmentId = (appointmentId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let appointment = yield AppointmentPayment_Model_1.default
+            .findOne({
+            appointmentId: appointmentId,
+        })
+            .populate("orderId")
+            .lean();
+        return Promise.resolve(appointment);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.getAppointmentFeeFromAppointmentId = getAppointmentFeeFromAppointmentId;

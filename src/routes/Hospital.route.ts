@@ -203,7 +203,7 @@ hospitalRouter.get(
 
 hospitalRouter.get(
   "/getFees",
-  oneOf(authenticateHospital),
+  oneOf(authenticateHospital, authenticateDoctor),
   async (req: Request, res: Response) => {
     try {
       let data = await feeService.getAllFees();
@@ -224,5 +224,10 @@ hospitalRouter.post(
   "/verifyPayment",
   oneOf(authenticateHospital),
   hospitalController.verifyPayment
+);
+hospitalRouter.post(
+  "/generateOrderId",
+  oneOf(authenticateHospital),
+  hospitalController.generateOrderId
 );
 export default hospitalRouter;

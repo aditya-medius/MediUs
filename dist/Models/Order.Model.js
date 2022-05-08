@@ -40,6 +40,6 @@ const orderSchema = new mongoose_1.Schema({
         // required: true,
     },
 });
-orderSchema.pre("save", function (next) { });
+// orderSchema.pre("save", function (next) {});
 const orderModel = (0, mongoose_1.model)(schemaNames_1.order, orderSchema);
 exports.default = orderModel;

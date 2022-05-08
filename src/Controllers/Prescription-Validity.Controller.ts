@@ -6,7 +6,11 @@ import moment from "moment";
 import mongoose from "mongoose";
 export const setPrescriptionValidity = async (req: Request, res: Response) => {
   try {
-    let { doctorId = req.currentDoctor, validateTill, hospitalId } = req.body;
+    let {
+      doctorId = req.currentDoctor ? req.currentDoctor : req.body.doctorId,
+      validateTill,
+      hospitalId,
+    } = req.body;
     let prescription = await new prescriptionValidityModel({
       doctorId,
       hospitalId,

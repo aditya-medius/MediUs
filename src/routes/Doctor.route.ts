@@ -335,7 +335,7 @@ doctorRouter.put(
 
 doctorRouter.put(
   "/setConsultationFeeForDoctor",
-  oneOf(authenticateDoctor),
+  oneOf(authenticateDoctor, authenticateHospital),
   doctorController.setConsultationFeeForDoctor
 );
 
@@ -356,7 +356,7 @@ doctorRouter.put(
 /* Doctor ka presciprtion validity */
 doctorRouter.put(
   "/setPrescriptionValidity",
-  oneOf(authenticateDoctor),
+  oneOf(authenticateDoctor, authenticateHospital),
   setPrescriptionValidity
 );
 
@@ -403,7 +403,13 @@ doctorRouter.post(
 
 doctorRouter.put(
   "/deleteWorkingHour",
-  oneOf(authenticateDoctor),
+  oneOf(authenticateDoctor, authenticateHospital),
   workingHoursController.deleteWorkingHour
+);
+
+doctorRouter.get(
+  "/getAppointmentFeeFromAppointmentId/:appointmentId",
+  oneOf(authenticateDoctor),
+  doctorController.getAppointmentFeeFromAppointmentId
 );
 export default doctorRouter;
