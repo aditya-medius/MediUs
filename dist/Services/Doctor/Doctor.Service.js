@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = void 0;
+exports.getDoctorFeeInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const AppointmentPayment_Model_1 = __importDefault(require("../../Models/AppointmentPayment.Model"));
 const CreditAmount_Model_1 = __importDefault(require("../../Models/CreditAmount.Model"));
@@ -443,3 +443,29 @@ const getAppointmentFeeFromAppointmentId = (appointmentId) => __awaiter(void 0, 
     }
 });
 exports.getAppointmentFeeFromAppointmentId = getAppointmentFeeFromAppointmentId;
+const getDoctorFeeInHospital = (doctorId, hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let fee = (yield Doctors_Model_1.default.aggregate([
+            {
+                $match: {
+                    _id: new mongoose_1.default.Types.ObjectId(doctorId),
+                },
+            },
+            {
+                $project: {
+                    hospitalDetails: 1,
+                },
+            },
+        ]))[0];
+        fee = fee.hospitalDetails
+            .filter((e) => {
+            return e.hospital.toString() === hospitalId;
+        })
+            .map((e) => e.consultationFee);
+        return Promise.resolve({ consultationFee: fee[0] });
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.getDoctorFeeInHospital = getDoctorFeeInHospital;

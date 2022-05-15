@@ -466,6 +466,7 @@ export const getPatientsAppointmentsInThisHospital = async (
           "hospital.address": 1,
           "doctors.firstName": 1,
           "doctors.lastName": 1,
+          "doctors._id": 1,
           // "doctors.specialization": 1,
           specials: 1,
           createdAt: 1,

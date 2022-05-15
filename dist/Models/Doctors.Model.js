@@ -142,12 +142,7 @@ doctorSchema.pre("save", function (next) {
         const hospitalExist = yield Hospital_Model_1.default.findOne({
             $and: [
                 {
-                    $or: [
-                        {
-                            email: this.email,
-                        },
-                        { contactNumber: this.phoneNumber },
-                    ],
+                    $or: [{ contactNumber: this.phoneNumber }],
                 },
                 { deleted: false },
             ],
@@ -170,7 +165,7 @@ doctorSchema.pre("save", function (next) {
                 this.phoneNumber == "9999999999") {
                 return next();
             }
-            else if (!profileExist.verified) {
+            else if (profileExist && !profileExist.verified) {
                 throw new Error("Your profile is under verification process");
             }
             else {
@@ -326,12 +321,12 @@ doctorSchema.path("hospitalDetails").validate(function (hospital) {
     return true;
 }, "Cannot enter same hospital twice");
 // Specialization validation
-doctorSchema.path("specialization").validate(function (specialization) {
-    if (specialization.length < 1) {
-        return false;
-    }
-    return true;
-}, "specialization details are required");
+// doctorSchema.path("specialization").validate(function (specialization: any) {
+//   if (specialization.length < 1) {
+//     return false;
+//   }
+//   return true;
+// }, "specialization details are required");
 // Qualification Validation
 // doctorSchema.path("qualification").validate(function (qualification: any) {
 //   if (qualification.length < 1) {

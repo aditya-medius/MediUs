@@ -964,7 +964,11 @@ export const getHospitalById = async (req: Request, res: Response) => {
           overallExperience: e.overallExperience,
           hospitalDetails: [
             {
-              workingHour: formatWorkingHour(workingHours[e._id.toString()]),
+              workingHour: formatWorkingHour(
+                workingHours[e._id.toString()]
+                  ? workingHours[e._id.toString()]
+                  : []
+              ),
               consultationFee: e.hospitalDetails[0].consultationFee,
               _id: e.hospitalDetails._id,
             },

@@ -438,3 +438,33 @@ export const getAppointmentFeeFromAppointmentId = async (
     return Promise.reject(error);
   }
 };
+
+export const getDoctorFeeInHospital = async (
+  doctorId: string,
+  hospitalId: string
+) => {
+  try {
+    let fee = (
+      await doctorModel.aggregate([
+        {
+          $match: {
+            _id: new mongoose.Types.ObjectId(doctorId),
+          },
+        },
+        {
+          $project: {
+            hospitalDetails: 1,
+          },
+        },
+      ])
+    )[0];
+    fee = fee.hospitalDetails
+      .filter((e: any) => {
+        return e.hospital.toString() === hospitalId;
+      })
+      .map((e: any) => e.consultationFee);
+    return Promise.resolve({ consultationFee: fee[0] });
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};

@@ -311,7 +311,7 @@ doctorRouter.post(
 /* Qualification List */
 doctorRouter.get(
   "/getQualificationList",
-  oneOf(authenticateDoctor),
+  // oneOf(authenticateDoctor),
   qualificationController.getQualificationList
 );
 
@@ -411,5 +411,10 @@ doctorRouter.get(
   "/getAppointmentFeeFromAppointmentId/:appointmentId",
   oneOf(authenticateDoctor),
   doctorController.getAppointmentFeeFromAppointmentId
+);
+doctorRouter.put(
+  "/getFeeAndValidity",
+  oneOf(authenticateDoctor, authenticateHospital),
+  doctorController.getPrescriptionValidityAndFeesOfDoctorInHospital
 );
 export default doctorRouter;

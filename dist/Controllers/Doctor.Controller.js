@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getHospitalsOfflineAndOnlineAppointments = exports.deleteHolidayCalendar = exports.getDoctorsHolidayList = exports.setHolidayCalendar = exports.getDoctorsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.setConsultationFeeForDoctor = exports.addHospitalInDoctorProfile = exports.checkVerificationStatus = exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
+exports.getPrescriptionValidityAndFeesOfDoctorInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getHospitalsOfflineAndOnlineAppointments = exports.deleteHolidayCalendar = exports.getDoctorsHolidayList = exports.setHolidayCalendar = exports.getDoctorsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.setConsultationFeeForDoctor = exports.addHospitalInDoctorProfile = exports.checkVerificationStatus = exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -67,6 +67,7 @@ const Patient_Service_1 = require("../Services/Patient/Patient.Service");
 const approvalService = __importStar(require("../Services/Approval-Request/Approval-Request.Service"));
 const holidayService = __importStar(require("../Services/Holiday-Calendar/Holiday-Calendar.Service"));
 const hospitalService = __importStar(require("../Services/Hospital/Hospital.Service"));
+const prescriptionController = __importStar(require("../Controllers/Prescription-Validity.Controller"));
 exports.excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -271,7 +272,12 @@ const getDoctorById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         })
             .populate("hospitalDetails.workingHours")
             .populate("specialization")
-            .populate("qualification")
+            .populate({
+            path: "qualification",
+            populate: {
+                path: "qualificationName",
+            },
+        })
             .lean();
         if (doctorData) {
             doctorData.hospitalDetails = doctorData.hospitalDetails.map((elem) => {
@@ -1647,3 +1653,21 @@ const getAppointmentFeeFromAppointmentId = (req, res) => __awaiter(void 0, void 
     }
 });
 exports.getAppointmentFeeFromAppointmentId = getAppointmentFeeFromAppointmentId;
+const getPrescriptionValidityAndFeesOfDoctorInHospital = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let doctorId;
+        let hospitalId = req.body.hospitalId;
+        if (req.currentDoctor) {
+            doctorId = req.currentDoctor;
+        }
+        else {
+            doctorId = req.body.doctorId;
+        }
+        let data = yield prescriptionController.getPrescriptionValidityAndFeesOfDoctorInHospital(hospitalId, doctorId);
+        return (0, response_1.successResponse)(data, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getPrescriptionValidityAndFeesOfDoctorInHospital = getPrescriptionValidityAndFeesOfDoctorInHospital;

@@ -39,7 +39,7 @@ import { calculateAge } from "../Services/Patient/Patient.Service";
 import * as approvalService from "../Services/Approval-Request/Approval-Request.Service";
 import * as holidayService from "../Services/Holiday-Calendar/Holiday-Calendar.Service";
 import * as hospitalService from "../Services/Hospital/Hospital.Service";
-
+import * as prescriptionController from "../Controllers/Prescription-Validity.Controller";
 export const excludeDoctorFields = {
   password: 0,
   // panCard: 0,
@@ -316,7 +316,12 @@ export const getDoctorById = async (req: Request, res: Response) => {
       })
       .populate("hospitalDetails.workingHours")
       .populate("specialization")
-      .populate("qualification")
+      .populate({
+        path: "qualification",
+        populate: {
+          path: "qualificationName",
+        },
+      })
       .lean();
 
     if (doctorData) {
@@ -1891,6 +1896,29 @@ export const getAppointmentFeeFromAppointmentId = async (
       "Success",
       res
     );
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getPrescriptionValidityAndFeesOfDoctorInHospital = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    let doctorId;
+    let hospitalId = req.body.hospitalId;
+    if (req.currentDoctor) {
+      doctorId = req.currentDoctor;
+    } else {
+      doctorId = req.body.doctorId;
+    }
+    let data =
+      await prescriptionController.getPrescriptionValidityAndFeesOfDoctorInHospital(
+        hospitalId,
+        doctorId
+      );
+    return successResponse(data, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

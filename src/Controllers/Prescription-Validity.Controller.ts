@@ -4,6 +4,7 @@ import prescriptionValidityModel from "../Models/Prescription-Validity.Model";
 import { errorResponse, successResponse } from "../Services/response";
 import moment from "moment";
 import mongoose from "mongoose";
+import * as doctorService from "../Services/Doctor/Doctor.Service";
 export const setPrescriptionValidity = async (req: Request, res: Response) => {
   try {
     let {
@@ -70,3 +71,34 @@ export const checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod =
       return Promise.reject(error);
     }
   };
+
+export const getPrescriptionValidityAndFeesOfDoctorInHospital = async (
+  hospitalId: string,
+  doctorId: string
+) => {
+  try {
+    let data = await Promise.all([
+      getDoctorPrescriptionInHospital(hospitalId, doctorId),
+      doctorService.getDoctorFeeInHospital(doctorId, hospitalId),
+    ]);
+
+    return Promise.resolve(data);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const getDoctorPrescriptionInHospital = async (
+  hospitalId: string,
+  doctorId: string
+) => {
+  try {
+    let prescription = await prescriptionValidityModel.findOne(
+      { doctorId },
+      "validateTill"
+    );
+    return Promise.resolve({ prescription });
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};

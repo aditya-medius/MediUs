@@ -177,7 +177,9 @@ doctorRouter.post("/addHospitalInDoctorProfile", (0, middlewareHelper_1.oneOf)(H
 // },
 doctorController.addHospitalInDoctorProfile);
 /* Qualification List */
-doctorRouter.get("/getQualificationList", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), qualificationController.getQualificationList);
+doctorRouter.get("/getQualificationList", 
+// oneOf(authenticateDoctor),
+qualificationController.getQualificationList);
 doctorRouter.put("/requestApprovalFromHospital", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), Approval_Request_Controller_1.requestApprovalFromHospital);
 doctorRouter.put("/approveHospitalRequest", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), Approval_Request_Controller_1.approveHospitalRequest);
 doctorRouter.put("/denyHospitalRequest", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), Approval_Request_Controller_1.denyHospitalRequest);
@@ -199,4 +201,5 @@ doctorRouter.post("/getHospitalsOfflineAndOnlineAppointments", (0, middlewareHel
 doctorRouter.post("/getListOfAllAppointments/:page", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getListOfAllAppointments);
 doctorRouter.put("/deleteWorkingHour", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), workingHoursController.deleteWorkingHour);
 doctorRouter.get("/getAppointmentFeeFromAppointmentId/:appointmentId", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getAppointmentFeeFromAppointmentId);
+doctorRouter.put("/getFeeAndValidity", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), doctorController.getPrescriptionValidityAndFeesOfDoctorInHospital);
 exports.default = doctorRouter;

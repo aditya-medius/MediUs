@@ -853,7 +853,9 @@ const getHospitalById = (req, res) => __awaiter(void 0, void 0, void 0, function
                     overallExperience: e.overallExperience,
                     hospitalDetails: [
                         {
-                            workingHour: (0, WorkingHour_helper_1.formatWorkingHour)(workingHours[e._id.toString()]),
+                            workingHour: (0, WorkingHour_helper_1.formatWorkingHour)(workingHours[e._id.toString()]
+                                ? workingHours[e._id.toString()]
+                                : []),
                             consultationFee: e.hospitalDetails[0].consultationFee,
                             _id: e.hospitalDetails._id,
                         },
