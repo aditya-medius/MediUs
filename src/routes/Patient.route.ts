@@ -79,7 +79,7 @@ patientRouter.post(
   oneOf(authenticatePatient),
   patientController.doneAppointment
 );
-patientRouter.get(
+patientRouter.put(
   "/viewAppointById/:id",
   oneOf(authenticateDoctor, authenticateHospital, authenticatePatient),
   patientController.viewAppointById

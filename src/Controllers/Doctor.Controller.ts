@@ -1754,7 +1754,11 @@ export const getListOfRequestedApprovals_ByDoctor = async (
     let data = await approvalService.getListOfRequestedApprovals_ByDoctor(
       doctorId
     );
-    return successResponse(data, "Success", res);
+    let data2 = await approvalService.getListOfRequestedApprovals_OfDoctor(
+      doctorId
+    );
+    let response = [...data, ...data2];
+    return successResponse(response, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

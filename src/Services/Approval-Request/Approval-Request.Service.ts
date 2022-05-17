@@ -230,10 +230,24 @@ export const getListOfRequestedApprovals_OfDoctor = async (
   doctorId: string
 ) => {
   try {
-    let requestedApprovals = await approvalModel.find({
-      requestTo: doctorId,
-      "delData.deleted": false,
-    });
+    let requestedApprovals = await approvalModel
+      .find({
+        requestTo: doctorId,
+        "delData.deleted": false,
+      })
+      .populate({
+        path: "requestFrom",
+        select: {
+          address: 1,
+          name: 1,
+        },
+        populate: {
+          path: "address",
+          populate: {
+            path: "city state locality country",
+          },
+        },
+      });
     return Promise.resolve(requestedApprovals);
   } catch (error: any) {
     return Promise.reject(error);
@@ -408,7 +422,7 @@ export const checkIfHospitalAlreadyExistInDoctor = async (
       _id: doctorId,
       "hospitalDetails.hospital": hospitalId,
     });
-    if (exist) {
+    if (!exist) {
       return Promise.resolve(true);
     } else {
       return Promise.reject(

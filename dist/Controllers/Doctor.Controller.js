@@ -1540,7 +1540,9 @@ const getListOfRequestedApprovals_ByDoctor = (req, res) => __awaiter(void 0, voi
     try {
         let doctorId = req.currentDoctor;
         let data = yield approvalService.getListOfRequestedApprovals_ByDoctor(doctorId);
-        return (0, response_1.successResponse)(data, "Success", res);
+        let data2 = yield approvalService.getListOfRequestedApprovals_OfDoctor(doctorId);
+        let response = [...data, ...data2];
+        return (0, response_1.successResponse)(response, "Success", res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);

@@ -214,9 +214,23 @@ exports.doctorKLiyeHospitalKiRequestExistKrtiHai = doctorKLiyeHospitalKiRequestE
 /* Doctor ko kitno ne approval k liye request ki hai */
 const getListOfRequestedApprovals_OfDoctor = (doctorId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let requestedApprovals = yield Approval_Request_Model_1.default.find({
+        let requestedApprovals = yield Approval_Request_Model_1.default
+            .find({
             requestTo: doctorId,
             "delData.deleted": false,
+        })
+            .populate({
+            path: "requestFrom",
+            select: {
+                address: 1,
+                name: 1,
+            },
+            populate: {
+                path: "address",
+                populate: {
+                    path: "city state locality country",
+                },
+            },
         });
         return Promise.resolve(requestedApprovals);
     }
@@ -360,7 +374,7 @@ const checkIfHospitalAlreadyExistInDoctor = (hospitalId, doctorId) => __awaiter(
             _id: doctorId,
             "hospitalDetails.hospital": hospitalId,
         });
-        if (exist) {
+        if (!exist) {
             return Promise.resolve(true);
         }
         else {

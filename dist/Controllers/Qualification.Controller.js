@@ -20,6 +20,7 @@ const addDoctorQualification = (req, res) => __awaiter(void 0, void 0, void 0, f
     try {
         let body = req.body;
         const qualificationDoc = yield new Qualification_Model_1.default(body).save();
+        yield qualificationDoc.populate("qualificationName");
         return (0, response_1.successResponse)(qualificationDoc, "Success", res);
     }
     catch (error) {

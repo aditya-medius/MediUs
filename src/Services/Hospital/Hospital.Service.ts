@@ -228,6 +228,85 @@ export const getDoctorsListInHospital_withApprovalStatus = async (
               },
             },
           ],
+          requestTo: [
+            {
+              $lookup: {
+                from: "approvalrequests",
+                localField: "_id",
+                foreignField: "requestTo",
+                as: "approved",
+              },
+            },
+            {
+              $project: {
+                "approved.requestFrom": 1,
+                "approved.approvalStatus": 1,
+              },
+            },
+            {
+              $unwind: "$approved",
+            },
+            {
+              $lookup: {
+                from: "doctors",
+                localField: "approved.requestFrom",
+                foreignField: "_id",
+                as: "approved.doctor",
+              },
+            },
+            {
+              $unwind: "$approved.doctor",
+            },
+            {
+              $addFields: {
+                doctor: "$approved.doctor",
+              },
+            },
+            {
+              $lookup: {
+                from: qualification,
+                localField: "doctor.qualification",
+                foreignField: "_id",
+                as: "doctor.qualification",
+              },
+            },
+            {
+              $lookup: {
+                from: specialization,
+                localField: "doctor.specialization",
+                foreignField: "_id",
+                as: "doctor.specialization",
+              },
+            },
+            {
+              $addFields: {
+                status: "$approved.approvalStatus",
+                experience: {
+                  $function: {
+                    body: function (experience: any) {
+                      experience = new Date(experience);
+                      let currentDate = new Date();
+                      let age: number | string =
+                        currentDate.getFullYear() - experience.getFullYear();
+                      if (age > 0) {
+                        age = `${age} years`;
+                      } else {
+                        age = `${age} months`;
+                      }
+                      return age;
+                    },
+                    lang: "js",
+                    args: ["$doctor.overallExperience"],
+                  },
+                },
+              },
+            },
+            {
+              $project: {
+                approved: 0,
+              },
+            },
+          ],
           // doctors: [
           //   {
           //     $lookup: {
@@ -295,7 +374,7 @@ export const getDoctorsListInHospital_withApprovalStatus = async (
       {
         $project: {
           doctors: {
-            $setUnion: ["$approved"],
+            $setUnion: ["$approved", "$requestTo"],
           },
         },
       },
