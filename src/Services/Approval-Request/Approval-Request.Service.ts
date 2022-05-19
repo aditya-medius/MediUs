@@ -231,10 +231,13 @@ export const getListOfRequestedApprovals_OfDoctor = async (
 ) => {
   try {
     let requestedApprovals = await approvalModel
-      .find({
-        requestTo: doctorId,
-        "delData.deleted": false,
-      })
+      .find(
+        {
+          requestTo: doctorId,
+          "delData.deleted": false,
+        },
+        "-requestTo"
+      )
       .populate({
         path: "requestFrom",
         select: {
@@ -260,10 +263,13 @@ export const getListOfRequestedApprovals_ByDoctor = async (
 ) => {
   try {
     let requestedApprovals = await approvalModel
-      .find({
-        requestFrom: doctorId,
-        "delData.deleted": false,
-      })
+      .find(
+        {
+          requestFrom: doctorId,
+          "delData.deleted": false,
+        },
+        "-requestFrom"
+      )
       .populate({
         path: "requestTo",
         select: {

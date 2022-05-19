@@ -218,7 +218,7 @@ const getListOfRequestedApprovals_OfDoctor = (doctorId) => __awaiter(void 0, voi
             .find({
             requestTo: doctorId,
             "delData.deleted": false,
-        })
+        }, "-requestTo")
             .populate({
             path: "requestFrom",
             select: {
@@ -246,7 +246,7 @@ const getListOfRequestedApprovals_ByDoctor = (doctorId) => __awaiter(void 0, voi
             .find({
             requestFrom: doctorId,
             "delData.deleted": false,
-        })
+        }, "-requestFrom")
             .populate({
             path: "requestTo",
             select: {
