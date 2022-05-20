@@ -7,6 +7,7 @@ export const addDoctorQualification = async (req: Request, res: Response) => {
   try {
     let body = req.body;
     const qualificationDoc = await new qualificationModel(body).save();
+    await qualificationDoc.populate("qualificationName");
     return successResponse(qualificationDoc, "Success", res);
   } catch (error) {
     return errorResponse(error, res);

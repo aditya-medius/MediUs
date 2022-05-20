@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRequestIdFromNotificationId = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.doctorKLiyeHospitalKiRequestExistKrtiHai = exports.hospitalKLiyeDoctorKiRequestExistKrtiHai = exports.canThisHospitalApproveThisRequest = exports.canThisDoctorApproveThisRequest = exports.checkHospitalsApprovalStatus = exports.checkDoctorsApprovalStatus = exports.denyDoctorRequest = exports.approveDoctorRequest = exports.requestApprovalFromHospital = exports.denyHospitalRequest = exports.approveHospitalRequest = exports.requestApprovalFromDoctor = void 0;
+exports.checkIfHospitalAlreadyExistInDoctor = exports.getRequestIdFromNotificationId = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.doctorKLiyeHospitalKiRequestExistKrtiHai = exports.hospitalKLiyeDoctorKiRequestExistKrtiHai = exports.canThisHospitalApproveThisRequest = exports.canThisDoctorApproveThisRequest = exports.checkHospitalsApprovalStatus = exports.checkDoctorsApprovalStatus = exports.denyDoctorRequest = exports.approveDoctorRequest = exports.requestApprovalFromHospital = exports.denyHospitalRequest = exports.approveHospitalRequest = exports.requestApprovalFromDoctor = void 0;
 const Doctor_Controller_1 = require("../../Controllers/Doctor.Controller");
 const Approval_Request_Model_1 = __importDefault(require("../../Models/Approval-Request.Model"));
 const Doctors_Model_1 = __importDefault(require("../../Models/Doctors.Model"));
@@ -214,9 +214,23 @@ exports.doctorKLiyeHospitalKiRequestExistKrtiHai = doctorKLiyeHospitalKiRequestE
 /* Doctor ko kitno ne approval k liye request ki hai */
 const getListOfRequestedApprovals_OfDoctor = (doctorId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let requestedApprovals = yield Approval_Request_Model_1.default.find({
+        let requestedApprovals = yield Approval_Request_Model_1.default
+            .find({
             requestTo: doctorId,
             "delData.deleted": false,
+        }, "-requestTo")
+            .populate({
+            path: "requestFrom",
+            select: {
+                address: 1,
+                name: 1,
+            },
+            populate: {
+                path: "address",
+                populate: {
+                    path: "city state locality country",
+                },
+            },
         });
         return Promise.resolve(requestedApprovals);
     }
@@ -232,7 +246,7 @@ const getListOfRequestedApprovals_ByDoctor = (doctorId) => __awaiter(void 0, voi
             .find({
             requestFrom: doctorId,
             "delData.deleted": false,
-        })
+        }, "-requestFrom")
             .populate({
             path: "requestTo",
             select: {
@@ -260,6 +274,7 @@ const getListOfRequestedApprovals_OfHospital = (hospitalId) => __awaiter(void 0,
         let requestedApprovals = yield Approval_Request_Model_1.default
             .find({
             requestTo: hospitalId,
+            approvalStatus: "Pending",
             "delData.deleted": false,
         })
             .populate({
@@ -353,3 +368,21 @@ const getRequestIdFromNotificationId = (notificationId) => __awaiter(void 0, voi
     }
 });
 exports.getRequestIdFromNotificationId = getRequestIdFromNotificationId;
+const checkIfHospitalAlreadyExistInDoctor = (hospitalId, doctorId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let exist = yield Doctors_Model_1.default.exists({
+            _id: doctorId,
+            "hospitalDetails.hospital": hospitalId,
+        });
+        if (!exist) {
+            return Promise.resolve(true);
+        }
+        else {
+            return Promise.reject(new Error("This hospital is already in doctor's profile"));
+        }
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.checkIfHospitalAlreadyExistInDoctor = checkIfHospitalAlreadyExistInDoctor;

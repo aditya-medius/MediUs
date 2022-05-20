@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import * as approvalService from "../Services/Approval-Request/Approval-Request.Service";
 import { errorResponse, successResponse } from "../Services/response";
 import * as notificationService from "../Services/Notification/Notification.Service";
+import doctorModel from "../Models/Doctors.Model";
 
 export const requestApprovalFromDoctor = async (
   req: Request,
@@ -68,6 +69,11 @@ export const requestApprovalFromHospital = async (
 ) => {
   try {
     let { doctorId, hospitalId } = req.body;
+
+    await approvalService.checkIfHospitalAlreadyExistInDoctor(
+      hospitalId,
+      doctorId
+    );
     let exist = await approvalService.hospitalKLiyeDoctorKiRequestExistKrtiHai(
       doctorId,
       hospitalId

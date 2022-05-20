@@ -31,8 +31,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = void 0;
+exports.getDoctorFeeInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
+const AppointmentPayment_Model_1 = __importDefault(require("../../Models/AppointmentPayment.Model"));
 const CreditAmount_Model_1 = __importDefault(require("../../Models/CreditAmount.Model"));
 const Withdrawal_Model_1 = __importDefault(require("../../Models/Withdrawal.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -41,6 +42,7 @@ const moment_1 = __importDefault(require("moment"));
 const Doctors_Model_1 = __importDefault(require("../../Models/Doctors.Model"));
 const Appointment_Model_1 = __importDefault(require("../../Models/Appointment.Model"));
 const Utils_1 = require("../Utils");
+const schemaNames_1 = require("../schemaNames");
 dotenv.config();
 const getUser = (req) => __awaiter(void 0, void 0, void 0, function* () {
     return req.currentDoctor ? req.currentDoctor : req.currentHospital;
@@ -303,3 +305,167 @@ const getDoctorsOfflineAndOnlineAppointments = (doctorId, body) => __awaiter(voi
     }
 });
 exports.getDoctorsOfflineAndOnlineAppointments = getDoctorsOfflineAndOnlineAppointments;
+const getListOfAllAppointments = (doctorId, page) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const limit = 10;
+        const skip = parseInt(page) * limit;
+        let appointmentsInThisHospital = yield Appointment_Model_1.default.aggregate([
+            {
+                $match: {
+                    doctors: new mongoose_1.default.Types.ObjectId(doctorId),
+                },
+            },
+            {
+                $lookup: {
+                    from: schemaNames_1.patient,
+                    localField: "patient",
+                    foreignField: "_id",
+                    as: "patient",
+                },
+            },
+            {
+                $unwind: "$patient",
+            },
+            {
+                $unwind: "$hospital",
+            },
+            {
+                $lookup: {
+                    from: schemaNames_1.hospital,
+                    localField: "hospital",
+                    foreignField: "_id",
+                    as: "hospital",
+                },
+            },
+            {
+                $lookup: {
+                    from: schemaNames_1.doctor,
+                    localField: "doctors",
+                    foreignField: "_id",
+                    as: "doctors",
+                },
+            },
+            {
+                $lookup: {
+                    from: schemaNames_1.specialization,
+                    localField: "doctors.specialization",
+                    foreignField: "_id",
+                    as: "specials",
+                },
+            },
+            // {
+            //   $unwind: "doctors.specialization",
+            // },
+            {
+                $unwind: "$doctors",
+            },
+            {
+                $unwind: "$hospital",
+            },
+            {
+                $project: {
+                    "patient.firstName": 1,
+                    "patient.lastName": 1,
+                    "patient.DOB": 1,
+                    "patient.gender": 1,
+                    "patient.phoneNumber": 1,
+                    "hospital.name": 1,
+                    "hospital.address": 1,
+                    "doctors.firstName": 1,
+                    "doctors.lastName": 1,
+                    // "doctors.specialization": 1,
+                    specials: 1,
+                    createdAt: 1,
+                    appointmentToken: 1,
+                    appointmentId: 1,
+                    appointmentType: 1,
+                    Type: 1,
+                    done: 1,
+                    cancelled: 1,
+                    rescheduled: 1,
+                    time: 1,
+                },
+            },
+            {
+                $addFields: {
+                    "patient.age": {
+                        $function: {
+                            body: function (dob) {
+                                dob = new Date(dob);
+                                let currentDate = new Date();
+                                let age = currentDate.getFullYear() - dob.getFullYear();
+                                if (age > 0) {
+                                    age = `${age} years`;
+                                }
+                                else {
+                                    age = `${age} months`;
+                                }
+                                return age;
+                            },
+                            lang: "js",
+                            args: ["$patient.DOB"],
+                        },
+                    },
+                    "doctors.specialization": "$specials",
+                },
+            },
+            {
+                $sort: {
+                    "time.date": -1,
+                },
+            },
+            {
+                $skip: skip,
+            },
+            {
+                $limit: limit,
+            },
+        ]);
+        return Promise.resolve(appointmentsInThisHospital);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.getListOfAllAppointments = getListOfAllAppointments;
+const getAppointmentFeeFromAppointmentId = (appointmentId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let appointment = yield AppointmentPayment_Model_1.default
+            .findOne({
+            appointmentId: appointmentId,
+        })
+            .populate("orderId")
+            .lean();
+        return Promise.resolve(appointment);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.getAppointmentFeeFromAppointmentId = getAppointmentFeeFromAppointmentId;
+const getDoctorFeeInHospital = (doctorId, hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let fee = (yield Doctors_Model_1.default.aggregate([
+            {
+                $match: {
+                    _id: new mongoose_1.default.Types.ObjectId(doctorId),
+                },
+            },
+            {
+                $project: {
+                    hospitalDetails: 1,
+                },
+            },
+        ]))[0];
+        fee = fee.hospitalDetails
+            .filter((e) => {
+            return e.hospital.toString() === hospitalId;
+        })
+            .map((e) => e.consultationFee);
+        return Promise.resolve({ consultationFee: fee[0] });
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.getDoctorFeeInHospital = getDoctorFeeInHospital;

@@ -5,7 +5,6 @@ export const generateOrderId = async (body: any) => {
     const receiptNumber = Math.floor(
       100000 + Math.random() * 900000
     ).toString();
-
     var opt = {
       amount: body.amount, // amount in the smallest currency unit
       currency: body.currency,

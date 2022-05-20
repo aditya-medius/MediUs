@@ -311,7 +311,7 @@ doctorRouter.post(
 /* Qualification List */
 doctorRouter.get(
   "/getQualificationList",
-  oneOf(authenticateDoctor),
+  // oneOf(authenticateDoctor),
   qualificationController.getQualificationList
 );
 
@@ -335,7 +335,7 @@ doctorRouter.put(
 
 doctorRouter.put(
   "/setConsultationFeeForDoctor",
-  oneOf(authenticateDoctor),
+  oneOf(authenticateDoctor, authenticateHospital),
   doctorController.setConsultationFeeForDoctor
 );
 
@@ -356,7 +356,7 @@ doctorRouter.put(
 /* Doctor ka presciprtion validity */
 doctorRouter.put(
   "/setPrescriptionValidity",
-  oneOf(authenticateDoctor),
+  oneOf(authenticateDoctor, authenticateHospital),
   setPrescriptionValidity
 );
 
@@ -394,5 +394,27 @@ doctorRouter.post(
   "/getHospitalsOfflineAndOnlineAppointments",
   oneOf(authenticateDoctor),
   doctorController.getHospitalsOfflineAndOnlineAppointments
+);
+doctorRouter.post(
+  "/getListOfAllAppointments/:page",
+  oneOf(authenticateDoctor),
+  doctorController.getListOfAllAppointments
+);
+
+doctorRouter.put(
+  "/deleteWorkingHour",
+  oneOf(authenticateDoctor, authenticateHospital),
+  workingHoursController.deleteWorkingHour
+);
+
+doctorRouter.get(
+  "/getAppointmentFeeFromAppointmentId/:appointmentId",
+  oneOf(authenticateDoctor),
+  doctorController.getAppointmentFeeFromAppointmentId
+);
+doctorRouter.put(
+  "/getFeeAndValidity",
+  oneOf(authenticateDoctor, authenticateHospital),
+  doctorController.getPrescriptionValidityAndFeesOfDoctorInHospital
 );
 export default doctorRouter;

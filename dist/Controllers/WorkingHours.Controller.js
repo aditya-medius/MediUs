@@ -23,7 +23,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateWorkingHour = exports.getWorkingHours = exports.createOpeningHours = exports.createWorkingHours = void 0;
+exports.deleteWorkingHour = exports.updateWorkingHour = exports.getWorkingHours = exports.createOpeningHours = exports.createWorkingHours = void 0;
 const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
 const response_1 = require("../Services/response");
 const time_class_1 = require("../Services/time.class");
@@ -113,7 +113,6 @@ const getWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function
             //   }
             // });
             // WHObj2 = formatWorkingHour([WHObj2]);
-            console.log("HOW::", WHObj);
             WHObj.map((e) => {
                 for (let data in e) {
                     if (WorkingHour_helper_1.dayArray.includes(data)) {
@@ -127,16 +126,14 @@ const getWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function
                             WHObj2.push({
                                 from: e[data].from,
                                 till: e[data].till,
-                                Days: [
-                                    { day: data, capacity: e[data].capacity, id: e[data]._id },
-                                ],
+                                Days: [{ day: data, capacity: e[data].capacity, id: e._id }],
                             });
                         }
                         else {
                             WHObj2[index].Days.push({
                                 day: data,
                                 capacity: e[data].capacity,
-                                id: e[data]._id,
+                                id: e._id,
                             });
                         }
                     }
@@ -250,6 +247,18 @@ const updateWorkingHour = (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.updateWorkingHour = updateWorkingHour;
+const deleteWorkingHour = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // await workingHourModel.findOneAndDelete({ _id: req.body.workingHour });
+        let workingIds = [...new Set(req.body.workingHour)];
+        yield WorkingHours_Model_1.default.deleteMany({ _id: { $in: workingIds } });
+        return (0, response_1.successResponse)({}, "Successully deleted slot", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.deleteWorkingHour = deleteWorkingHour;
 function timeLessThan(t1, t2) {
     if (t1.division == 1 && t2.division == 0) {
         return false;

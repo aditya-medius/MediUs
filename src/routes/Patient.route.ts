@@ -79,7 +79,7 @@ patientRouter.post(
   oneOf(authenticatePatient),
   patientController.doneAppointment
 );
-patientRouter.get(
+patientRouter.put(
   "/viewAppointById/:id",
   oneOf(authenticateDoctor, authenticateHospital, authenticatePatient),
   patientController.viewAppointById
@@ -92,7 +92,7 @@ patientRouter.post(
 
 patientRouter.post(
   "/generateOrderId",
-  oneOf(authenticatePatient),
+  oneOf(authenticatePatient, authenticateHospital),
   paymentController.generateOrderId
 );
 patientRouter.post(

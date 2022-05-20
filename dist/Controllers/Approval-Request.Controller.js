@@ -78,6 +78,7 @@ exports.denyHospitalRequest = denyHospitalRequest;
 const requestApprovalFromHospital = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { doctorId, hospitalId } = req.body;
+        yield approvalService.checkIfHospitalAlreadyExistInDoctor(hospitalId, doctorId);
         let exist = yield approvalService.hospitalKLiyeDoctorKiRequestExistKrtiHai(doctorId, hospitalId);
         let response = yield approvalService.requestApprovalFromHospital(doctorId, hospitalId);
         notificationService.sendApprovalRequestNotificationToHospital_FromDoctor(doctorId, hospitalId);

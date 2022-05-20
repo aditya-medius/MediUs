@@ -109,7 +109,6 @@ export const getWorkingHours = async (req: Request, res: Response) => {
       // });
       // WHObj2 = formatWorkingHour([WHObj2]);
 
-      console.log("HOW::", WHObj);
       WHObj.map((e: any) => {
         for (let data in e) {
           if (dayArray.includes(data)) {
@@ -125,15 +124,13 @@ export const getWorkingHours = async (req: Request, res: Response) => {
               WHObj2.push({
                 from: e[data].from,
                 till: e[data].till,
-                Days: [
-                  { day: data, capacity: e[data].capacity, id: e[data]._id },
-                ],
+                Days: [{ day: data, capacity: e[data].capacity, id: e._id }],
               });
             } else {
               WHObj2[index].Days.push({
                 day: data,
                 capacity: e[data].capacity,
-                id: e[data]._id,
+                id: e._id,
               });
             }
           }
@@ -278,6 +275,18 @@ export const updateWorkingHour = async (req: Request, res: Response) => {
       updateQuery
     );
     return successResponse({}, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const deleteWorkingHour = async (req: Request, res: Response) => {
+  try {
+    // await workingHourModel.findOneAndDelete({ _id: req.body.workingHour });
+    let workingIds = [...new Set(req.body.workingHour)];
+
+    await workingHourModel.deleteMany({ _id: { $in: workingIds } });
+    return successResponse({}, "Successully deleted slot", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

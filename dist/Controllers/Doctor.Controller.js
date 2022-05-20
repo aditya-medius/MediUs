@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getHospitalsOfflineAndOnlineAppointments = exports.deleteHolidayCalendar = exports.getDoctorsHolidayList = exports.setHolidayCalendar = exports.getDoctorsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.setConsultationFeeForDoctor = exports.addHospitalInDoctorProfile = exports.checkVerificationStatus = exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
+exports.getPrescriptionValidityAndFeesOfDoctorInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getHospitalsOfflineAndOnlineAppointments = exports.deleteHolidayCalendar = exports.getDoctorsHolidayList = exports.setHolidayCalendar = exports.getDoctorsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.setConsultationFeeForDoctor = exports.addHospitalInDoctorProfile = exports.checkVerificationStatus = exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -67,6 +67,7 @@ const Patient_Service_1 = require("../Services/Patient/Patient.Service");
 const approvalService = __importStar(require("../Services/Approval-Request/Approval-Request.Service"));
 const holidayService = __importStar(require("../Services/Holiday-Calendar/Holiday-Calendar.Service"));
 const hospitalService = __importStar(require("../Services/Hospital/Hospital.Service"));
+const prescriptionController = __importStar(require("../Controllers/Prescription-Validity.Controller"));
 exports.excludeDoctorFields = {
     password: 0,
     // panCard: 0,
@@ -271,7 +272,12 @@ const getDoctorById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         })
             .populate("hospitalDetails.workingHours")
             .populate("specialization")
-            .populate("qualification")
+            .populate({
+            path: "qualification",
+            populate: {
+                path: "qualificationName",
+            },
+        })
             .lean();
         if (doctorData) {
             doctorData.hospitalDetails = doctorData.hospitalDetails.map((elem) => {
@@ -1511,7 +1517,7 @@ const addHospitalInDoctorProfile = (req, res) => __awaiter(void 0, void 0, void 
 exports.addHospitalInDoctorProfile = addHospitalInDoctorProfile;
 const setConsultationFeeForDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let response = yield doctorService.setConsultationFeeForDoctor(req.currentDoctor, req.body.hospitalId, req.body.consultationFee);
+        let response = yield doctorService.setConsultationFeeForDoctor(req.currentDoctor ? req.currentDoctor : req.body.doctorId, req.body.hospitalId, req.body.consultationFee);
         return (0, response_1.successResponse)({}, "Success", res);
     }
     catch (error) {
@@ -1534,7 +1540,9 @@ const getListOfRequestedApprovals_ByDoctor = (req, res) => __awaiter(void 0, voi
     try {
         let doctorId = req.currentDoctor;
         let data = yield approvalService.getListOfRequestedApprovals_ByDoctor(doctorId);
-        return (0, response_1.successResponse)(data, "Success", res);
+        let data2 = yield approvalService.getListOfRequestedApprovals_OfDoctor(doctorId);
+        let response = [...data, ...data2];
+        return (0, response_1.successResponse)(response, "Success", res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);
@@ -1628,3 +1636,40 @@ const getHospitalsOfflineAndOnlineAppointments = (req, res) => __awaiter(void 0,
     }
 });
 exports.getHospitalsOfflineAndOnlineAppointments = getHospitalsOfflineAndOnlineAppointments;
+const getListOfAllAppointments = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let appointment = yield doctorService.getListOfAllAppointments(req.currentDoctor, req.params.page);
+        return (0, response_1.successResponse)(appointment, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getListOfAllAppointments = getListOfAllAppointments;
+const getAppointmentFeeFromAppointmentId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        return (0, response_1.successResponse)(yield doctorService.getAppointmentFeeFromAppointmentId(req.params.appointmentId), "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getAppointmentFeeFromAppointmentId = getAppointmentFeeFromAppointmentId;
+const getPrescriptionValidityAndFeesOfDoctorInHospital = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let doctorId;
+        let hospitalId = req.body.hospitalId;
+        if (req.currentDoctor) {
+            doctorId = req.currentDoctor;
+        }
+        else {
+            doctorId = req.body.doctorId;
+        }
+        let data = yield prescriptionController.getPrescriptionValidityAndFeesOfDoctorInHospital(hospitalId, doctorId);
+        return (0, response_1.successResponse)(data, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getPrescriptionValidityAndFeesOfDoctorInHospital = getPrescriptionValidityAndFeesOfDoctorInHospital;

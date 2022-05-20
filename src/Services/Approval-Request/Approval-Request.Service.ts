@@ -230,10 +230,27 @@ export const getListOfRequestedApprovals_OfDoctor = async (
   doctorId: string
 ) => {
   try {
-    let requestedApprovals = await approvalModel.find({
-      requestTo: doctorId,
-      "delData.deleted": false,
-    });
+    let requestedApprovals = await approvalModel
+      .find(
+        {
+          requestTo: doctorId,
+          "delData.deleted": false,
+        },
+        "-requestTo"
+      )
+      .populate({
+        path: "requestFrom",
+        select: {
+          address: 1,
+          name: 1,
+        },
+        populate: {
+          path: "address",
+          populate: {
+            path: "city state locality country",
+          },
+        },
+      });
     return Promise.resolve(requestedApprovals);
   } catch (error: any) {
     return Promise.reject(error);
@@ -246,10 +263,13 @@ export const getListOfRequestedApprovals_ByDoctor = async (
 ) => {
   try {
     let requestedApprovals = await approvalModel
-      .find({
-        requestFrom: doctorId,
-        "delData.deleted": false,
-      })
+      .find(
+        {
+          requestFrom: doctorId,
+          "delData.deleted": false,
+        },
+        "-requestFrom"
+      )
       .populate({
         path: "requestTo",
         select: {
@@ -284,6 +304,7 @@ export const getListOfRequestedApprovals_OfHospital = async (
     let requestedApprovals = await approvalModel
       .find({
         requestTo: hospitalId,
+        approvalStatus: "Pending",
         "delData.deleted": false,
       })
       .populate({
@@ -393,6 +414,27 @@ export const getRequestIdFromNotificationId = async (
       .lean();
 
     return Promise.resolve(_id);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const checkIfHospitalAlreadyExistInDoctor = async (
+  hospitalId: string,
+  doctorId: string
+) => {
+  try {
+    let exist = await doctorModel.exists({
+      _id: doctorId,
+      "hospitalDetails.hospital": hospitalId,
+    });
+    if (!exist) {
+      return Promise.resolve(true);
+    } else {
+      return Promise.reject(
+        new Error("This hospital is already in doctor's profile")
+      );
+    }
   } catch (error: any) {
     return Promise.reject(error);
   }

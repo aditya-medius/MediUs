@@ -3,8 +3,10 @@ import * as dotenv from "dotenv";
 import hospitalModel from "../../Models/Hospital.Model";
 import mongoose from "mongoose";
 import {
+  appointmentPayment,
   doctor,
   hospital,
+  order,
   patient,
   qualification,
   specialization,
@@ -18,6 +20,7 @@ import moment from "moment";
 import { BookAppointment } from "../Patient/Patient.Service";
 import creditAmountModel from "../../Models/CreditAmount.Model";
 import appointmentPaymentModel from "../../Models/AppointmentPayment.Model";
+import * as orderController from "../../Controllers/Order.Controller";
 dotenv.config();
 
 export const getHospitalToken = async (body: any) => {
@@ -225,27 +228,39 @@ export const getDoctorsListInHospital_withApprovalStatus = async (
               },
             },
           ],
-          doctors: [
+          requestTo: [
             {
               $lookup: {
-                from: "doctors",
-                localField: "doctors",
-                foreignField: "_id",
-                as: "doctors",
-              },
-            },
-            {
-              $addFields: {
-                doctor: "$doctors",
+                from: "approvalrequests",
+                localField: "_id",
+                foreignField: "requestTo",
+                as: "approved",
               },
             },
             {
               $project: {
-                doctor: 1,
+                "approved.requestFrom": 1,
+                "approved.approvalStatus": 1,
               },
             },
             {
-              $unwind: "$doctor",
+              $unwind: "$approved",
+            },
+            {
+              $lookup: {
+                from: "doctors",
+                localField: "approved.requestFrom",
+                foreignField: "_id",
+                as: "approved.doctor",
+              },
+            },
+            {
+              $unwind: "$approved.doctor",
+            },
+            {
+              $addFields: {
+                doctor: "$approved.doctor",
+              },
             },
             {
               $lookup: {
@@ -286,13 +301,80 @@ export const getDoctorsListInHospital_withApprovalStatus = async (
                 },
               },
             },
+            {
+              $project: {
+                approved: 0,
+              },
+            },
           ],
+          // doctors: [
+          //   {
+          //     $lookup: {
+          //       from: "doctors",
+          //       localField: "doctors",
+          //       foreignField: "_id",
+          //       as: "doctors",
+          //     },
+          //   },
+          //   {
+          //     $addFields: {
+          //       doctor: "$doctors",
+          //     },
+          //   },
+          //   {
+          //     $project: {
+          //       doctor: 1,
+          //     },
+          //   },
+          //   {
+          //     $unwind: "$doctor",
+          //   },
+          //   {
+          //     $lookup: {
+          //       from: qualification,
+          //       localField: "doctor.qualification",
+          //       foreignField: "_id",
+          //       as: "doctor.qualification",
+          //     },
+          //   },
+          //   {
+          //     $lookup: {
+          //       from: specialization,
+          //       localField: "doctor.specialization",
+          //       foreignField: "_id",
+          //       as: "doctor.specialization",
+          //     },
+          //   },
+          //   {
+          //     $addFields: {
+          //       status: "$approved.approvalStatus",
+          //       experience: {
+          //         $function: {
+          //           body: function (experience: any) {
+          //             experience = new Date(experience);
+          //             let currentDate = new Date();
+          //             let age: number | string =
+          //               currentDate.getFullYear() - experience.getFullYear();
+          //             if (age > 0) {
+          //               age = `${age} years`;
+          //             } else {
+          //               age = `${age} months`;
+          //             }
+          //             return age;
+          //           },
+          //           lang: "js",
+          //           args: ["$doctor.overallExperience"],
+          //         },
+          //       },
+          //     },
+          //   },
+          // ],
         },
       },
       {
         $project: {
           doctors: {
-            $setUnion: ["$approved", "$doctors"],
+            $setUnion: ["$approved", "$requestTo"],
           },
         },
       },
@@ -463,6 +545,7 @@ export const getPatientsAppointmentsInThisHospital = async (
           "hospital.address": 1,
           "doctors.firstName": 1,
           "doctors.lastName": 1,
+          "doctors._id": 1,
           // "doctors.specialization": 1,
           specials: 1,
           createdAt: 1,
@@ -498,6 +581,42 @@ export const getPatientsAppointmentsInThisHospital = async (
           },
           "doctors.specialization": "$specials",
         },
+      },
+      {
+        $lookup: {
+          from: appointmentPayment,
+          let: { id: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$appointmentId", "$$id"] },
+              },
+            },
+            {
+              $lookup: {
+                from: order,
+                localField: "orderId",
+                foreignField: "_id",
+                as: "order",
+              },
+            },
+            {
+              $unwind: "$order",
+            },
+            {
+              $project: {
+                order: 1,
+              },
+            },
+          ],
+          as: "paymentInfo",
+          // localField: "_id",
+          // foreignField: "appointmentId",
+          // as: "paymentInfo",
+        },
+      },
+      {
+        $unwind: "$paymentInfo",
       },
       {
         $sort: {
@@ -543,6 +662,25 @@ export const verifyPayment = async (body: any) => {
       orderId: body.appointmentOrderId,
       appointmentDetails: appointmentBook._id,
     }).save();
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const generateOrderId = async (body: any) => {
+  try {
+    const { appointmentOrderId, options, receiptNumber } =
+      await orderController.generateOrderId(body);
+
+    let orderId = `order_${Math.floor(
+      100000 + Math.random() * 900000
+    ).toString()}`;
+
+    return Promise.resolve({
+      appointmentOrderId,
+      orderId: orderId,
+      orderReceipt: `order_rcptid_${receiptNumber}`,
+    });
   } catch (error: any) {
     return Promise.reject(error);
   }

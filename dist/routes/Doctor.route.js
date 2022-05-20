@@ -177,17 +177,19 @@ doctorRouter.post("/addHospitalInDoctorProfile", (0, middlewareHelper_1.oneOf)(H
 // },
 doctorController.addHospitalInDoctorProfile);
 /* Qualification List */
-doctorRouter.get("/getQualificationList", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), qualificationController.getQualificationList);
+doctorRouter.get("/getQualificationList", 
+// oneOf(authenticateDoctor),
+qualificationController.getQualificationList);
 doctorRouter.put("/requestApprovalFromHospital", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), Approval_Request_Controller_1.requestApprovalFromHospital);
 doctorRouter.put("/approveHospitalRequest", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), Approval_Request_Controller_1.approveHospitalRequest);
 doctorRouter.put("/denyHospitalRequest", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), Approval_Request_Controller_1.denyHospitalRequest);
-doctorRouter.put("/setConsultationFeeForDoctor", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.setConsultationFeeForDoctor);
+doctorRouter.put("/setConsultationFeeForDoctor", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), doctorController.setConsultationFeeForDoctor);
 /* Doctor ko kitno ne approval k liye request ki hai  */
 doctorRouter.put("/getListOfRequestedApprovals_OfDoctor", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getListOfRequestedApprovals_OfDoctor);
 /* Doctor ne kitno se approval ki request ki hai */
 doctorRouter.put("/getListOfRequestedApprovals_ByDoctor", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getListOfRequestedApprovals_ByDoctor);
 /* Doctor ka presciprtion validity */
-doctorRouter.put("/setPrescriptionValidity", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), Prescription_Validity_Controller_1.setPrescriptionValidity);
+doctorRouter.put("/setPrescriptionValidity", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), Prescription_Validity_Controller_1.setPrescriptionValidity);
 /* Doctors ki offline aur online appointment */
 doctorRouter.get("/getDoctorsOfflineAndOnlineAppointments", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getDoctorsOfflineAndOnlineAppointments);
 /* Doctors k liye kya notification hai */
@@ -196,4 +198,8 @@ doctorRouter.post("/setHolidayCalendar", (0, middlewareHelper_1.oneOf)(Doctor_au
 doctorRouter.put("/getDoctorsHolidayList", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), doctorController.getDoctorsHolidayList);
 doctorRouter.put("/deleteHolidayCalendar", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.deleteHolidayCalendar);
 doctorRouter.post("/getHospitalsOfflineAndOnlineAppointments", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getHospitalsOfflineAndOnlineAppointments);
+doctorRouter.post("/getListOfAllAppointments/:page", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getListOfAllAppointments);
+doctorRouter.put("/deleteWorkingHour", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), workingHoursController.deleteWorkingHour);
+doctorRouter.get("/getAppointmentFeeFromAppointmentId/:appointmentId", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getAppointmentFeeFromAppointmentId);
+doctorRouter.put("/getFeeAndValidity", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), doctorController.getPrescriptionValidityAndFeesOfDoctorInHospital);
 exports.default = doctorRouter;

@@ -115,7 +115,7 @@ hospitalRouter.put("/updateHospitalAddress", (0, middlewareHelper_1.oneOf)(Hospi
 hospitalRouter.put("/getHospitalsSpecilization_AccordingToDoctor", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getHospitalsSpecilization_AccordingToDoctor);
 hospitalRouter.put("/getDoctorsListInHospital_withApprovalStatus", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getDoctorsListInHospital_withApprovalStatus);
 hospitalRouter.get("/searchHospitalByPhoneNumber/:term", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital, Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), hospitalController.searchHospitalByPhoneNumber);
-hospitalRouter.get("/getFees", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+hospitalRouter.get("/getFees", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital, Doctor_auth_1.authenticateDoctor), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let data = yield feeService.getAllFees();
         return (0, response_1.successResponse)(data, "Success", res);
@@ -126,4 +126,5 @@ hospitalRouter.get("/getFees", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.aut
 }));
 hospitalRouter.put("/getPatientsAppointmentsInThisHospital/:page", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getPatientsAppointmentsInThisHospital);
 hospitalRouter.post("/verifyPayment", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.verifyPayment);
+hospitalRouter.post("/generateOrderId", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.generateOrderId);
 exports.default = hospitalRouter;
