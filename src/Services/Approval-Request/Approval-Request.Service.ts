@@ -419,6 +419,16 @@ export const getRequestIdFromNotificationId = async (
   }
 };
 
+export const checkIfNotificationExist = async (notificationId: string) => {
+  try {
+    return Promise.resolve(
+      await notificationsModel.exists({ _id: notificationId })
+    );
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
 export const checkIfHospitalAlreadyExistInDoctor = async (
   hospitalId: string,
   doctorId: string

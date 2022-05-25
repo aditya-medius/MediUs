@@ -33,7 +33,12 @@ export const requestApprovalFromDoctor = async (
 export const approveHospitalRequest = async (req: Request, res: Response) => {
   try {
     let { requestId } = req.body;
-    requestId = await approvalService.getRequestIdFromNotificationId(requestId);
+    let exist = await approvalService.checkIfNotificationExist(requestId);
+    if (exist) {
+      requestId = await approvalService.getRequestIdFromNotificationId(
+        requestId
+      );
+    }
     let requestExist = await approvalService.canThisDoctorApproveThisRequest(
       requestId,
       req.currentDoctor
