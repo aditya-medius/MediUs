@@ -1,6 +1,7 @@
 import workingHourModel from "../../Models/WorkingHours.Model";
 import appointmentModel from "../../Models/Appointment.Model";
 import moment from "moment";
+import { generateAppointmentId, getTokenNumber } from "../Appointment/Appointment.Service";
 
 export const BookAppointment = async (body: any) => {
   try {
@@ -71,6 +72,11 @@ export const BookAppointment = async (body: any) => {
     //     new Error("Doctor cannot take any more appointments")
     //   );
     // }
+    let appointmentTokenNumber = await getTokenNumber(body);
+    let appointmentId = generateAppointmentId();
+
+    body["appointmentToken"] = appointmentTokenNumber;
+    body["appointmentId"] = appointmentId;
     let appointmentBook = await new appointmentModel(body).save();
     await appointmentBook.populate({
       path: "subPatient",

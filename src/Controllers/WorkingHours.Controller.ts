@@ -12,10 +12,10 @@ import mongoose, { ObjectId } from "mongoose";
 export const createWorkingHours = async (req: Request, res: Response) => {
   try {
     let body: any = req.body;
-    body.doctorDetails = req.currentDoctor;
+    body.doctorDetails = req.currentDoctor ? req.currentDoctor : body.doctorId;
     let workingHour = await workingHourModel.find(
       {
-        doctorDetails: req.currentDoctor,
+        doctorDetails: req.currentDoctor ? req.currentDoctor : body.doctorId,
         hospitalDetails: body.hospitalId,
       },
       { doctorDetails: 0, hospitalDetails: 0 }

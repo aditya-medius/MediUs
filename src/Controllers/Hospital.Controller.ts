@@ -56,22 +56,22 @@ export const login = async (req: Request, res: Response) => {
         const OTP = Math.floor(100000 + Math.random() * 900000).toString();
 
         // Implement message service API
-        sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
-          .then(async (message) => {
-            const otpToken = jwt.sign(
-              { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
-              OTP
-            );
-            // Add OTP and phone number to temporary collection
-            await otpModel.findOneAndUpdate(
-              { phoneNumber: body.phoneNumber },
-              { $set: { phoneNumber: body.phoneNumber, otp: otpToken } },
-              { upsert: true }
-            );
-          })
-          .catch((error) => {
-            throw error;
-          });
+        // sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
+        //   .then(async (message) => {
+        //   })
+        //   .catch((error) => {
+        //     throw error;
+        //   });
+        const otpToken = jwt.sign(
+          { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
+          OTP
+        );
+        // Add OTP and phone number to temporary collection
+        await otpModel.findOneAndUpdate(
+          { phoneNumber: body.phoneNumber },
+          { $set: { phoneNumber: body.phoneNumber, otp: otpToken } },
+          { upsert: true }
+        );
 
         return successResponse({}, "OTP sent successfully", res);
       } else {
@@ -127,12 +127,11 @@ export const login = async (req: Request, res: Response) => {
       });
       try {
         // Abhi k liye OTP verification hata di hai
-        // const data: any = await jwt.verify(otpData.otp, body.OTP);
-        // if (Date.now() > data.expiresIn)
-        //   return errorResponse(new Error("OTP expired"), res);
-
-        // if (body.OTP === data.otp) {
-        if (true) {
+        const data: any = await jwt.verify(otpData.otp, body.OTP);
+        if (Date.now() > data.expiresIn)
+          return errorResponse(new Error("OTP expired"), res);
+        if (body.OTP === data.otp) {
+          // if (true) {
           const profile = await hospitalModel.findOne({
             contactNumber: body.phoneNumber,
             deleted: false,
@@ -314,6 +313,18 @@ export const getAnemities = async (req: Request, res: Response) => {
     let body = req.body;
     let anemityObj = await anemityModel.find({});
     return successResponse(anemityObj, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const deleteAnemities = async (req: Request, res: Response) => {
+  try {
+    return successResponse(
+      await anemityModel.findOneAndDelete({ _id: req.params.id }),
+      "Success",
+      res
+    );
   } catch (error: any) {
     return errorResponse(error, res);
   }
@@ -613,6 +624,7 @@ export const searchHospital = async (req: Request, res: Response) => {
 
     Promise.all(promiseArray)
       .then(async (specialityArray: Array<any>) => {
+        console.log("speciality", specialityArray);
         let formatArray = (arr: Array<any>) => {
           arr = arr.flat();
           return _.map(arr, (e) =>
@@ -828,7 +840,6 @@ export const getAppointmentByDate = async (req: Request, res: Response) => {
 
     gtDate.setDate(gtDate.getDate() + 1);
     gtDate.setUTCHours(0, 0, 0, 0);
-
     let appointmenObj = await appointmentModel
       .find({
         hospital: req.currentHospital,
@@ -1209,9 +1220,21 @@ export const searchHospitalByPhoneNumber = async (
         .findOne({
           contactNumber: term,
         })
-        .populate("address")
+        .populate({
+          path: "address",
+          populate: {
+            path: "city state locality country",
+          },
+        })
         .lean();
     }
+    let doctorIds = hospitalObj.doctors.map((e: any) => e.toString());
+    if (doctorIds.includes(req.currentDoctor)) {
+      hospitalObj["containsDoctor"] = true;
+    } else {
+      hospitalObj["containsDoctor"] = false;
+    }
+
     if (hospitalObj) {
       return successResponse(hospitalObj, "Success", res);
     }

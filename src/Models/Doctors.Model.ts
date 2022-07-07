@@ -147,7 +147,7 @@ doctorSchema.pre("save", async function (next) {
       { deleted: false },
     ],
   });
-  if (/^[0]?[789]\d{9}$/.test(this.phoneNumber)) {
+  if (/^[0]?[6789]\d{9}$/.test(this.phoneNumber)) {
     if (
       !(profileExist || hospitalExist || patientExist) ||
       this.phoneNumber == "9999999999"
@@ -286,17 +286,8 @@ doctorSchema.pre("findOneAndUpdate", async function (next) {
   next();
 });
 
-// Hospital details validation
-// doctorSchema.path("hospitalDetails").validate(function (hospital: any) {
-//   if (hospital.length < 1) {
-//     return false;
-//   }
-//   return true;
-// }, "Hospital details are required");
 
 doctorSchema.path("hospitalDetails").validate(function (hospital: any) {
-  // if (hospital.lenght) {
-  // }let element
   let element: any;
   if (hospital.length > 1) {
     for (let index = 0; index < hospital.length; index++) {
@@ -316,22 +307,6 @@ doctorSchema.path("hospitalDetails").validate(function (hospital: any) {
   }
   return true;
 }, "Cannot enter same hospital twice");
-
-// Specialization validation
-// doctorSchema.path("specialization").validate(function (specialization: any) {
-//   if (specialization.length < 1) {
-//     return false;
-//   }
-//   return true;
-// }, "specialization details are required");
-
-// Qualification Validation
-// doctorSchema.path("qualification").validate(function (qualification: any) {
-//   if (qualification.length < 1) {
-//     return false;
-//   }
-//   return true;
-// }, "qualification details are required");
 
 ["remove", "findOneAndDelete"].forEach((e: string) => {
   doctorSchema.pre(e, async function (next) {

@@ -48,7 +48,6 @@ const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
 const bcrypt = __importStar(require("bcrypt"));
 const response_1 = require("../Services/response");
-const message_service_1 = require("../Services/message.service");
 const SpecialityBody_Model_1 = __importDefault(require("../Admin Controlled Models/SpecialityBody.Model"));
 const underscore_1 = __importDefault(require("underscore"));
 const SpecialityDisease_Model_1 = __importDefault(require("../Admin Controlled Models/SpecialityDisease.Model"));
@@ -130,15 +129,15 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
                 const OTP = Math.floor(100000 + Math.random() * 900000).toString();
                 if (!(body.phoneNumber == "9999999999")) {
-                    (0, message_service_1.sendMessage)(`Your OTP is: ${OTP}`, body.phoneNumber)
-                        .then((message) => __awaiter(void 0, void 0, void 0, function* () {
-                        const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 }, OTP);
-                        // Add OTP and phone number to temporary collection
-                        yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: body.phoneNumber }, { $set: { phoneNumber: body.phoneNumber, otp: otpToken } }, { upsert: true });
-                    }))
-                        .catch((error) => {
-                        throw error;
-                    });
+                    // sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
+                    //   .then(async (message) => {
+                    //   })
+                    //   .catch((error) => {
+                    //     throw error;
+                    //   });
+                    const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 }, OTP);
+                    // Add OTP and phone number to temporary collection
+                    yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: body.phoneNumber }, { $set: { phoneNumber: body.phoneNumber, otp: otpToken } }, { upsert: true });
                     return (0, response_1.successResponse)({}, "OTP sent successfully", res);
                 }
                 else {
@@ -179,11 +178,10 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             });
             try {
                 // Abhi k liye OTP verification hata di hai
-                // const data: any = await jwt.verify(otpData.otp, body.OTP);
-                // if (Date.now() > data.expiresIn)
-                //   return errorResponse(new Error("OTP expired"), res);
-                // if (body.OTP === data.otp) {
-                if (true) {
+                const data = yield jwt.verify(otpData.otp, body.OTP);
+                if (Date.now() > data.expiresIn)
+                    return (0, response_1.errorResponse)(new Error("OTP expired"), res);
+                if (body.OTP === data.otp) {
                     let profile = yield Doctors_Model_1.default.findOne({
                         phoneNumber: body.phoneNumber,
                         deleted: false,
@@ -365,6 +363,7 @@ exports.deleteProfile = deleteProfile;
 const searchDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const term = req.params.term;
+        let { city } = req.query;
         const promiseArray = [
             SpecialityBody_Model_1.default.aggregate([
                 {
@@ -573,7 +572,7 @@ const searchDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             let id = specialityArray.splice(-1, 1);
             id = formatArray(id);
             specialityArray = formatArray(specialityArray);
-            const doctorArray = yield Doctors_Model_1.default
+            let doctorArray = yield Doctors_Model_1.default
                 .find({
                 $or: [
                     {
@@ -584,10 +583,26 @@ const searchDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                         _id: { $in: id },
                     },
                 ],
-            }, Object.assign(Object.assign({}, exports.excludeDoctorFields), { "hospitalDetails.hospital": 0, "hospitalDetails.workingHours": 0 }))
+            }, Object.assign({}, exports.excludeDoctorFields))
                 .populate("specialization")
-                // .populate("hospitalDetails.hospital")
-                .populate({ path: "qualification", select: { duration: 0 } });
+                .populate({ path: "qualification", select: { duration: 0 } })
+                .populate({
+                path: "hospitalDetails.hospital",
+                populate: {
+                    path: "address",
+                    populate: { path: "city state locality country" },
+                },
+            });
+            if (city) {
+                doctorArray = doctorArray.filter((e) => {
+                    let data = e.hospitalDetails.filter((elem) => {
+                        return elem.hospital.address.city._id
+                            ? elem.hospital.address.city._id.toString() === city
+                            : false;
+                    });
+                    return data.length ? true : false;
+                });
+            }
             return (0, response_1.successResponse)(doctorArray, "Success", res);
         }))
             .catch((error) => {
@@ -823,10 +838,15 @@ const viewAppointmentsByDate = (req, res) => __awaiter(void 0, void 0, void 0, f
         const skip = parseInt(req.params.page) * limit;
         const date = req.body.date;
         let d = new Date(date);
-        let gtDate = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+        // console.log("date", d);
+        // let gtDate: Date = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+        // let ltDate: Date = new Date(gtDate);
+        // ltDate.setDate(gtDate.getDate() - 1);
+        // ltDate.setUTCHours(24, 60, 60, 0);
+        // gtDate.setDate(gtDate.getDate() + 1);
+        // gtDate.setUTCHours(0, 0, 0, 0);
+        let gtDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
         let ltDate = new Date(gtDate);
-        ltDate.setDate(gtDate.getDate() - 1);
-        ltDate.setUTCHours(24, 60, 60, 0);
         gtDate.setDate(gtDate.getDate() + 1);
         gtDate.setUTCHours(0, 0, 0, 0);
         let query = {
@@ -1666,7 +1686,8 @@ const getPrescriptionValidityAndFeesOfDoctorInHospital = (req, res) => __awaiter
             doctorId = req.body.doctorId;
         }
         let data = yield prescriptionController.getPrescriptionValidityAndFeesOfDoctorInHospital(hospitalId, doctorId);
-        return (0, response_1.successResponse)(data, "Success", res);
+        let [p, c] = data;
+        return (0, response_1.successResponse)(Object.assign(Object.assign({}, p), c), "Success", res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);

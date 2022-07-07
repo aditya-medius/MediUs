@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPatientsNotification = exports.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod = exports.searchPatientByPhoneNumberOrEmail = exports.checkDoctorAvailability = exports.uploadPrescription = exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.viewAppointById = exports.CancelAppointment = exports.doneAppointment = exports.rescheduleAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = exports.excludeHospitalFields = exports.excludePatientFields = void 0;
+exports.checkIfDoctorIsOnHoliday = exports.getPatientsNotification = exports.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod = exports.searchPatientByPhoneNumberOrEmail = exports.checkDoctorAvailability = exports.uploadPrescription = exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.viewAppointById = exports.CancelAppointment = exports.doneAppointment = exports.rescheduleAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = exports.excludeHospitalFields = exports.excludePatientFields = void 0;
 const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
 // import { excludePatientFields } from "./Patient.Controller";
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
@@ -39,8 +39,6 @@ const Appointment_Model_1 = __importDefault(require("../Models/Appointment.Model
 const jwt = __importStar(require("jsonwebtoken"));
 const bcrypt = __importStar(require("bcrypt"));
 const response_1 = require("../Services/response");
-// import { sendMessage } from "../Services/message.service";
-const message_service_1 = require("../Services/message.service");
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const Doctor_Controller_1 = require("./Doctor.Controller");
 const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
@@ -56,6 +54,7 @@ const Validation_Service_1 = require("../Services/Validation.Service");
 const Appointment_Service_1 = require("../Services/Appointment/Appointment.Service");
 const prescriptionValidityController = __importStar(require("../Controllers/Prescription-Validity.Controller"));
 const Order_Model_1 = __importDefault(require("../Models/Order.Model"));
+const Doctor_Service_1 = require("../Services/Doctor/Doctor.Service");
 exports.excludePatientFields = {
     password: 0,
     verified: 0,
@@ -114,17 +113,17 @@ const patientLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
                 const OTP = Math.floor(100000 + Math.random() * 900000).toString();
                 // Implement message service API
-                (0, message_service_1.sendMessage)(`Your OTP is: ${OTP}`, body.phoneNumber)
-                    .then((message) => __awaiter(void 0, void 0, void 0, function* () {
-                    const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 }, OTP);
-                    // Add OTP and phone number to temporary collection
-                    yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: body.phoneNumber }, { $set: { phoneNumber: body.phoneNumber, otp: otpToken } }, { upsert: true });
-                }))
-                    .catch((error) => {
-                    // throw error;
-                    console.log("error :", error);
-                    // return errorResponse(error, res);
-                });
+                // sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
+                //   .then(async (message) => {
+                //   })
+                //   .catch((error) => {
+                //     // throw error;
+                //     console.log("error :", error);
+                //     // return errorResponse(error, res);
+                //   });
+                const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 }, OTP);
+                // Add OTP and phone number to temporary collection
+                yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: body.phoneNumber }, { $set: { phoneNumber: body.phoneNumber, otp: otpToken } }, { upsert: true });
                 return (0, response_1.successResponse)({}, `OTP sent successfully`, res);
             }
             else {
@@ -148,11 +147,11 @@ const patientLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             });
             try {
                 // Abhi k liye OTP verification hata di hai
-                // const data: any = await jwt.verify(otpData.otp, body.OTP);
-                // if (Date.now() > data.expiresIn)
-                //   return errorResponse(new Error("OTP expired"), res);
-                // if (body.OTP === data.otp) {
-                if (true) {
+                const data = yield jwt.verify(otpData.otp, body.OTP);
+                if (Date.now() > data.expiresIn)
+                    return (0, response_1.errorResponse)(new Error("OTP expired"), res);
+                if (body.OTP === data.otp) {
+                    // if (true) {
                     const profile = yield Patient_Model_1.default.findOne({
                         phoneNumber: body.phoneNumber,
                         deleted: false,
@@ -754,8 +753,15 @@ const getHospitalsByCity = (req, res) => __awaiter(void 0, void 0, void 0, funct
         let addressIds = addressById.map((e) => {
             return e._id;
         });
-        const hospitalsInThatCity = yield Hospital_Model_1.default.find({
+        const hospitalsInThatCity = yield Hospital_Model_1.default
+            .find({
             address: { $in: addressIds },
+        })
+            .populate({
+            path: "address",
+            populate: {
+                path: "city state locality country",
+            },
         });
         return (0, response_1.successResponse)(hospitalsInThatCity, "Success", res);
     }
@@ -775,7 +781,10 @@ const getDoctorsByCity = (req, res) => __awaiter(void 0, void 0, void 0, functio
             .find({
             address: { $in: addressIds },
         }, { doctors: 1 })
-            .populate({ path: "doctors", select: Doctor_Controller_1.excludeDoctorFields });
+            .populate({
+            path: "doctors",
+            select: Doctor_Controller_1.excludeDoctorFields,
+        });
         hospitalsInThatCity = hospitalsInThatCity.filter((e) => e.doctors.length > 0);
         // Isme ek particular hospital k liye consultation fee dikhani hai.
         // Match krna padega k kissi city k liye kissi hospital me kissi doctor ki
@@ -788,7 +797,24 @@ const getDoctorsByCity = (req, res) => __awaiter(void 0, void 0, void 0, functio
             .find({
             _id: { $in: doctorsInThatCity },
         }, Doctor_Controller_1.excludeDoctorFields)
-            .populate("specialization qualification");
+            .populate({
+            path: "specialization",
+        })
+            .populate({
+            path: "hospitalDetails.hospital",
+            populate: {
+                path: "address",
+                populate: {
+                    path: "city state locality country",
+                },
+            },
+        })
+            .populate({
+            path: "qualification",
+            populate: {
+                path: "qualificationName",
+            },
+        });
         // .populate("hospitalDetails.hospital");
         return (0, response_1.successResponse)(doctorsInThatCity, "Success", res);
     }
@@ -883,3 +909,14 @@ const getPatientsNotification = (req, res) => __awaiter(void 0, void 0, void 0, 
     }
 });
 exports.getPatientsNotification = getPatientsNotification;
+const checkIfDoctorIsOnHoliday = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let { date, month, year, doctorId, hospitalId } = req.body;
+        let holidayExist = yield (0, Doctor_Service_1.checkIfDoctorIsAvailableOnTheDay)(date, month, year, doctorId, hospitalId);
+        return (0, response_1.successResponse)(holidayExist, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.checkIfDoctorIsOnHoliday = checkIfDoctorIsOnHoliday;

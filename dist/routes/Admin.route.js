@@ -57,6 +57,7 @@ adminRouter.post("/create", adminController.create);
 adminRouter.put("/login", adminController.login);
 // Anemity controller
 adminRouter.post("/addHospitalService", adminController.addHospitalService);
+adminRouter.post("/deleteHospitalService/:id", adminController.deleteHospitalService);
 // Verification doctors ka
 adminRouter.get("/getUnverifiedDoctors", adminController.getUnverifiedDoctors);
 adminRouter.put("/verifyDoctors/:doctorId", adminController.verifyDoctors);
@@ -79,10 +80,15 @@ adminRouter.post("/uploadCSV_city", upload.single("file"), adminController.uploa
 adminRouter.post("/uploadCSV_locality", upload.single("file"), adminController.uploadCSV_locality);
 adminRouter.get("/getQualificationList", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), qualificationController.getQualificationList);
 adminRouter.post("/addQualificationName", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), qualificationController.addQualificationName);
+adminRouter.post("/deleteQualification/:id", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), qualificationController.deleteQualification);
 /* Qualification */
 adminRouter.post("/addQualification", adminController.addQualificationn);
 adminRouter.post("/addAnemities", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), hospitalController.createHospitalAnemity);
 adminRouter.get("/getAllAnemities", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), hospitalController.getAnemities);
+adminRouter.get("/deleteAnemities/:id", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), hospitalController.deleteAnemities);
 adminRouter.post("/createFee", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), adminController.createFee);
+adminRouter.post("/addOwnership", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), adminController.addOwnership);
+adminRouter.get("/getOwnership", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), adminController.getOwnership);
+adminRouter.post("/deleteOwnership/:id", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), adminController.deleteOwnership);
 adminRouter.get("/getFees", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), adminController.getFees);
 exports.default = adminRouter;

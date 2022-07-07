@@ -118,7 +118,7 @@ const getPrescriptionValidityAndFeesOfDoctorInHospital = (hospitalId, doctorId) 
 exports.getPrescriptionValidityAndFeesOfDoctorInHospital = getPrescriptionValidityAndFeesOfDoctorInHospital;
 const getDoctorPrescriptionInHospital = (hospitalId, doctorId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let prescription = yield Prescription_Validity_Model_1.default.findOne({ doctorId }, "validateTill");
+        let prescription = yield Prescription_Validity_Model_1.default.find({ doctorId, hospitalId }, "validateTill");
         return Promise.resolve({ prescription });
     }
     catch (error) {

@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDoctorFeeInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = void 0;
+exports.checkIfDoctorIsAvailableOnTheDay = exports.getDoctorFeeInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const AppointmentPayment_Model_1 = __importDefault(require("../../Models/AppointmentPayment.Model"));
 const CreditAmount_Model_1 = __importDefault(require("../../Models/CreditAmount.Model"));
@@ -43,6 +43,7 @@ const Doctors_Model_1 = __importDefault(require("../../Models/Doctors.Model"));
 const Appointment_Model_1 = __importDefault(require("../../Models/Appointment.Model"));
 const Utils_1 = require("../Utils");
 const schemaNames_1 = require("../schemaNames");
+const Holiday_Calendar_Model_1 = __importDefault(require("../../Models/Holiday-Calendar.Model"));
 dotenv.config();
 const getUser = (req) => __awaiter(void 0, void 0, void 0, function* () {
     return req.currentDoctor ? req.currentDoctor : req.currentHospital;
@@ -469,3 +470,21 @@ const getDoctorFeeInHospital = (doctorId, hospitalId) => __awaiter(void 0, void 
     }
 });
 exports.getDoctorFeeInHospital = getDoctorFeeInHospital;
+const checkIfDoctorIsAvailableOnTheDay = (date, month, year, doctorId, hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        month = month - 1;
+        let startDate = new Date(year, month, date);
+        let endDate = new Date(year, month, date + 1);
+        let holidayExist = yield Holiday_Calendar_Model_1.default.findOne({
+            doctorId,
+            hospitalId,
+            date: { $gte: startDate, $lte: endDate },
+            "delData.deleted": false,
+        });
+        return Promise.resolve(holidayExist);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.checkIfDoctorIsAvailableOnTheDay = checkIfDoctorIsAvailableOnTheDay;

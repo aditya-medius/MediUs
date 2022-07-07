@@ -33,7 +33,12 @@ export const requestApprovalFromDoctor = async (
 export const approveHospitalRequest = async (req: Request, res: Response) => {
   try {
     let { requestId } = req.body;
-    requestId = await approvalService.getRequestIdFromNotificationId(requestId);
+    let exist = await approvalService.checkIfNotificationExist(requestId);
+    if (exist) {
+      requestId = await approvalService.getRequestIdFromNotificationId(
+        requestId
+      );
+    }
     let requestExist = await approvalService.canThisDoctorApproveThisRequest(
       requestId,
       req.currentDoctor
@@ -41,6 +46,13 @@ export const approveHospitalRequest = async (req: Request, res: Response) => {
 
     if (requestExist) {
       let response = await approvalService.approveHospitalRequest(requestId);
+
+      let notificationId = await approvalService.getNotificationFromRequestId(
+        requestId
+      );
+      console.log("ssss", notificationId);
+
+      await approvalService.updateNotificationReadStatus(notificationId);
       return successResponse(response, "Success", res);
     } else {
       throw new Error(
@@ -54,6 +66,8 @@ export const approveHospitalRequest = async (req: Request, res: Response) => {
 
 export const denyHospitalRequest = async (req: Request, res: Response) => {
   try {
+
+    // Is method me approve hospital jaisi same problem hai. Eventually yeh uske jaisa hi banega
     let { requestId } = req.body;
     requestId = await approvalService.getRequestIdFromNotificationId(requestId);
     let response = await approvalService.denyHospitalRequest(requestId);

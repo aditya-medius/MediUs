@@ -73,9 +73,9 @@ patientRouter.get("/viewAppointment/:page", (0, middlewareHelper_1.oneOf)(Patien
 // Get all the entities of filter
 patientRouter.get("/getSpecialityBodyPartAndDisease", patientController.getSpecialityBodyPartAndDisease);
 // Get hospitals by city
-patientRouter.get("/getHospitalsByCity", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.getHospitalsByCity);
+patientRouter.post("/getHospitalsByCity", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.getHospitalsByCity);
 // Get doctors by city
-patientRouter.get("/getDoctorsByCity", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.getDoctorsByCity);
+patientRouter.post("/getDoctorsByCity", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.getDoctorsByCity);
 //upload prescription
 patientRouter.post("/uploadPrescription", upload.single("prescription"), Patient_auth_1.authenticatePatient, patientController.uploadPrescription);
 // Sub Patient
@@ -99,4 +99,5 @@ patientRouter.get("/getFees", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authe
         return (0, response_1.errorResponse)(error, res);
     }
 }));
+patientRouter.post("/checkIfDoctorIsOnHoliday", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital, Doctor_auth_1.authenticateDoctor), patientController.checkIfDoctorIsOnHoliday);
 exports.default = patientRouter;

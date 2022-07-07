@@ -9,6 +9,7 @@ import {
   order,
   patient,
   qualification,
+  qualificationNames,
   specialization,
 } from "../schemaNames";
 import approvalModel from "../../Models/Approval-Request.Model";
@@ -129,6 +130,27 @@ export const getHospitalsSpecilization_AccordingToDoctor = async (
           specialization: 1,
         },
       },
+      {
+        $project: {
+          "specialization._id": 1,
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          specializations: {
+            $addToSet: "$specialization._id",
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "specializations",
+          localField: "specializations",
+          foreignField: "_id",
+          as: "specializations",
+        },
+      },
     ]);
 
     return Promise.resolve(specializaitons);
@@ -189,6 +211,14 @@ export const getDoctorsListInHospital_withApprovalStatus = async (
                 localField: "doctor.qualification",
                 foreignField: "_id",
                 as: "doctor.qualification",
+              },
+            },
+            {
+              $lookup: {
+                from: qualificationNames,
+                localField: "doctor.qualification.qualificationName",
+                foreignField: "_id",
+                as: "doctor.qualification.qualificationName",
               },
             },
             {
@@ -268,6 +298,14 @@ export const getDoctorsListInHospital_withApprovalStatus = async (
                 localField: "doctor.qualification",
                 foreignField: "_id",
                 as: "doctor.qualification",
+              },
+            },
+            {
+              $lookup: {
+                from: qualificationNames,
+                localField: "doctor.qualification.qualificationName",
+                foreignField: "_id",
+                as: "doctor.qualification.qualificationName",
               },
             },
             {

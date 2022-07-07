@@ -84,7 +84,7 @@ hospitalRouter.post("/anemity", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.au
 hospitalRouter.get("/getAnemities", hospitalController.getAnemities);
 hospitalRouter.get("/getServices", hospitalController.getServices);
 // hospitalRouter.post("/speciality",oneOf(authenticateHospital),hospitalController.addHospitalSpeciality);
-hospitalRouter.post("/findHospitalBySpecialityOrBodyPart/:term", hospitalController.searchHospital);
+hospitalRouter.get("/findHospitalBySpecialityOrBodyPart/:term", hospitalController.searchHospital);
 //ADD DOCTOR TO THE HOSPITAL
 hospitalRouter.post("/removeDoctor", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.removeDoctor);
 //View Appointments

@@ -393,6 +393,16 @@ const addDoctorAndHospitalToEachOthersProfile = async (
   }
 };
 
+export const checkIfNotificationExist = async (notificationId: string) => {
+  try {
+    return Promise.resolve(
+      await notificationsModel.exists({ _id: notificationId })
+    );
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
 export const getRequestIdFromNotificationId = async (
   notificationId: string
 ) => {
@@ -419,6 +429,37 @@ export const getRequestIdFromNotificationId = async (
   }
 };
 
+export const getNotificationFromRequestId = async (requestId: string) => {
+  try {
+    let { requestFrom, requestTo } = await approvalModel
+      .findOne({ _id: requestId, ref_From: "hospitals", ref_To: "doctors" })
+      .lean();
+
+    let { _id } = await notificationsModel
+      .findOne({ sender: requestFrom, receiver: requestTo })
+      .lean();
+
+    return Promise.resolve(_id);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const updateNotificationReadStatus = async (notificationId: string) => {
+  try {
+    await notificationsModel.findOneAndUpdate(
+      { _id: notificationId },
+      {
+        $set: {
+          "readDetails.isRead": true,
+          "readDetails.readDate": new Date(),
+        },
+      }
+    );
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
 export const checkIfHospitalAlreadyExistInDoctor = async (
   hospitalId: string,
   doctorId: string

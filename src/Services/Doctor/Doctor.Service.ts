@@ -15,6 +15,7 @@ import {
 } from "../../Controllers/Patient.Controller";
 import { excludeDoctorFields } from "../../Controllers/Doctor.Controller";
 import { doctor, hospital, patient, specialization } from "../schemaNames";
+import holidayModel from "../../Models/Holiday-Calendar.Model";
 
 dotenv.config();
 
@@ -464,6 +465,30 @@ export const getDoctorFeeInHospital = async (
       })
       .map((e: any) => e.consultationFee);
     return Promise.resolve({ consultationFee: fee[0] });
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const checkIfDoctorIsAvailableOnTheDay = async (
+  date: number,
+  month: number,
+  year: number,
+  doctorId: string,
+  hospitalId: string
+) => {
+  try {
+    month = month - 1;
+    let startDate = new Date(year, month, date);
+    let endDate = new Date(year, month, date + 1);
+
+    let holidayExist = await holidayModel.findOne({
+      doctorId,
+      hospitalId,
+      date: { $gte: startDate, $lte: endDate },
+      "delData.deleted": false,
+    });
+    return Promise.resolve(holidayExist);
   } catch (error: any) {
     return Promise.reject(error);
   }

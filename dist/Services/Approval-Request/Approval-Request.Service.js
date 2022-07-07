@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkIfHospitalAlreadyExistInDoctor = exports.getRequestIdFromNotificationId = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.doctorKLiyeHospitalKiRequestExistKrtiHai = exports.hospitalKLiyeDoctorKiRequestExistKrtiHai = exports.canThisHospitalApproveThisRequest = exports.canThisDoctorApproveThisRequest = exports.checkHospitalsApprovalStatus = exports.checkDoctorsApprovalStatus = exports.denyDoctorRequest = exports.approveDoctorRequest = exports.requestApprovalFromHospital = exports.denyHospitalRequest = exports.approveHospitalRequest = exports.requestApprovalFromDoctor = void 0;
+exports.checkIfHospitalAlreadyExistInDoctor = exports.updateNotificationReadStatus = exports.getNotificationFromRequestId = exports.getRequestIdFromNotificationId = exports.checkIfNotificationExist = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.doctorKLiyeHospitalKiRequestExistKrtiHai = exports.hospitalKLiyeDoctorKiRequestExistKrtiHai = exports.canThisHospitalApproveThisRequest = exports.canThisDoctorApproveThisRequest = exports.checkHospitalsApprovalStatus = exports.checkDoctorsApprovalStatus = exports.denyDoctorRequest = exports.approveDoctorRequest = exports.requestApprovalFromHospital = exports.denyHospitalRequest = exports.approveHospitalRequest = exports.requestApprovalFromDoctor = void 0;
 const Doctor_Controller_1 = require("../../Controllers/Doctor.Controller");
 const Approval_Request_Model_1 = __importDefault(require("../../Models/Approval-Request.Model"));
 const Doctors_Model_1 = __importDefault(require("../../Models/Doctors.Model"));
@@ -348,6 +348,15 @@ const addDoctorAndHospitalToEachOthersProfile = (doctorId, hospitalId) => __awai
         return Promise.reject(error);
     }
 });
+const checkIfNotificationExist = (notificationId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        return Promise.resolve(yield Notification_Model_1.default.exists({ _id: notificationId }));
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.checkIfNotificationExist = checkIfNotificationExist;
 const getRequestIdFromNotificationId = (notificationId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { sender, receiver } = yield Notification_Model_1.default
@@ -368,6 +377,35 @@ const getRequestIdFromNotificationId = (notificationId) => __awaiter(void 0, voi
     }
 });
 exports.getRequestIdFromNotificationId = getRequestIdFromNotificationId;
+const getNotificationFromRequestId = (requestId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let { requestFrom, requestTo } = yield Approval_Request_Model_1.default
+            .findOne({ _id: requestId, ref_From: "hospitals", ref_To: "doctors" })
+            .lean();
+        let { _id } = yield Notification_Model_1.default
+            .findOne({ sender: requestFrom, receiver: requestTo })
+            .lean();
+        return Promise.resolve(_id);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.getNotificationFromRequestId = getNotificationFromRequestId;
+const updateNotificationReadStatus = (notificationId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        yield Notification_Model_1.default.findOneAndUpdate({ _id: notificationId }, {
+            $set: {
+                "readDetails.isRead": true,
+                "readDetails.readDate": new Date(),
+            },
+        });
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.updateNotificationReadStatus = updateNotificationReadStatus;
 const checkIfHospitalAlreadyExistInDoctor = (hospitalId, doctorId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let exist = yield Doctors_Model_1.default.exists({
