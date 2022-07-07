@@ -149,6 +149,27 @@ const getHospitalsSpecilization_AccordingToDoctor = (hospitalId) => __awaiter(vo
                     specialization: 1,
                 },
             },
+            {
+                $project: {
+                    "specialization._id": 1,
+                },
+            },
+            {
+                $group: {
+                    _id: "$_id",
+                    specializations: {
+                        $addToSet: "$specialization._id",
+                    },
+                },
+            },
+            {
+                $lookup: {
+                    from: "specializations",
+                    localField: "specializations",
+                    foreignField: "_id",
+                    as: "specializations",
+                },
+            },
         ]);
         return Promise.resolve(specializaitons);
     }
@@ -207,6 +228,14 @@ const getDoctorsListInHospital_withApprovalStatus = (hospitalId) => __awaiter(vo
                                 localField: "doctor.qualification",
                                 foreignField: "_id",
                                 as: "doctor.qualification",
+                            },
+                        },
+                        {
+                            $lookup: {
+                                from: schemaNames_1.qualificationNames,
+                                localField: "doctor.qualification.qualificationName",
+                                foreignField: "_id",
+                                as: "doctor.qualification.qualificationName",
                             },
                         },
                         {
@@ -286,6 +315,14 @@ const getDoctorsListInHospital_withApprovalStatus = (hospitalId) => __awaiter(vo
                                 localField: "doctor.qualification",
                                 foreignField: "_id",
                                 as: "doctor.qualification",
+                            },
+                        },
+                        {
+                            $lookup: {
+                                from: schemaNames_1.qualificationNames,
+                                localField: "doctor.qualification.qualificationName",
+                                foreignField: "_id",
+                                as: "doctor.qualification.qualificationName",
                             },
                         },
                         {

@@ -62,6 +62,10 @@ adminRouter.put("/login", adminController.login);
 
 // Anemity controller
 adminRouter.post("/addHospitalService", adminController.addHospitalService);
+adminRouter.post(
+  "/deleteHospitalService/:id",
+  adminController.deleteHospitalService
+);
 
 // Verification doctors ka
 adminRouter.get("/getUnverifiedDoctors", adminController.getUnverifiedDoctors);
@@ -116,6 +120,11 @@ adminRouter.post(
   oneOf(authenticateAdmin),
   qualificationController.addQualificationName
 );
+adminRouter.post(
+  "/deleteQualification/:id",
+  oneOf(authenticateAdmin),
+  qualificationController.deleteQualification
+);
 /* Qualification */
 adminRouter.post("/addQualification", adminController.addQualificationn);
 
@@ -130,6 +139,11 @@ adminRouter.get(
   oneOf(authenticateAdmin),
   hospitalController.getAnemities
 );
+adminRouter.get(
+  "/deleteAnemities/:id",
+  oneOf(authenticateAdmin),
+  hospitalController.deleteAnemities
+);
 
 adminRouter.post(
   "/createFee",
@@ -137,5 +151,21 @@ adminRouter.post(
   adminController.createFee
 );
 
+adminRouter.post(
+  "/addOwnership",
+  oneOf(authenticateAdmin),
+  adminController.addOwnership
+);
+adminRouter.get(
+  "/getOwnership",
+  oneOf(authenticateAdmin),
+  adminController.getOwnership
+);
+
+adminRouter.post(
+  "/deleteOwnership/:id",
+  oneOf(authenticateAdmin),
+  adminController.deleteOwnership
+);
 adminRouter.get("/getFees", oneOf(authenticateAdmin), adminController.getFees);
 export default adminRouter;

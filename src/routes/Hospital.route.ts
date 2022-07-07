@@ -81,7 +81,7 @@ hospitalRouter.get("/getAnemities", hospitalController.getAnemities);
 hospitalRouter.get("/getServices", hospitalController.getServices);
 // hospitalRouter.post("/speciality",oneOf(authenticateHospital),hospitalController.addHospitalSpeciality);
 
-hospitalRouter.post(
+hospitalRouter.get(
   "/findHospitalBySpecialityOrBodyPart/:term",
   hospitalController.searchHospital
 );

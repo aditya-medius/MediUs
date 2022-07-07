@@ -35,9 +35,9 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const createWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
-        body.doctorDetails = req.currentDoctor;
+        body.doctorDetails = req.currentDoctor ? req.currentDoctor : body.doctorId;
         let workingHour = yield WorkingHours_Model_1.default.find({
-            doctorDetails: req.currentDoctor,
+            doctorDetails: req.currentDoctor ? req.currentDoctor : body.doctorId,
             hospitalDetails: body.hospitalId,
         }, { doctorDetails: 0, hospitalDetails: 0 });
         const { hospitalId } = body, tempBody = __rest(body, ["hospitalId"]);

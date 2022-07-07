@@ -36,6 +36,7 @@ import {
 
 import * as prescriptionValidityController from "../Controllers/Prescription-Validity.Controller";
 import orderModel from "../Models/Order.Model";
+import { checkIfDoctorIsAvailableOnTheDay } from "../Services/Doctor/Doctor.Service";
 
 export const excludePatientFields = {
   password: 0,
@@ -110,24 +111,24 @@ export const patientLogin = async (req: Request, res: Response) => {
         const OTP = Math.floor(100000 + Math.random() * 900000).toString();
 
         // Implement message service API
-        sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
-          .then(async (message) => {
-            const otpToken = jwt.sign(
-              { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
-              OTP
-            );
-            // Add OTP and phone number to temporary collection
-            await otpModel.findOneAndUpdate(
-              { phoneNumber: body.phoneNumber },
-              { $set: { phoneNumber: body.phoneNumber, otp: otpToken } },
-              { upsert: true }
-            );
-          })
-          .catch((error) => {
-            // throw error;
-            console.log("error :", error);
-            // return errorResponse(error, res);
-          });
+        // sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
+        //   .then(async (message) => {
+        //   })
+        //   .catch((error) => {
+        //     // throw error;
+        //     console.log("error :", error);
+        //     // return errorResponse(error, res);
+        //   });
+        const otpToken = jwt.sign(
+          { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
+          OTP
+        );
+        // Add OTP and phone number to temporary collection
+        await otpModel.findOneAndUpdate(
+          { phoneNumber: body.phoneNumber },
+          { $set: { phoneNumber: body.phoneNumber, otp: otpToken } },
+          { upsert: true }
+        );
 
         return successResponse({}, `OTP sent successfully`, res);
       } else {
@@ -161,11 +162,11 @@ export const patientLogin = async (req: Request, res: Response) => {
       });
       try {
         // Abhi k liye OTP verification hata di hai
-        // const data: any = await jwt.verify(otpData.otp, body.OTP);
-        // if (Date.now() > data.expiresIn)
-        //   return errorResponse(new Error("OTP expired"), res);
-        // if (body.OTP === data.otp) {
-        if (true) {
+        const data: any = await jwt.verify(otpData.otp, body.OTP);
+        if (Date.now() > data.expiresIn)
+          return errorResponse(new Error("OTP expired"), res);
+        if (body.OTP === data.otp) {
+          // if (true) {
           const profile = await patientModel.findOne(
             {
               phoneNumber: body.phoneNumber,
@@ -859,9 +860,16 @@ export const getHospitalsByCity = async (req: Request, res: Response) => {
       return e._id;
     });
 
-    const hospitalsInThatCity = await hospitalModel.find({
-      address: { $in: addressIds },
-    });
+    const hospitalsInThatCity = await hospitalModel
+      .find({
+        address: { $in: addressIds },
+      })
+      .populate({
+        path: "address",
+        populate: {
+          path: "city state locality country",
+        },
+      });
     return successResponse(hospitalsInThatCity, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
@@ -886,7 +894,10 @@ export const getDoctorsByCity = async (req: Request, res: Response) => {
         },
         { doctors: 1 }
       )
-      .populate({ path: "doctors", select: excludeDoctorFields });
+      .populate({
+        path: "doctors",
+        select: excludeDoctorFields,
+      });
 
     hospitalsInThatCity = hospitalsInThatCity.filter(
       (e: any) => e.doctors.length > 0
@@ -907,7 +918,24 @@ export const getDoctorsByCity = async (req: Request, res: Response) => {
         },
         excludeDoctorFields
       )
-      .populate("specialization qualification");
+      .populate({
+        path: "specialization",
+      })
+      .populate({
+        path: "hospitalDetails.hospital",
+        populate: {
+          path: "address",
+          populate: {
+            path: "city state locality country",
+          },
+        },
+      })
+      .populate({
+        path: "qualification",
+        populate: {
+          path: "qualificationName",
+        },
+      });
     // .populate("hospitalDetails.hospital");
     return successResponse(doctorsInThatCity, "Success", res);
   } catch (error: any) {
@@ -1013,6 +1041,22 @@ export const getPatientsNotification = async (req: Request, res: Response) => {
         return successResponse(notifications, "Success", res);
       })
       .catch((error: any) => errorResponse(error, res));
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const checkIfDoctorIsOnHoliday = async (req: Request, res: Response) => {
+  try {
+    let { date, month, year, doctorId, hospitalId } = req.body;
+    let holidayExist = await checkIfDoctorIsAvailableOnTheDay(
+      date,
+      month,
+      year,
+      doctorId,
+      hospitalId
+    );
+    return successResponse(holidayExist, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

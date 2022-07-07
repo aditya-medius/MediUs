@@ -138,7 +138,11 @@ exports.getHospitalsNotification_whenSenderIsPatient = getHospitalsNotification_
 const getDoctorsNotification_whenSenderIsHospital_approvalRequest = (doctorId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let notifications = yield Notification_Model_1.default
-            .find({ receiver: doctorId, sender_ref: schemaNames_1.hospital })
+            .find({
+            receiver: doctorId,
+            sender_ref: schemaNames_1.hospital,
+            "readDetails.isRead": false,
+        })
             .populate({
             path: "sender",
             select: Object.assign(Object.assign({}, hospitalFields), Patient_Controller_1.excludePatientFields),
@@ -200,7 +204,11 @@ exports.getDoctorsNotification_whenSenderIsHospital_approvalRequest = getDoctors
 const getDoctorsNotification_whenSenderIsPatient = (doctorId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let notifications = yield Notification_Model_1.default
-            .find({ receiver: doctorId, sender_ref: schemaNames_1.patient })
+            .find({
+            receiver: doctorId,
+            sender_ref: schemaNames_1.patient,
+            "readDetails.isRead": false,
+        })
             .populate({
             path: "sender",
             select: Object.assign(Object.assign({}, hospitalFields), Patient_Controller_1.excludePatientFields),

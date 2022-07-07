@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getFees = exports.createFee = exports.getAllAppointments = exports.addQualificationn = exports.uploadCSV_locality = exports.uploadCSV_city = exports.uploadCSV_state = exports.getLocalityByCity = exports.getCityByState = exports.getStateByCountry = exports.setCityMap = exports.setStateMap = exports.setCountryMap = exports.getAllHospitalList = exports.getAllAgentList = exports.getAllPatientList = exports.verifyAgents = exports.getAllDoctorsList = exports.verifyHospitals = exports.verifyDoctors = exports.getUnverifiedDoctors = exports.addHospitalService = exports.create = exports.login = exports.getCityStateLocalityCountry = exports.getPayments = exports.addPayment = exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityDoctorType = exports.addSpecialityDoctorType = exports.addDoctorType = exports.addToSpecialityDisease = exports.addSpecialityDisease = exports.addDisease = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
+exports.deleteOwnership = exports.getOwnership = exports.addOwnership = exports.getFees = exports.createFee = exports.getAllAppointments = exports.addQualificationn = exports.uploadCSV_locality = exports.uploadCSV_city = exports.uploadCSV_state = exports.getLocalityByCity = exports.getCityByState = exports.getStateByCountry = exports.setCityMap = exports.setStateMap = exports.setCountryMap = exports.getAllHospitalList = exports.getAllAgentList = exports.getAllPatientList = exports.verifyAgents = exports.getAllDoctorsList = exports.verifyHospitals = exports.verifyDoctors = exports.getUnverifiedDoctors = exports.deleteHospitalService = exports.addHospitalService = exports.create = exports.login = exports.getCityStateLocalityCountry = exports.getPayments = exports.addPayment = exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityDoctorType = exports.addSpecialityDoctorType = exports.addDoctorType = exports.addToSpecialityDisease = exports.addSpecialityDisease = exports.addDisease = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
 const BodyPart_Model_1 = __importDefault(require("./BodyPart.Model"));
 const SpecialityBody_Model_1 = __importDefault(require("./SpecialityBody.Model"));
 const SpecialityDisease_Model_1 = __importDefault(require("./SpecialityDisease.Model"));
@@ -57,6 +57,7 @@ const adminService = __importStar(require("../Services/Admin/Admin.Service"));
 const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
 const Appointment_Model_1 = __importDefault(require("../Models/Appointment.Model"));
 const feeService = __importStar(require("../Module/Payment/Service/Fee.Service"));
+const ownershipService = __importStar(require("../Services/Ownership/Ownership.Service"));
 const addSpeciality = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const body = req.body;
@@ -323,25 +324,27 @@ const getCityStateLocalityCountry = (req, res) => __awaiter(void 0, void 0, void
         let { region } = req.query;
         if (region) {
             region = region.toLowerCase();
-            if (region == "city") {
+            if (region === "city") {
                 response[region] = Ci;
             }
-            else if (region == "state") {
+            else if (region === "state") {
                 response[region] = S;
             }
-            else if (region == "locality") {
+            else if (region === "locality") {
                 response[region] = L;
             }
-            else if (region == "country") {
+            else if (region === "country") {
                 response[region] = Co;
             }
         }
         else {
             response = { city: Ci, state: S, locality: L, country: Co };
         }
-        return (0, response_1.successResponse)(response, "Success", res);
+        return (0, response_1.successResponse)(Object.assign({}, response), "Success", res);
     }
-    catch (error) { }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
 });
 exports.getCityStateLocalityCountry = getCityStateLocalityCountry;
 // export const login = async (req: Request, res: Response) => {
@@ -472,6 +475,15 @@ const addHospitalService = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.addHospitalService = addHospitalService;
+const deleteHospitalService = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        return (0, response_1.successResponse)(yield Services_Model_1.default.findOneAndDelete({ _id: req.params.id }), "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.deleteHospitalService = deleteHospitalService;
 // Unverified users ko get krne ki query
 const getUnverifiedDoctors = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -539,10 +551,66 @@ const verifyHospitals = (req, res) => __awaiter(void 0, void 0, void 0, function
 exports.verifyHospitals = verifyHospitals;
 const getAllDoctorsList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const doctorList = yield Doctors_Model_1.default.find({
-            deleted: false,
-            adminSearch: true,
-        }, Doctor_Controller_1.excludeDoctorFields);
+        // const doctorList = await doctorModel.find(
+        //   {
+        //     deleted: false,
+        //     adminSearch: true,
+        //   },
+        //   excludeDoctorFields
+        // ).populate("specialization")
+        const doctorList = yield Doctors_Model_1.default.aggregate([
+            {
+                $lookup: {
+                    from: "appointments",
+                    let: {
+                        id: "$_id",
+                    },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $eq: ["$doctors", "$$id"],
+                                },
+                            },
+                        },
+                        {
+                            $count: "appointment",
+                        },
+                    ],
+                    as: "appointment",
+                },
+            },
+            {
+                $lookup: {
+                    from: "specializations",
+                    localField: "specialization",
+                    foreignField: "_id",
+                    as: "specialization",
+                },
+            },
+            {
+                $addFields: {
+                    overallExperience: {
+                        $function: {
+                            body: function (dob) {
+                                dob = new Date(dob);
+                                let currentDate = new Date();
+                                let age = currentDate.getFullYear() - dob.getFullYear();
+                                if (age > 0) {
+                                    age = `${age} years`;
+                                }
+                                else {
+                                    age = `${age} months`;
+                                }
+                                return age;
+                            },
+                            args: ["$overallExperience"],
+                            lang: "js",
+                        },
+                    },
+                },
+            },
+        ]);
         return (0, response_1.successResponse)(doctorList, "Successfully fetched doctor's list", res);
     }
     catch (error) {
@@ -600,10 +668,85 @@ const getAllAgentList = (req, res) => __awaiter(void 0, void 0, void 0, function
 exports.getAllAgentList = getAllAgentList;
 const getAllHospitalList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const hospitalList = yield Hospital_Model_1.default.find({
-            "delData.deleted": false,
-            adminSearch: true,
-        });
+        // const hospitalList = await hospitalModel.find({
+        //   "delData.deleted": false,
+        //   adminSearch: true,
+        // });
+        const hospitalList = yield Hospital_Model_1.default.aggregate([
+            {
+                $lookup: {
+                    from: "addresses",
+                    localField: "address",
+                    foreignField: "_id",
+                    as: "address",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$address",
+                },
+            },
+            {
+                $lookup: {
+                    from: "appointments",
+                    let: {
+                        id: "$_id",
+                    },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $eq: ["$hospital", "$$id"],
+                                },
+                            },
+                        },
+                        {
+                            $count: "appointment",
+                        },
+                    ],
+                    as: "appointment",
+                },
+            },
+            {
+                $lookup: {
+                    from: "cities",
+                    localField: "address.city",
+                    foreignField: "_id",
+                    as: "address.city",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$address.city",
+                },
+            },
+            {
+                $lookup: {
+                    from: "states",
+                    localField: "address.state",
+                    foreignField: "_id",
+                    as: "address.state",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$address.state",
+                },
+            },
+            {
+                $lookup: {
+                    from: "localities",
+                    localField: "address.locality",
+                    foreignField: "_id",
+                    as: "address.locality",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$address.locality",
+                },
+            },
+        ]);
         return (0, response_1.successResponse)(hospitalList, "Successfully fetched Hospital's list", res);
     }
     catch (error) {
@@ -792,3 +935,32 @@ const getFees = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.getFees = getFees;
+const addOwnership = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let ownershipData = yield ownershipService.addOwnership(req.body);
+        return (0, response_1.successResponse)(ownershipData, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.addOwnership = addOwnership;
+const getOwnership = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let ownershipData = yield ownershipService.getOwnership();
+        return (0, response_1.successResponse)(ownershipData, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getOwnership = getOwnership;
+const deleteOwnership = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        return (0, response_1.successResponse)(yield ownershipService.deleteOwnership(req.params.id), "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.deleteOwnership = deleteOwnership;

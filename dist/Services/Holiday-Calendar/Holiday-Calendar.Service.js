@@ -34,6 +34,7 @@ const getDoctorsHolidayList = (doctorId, year, month, hospitalId) => __awaiter(v
             date: { $gte: startDate, $lt: endDate },
             "delData.deleted": false,
         };
+        console.log(query);
         let holidayList = yield Holiday_Calendar_Model_1.default.find(query, {
             delData: 0,
         });

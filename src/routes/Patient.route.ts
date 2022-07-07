@@ -113,14 +113,14 @@ patientRouter.get(
 );
 
 // Get hospitals by city
-patientRouter.get(
+patientRouter.post(
   "/getHospitalsByCity",
   oneOf(authenticatePatient),
   patientController.getHospitalsByCity
 );
 
 // Get doctors by city
-patientRouter.get(
+patientRouter.post(
   "/getDoctorsByCity",
   oneOf(authenticatePatient),
   patientController.getDoctorsByCity
@@ -201,5 +201,11 @@ patientRouter.get(
       return errorResponse(error, res);
     }
   }
+);
+
+patientRouter.post(
+  "/checkIfDoctorIsOnHoliday",
+  oneOf(authenticatePatient, authenticateHospital, authenticateDoctor),
+  patientController.checkIfDoctorIsOnHoliday
 );
 export default patientRouter;

@@ -112,7 +112,7 @@ doctorRouter.delete(
   doctorController.deleteProfile
 );
 
-doctorRouter.post(
+doctorRouter.get(
   "/findDoctorBySpecialityOrBodyPart/:term",
   oneOf(authenticateDoctor, authenticatePatient),
   doctorController.searchDoctor
@@ -376,7 +376,7 @@ doctorRouter.get(
 
 doctorRouter.post(
   "/setHolidayCalendar",
-  oneOf(authenticateDoctor),
+  oneOf(authenticateDoctor, authenticateHospital),
   doctorController.setHolidayCalendar
 );
 doctorRouter.put(

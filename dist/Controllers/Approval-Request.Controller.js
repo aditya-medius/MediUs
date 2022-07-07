@@ -55,6 +55,9 @@ const approveHospitalRequest = (req, res) => __awaiter(void 0, void 0, void 0, f
         let requestExist = yield approvalService.canThisDoctorApproveThisRequest(requestId, req.currentDoctor);
         if (requestExist) {
             let response = yield approvalService.approveHospitalRequest(requestId);
+            let notificationId = yield approvalService.getNotificationFromRequestId(requestId);
+            console.log("ssss", notificationId);
+            yield approvalService.updateNotificationReadStatus(notificationId);
             return (0, response_1.successResponse)(response, "Success", res);
         }
         else {
@@ -68,6 +71,7 @@ const approveHospitalRequest = (req, res) => __awaiter(void 0, void 0, void 0, f
 exports.approveHospitalRequest = approveHospitalRequest;
 const denyHospitalRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        // Is method me approve hospital jaisi same problem hai. Eventually yeh uske jaisa hi banega
         let { requestId } = req.body;
         requestId = yield approvalService.getRequestIdFromNotificationId(requestId);
         let response = yield approvalService.denyHospitalRequest(requestId);

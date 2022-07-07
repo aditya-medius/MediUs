@@ -51,5 +51,9 @@ const qualificationSchema = new mongoose_1.Schema({
         // unique: true,
     },
 });
+qualificationSchema.pre("find", function (next) {
+    this.populate("qualificationName");
+    next();
+});
 const qualificationModel = (0, mongoose_1.model)(schemaNames_1.qualification, qualificationSchema);
 exports.default = qualificationModel;

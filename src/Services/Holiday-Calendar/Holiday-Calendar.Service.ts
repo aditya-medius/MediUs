@@ -24,6 +24,7 @@ export const getDoctorsHolidayList = async (
       date: { $gte: startDate, $lt: endDate },
       "delData.deleted": false,
     };
+    console.log(query);
     let holidayList = await holidayModel.find(query, {
       delData: 0,
     });

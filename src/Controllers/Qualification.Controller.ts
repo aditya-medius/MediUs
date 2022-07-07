@@ -34,5 +34,19 @@ export const addQualificationName = async (req: Request, res: Response) => {
       "Success",
       res
     );
-  } catch (error: any) {}
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const deleteQualification = async (req: Request, res: Response) => {
+  try {
+    return successResponse(
+      await qualificationNamesModel.findOneAndDelete({ _id: req.params.id }),
+      "Success",
+      res
+    );
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
 };

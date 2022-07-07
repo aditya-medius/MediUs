@@ -93,8 +93,8 @@ export const getDoctorPrescriptionInHospital = async (
   doctorId: string
 ) => {
   try {
-    let prescription = await prescriptionValidityModel.findOne(
-      { doctorId },
+    let prescription = await prescriptionValidityModel.find(
+      { doctorId, hospitalId },
       "validateTill"
     );
     return Promise.resolve({ prescription });

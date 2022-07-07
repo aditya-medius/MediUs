@@ -124,22 +124,22 @@ export const doctorLogin = async (req: Request, res: Response) => {
         const OTP = Math.floor(100000 + Math.random() * 900000).toString();
 
         if (!(body.phoneNumber == "9999999999")) {
-          sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
-            .then(async (message) => {
-              const otpToken = jwt.sign(
-                { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
-                OTP
-              );
-              // Add OTP and phone number to temporary collection
-              await otpModel.findOneAndUpdate(
-                { phoneNumber: body.phoneNumber },
-                { $set: { phoneNumber: body.phoneNumber, otp: otpToken } },
-                { upsert: true }
-              );
-            })
-            .catch((error) => {
-              throw error;
-            });
+          // sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
+          //   .then(async (message) => {
+          //   })
+          //   .catch((error) => {
+          //     throw error;
+          //   });
+            const otpToken = jwt.sign(
+              { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
+              OTP
+            );
+            // Add OTP and phone number to temporary collection
+            await otpModel.findOneAndUpdate(
+              { phoneNumber: body.phoneNumber },
+              { $set: { phoneNumber: body.phoneNumber, otp: otpToken } },
+              { upsert: true }
+            );
 
           return successResponse({}, "OTP sent successfully", res);
         } else {
@@ -197,11 +197,10 @@ export const doctorLogin = async (req: Request, res: Response) => {
       });
       try {
         // Abhi k liye OTP verification hata di hai
-        // const data: any = await jwt.verify(otpData.otp, body.OTP);
-        // if (Date.now() > data.expiresIn)
-        //   return errorResponse(new Error("OTP expired"), res);
-        // if (body.OTP === data.otp) {
-        if (true) {
+        const data: any = await jwt.verify(otpData.otp, body.OTP);
+        if (Date.now() > data.expiresIn)
+          return errorResponse(new Error("OTP expired"), res);
+        if (body.OTP === data.otp) {
           let profile = await doctorModel.findOne(
             {
               phoneNumber: body.phoneNumber,
@@ -420,6 +419,8 @@ export const deleteProfile = async (req: Request, res: Response) => {
 export const searchDoctor = async (req: Request, res: Response) => {
   try {
     const term = req.params.term;
+
+    let { city } = req.query;
     const promiseArray: Array<any> = [
       specialityBodyModel.aggregate([
         {
@@ -633,7 +634,7 @@ export const searchDoctor = async (req: Request, res: Response) => {
         id = formatArray(id);
 
         specialityArray = formatArray(specialityArray);
-        const doctorArray = await doctorModel
+        let doctorArray = await doctorModel
           .find(
             {
               $or: [
@@ -648,13 +649,30 @@ export const searchDoctor = async (req: Request, res: Response) => {
             },
             {
               ...excludeDoctorFields,
-              "hospitalDetails.hospital": 0,
-              "hospitalDetails.workingHours": 0,
+              // "hospitalDetails.hospital": 0,
+              // "hospitalDetails.workingHours": 0,
             }
           )
           .populate("specialization")
-          // .populate("hospitalDetails.hospital")
-          .populate({ path: "qualification", select: { duration: 0 } });
+          .populate({ path: "qualification", select: { duration: 0 } })
+          .populate({
+            path: "hospitalDetails.hospital",
+            populate: {
+              path: "address",
+              populate: { path: "city state locality country" },
+            },
+          });
+
+        if (city) {
+          doctorArray = doctorArray.filter((e: any) => {
+            let data = e.hospitalDetails.filter((elem: any) => {
+              return elem.hospital.address.city._id
+                ? elem.hospital.address.city._id.toString() === city
+                : false;
+            });
+            return data.length ? true : false;
+          });
+        }
 
         return successResponse(doctorArray, "Success", res);
       })
@@ -902,11 +920,19 @@ export const viewAppointmentsByDate = async (req: Request, res: Response) => {
     const skip: number = parseInt(req.params.page) * limit;
     const date: Date = req.body.date;
     let d = new Date(date);
-    let gtDate: Date = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+    // console.log("date", d);
+    // let gtDate: Date = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+
+    // let ltDate: Date = new Date(gtDate);
+    // ltDate.setDate(gtDate.getDate() - 1);
+    // ltDate.setUTCHours(24, 60, 60, 0);
+
+    // gtDate.setDate(gtDate.getDate() + 1);
+    // gtDate.setUTCHours(0, 0, 0, 0);
+
+    let gtDate: Date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
     let ltDate: Date = new Date(gtDate);
-    ltDate.setDate(gtDate.getDate() - 1);
-    ltDate.setUTCHours(24, 60, 60, 0);
 
     gtDate.setDate(gtDate.getDate() + 1);
     gtDate.setUTCHours(0, 0, 0, 0);
@@ -1922,7 +1948,9 @@ export const getPrescriptionValidityAndFeesOfDoctorInHospital = async (
         hospitalId,
         doctorId
       );
-    return successResponse(data, "Success", res);
+    let [p, c] = data;
+
+    return successResponse({ ...p, ...c }, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

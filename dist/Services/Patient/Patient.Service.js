@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.calculateAge = exports.BookAppointment = void 0;
 const Appointment_Model_1 = __importDefault(require("../../Models/Appointment.Model"));
 const moment_1 = __importDefault(require("moment"));
+const Appointment_Service_1 = require("../Appointment/Appointment.Service");
 const BookAppointment = (body) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // @TODO check if working hour exist first
@@ -81,6 +82,10 @@ const BookAppointment = (body) => __awaiter(void 0, void 0, void 0, function* ()
         //     new Error("Doctor cannot take any more appointments")
         //   );
         // }
+        let appointmentTokenNumber = yield (0, Appointment_Service_1.getTokenNumber)(body);
+        let appointmentId = (0, Appointment_Service_1.generateAppointmentId)();
+        body["appointmentToken"] = appointmentTokenNumber;
+        body["appointmentId"] = appointmentId;
         let appointmentBook = yield new Appointment_Model_1.default(body).save();
         yield appointmentBook.populate({
             path: "subPatient",

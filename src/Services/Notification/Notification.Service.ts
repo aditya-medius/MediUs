@@ -163,7 +163,11 @@ export const getDoctorsNotification_whenSenderIsHospital_approvalRequest =
   async (doctorId: string) => {
     try {
       let notifications = await notificationsModel
-        .find({ receiver: doctorId, sender_ref: hospital })
+        .find({
+          receiver: doctorId,
+          sender_ref: hospital,
+          "readDetails.isRead": false,
+        })
         .populate({
           path: "sender",
           select: { ...hospitalFields, ...excludePatientFields },
@@ -227,7 +231,11 @@ export const getDoctorsNotification_whenSenderIsPatient = async (
 ) => {
   try {
     let notifications = await notificationsModel
-      .find({ receiver: doctorId, sender_ref: patient })
+      .find({
+        receiver: doctorId,
+        sender_ref: patient,
+        "readDetails.isRead": false,
+      })
       .populate({
         path: "sender",
         select: { ...hospitalFields, ...excludePatientFields },

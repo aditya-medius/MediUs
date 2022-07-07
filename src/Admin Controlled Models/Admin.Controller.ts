@@ -31,6 +31,8 @@ import appointmentModel from "../Models/Appointment.Model";
 
 import * as feeService from "../Module/Payment/Service/Fee.Service";
 
+import * as ownershipService from "../Services/Ownership/Ownership.Service";
+
 export const addSpeciality = async (req: Request, res: Response) => {
   try {
     const body = req.body;
@@ -309,21 +311,23 @@ export const getCityStateLocalityCountry = async (
     let { region } = req.query;
     if (region) {
       region = (region as string).toLowerCase();
-      if (region == "city") {
+      if (region === "city") {
         response[region] = Ci;
-      } else if (region == "state") {
+      } else if (region === "state") {
         response[region] = S;
-      } else if (region == "locality") {
+      } else if (region === "locality") {
         response[region] = L;
-      } else if (region == "country") {
+      } else if (region === "country") {
         response[region] = Co;
       }
     } else {
       response = { city: Ci, state: S, locality: L, country: Co };
     }
 
-    return successResponse(response, "Success", res);
-  } catch (error: any) {}
+    return successResponse({ ...response }, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
 };
 
 // export const login = async (req: Request, res: Response) => {
@@ -460,6 +464,18 @@ export const addHospitalService = async (req: Request, res: Response) => {
   }
 };
 
+export const deleteHospitalService = async (req: Request, res: Response) => {
+  try {
+    return successResponse(
+      await servicesModel.findOneAndDelete({ _id: req.params.id }),
+      "Success",
+      res
+    );
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
 // Unverified users ko get krne ki query
 export const getUnverifiedDoctors = async (req: Request, res: Response) => {
   try {
@@ -528,13 +544,66 @@ export const verifyHospitals = async (req: Request, res: Response) => {
 
 export const getAllDoctorsList = async (req: Request, res: Response) => {
   try {
-    const doctorList = await doctorModel.find(
+    // const doctorList = await doctorModel.find(
+    //   {
+    //     deleted: false,
+    //     adminSearch: true,
+    //   },
+    //   excludeDoctorFields
+    // ).populate("specialization")
+    const doctorList = await doctorModel.aggregate([
       {
-        deleted: false,
-        adminSearch: true,
+        $lookup: {
+          from: "appointments",
+          let: {
+            id: "$_id",
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ["$doctors", "$$id"],
+                },
+              },
+            },
+            {
+              $count: "appointment",
+            },
+          ],
+          as: "appointment",
+        },
       },
-      excludeDoctorFields
-    );
+      {
+        $lookup: {
+          from: "specializations",
+          localField: "specialization",
+          foreignField: "_id",
+          as: "specialization",
+        },
+      },
+      {
+        $addFields: {
+          overallExperience: {
+            $function: {
+              body: function (dob: any) {
+                dob = new Date(dob);
+                let currentDate = new Date();
+                let age: string | number =
+                  currentDate.getFullYear() - dob.getFullYear();
+                if (age > 0) {
+                  age = `${age} years`;
+                } else {
+                  age = `${age} months`;
+                }
+                return age;
+              },
+              args: ["$overallExperience"],
+              lang: "js",
+            },
+          },
+        },
+      },
+    ]);
     return successResponse(
       doctorList,
       "Successfully fetched doctor's list",
@@ -593,10 +662,86 @@ export const getAllAgentList = async (req: Request, res: Response) => {
 };
 export const getAllHospitalList = async (req: Request, res: Response) => {
   try {
-    const hospitalList = await hospitalModel.find({
-      "delData.deleted": false,
-      adminSearch: true,
-    });
+    // const hospitalList = await hospitalModel.find({
+    //   "delData.deleted": false,
+    //   adminSearch: true,
+    // });
+
+    const hospitalList = await hospitalModel.aggregate([
+      {
+        $lookup: {
+          from: "addresses",
+          localField: "address",
+          foreignField: "_id",
+          as: "address",
+        },
+      },
+      {
+        $unwind: {
+          path: "$address",
+        },
+      },
+      {
+        $lookup: {
+          from: "appointments",
+          let: {
+            id: "$_id",
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ["$hospital", "$$id"],
+                },
+              },
+            },
+            {
+              $count: "appointment",
+            },
+          ],
+          as: "appointment",
+        },
+      },
+      {
+        $lookup: {
+          from: "cities",
+          localField: "address.city",
+          foreignField: "_id",
+          as: "address.city",
+        },
+      },
+      {
+        $unwind: {
+          path: "$address.city",
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "address.state",
+          foreignField: "_id",
+          as: "address.state",
+        },
+      },
+      {
+        $unwind: {
+          path: "$address.state",
+        },
+      },
+      {
+        $lookup: {
+          from: "localities",
+          localField: "address.locality",
+          foreignField: "_id",
+          as: "address.locality",
+        },
+      },
+      {
+        $unwind: {
+          path: "$address.locality",
+        },
+      },
+    ]);
     return successResponse(
       hospitalList,
       "Successfully fetched Hospital's list",
@@ -614,6 +759,7 @@ import CountryMapModel from "../Admin Controlled Models/Country.Map.Model";
 import StateMapModel from "../Admin Controlled Models/State.Map.Model";
 import CityMapModel from "../Admin Controlled Models/City.Map.Model";
 import qualificationNameModel from "./QualificationName.Model";
+import ownershipModel from "../Models/Ownership.Model";
 
 export const setCountryMap = async (req: Request, res: Response) => {
   try {
@@ -779,6 +925,36 @@ export const createFee = async (req: Request, res: Response) => {
 export const getFees = async (req: Request, res: Response) => {
   try {
     return successResponse(await feeService.getAllFees(), "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const addOwnership = async (req: Request, res: Response) => {
+  try {
+    let ownershipData = await ownershipService.addOwnership(req.body);
+    return successResponse(ownershipData, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getOwnership = async (req: Request, res: Response) => {
+  try {
+    let ownershipData = await ownershipService.getOwnership();
+    return successResponse(ownershipData, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const deleteOwnership = async (req: Request, res: Response) => {
+  try {
+    return successResponse(
+      await ownershipService.deleteOwnership(req.params.id),
+      "Success",
+      res
+    );
   } catch (error: any) {
     return errorResponse(error, res);
   }

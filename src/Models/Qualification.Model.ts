@@ -32,6 +32,10 @@ const qualificationSchema = new Schema({
   },
 });
 
+qualificationSchema.pre("find", function (next) {
+  this.populate("qualificationName");
+  next();
+});
 const qualificationModel = model(qualification, qualificationSchema);
 
 export default qualificationModel;
