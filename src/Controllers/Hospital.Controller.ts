@@ -56,12 +56,11 @@ export const login = async (req: Request, res: Response) => {
         const OTP = Math.floor(100000 + Math.random() * 900000).toString();
 
         // Implement message service API
-        // sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
-        //   .then(async (message) => {
-        //   })
-        //   .catch((error) => {
-        //     throw error;
-        //   });
+        sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
+          .then(async (message) => {})
+          .catch((error) => {
+            throw error;
+          });
         const otpToken = jwt.sign(
           { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
           OTP

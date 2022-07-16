@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateOrderId = exports.verifyPayment = exports.getPatientsAppointmentsInThisHospital = exports.getPatientFromPhoneNumber = exports.getHospitalsOfflineAndOnlineAppointments = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.getHospitalToken = void 0;
+exports.doesHospitalExist = exports.generateOrderId = exports.verifyPayment = exports.getPatientsAppointmentsInThisHospital = exports.getPatientFromPhoneNumber = exports.getHospitalsOfflineAndOnlineAppointments = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.getHospitalToken = void 0;
 const jwt = __importStar(require("jsonwebtoken"));
 const dotenv = __importStar(require("dotenv"));
 const Hospital_Model_1 = __importDefault(require("../../Models/Hospital.Model"));
@@ -725,3 +725,13 @@ const generateOrderId = (body) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.generateOrderId = generateOrderId;
+const doesHospitalExist = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let hospitalExist = yield Hospital_Model_1.default.exists({ _id: id });
+        return Promise.resolve(hospitalExist);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.doesHospitalExist = doesHospitalExist;

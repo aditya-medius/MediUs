@@ -42,12 +42,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPrescriptionValidityAndFeesOfDoctorInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getHospitalsOfflineAndOnlineAppointments = exports.deleteHolidayCalendar = exports.getDoctorsHolidayList = exports.setHolidayCalendar = exports.getDoctorsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.setConsultationFeeForDoctor = exports.addHospitalInDoctorProfile = exports.checkVerificationStatus = exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
+exports.getMyLikes = exports.unlikeDoctor = exports.likeADoctor = exports.getPrescriptionValidityAndFeesOfDoctorInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getHospitalsOfflineAndOnlineAppointments = exports.deleteHolidayCalendar = exports.getDoctorsHolidayList = exports.setHolidayCalendar = exports.getDoctorsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.setConsultationFeeForDoctor = exports.addHospitalInDoctorProfile = exports.checkVerificationStatus = exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
 const bcrypt = __importStar(require("bcrypt"));
 const response_1 = require("../Services/response");
+const message_service_1 = require("../Services/message.service");
 const SpecialityBody_Model_1 = __importDefault(require("../Admin Controlled Models/SpecialityBody.Model"));
 const underscore_1 = __importDefault(require("underscore"));
 const SpecialityDisease_Model_1 = __importDefault(require("../Admin Controlled Models/SpecialityDisease.Model"));
@@ -129,12 +130,11 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
                 const OTP = Math.floor(100000 + Math.random() * 900000).toString();
                 if (!(body.phoneNumber == "9999999999")) {
-                    // sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
-                    //   .then(async (message) => {
-                    //   })
-                    //   .catch((error) => {
-                    //     throw error;
-                    //   });
+                    (0, message_service_1.sendMessage)(`Your OTP is: ${OTP}`, body.phoneNumber)
+                        .then((message) => __awaiter(void 0, void 0, void 0, function* () { }))
+                        .catch((error) => {
+                        throw error;
+                    });
                     const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 }, OTP);
                     // Add OTP and phone number to temporary collection
                     yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: body.phoneNumber }, { $set: { phoneNumber: body.phoneNumber, otp: otpToken } }, { upsert: true });
@@ -363,7 +363,8 @@ exports.deleteProfile = deleteProfile;
 const searchDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const term = req.params.term;
-        let { city } = req.query;
+        let { city, gender } = req.query;
+        let matchQuery = {};
         const promiseArray = [
             SpecialityBody_Model_1.default.aggregate([
                 {
@@ -575,10 +576,7 @@ const searchDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             let doctorArray = yield Doctors_Model_1.default
                 .find({
                 $or: [
-                    {
-                        active: true,
-                        specialization: { $in: specialityArray },
-                    },
+                    Object.assign({ active: true, specialization: { $in: specialityArray } }, (gender && { gender })),
                     {
                         _id: { $in: id },
                     },
@@ -1694,3 +1692,49 @@ const getPrescriptionValidityAndFeesOfDoctorInHospital = (req, res) => __awaiter
     }
 });
 exports.getPrescriptionValidityAndFeesOfDoctorInHospital = getPrescriptionValidityAndFeesOfDoctorInHospital;
+const likeADoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let { likedDoctorId, likedById } = req.body;
+        let hospitalExist = yield hospitalService.doesHospitalExist(likedById);
+        let reference;
+        if (hospitalExist) {
+            reference = schemaNames_1.hospital;
+        }
+        let likedDoctor = yield doctorService.likeDoctor(likedDoctorId, likedById, reference);
+        return (0, response_1.successResponse)(likedDoctor, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.likeADoctor = likeADoctor;
+const unlikeDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let { likedDoctorId, likedById } = req.body;
+        let hospitalExist = yield hospitalService.doesHospitalExist(likedById);
+        let reference;
+        if (hospitalExist) {
+            reference = schemaNames_1.hospital;
+        }
+        let unlikeDoctor = yield doctorService.unlikeDoctor(likedDoctorId, likedById, reference);
+        return (0, response_1.successResponse)(unlikeDoctor, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(new Error(error), res);
+    }
+});
+exports.unlikeDoctor = unlikeDoctor;
+const getMyLikes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let { doctorId } = req.currentDoctor;
+        if (!doctorId) {
+            doctorId = req.body.doctorId;
+        }
+        let likes = yield doctorService.getMyLikes(doctorId);
+        return (0, response_1.successResponse)(likes, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getMyLikes = getMyLikes;

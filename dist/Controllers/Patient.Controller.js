@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkIfDoctorIsOnHoliday = exports.getPatientsNotification = exports.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod = exports.searchPatientByPhoneNumberOrEmail = exports.checkDoctorAvailability = exports.uploadPrescription = exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.viewAppointById = exports.CancelAppointment = exports.doneAppointment = exports.rescheduleAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = exports.excludeHospitalFields = exports.excludePatientFields = void 0;
+exports.getDoctorsIHaveLikes = exports.checkIfDoctorIsOnHoliday = exports.getPatientsNotification = exports.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod = exports.searchPatientByPhoneNumberOrEmail = exports.checkDoctorAvailability = exports.uploadPrescription = exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.viewAppointById = exports.CancelAppointment = exports.doneAppointment = exports.rescheduleAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = exports.excludeHospitalFields = exports.excludePatientFields = void 0;
 const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
 // import { excludePatientFields } from "./Patient.Controller";
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
@@ -39,6 +39,8 @@ const Appointment_Model_1 = __importDefault(require("../Models/Appointment.Model
 const jwt = __importStar(require("jsonwebtoken"));
 const bcrypt = __importStar(require("bcrypt"));
 const response_1 = require("../Services/response");
+// import { sendMessage } from "../Services/message.service";
+const message_service_1 = require("../Services/message.service");
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const Doctor_Controller_1 = require("./Doctor.Controller");
 const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
@@ -52,6 +54,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const notificationService = __importStar(require("../Services/Notification/Notification.Service"));
 const Validation_Service_1 = require("../Services/Validation.Service");
 const Appointment_Service_1 = require("../Services/Appointment/Appointment.Service");
+const likeService = __importStar(require("../Services/Like/Like.service"));
 const prescriptionValidityController = __importStar(require("../Controllers/Prescription-Validity.Controller"));
 const Order_Model_1 = __importDefault(require("../Models/Order.Model"));
 const Doctor_Service_1 = require("../Services/Doctor/Doctor.Service");
@@ -97,7 +100,7 @@ const createPatient = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         jwt.sign(patientObj.toJSON(), process.env.SECRET_PATIENT_KEY, (err, token) => {
             if (err)
                 return (0, response_1.errorResponse)(err, res);
-            return (0, response_1.successResponse)(token, "Patient profile successfully created", res);
+            return (0, response_1.successResponse)({ token, _id: patientObj._id }, "Patient profile successfully created", res);
         });
     }
     catch (error) {
@@ -113,14 +116,13 @@ const patientLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
                 const OTP = Math.floor(100000 + Math.random() * 900000).toString();
                 // Implement message service API
-                // sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
-                //   .then(async (message) => {
-                //   })
-                //   .catch((error) => {
-                //     // throw error;
-                //     console.log("error :", error);
-                //     // return errorResponse(error, res);
-                //   });
+                (0, message_service_1.sendMessage)(`Your OTP is: ${OTP}`, body.phoneNumber)
+                    .then((message) => __awaiter(void 0, void 0, void 0, function* () { }))
+                    .catch((error) => {
+                    // throw error;
+                    console.log("error :", error);
+                    // return errorResponse(error, res);
+                });
                 const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 }, OTP);
                 // Add OTP and phone number to temporary collection
                 yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: body.phoneNumber }, { $set: { phoneNumber: body.phoneNumber, otp: otpToken } }, { upsert: true });
@@ -137,10 +139,13 @@ const patientLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                 const profile = yield Patient_Model_1.default.findOne({
                     phoneNumber: body.phoneNumber,
                     deleted: false,
-                }, Doctor_Controller_1.excludeDoctorFields);
+                }, {
+                    password: 0,
+                    verified: 0,
+                });
                 const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_PATIENT_KEY);
-                const { firstName, lastName, gender, phoneNumber, email, _id } = profile.toJSON();
-                return (0, response_1.successResponse)({ token, firstName, lastName, gender, phoneNumber, email, _id }, "Successfully logged in", res);
+                const { firstName, lastName, gender, phoneNumber, email, _id, DOB } = profile.toJSON();
+                return (0, response_1.successResponse)({ token, firstName, lastName, gender, phoneNumber, email, _id, DOB }, "Successfully logged in", res);
             }
             const otpData = yield OTP_Model_1.default.findOne({
                 phoneNumber: body.phoneNumber,
@@ -155,12 +160,24 @@ const patientLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                     const profile = yield Patient_Model_1.default.findOne({
                         phoneNumber: body.phoneNumber,
                         deleted: false,
-                    }, exports.excludePatientFields);
+                    }, {
+                        password: 0,
+                        verified: 0,
+                    });
                     if (profile) {
                         const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_PATIENT_KEY);
                         otpData.remove();
-                        const { firstName, lastName, gender, phoneNumber, email, _id } = profile.toJSON();
-                        return (0, response_1.successResponse)({ token, firstName, lastName, gender, phoneNumber, email, _id }, "Successfully logged in", res);
+                        const { firstName, lastName, gender, phoneNumber, email, _id, DOB, } = profile.toJSON();
+                        return (0, response_1.successResponse)({
+                            token,
+                            firstName,
+                            lastName,
+                            gender,
+                            phoneNumber,
+                            email,
+                            _id,
+                            DOB,
+                        }, "Successfully logged in", res);
                     }
                     else {
                         otpData.remove();
@@ -920,3 +937,14 @@ const checkIfDoctorIsOnHoliday = (req, res) => __awaiter(void 0, void 0, void 0,
     }
 });
 exports.checkIfDoctorIsOnHoliday = checkIfDoctorIsOnHoliday;
+const getDoctorsIHaveLikes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let { id } = req.params;
+        let myLikes = yield likeService.getDoctorsIHaveLikes(id);
+        return (0, response_1.successResponse)(myLikes, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getDoctorsIHaveLikes = getDoctorsIHaveLikes;

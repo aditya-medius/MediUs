@@ -26,9 +26,20 @@ const likeSchema = new mongoose_1.Schema({
         type: mongoose_1.default.Schema.Types.ObjectId,
         ref: schemaNames_1.doctor,
     },
-    patient: {
+    likedBy: {
         type: mongoose_1.default.Schema.Types.ObjectId,
-        ref: schemaNames_1.patient,
+        refPath: "reference",
+    },
+    reference: {
+        type: String,
+        enum: [schemaNames_1.patient, schemaNames_1.hospital],
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now(),
+    },
+    unlike: {
+        type: Boolean,
     },
 });
 const likeModel = (0, mongoose_1.model)(schemaNames_1.like, likeSchema);

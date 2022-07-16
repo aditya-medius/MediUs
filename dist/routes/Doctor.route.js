@@ -202,4 +202,7 @@ doctorRouter.post("/getListOfAllAppointments/:page", (0, middlewareHelper_1.oneO
 doctorRouter.put("/deleteWorkingHour", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), workingHoursController.deleteWorkingHour);
 doctorRouter.get("/getAppointmentFeeFromAppointmentId/:appointmentId", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getAppointmentFeeFromAppointmentId);
 doctorRouter.put("/getFeeAndValidity", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), doctorController.getPrescriptionValidityAndFeesOfDoctorInHospital);
+doctorRouter.post("/likeUnlikeDoctor", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.likeADoctor);
+doctorRouter.post("/unlikeDoctor", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.unlikeDoctor);
+doctorRouter.post("/getMyLikes", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.getMyLikes);
 exports.default = doctorRouter;

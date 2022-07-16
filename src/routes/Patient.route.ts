@@ -208,4 +208,11 @@ patientRouter.post(
   oneOf(authenticatePatient, authenticateHospital, authenticateDoctor),
   patientController.checkIfDoctorIsOnHoliday
 );
+
+patientRouter.get(
+  "/getMyLikes/:id",
+  oneOf(authenticatePatient),
+  patientController.getDoctorsIHaveLikes
+);
+
 export default patientRouter;

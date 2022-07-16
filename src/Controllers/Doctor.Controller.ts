@@ -124,22 +124,21 @@ export const doctorLogin = async (req: Request, res: Response) => {
         const OTP = Math.floor(100000 + Math.random() * 900000).toString();
 
         if (!(body.phoneNumber == "9999999999")) {
-          // sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
-          //   .then(async (message) => {
-          //   })
-          //   .catch((error) => {
-          //     throw error;
-          //   });
-            const otpToken = jwt.sign(
-              { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
-              OTP
-            );
-            // Add OTP and phone number to temporary collection
-            await otpModel.findOneAndUpdate(
-              { phoneNumber: body.phoneNumber },
-              { $set: { phoneNumber: body.phoneNumber, otp: otpToken } },
-              { upsert: true }
-            );
+          sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
+            .then(async (message) => {})
+            .catch((error) => {
+              throw error;
+            });
+          const otpToken = jwt.sign(
+            { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
+            OTP
+          );
+          // Add OTP and phone number to temporary collection
+          await otpModel.findOneAndUpdate(
+            { phoneNumber: body.phoneNumber },
+            { $set: { phoneNumber: body.phoneNumber, otp: otpToken } },
+            { upsert: true }
+          );
 
           return successResponse({}, "OTP sent successfully", res);
         } else {
@@ -420,7 +419,9 @@ export const searchDoctor = async (req: Request, res: Response) => {
   try {
     const term = req.params.term;
 
-    let { city } = req.query;
+    let { city, gender } = req.query;
+
+    let matchQuery = {};
     const promiseArray: Array<any> = [
       specialityBodyModel.aggregate([
         {
@@ -641,6 +642,7 @@ export const searchDoctor = async (req: Request, res: Response) => {
                 {
                   active: true,
                   specialization: { $in: specialityArray },
+                  ...(gender && { gender }),
                 },
                 {
                   _id: { $in: id },
@@ -1951,6 +1953,56 @@ export const getPrescriptionValidityAndFeesOfDoctorInHospital = async (
     let [p, c] = data;
 
     return successResponse({ ...p, ...c }, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const likeADoctor = async (req: Request, res: Response) => {
+  try {
+    let { likedDoctorId, likedById } = req.body;
+    let hospitalExist = await hospitalService.doesHospitalExist(likedById);
+    let reference;
+    if (hospitalExist) {
+      reference = hospital;
+    }
+    let likedDoctor = await doctorService.likeDoctor(
+      likedDoctorId,
+      likedById,
+      reference
+    );
+    return successResponse(likedDoctor, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const unlikeDoctor = async (req: Request, res: Response) => {
+  try {
+    let { likedDoctorId, likedById } = req.body;
+    let hospitalExist = await hospitalService.doesHospitalExist(likedById);
+    let reference;
+    if (hospitalExist) {
+      reference = hospital;
+    }
+    let unlikeDoctor = await doctorService.unlikeDoctor(
+      likedDoctorId,
+      likedById,
+      reference
+    );
+    return successResponse(unlikeDoctor, "Success", res);
+  } catch (error: any) {
+    return errorResponse(new Error(error), res);
+  }
+};
+export const getMyLikes = async (req: Request, res: Response) => {
+  try {
+    let { doctorId } = req.currentDoctor;
+    if (!doctorId) {
+      doctorId = req.body.doctorId;
+    }
+    let likes = await doctorService.getMyLikes(doctorId);
+    return successResponse(likes, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }
