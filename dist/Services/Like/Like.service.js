@@ -42,7 +42,15 @@ const getDoctorsIHaveLikes = (myId) => __awaiter(void 0, void 0, void 0, functio
                 },
             ],
         })
-            .populate({ path: "doctor", select: Doctor_Controller_1.excludeDoctorFields });
+            .populate({
+            path: "doctor",
+            select: Doctor_Controller_1.excludeDoctorFields,
+            populate: {
+                path: "specialization qualification",
+            },
+        });
+        // .populate({ path: "qualification" })
+        // .populate({ path: "Specialization" });
         return Promise.resolve(myLikes);
     }
     catch (error) {

@@ -9,6 +9,7 @@ export const generateOrderId = async (body: any) => {
       amount: body.amount, // amount in the smallest currency unit
       currency: body.currency,
       receipt: `order_rcptid_${receiptNumber}`,
+      otherCharges: body.otherCharges,
       // appointmentDetails: body.appointment,
     };
 

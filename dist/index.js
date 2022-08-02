@@ -40,6 +40,8 @@ const Doctor_auth_1 = require("./authentication/Doctor.auth");
 const Hospital_auth_1 = require("./authentication/Hospital.auth");
 const Patient_auth_1 = require("./authentication/Patient.auth");
 const Admin_auth_1 = require("./authentication/Admin.auth");
+const swaggerUi = __importStar(require("swagger-ui-express"));
+const swaggerDoc = __importStar(require("../swagger.json"));
 // Cron Jobs
 // cronJobService.cronFunctions.forEach((e: Function) => {
 //   e();
@@ -49,6 +51,7 @@ const port = process.env.PORT;
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
+app.use("/apiDocs", swaggerUi.serve, swaggerUi.setup(swaggerDoc));
 app.use("/doctor", Doctor_route_1.default);
 app.use("/hospital", Hospital_route_1.default);
 app.use("/admin", Admin_route_1.default);

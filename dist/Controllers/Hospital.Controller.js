@@ -384,6 +384,7 @@ exports.updateHospital = updateHospital;
 const searchHospital = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const term = req.params.term;
+        let { city } = req.query;
         let regexVar = `/^${term}$/i`;
         const promiseArray = [
             SpecialityBody_Model_1.default.aggregate([

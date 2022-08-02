@@ -7,3 +7,8 @@ declare namespace Express {
     currentAgent: Object<any>;
   }
 }
+
+declare module "*.json" {
+  const value: any;
+  export default value;
+}

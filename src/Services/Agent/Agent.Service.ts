@@ -62,13 +62,13 @@ export const sendOTP = async (phoneNumber: string) => {
         { $set: { phoneNumber: phoneNumber, otp: otpToken } },
         { upsert: true }
       );
-      // sendMessage(`Your OTP is: ${OTP}`, phoneNumber)
-      //   .then(async (message: any) => {
-      //     // Add OTP and phone number to temporary collection
-      //   })
-      //   .catch((error: any) => {
-      //     return Promise.reject(error);
-      //   });
+      sendMessage(`Your OTP is: ${OTP}`, phoneNumber)
+        .then(async (message: any) => {
+          // Add OTP and phone number to temporary collection
+        })
+        .catch((error: any) => {
+          return Promise.reject(error);
+        });
       return Promise.resolve({});
     }
   } catch (error: any) {

@@ -31,13 +31,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDoctorPrescriptionInHospital = exports.getPrescriptionValidityAndFeesOfDoctorInHospital = exports.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod = exports.setPrescriptionValidity = void 0;
+exports.getDoctorPrescriptionValidity = exports.getDoctorPrescriptionInHospital = exports.getPrescriptionValidityAndFeesOfDoctorInHospital = exports.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod = exports.setPrescriptionValidity = void 0;
 const Appointment_Model_1 = __importDefault(require("../Models/Appointment.Model"));
 const Prescription_Validity_Model_1 = __importDefault(require("../Models/Prescription-Validity.Model"));
 const response_1 = require("../Services/response");
 const moment_1 = __importDefault(require("moment"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const doctorService = __importStar(require("../Services/Doctor/Doctor.Service"));
+const Prescription_Model_1 = __importDefault(require("../Models/Prescription.Model"));
 const setPrescriptionValidity = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { doctorId = req.currentDoctor ? req.currentDoctor : req.body.doctorId, validateTill, hospitalId, } = req.body;
@@ -126,3 +127,13 @@ const getDoctorPrescriptionInHospital = (hospitalId, doctorId) => __awaiter(void
     }
 });
 exports.getDoctorPrescriptionInHospital = getDoctorPrescriptionInHospital;
+const getDoctorPrescriptionValidity = (doctorId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let data = yield Prescription_Model_1.default.find({ doctorId }).lean();
+        return Promise.resolve(data);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.getDoctorPrescriptionValidity = getDoctorPrescriptionValidity;

@@ -27,7 +27,15 @@ export const getDoctorsIHaveLikes = async (myId: string) => {
           },
         ],
       })
-      .populate({ path: "doctor", select: excludeDoctorFields });
+      .populate({
+        path: "doctor",
+        select: excludeDoctorFields,
+        populate: {
+          path: "specialization qualification",
+        },
+      });
+    // .populate({ path: "qualification" })
+    // .populate({ path: "Specialization" });
 
     return Promise.resolve(myLikes);
   } catch (error: any) {

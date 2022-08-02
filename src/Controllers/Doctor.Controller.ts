@@ -1115,6 +1115,16 @@ export const getDoctorWorkingInHospitals = async (
 
     doctorDetails = doctorDetails.toObject();
     delete doctorDetails.hospitalDetails;
+
+    let allPrescriptions =
+      await prescriptionController.getDoctorPrescriptionValidity(req.params.id);
+    doctorsWorkingInHospital.map((e) => {
+      let prescription = allPrescriptions.filter((elem) => {
+        return elem.hospitalId.toString() === e.hospital._id.toString();
+      })[0]?.validateTill;
+      e["presciptionValidity"] = prescription ?? "Not found";
+    });
+
     return successResponse(
       { doctorDetails, doctorsWorkingInHospital },
       // doctorsWorkingInHospital,

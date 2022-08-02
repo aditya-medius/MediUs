@@ -674,7 +674,7 @@ export const ViewAppointment = async (req: Request, res: Response) => {
       .find({
         patient: req.currentPatient,
         cancelled: false,
-        "time.date": { $gt: Date() },
+        // "time.date": { $gt: Date() },
       })
       .populate({
         path: "hospital",
@@ -712,54 +712,56 @@ export const ViewAppointment = async (req: Request, res: Response) => {
 
     const page2 = appointmentData.length / 2;
 
-    const older_apppointmentData: Array<object> = await appointmentModel
-      .find(
-        {
-          patient: req.currentPatient,
-          cancelled: false,
-          "time.date": { $lte: Date() },
-        },
-        "-patient"
-      )
-      .populate({
-        path: "hospital",
-        select: {
-          ...excludeHospitalFields,
-          type: 0,
-          deleted: 0,
-          contactNumber: 0,
-        },
-      })
-      .populate({
-        path: "doctors",
-        select: {
-          ...excludeDoctorFields,
-          hospitalDetails: 0,
-          specialization: 0,
-          qualification: 0,
-          email: 0,
-          active: 0,
-          deleted: 0,
-          overallExperience: 0,
-          gender: 0,
-          image: 0,
-        },
-      })
-      .populate({
-        path: "subPatient",
-        select: {
-          parentPatient: 0,
-        },
-      })
-      .sort({ "time.date": 1 })
-      .skip(page > page2 ? (page2 - 1) * 2 : 0)
-      .limit(2);
+    // const older_apppointmentData: Array<object> = await appointmentModel
+    //   .find(
+    //     {
+    //       patient: req.currentPatient,
+    //       cancelled: false,
+    //       "time.date": { $lte: Date() },
+    //     },
+    //     "-patient"
+    //   )
+    //   .populate({
+    //     path: "hospital",
+    //     select: {
+    //       ...excludeHospitalFields,
+    //       type: 0,
+    //       deleted: 0,
+    //       contactNumber: 0,
+    //     },
+    //   })
+    //   .populate({
+    //     path: "doctors",
+    //     select: {
+    //       ...excludeDoctorFields,
+    //       hospitalDetails: 0,
+    //       specialization: 0,
+    //       qualification: 0,
+    //       email: 0,
+    //       active: 0,
+    //       deleted: 0,
+    //       overallExperience: 0,
+    //       gender: 0,
+    //       image: 0,
+    //     },
+    //   })
+    //   .populate({
+    //     path: "subPatient",
+    //     select: {
+    //       parentPatient: 0,
+    //     },
+    //   })
+    //   .sort({ "time.date": 1 })
+    //   .skip(page > page2 ? (page2 - 1) * 2 : 0)
+    //   .limit(2);
 
-    const allAppointment = appointmentData.concat(older_apppointmentData);
+    // const allAppointment = appointmentData.concat(older_apppointmentData);
+    const allAppointment = appointmentData;
 
     if (allAppointment.length > 0)
       return successResponse(
-        { past: older_apppointmentData, upcoming: allAppointment },
+        // { past: older_apppointmentData, upcoming: allAppointment },
+        { allAppointment },
         "Appointments has been found",
         res
       );

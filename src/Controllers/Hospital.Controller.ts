@@ -423,6 +423,8 @@ export const updateHospital = async (req: Request, res: Response) => {
 export const searchHospital = async (req: Request, res: Response) => {
   try {
     const term = req.params.term;
+
+    let { city } = req.query;
     let regexVar = `/^${term}$/i`;
     const promiseArray: Array<any> = [
       specialityBodyModel.aggregate([

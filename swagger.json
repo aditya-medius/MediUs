@@ -1,0 +1,933 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "DOBRH API Documentation",
+        "version": "1.0.0"
+    },
+    "securityDefinitions": {
+        "basicAuth": {
+            "type": "basic"
+        },
+        "bearerAuth": {
+            "type": "apiKey",
+            "name": "accesstoken",
+            "scheme": "bearer",
+            "in": "header",
+            "description": "JWT Authorization header"
+        }
+    },
+    "basePath": "/",
+    "tags": [
+        {
+            "name": "Agent",
+            "description": "Operations about agent",
+            "externalDocs": {
+                "description": "",
+                "url": ""
+            }
+        },
+        {
+            "name": "Clinic",
+            "description": "Operations about clinic",
+            "externalDocs": {
+                "description": "",
+                "url": ""
+            }
+        },
+        {
+            "name": "Doctor",
+            "description": "Operations about doctor",
+            "externalDocs": {
+                "description": "",
+                "url": ""
+            }
+        },
+        {
+            "name": "Patient",
+            "description": "Operations about patient",
+            "externalDocs": {
+                "description": "",
+                "url": ""
+            }
+        },
+        {
+            "name": "Common",
+            "description": "Common routes"
+        }
+    ],
+    "schemes": [
+        "http",
+        "https"
+    ],
+    "consumes": [
+        "application/json",
+        "application/x-www-form-urlencoded",
+        "multipart/form-data"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "doctor/": {
+            "post": {
+                "deprecated": false,
+                "tags": [
+                    "Agent"
+                ],
+                "description": "Doctor Basic Detail",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "type": "object",
+                        "schema": {
+                            "type": "object",
+                            "example": {
+                                "password": "12334",
+                                "KYCDetails": "62336efc8237676846e7cfaa",
+                                "registration": {
+                                    "registrationNumber": "123456",
+                                    "registrationCouncil": "Registration Council",
+                                    "registrationDate": "Tue Nov 30 2021 22:47:17 GMT+0530 (India Standard Time)"
+                                },
+                                "email": "rajnish@applegmail.com",
+                                "phoneNumber": "9876543214",
+                                "DOB": "Tue Nov 30 2021 22:47:17 GMT+0530 (India Standard Time)",
+                                "gender": "Male",
+                                "lastName": "Rawat",
+                                "firstName": "Aditya",
+                                "specialization": [
+                                    "623364078237676846e7cf92"
+                                ],
+                                "qualification": [
+                                    "62336f208237676846e7cfac"
+                                ],
+                                "overallExperience": "{{experience}}"
+                            }
+                        }
+                    }
+                ],
+                "response": {
+                    "200": {
+                        "description": "Successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/doctor/addDoctorQualification": {
+            "post": {
+                "deprecated": false,
+                "tags": [
+                    "Agent"
+                ],
+                "description": "Qualification Detail",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "type": "object",
+                        "schema": {
+                            "type": "object",
+                            "example": {
+                                "qualificationName": "6282953529ee825885b5413e",
+                                "certificationOrganisation": "aaa",
+                                "duration": {
+                                    "from": "Tue Nov 30 2021 22:47:17 GMT+0530 (India Standard Time)",
+                                    "till": "Tue Nov 30 2021 22:47:17 GMT+0530 (India Standard Time)"
+                                },
+                                "email": "aaa11a@gmail.com"
+                            }
+                        }
+                    }
+                ],
+                "response": {
+                    "200": {
+                        "description": "Successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "hospital/": {
+            "post": {
+                "deprecated": false,
+                "tags": [
+                    "Clinic"
+                ],
+                "description": "Clinic basic details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "type": "object",
+                        "schema": {
+                            "type": "object",
+                            "example": {
+                                "name": "New 2 Hospital",
+                                "address": {
+                                    "city": "62336f818237676846e7cfb9",
+                                    "state": "62336f918237676846e7cfbb",
+                                    "locality": "62336f9f8237676846e7cfbd",
+                                    "country": "62336fae8237676846e7cfbf",
+                                    "addressLine_1": "Gala No 6 & 7, Laxmi Plaza, Laxmi Industrial Estate, New Link Road, Andheri West, Mumbai - 400053",
+                                    "pincode": "123456"
+                                },
+                                "doctors": [
+                                    "62336f358237676846e7cfaf"
+                                ],
+                                "anemity": [
+                                    "62336f4c8237676846e7cfb5"
+                                ],
+                                "type": "Government",
+                                "contactNumber": "8970654321",
+                                "numberOfBed": 76,
+                                "specialisedIn": [
+                                    "61afa79ecd7be4b97f9b93e1"
+                                ],
+                                "payment": [
+                                    "6233648a8237676846e7cf94"
+                                ],
+                                "password": "123456",
+                                "services": [
+                                    "62336f6c8237676846e7cfb7"
+                                ],
+                                "modeOfAppointments": [
+                                    "Offline"
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "response": {
+                    "200": {
+                        "description": "Successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "agent/": {
+            "post": {
+                "deprecated": false,
+                "tags": [
+                    "Agent"
+                ],
+                "description": "Suvidha Kendra Personal Details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "type": "object",
+                        "schema": {
+                            "type": "object",
+                            "example": {
+                                "email": "aditya@gmail.com",
+                                "phoneNumber": "882633442",
+                                "firstName": "Aditya",
+                                "lastName": "Rawat",
+                                "gender": "Male",
+                                "alternateNumber": "1234567890",
+                                "photoIdentityNumber": "123456",
+                                "DOB": "Tue Nov 30 2021 22:47:17 GMT+0530 (India Standard Time)",
+                                "location": {
+                                    "type": "Point",
+                                    "coordinates": [
+                                        -73.856077,
+                                        40.848447
+                                    ]
+                                },
+                                "password": "123456"
+                            }
+                        }
+                    }
+                ],
+                "response": {
+                    "200": {
+                        "description": "Successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "doctor/likeUnlikeDoctor": {
+            "post": {
+                "deprecated": false,
+                "tags": [
+                    "Doctor"
+                ],
+                "description": "Like Doctor",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "type": "object",
+                        "schema": {
+                            "type": "object",
+                            "example": {
+                                "likedDoctorId": "61e846964fffd2dfc73b8ab9",
+                                "likedById": "61be140e0026889b22195736",
+                                "reference": "patients"
+                            }
+                        }
+                    }
+                ],
+                "response": {
+                    "200": {
+                        "description": "Successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "patient/getMyLikes/:id": {
+            "get": {
+                "deprecated": false,
+                "tags": [
+                    "Patient"
+                ],
+                "description": "Like List",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "response": {
+                    "200": {
+                        "description": "Successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "doctor/login?phoneNumber=9999999999": {
+            "post": {
+                "deprecated": false,
+                "tags": [
+                    "Doctor"
+                ],
+                "description": "Login (Doctor)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "response": {
+                    "200": {
+                        "description": "Successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "doctor/login?OTP=351808&phoneNumber=9999999999": {
+            "post": {
+                "deprecated": false,
+                "tags": [
+                    "Doctor"
+                ],
+                "description": "Login with OTP (Doctor)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "response": {
+                    "200": {
+                        "description": "Successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "doctor/addDoctorWorkingHour": {
+            "post": {
+                "deprecated": false,
+                "tags": [
+                    "Doctor"
+                ],
+                "description": "Working Hour (Doctor)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "response": {
+                    "200": {
+                        "description": "Successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "example": {
+                                "doctorDetails": "6235872b8237676846e7d11f",
+                                "hospitalDetails": "62336fb48237676846e7cfc3",
+                                "monday": {
+                                    "working": true,
+                                    "from": {
+                                        "time": 2,
+                                        "division": 2
+                                    },
+                                    "till": {
+                                        "time": 14,
+                                        "division": 2
+                                    },
+                                    "capacity": 1
+                                },
+                                "tuesday": {
+                                    "working": true,
+                                    "from": {
+                                        "time": 2,
+                                        "division": 2
+                                    },
+                                    "till": {
+                                        "time": 14,
+                                        "division": 2
+                                    },
+                                    "capacity": 1
+                                },
+                                "wednesday": {
+                                    "working": true,
+                                    "from": {
+                                        "time": 9,
+                                        "division": 2
+                                    },
+                                    "till": {
+                                        "time": 14,
+                                        "division": 2
+                                    },
+                                    "capacity": 1
+                                },
+                                "thursday": {
+                                    "working": true,
+                                    "from": {
+                                        "time": 2,
+                                        "division": 2
+                                    },
+                                    "till": {
+                                        "time": 14,
+                                        "division": 2
+                                    },
+                                    "capacity": 1
+                                },
+                                "friday": {
+                                    "working": true,
+                                    "from": {
+                                        "time": 8,
+                                        "division": 2
+                                    },
+                                    "till": {
+                                        "time": 14,
+                                        "division": 2
+                                    },
+                                    "capacity": 1
+                                },
+                                "saturday": {
+                                    "working": true,
+                                    "from": {
+                                        "time": 2,
+                                        "division": 2
+                                    },
+                                    "till": {
+                                        "time": 14,
+                                        "division": 2
+                                    },
+                                    "capacity": 1
+                                },
+                                "sunday": {
+                                    "working": true,
+                                    "from": {
+                                        "time": 2,
+                                        "division": 2
+                                    },
+                                    "till": {
+                                        "time": 14,
+                                        "division": 2
+                                    },
+                                    "capacity": 1
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "doctor/getDoctorById/:id": {
+            "post": {
+                "deprecated": false,
+                "tags": [
+                    "Doctor"
+                ],
+                "description": "Doctor Details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "response": {
+                    "200": {
+                        "description": "Successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "example": {
+                                "fullDetails": true
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "patient/generateOrderId": {
+            "post": {
+                "deprecated": false,
+                "tags": [
+                    "Patient"
+                ],
+                "description": "Order for patient",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "response": {
+                    "200": {
+                        "description": "Successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "example": {
+                                "amount": 50000,
+                                "currency": "INR",
+                                "otherCharges": {
+                                    "tax": 20,
+                                    "paymentGateway": 20
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "doctor/getMyLikes": {
+            "post": {
+                "deprecated": false,
+                "tags": [
+                    "Doctor"
+                ],
+                "description": "See who liked this doctor",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "response": {
+                    "200": {
+                        "description": "Successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "example": {
+                                "doctorId": "61e846964fffd2dfc73b8ab9"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "doctor/getFeeAndValidity": {
+            "post": {
+                "deprecated": false,
+                "tags": [
+                    "Doctor"
+                ],
+                "description": "See who liked this doctor",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "response": {
+                    "200": {
+                        "description": "Successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "example": {
+                                "hospitalId": "61fd7b086262f1e669e33218",
+                                "doctorId": "61e846964fffd2dfc73b8ab9"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "doctor/getAppointmentFeeFromAppointmentId/:appointmentId": {
+            "get": {
+                "deprecated": false,
+                "tags": [
+                    "Doctor"
+                ],
+                "description": "See who liked this doctor",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "response": {
+                    "200": {
+                        "description": "Successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "doctor/deleteWorkingHour": {
+            "put": {
+                "deprecated": false,
+                "tags": [
+                    "Doctor"
+                ],
+                "description": "Delete doctor's working hour",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "response": {
+                    "200": {
+                        "description": "Successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "example": {
+                                "workingHour": [
+                                    "627ea08f562da7bc4465f11b",
+                                    "627ea093562da7bc4465f122",
+                                    "627ea098562da7bc4465f12d"
+                                ]
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "doctor/getListOfAllAppointments/:page": {
+            "post": {
+                "deprecated": false,
+                "tags": [
+                    "Doctor"
+                ],
+                "description": "Get list of all appointments of this doctor",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "response": {
+                    "200": {
+                        "description": "Successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "doctor/getHospitalsOfflineAndOnlineAppointments": {
+            "post": {
+                "deprecated": false,
+                "tags": [
+                    "Doctor"
+                ],
+                "description": "Delete doctor's working hour",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "response": {
+                    "200": {
+                        "description": "Successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "doctor/deleteHolidayCalendar": {
+            "put": {
+                "deprecated": false,
+                "tags": [
+                    "Doctor"
+                ],
+                "description": "Delete doctor's holiday calendar",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "response": {
+                    "200": {
+                        "description": "Successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "example": {
+                                "holidayId": "625c42ae81925a7d083ad96b"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "doctor/getDoctorsHolidayList": {
+            "put": {
+                "deprecated": false,
+                "tags": [
+                    "Doctor"
+                ],
+                "description": "Get doctor's holiday calendar",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "response": {
+                    "200": {
+                        "description": "Successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "example": {
+                                "doctorId": "61e846964fffd2dfc73b8ab9",
+                                "hospitalId": "61e846964fffd2dfc73b8ab9",
+                                "year": 2021,
+                                "month": 11
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "doctor/setHolidayCalendar": {
+            "post": {
+                "deprecated": false,
+                "tags": [
+                    "Doctor"
+                ],
+                "description": "Set doctor's holiday calendar",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "response": {
+                    "200": {
+                        "description": "Successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "example": {
+                                "date": "Tue Nov 30 2021 22:47:17 GMT+0530 (India Standard Time)",
+                                "doctorId": "61e846964fffd2dfc73b8ab9",
+                                "hospitalId": "61e846964fffd2dfc73b8ab9"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "doctor/getDoctorsNotification": {
+            "get": {
+                "deprecated": false,
+                "tags": [
+                    "Doctor"
+                ],
+                "description": "Get doctor's notification",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "response": {
+                    "200": {
+                        "description": "Successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "doctor/getDoctorsOfflineAndOnlineAppointments": {
+            "post": {
+                "deprecated": false,
+                "tags": [
+                    "Doctor"
+                ],
+                "description": "Get doctor's online and offline notification",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "response": {
+                    "200": {
+                        "description": "Successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "example": {
+                                "date": {
+                                    "year": 2022,
+                                    "month": 3
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}

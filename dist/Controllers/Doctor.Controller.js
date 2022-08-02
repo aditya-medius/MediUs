@@ -996,6 +996,14 @@ const getDoctorWorkingInHospitals = (req, res) => __awaiter(void 0, void 0, void
         });
         doctorDetails = doctorDetails.toObject();
         delete doctorDetails.hospitalDetails;
+        let allPrescriptions = yield prescriptionController.getDoctorPrescriptionValidity(req.params.id);
+        doctorsWorkingInHospital.map((e) => {
+            var _a;
+            let prescription = (_a = allPrescriptions.filter((elem) => {
+                return elem.hospitalId.toString() === e.hospital._id.toString();
+            })[0]) === null || _a === void 0 ? void 0 : _a.validateTill;
+            e["presciptionValidity"] = prescription !== null && prescription !== void 0 ? prescription : "Not found";
+        });
         return (0, response_1.successResponse)({ doctorDetails, doctorsWorkingInHospital }, 
         // doctorsWorkingInHospital,
         "Success", res);
