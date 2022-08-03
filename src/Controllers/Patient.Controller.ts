@@ -34,6 +34,8 @@ import {
   getTokenNumber,
 } from "../Services/Appointment/Appointment.Service";
 
+import * as likeService from "../Services/Like/Like.service";
+
 import * as prescriptionValidityController from "../Controllers/Prescription-Validity.Controller";
 import orderModel from "../Models/Order.Model";
 import { checkIfDoctorIsAvailableOnTheDay } from "../Services/Doctor/Doctor.Service";
@@ -91,7 +93,7 @@ export const createPatient = async (req: Request, res: Response) => {
       (err: any, token: any) => {
         if (err) return errorResponse(err, res);
         return successResponse(
-          token,
+          { token, _id: patientObj._id },
           "Patient profile successfully created",
           res
         );
@@ -111,14 +113,13 @@ export const patientLogin = async (req: Request, res: Response) => {
         const OTP = Math.floor(100000 + Math.random() * 900000).toString();
 
         // Implement message service API
-        // sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
-        //   .then(async (message) => {
-        //   })
-        //   .catch((error) => {
-        //     // throw error;
-        //     console.log("error :", error);
-        //     // return errorResponse(error, res);
-        //   });
+        sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
+          .then(async (message) => {})
+          .catch((error) => {
+            // throw error;
+            console.log("error :", error);
+            // return errorResponse(error, res);
+          });
         const otpToken = jwt.sign(
           { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
           OTP
@@ -143,16 +144,19 @@ export const patientLogin = async (req: Request, res: Response) => {
             phoneNumber: body.phoneNumber,
             deleted: false,
           },
-          excludeDoctorFields
+          {
+            password: 0,
+            verified: 0,
+          }
         );
         const token = await jwt.sign(
           profile.toJSON(),
           process.env.SECRET_PATIENT_KEY as string
         );
-        const { firstName, lastName, gender, phoneNumber, email, _id } =
+        const { firstName, lastName, gender, phoneNumber, email, _id, DOB } =
           profile.toJSON();
         return successResponse(
-          { token, firstName, lastName, gender, phoneNumber, email, _id },
+          { token, firstName, lastName, gender, phoneNumber, email, _id, DOB },
           "Successfully logged in",
           res
         );
@@ -172,7 +176,10 @@ export const patientLogin = async (req: Request, res: Response) => {
               phoneNumber: body.phoneNumber,
               deleted: false,
             },
-            excludePatientFields
+            {
+              password: 0,
+              verified: 0,
+            }
           );
           if (profile) {
             const token = await jwt.sign(
@@ -180,10 +187,26 @@ export const patientLogin = async (req: Request, res: Response) => {
               process.env.SECRET_PATIENT_KEY as string
             );
             otpData.remove();
-            const { firstName, lastName, gender, phoneNumber, email, _id } =
-              profile.toJSON();
+            const {
+              firstName,
+              lastName,
+              gender,
+              phoneNumber,
+              email,
+              _id,
+              DOB,
+            } = profile.toJSON();
             return successResponse(
-              { token, firstName, lastName, gender, phoneNumber, email, _id },
+              {
+                token,
+                firstName,
+                lastName,
+                gender,
+                phoneNumber,
+                email,
+                _id,
+                DOB,
+              },
               "Successfully logged in",
               res
             );
@@ -651,7 +674,7 @@ export const ViewAppointment = async (req: Request, res: Response) => {
       .find({
         patient: req.currentPatient,
         cancelled: false,
-        "time.date": { $gt: Date() },
+        // "time.date": { $gt: Date() },
       })
       .populate({
         path: "hospital",
@@ -689,54 +712,56 @@ export const ViewAppointment = async (req: Request, res: Response) => {
 
     const page2 = appointmentData.length / 2;
 
-    const older_apppointmentData: Array<object> = await appointmentModel
-      .find(
-        {
-          patient: req.currentPatient,
-          cancelled: false,
-          "time.date": { $lte: Date() },
-        },
-        "-patient"
-      )
-      .populate({
-        path: "hospital",
-        select: {
-          ...excludeHospitalFields,
-          type: 0,
-          deleted: 0,
-          contactNumber: 0,
-        },
-      })
-      .populate({
-        path: "doctors",
-        select: {
-          ...excludeDoctorFields,
-          hospitalDetails: 0,
-          specialization: 0,
-          qualification: 0,
-          email: 0,
-          active: 0,
-          deleted: 0,
-          overallExperience: 0,
-          gender: 0,
-          image: 0,
-        },
-      })
-      .populate({
-        path: "subPatient",
-        select: {
-          parentPatient: 0,
-        },
-      })
-      .sort({ "time.date": 1 })
-      .skip(page > page2 ? (page2 - 1) * 2 : 0)
-      .limit(2);
+    // const older_apppointmentData: Array<object> = await appointmentModel
+    //   .find(
+    //     {
+    //       patient: req.currentPatient,
+    //       cancelled: false,
+    //       "time.date": { $lte: Date() },
+    //     },
+    //     "-patient"
+    //   )
+    //   .populate({
+    //     path: "hospital",
+    //     select: {
+    //       ...excludeHospitalFields,
+    //       type: 0,
+    //       deleted: 0,
+    //       contactNumber: 0,
+    //     },
+    //   })
+    //   .populate({
+    //     path: "doctors",
+    //     select: {
+    //       ...excludeDoctorFields,
+    //       hospitalDetails: 0,
+    //       specialization: 0,
+    //       qualification: 0,
+    //       email: 0,
+    //       active: 0,
+    //       deleted: 0,
+    //       overallExperience: 0,
+    //       gender: 0,
+    //       image: 0,
+    //     },
+    //   })
+    //   .populate({
+    //     path: "subPatient",
+    //     select: {
+    //       parentPatient: 0,
+    //     },
+    //   })
+    //   .sort({ "time.date": 1 })
+    //   .skip(page > page2 ? (page2 - 1) * 2 : 0)
+    //   .limit(2);
 
-    const allAppointment = appointmentData.concat(older_apppointmentData);
+    // const allAppointment = appointmentData.concat(older_apppointmentData);
+    const allAppointment = appointmentData;
 
     if (allAppointment.length > 0)
       return successResponse(
-        { past: older_apppointmentData, upcoming: allAppointment },
+        // { past: older_apppointmentData, upcoming: allAppointment },
+        { allAppointment },
         "Appointments has been found",
         res
       );
@@ -1057,6 +1082,16 @@ export const checkIfDoctorIsOnHoliday = async (req: Request, res: Response) => {
       hospitalId
     );
     return successResponse(holidayExist, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getDoctorsIHaveLikes = async (req: Request, res: Response) => {
+  try {
+    let { id } = req.params;
+    let myLikes = await likeService.getDoctorsIHaveLikes(id);
+    return successResponse(myLikes, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

@@ -9,6 +9,9 @@ const orderSchema = new Schema({
     type: Number,
     required: true,
   },
+  otherCharges: {
+    type: Object,
+  },
   currency: {
     type: String,
     required: true,

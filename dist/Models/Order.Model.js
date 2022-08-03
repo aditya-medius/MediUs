@@ -30,6 +30,9 @@ const orderSchema = new mongoose_1.Schema({
         type: Number,
         required: true,
     },
+    otherCharges: {
+        type: Object,
+    },
     currency: {
         type: String,
         required: true,

@@ -417,4 +417,20 @@ doctorRouter.put(
   oneOf(authenticateDoctor, authenticateHospital),
   doctorController.getPrescriptionValidityAndFeesOfDoctorInHospital
 );
+doctorRouter.post(
+  "/likeUnlikeDoctor",
+  oneOf(authenticateDoctor, authenticatePatient),
+  doctorController.likeADoctor
+);
+doctorRouter.post(
+  "/unlikeDoctor",
+  oneOf(authenticateDoctor, authenticatePatient),
+  doctorController.unlikeDoctor
+);
+
+doctorRouter.post(
+  "/getMyLikes",
+  oneOf(authenticateDoctor, authenticatePatient),
+  doctorController.getMyLikes
+);
 export default doctorRouter;

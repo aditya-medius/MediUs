@@ -1,14 +1,25 @@
 import mongoose, { Schema, model } from "mongoose";
-import { doctor, like, patient } from "../Services/schemaNames";
+import { doctor, like, patient, hospital } from "../Services/schemaNames";
 
 const likeSchema = new Schema({
   doctor: {
     type: mongoose.Schema.Types.ObjectId,
     ref: doctor,
   },
-  patient: {
+  likedBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: patient,
+    refPath: "reference",
+  },
+  reference: {
+    type: String,
+    enum: [patient, hospital],
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+  },
+  unlike: {
+    type: Boolean,
   },
 });
 

@@ -35,6 +35,7 @@ exports.getAgentToken = exports.verifyOtpAndLogin = exports.sendOTP = exports.lo
 const Agent_Model_1 = __importDefault(require("../../Models/Agent.Model"));
 const Utils_1 = require("../Utils");
 const dotenv = __importStar(require("dotenv"));
+const message_service_1 = require("../message.service");
 const OTP_Model_1 = __importDefault(require("../../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
 dotenv.config();
@@ -91,13 +92,13 @@ const sendOTP = (phoneNumber) => __awaiter(void 0, void 0, void 0, function* () 
             const OTP = yield (0, Utils_1.generateOTP)(phoneNumber);
             const otpToken = (0, Utils_1.generateOTPtoken)(OTP);
             yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: phoneNumber }, { $set: { phoneNumber: phoneNumber, otp: otpToken } }, { upsert: true });
-            // sendMessage(`Your OTP is: ${OTP}`, phoneNumber)
-            //   .then(async (message: any) => {
-            //     // Add OTP and phone number to temporary collection
-            //   })
-            //   .catch((error: any) => {
-            //     return Promise.reject(error);
-            //   });
+            (0, message_service_1.sendMessage)(`Your OTP is: ${OTP}`, phoneNumber)
+                .then((message) => __awaiter(void 0, void 0, void 0, function* () {
+                // Add OTP and phone number to temporary collection
+            }))
+                .catch((error) => {
+                return Promise.reject(error);
+            });
             return Promise.resolve({});
         }
     }

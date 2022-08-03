@@ -100,4 +100,5 @@ patientRouter.get("/getFees", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authe
     }
 }));
 patientRouter.post("/checkIfDoctorIsOnHoliday", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital, Doctor_auth_1.authenticateDoctor), patientController.checkIfDoctorIsOnHoliday);
+patientRouter.get("/getMyLikes/:id", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.getDoctorsIHaveLikes);
 exports.default = patientRouter;

@@ -186,7 +186,7 @@ hospitalRouter.put(
 
 hospitalRouter.put(
   "/getHospitalsSpecilization_AccordingToDoctor",
-  oneOf(authenticateHospital),
+  oneOf(authenticateHospital,authenticatePatient),
   hospitalController.getHospitalsSpecilization_AccordingToDoctor
 );
 hospitalRouter.put(

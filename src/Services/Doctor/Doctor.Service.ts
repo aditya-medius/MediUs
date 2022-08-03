@@ -16,7 +16,9 @@ import {
 import { excludeDoctorFields } from "../../Controllers/Doctor.Controller";
 import { doctor, hospital, patient, specialization } from "../schemaNames";
 import holidayModel from "../../Models/Holiday-Calendar.Model";
+import likeModel from "../../Models/Likes.Model";
 
+import * as likeService from "../../Services/Like/Like.service";
 dotenv.config();
 
 export const getUser = async (req: Request) => {
@@ -489,6 +491,86 @@ export const checkIfDoctorIsAvailableOnTheDay = async (
       "delData.deleted": false,
     });
     return Promise.resolve(holidayExist);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const likeDoctor = async (
+  likedDoctorId: string,
+  likedById: string,
+  reference = patient
+) => {
+  try {
+    let likeExist = await likeService.likeExist(likedDoctorId, likedById);
+    if (!likeExist) {
+      let liked = await new likeModel({
+        doctor: likedDoctorId,
+        likedBy: likedById,
+        reference,
+      }).save();
+
+      return Promise.resolve(true);
+    } else {
+      let { unlike, _id } = await likeService.getLikeById(
+        likedDoctorId,
+        likedById
+      );
+      console.log("unliked", unlike && unlike);
+      if (unlike) {
+        likeModel.findOneAndUpdate({ _id }, { $set: { unlike: false } });
+      } else {
+        console.log("dsdsjbdsnbdsjsdds", { _id });
+        likeModel.findOneAndUpdate({ _id }, { $set: { unlike: true } });
+      }
+      return Promise.resolve(!unlike);
+
+      // return Promise.resolve(true);
+    }
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const unlikeDoctor = async (
+  likedDoctorId: string,
+  likedById: string,
+  reference = patient
+) => {
+  try {
+    let likeExist = await likeService.likeExist(likedDoctorId, likedById);
+    if (!likeExist) {
+      return Promise.reject("You have not liked this doctor");
+    } else {
+      let unlike = await likeModel.findOneAndUpdate(
+        {
+          doctor: likedDoctorId,
+          likedBy: likedById,
+          reference,
+        },
+        {
+          $set: {
+            unlike: true,
+          },
+        }
+      );
+      return Promise.resolve(unlike ? false : true);
+    }
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const getMyLikes = async (doctorId: string) => {
+  try {
+    let likes = await likeModel
+      .find({
+        doctor: doctorId,
+        $or: [{ unlike: { $exists: false } }, { unlike: false }],
+      })
+      .populate({ path: "doctor", select: excludeDoctorFields })
+      .populate({ path: "likedBy", select: "-password" });
+    return Promise.resolve(likes);
   } catch (error: any) {
     return Promise.reject(error);
   }

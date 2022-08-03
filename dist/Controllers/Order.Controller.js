@@ -32,6 +32,7 @@ const generateOrderId = (body) => __awaiter(void 0, void 0, void 0, function* ()
             amount: body.amount,
             currency: body.currency,
             receipt: `order_rcptid_${receiptNumber}`,
+            otherCharges: body.otherCharges,
             // appointmentDetails: body.appointment,
         };
         const appointmentOrderId = yield new Order_Model_1.default(opt).save();

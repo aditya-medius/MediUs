@@ -723,3 +723,12 @@ export const generateOrderId = async (body: any) => {
     return Promise.reject(error);
   }
 };
+
+export const doesHospitalExist = async (id: string) => {
+  try {
+    let hospitalExist = await hospitalModel.exists({ _id: id });
+    return Promise.resolve(hospitalExist);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};

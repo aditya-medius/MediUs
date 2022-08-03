@@ -5,6 +5,7 @@ import { errorResponse, successResponse } from "../Services/response";
 import moment from "moment";
 import mongoose from "mongoose";
 import * as doctorService from "../Services/Doctor/Doctor.Service";
+import prescriptionModel from "../Models/Prescription.Model";
 export const setPrescriptionValidity = async (req: Request, res: Response) => {
   try {
     let {
@@ -98,6 +99,15 @@ export const getDoctorPrescriptionInHospital = async (
       "validateTill"
     );
     return Promise.resolve({ prescription });
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const getDoctorPrescriptionValidity = async (doctorId: string) => {
+  try {
+    let data = await prescriptionModel.find({ doctorId }).lean();
+    return Promise.resolve(data);
   } catch (error: any) {
     return Promise.reject(error);
   }

@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkIfDoctorIsAvailableOnTheDay = exports.getDoctorFeeInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = void 0;
+exports.getMyLikes = exports.unlikeDoctor = exports.likeDoctor = exports.checkIfDoctorIsAvailableOnTheDay = exports.getDoctorFeeInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const AppointmentPayment_Model_1 = __importDefault(require("../../Models/AppointmentPayment.Model"));
 const CreditAmount_Model_1 = __importDefault(require("../../Models/CreditAmount.Model"));
@@ -42,8 +42,11 @@ const moment_1 = __importDefault(require("moment"));
 const Doctors_Model_1 = __importDefault(require("../../Models/Doctors.Model"));
 const Appointment_Model_1 = __importDefault(require("../../Models/Appointment.Model"));
 const Utils_1 = require("../Utils");
+const Doctor_Controller_1 = require("../../Controllers/Doctor.Controller");
 const schemaNames_1 = require("../schemaNames");
 const Holiday_Calendar_Model_1 = __importDefault(require("../../Models/Holiday-Calendar.Model"));
+const Likes_Model_1 = __importDefault(require("../../Models/Likes.Model"));
+const likeService = __importStar(require("../../Services/Like/Like.service"));
 dotenv.config();
 const getUser = (req) => __awaiter(void 0, void 0, void 0, function* () {
     return req.currentDoctor ? req.currentDoctor : req.currentHospital;
@@ -488,3 +491,73 @@ const checkIfDoctorIsAvailableOnTheDay = (date, month, year, doctorId, hospitalI
     }
 });
 exports.checkIfDoctorIsAvailableOnTheDay = checkIfDoctorIsAvailableOnTheDay;
+const likeDoctor = (likedDoctorId, likedById, reference = schemaNames_1.patient) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let likeExist = yield likeService.likeExist(likedDoctorId, likedById);
+        if (!likeExist) {
+            let liked = yield new Likes_Model_1.default({
+                doctor: likedDoctorId,
+                likedBy: likedById,
+                reference,
+            }).save();
+            return Promise.resolve(true);
+        }
+        else {
+            let { unlike, _id } = yield likeService.getLikeById(likedDoctorId, likedById);
+            console.log("unliked", unlike && unlike);
+            if (unlike) {
+                Likes_Model_1.default.findOneAndUpdate({ _id }, { $set: { unlike: false } });
+            }
+            else {
+                console.log("dsdsjbdsnbdsjsdds", { _id });
+                Likes_Model_1.default.findOneAndUpdate({ _id }, { $set: { unlike: true } });
+            }
+            return Promise.resolve(!unlike);
+            // return Promise.resolve(true);
+        }
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.likeDoctor = likeDoctor;
+const unlikeDoctor = (likedDoctorId, likedById, reference = schemaNames_1.patient) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let likeExist = yield likeService.likeExist(likedDoctorId, likedById);
+        if (!likeExist) {
+            return Promise.reject("You have not liked this doctor");
+        }
+        else {
+            let unlike = yield Likes_Model_1.default.findOneAndUpdate({
+                doctor: likedDoctorId,
+                likedBy: likedById,
+                reference,
+            }, {
+                $set: {
+                    unlike: true,
+                },
+            });
+            return Promise.resolve(unlike ? false : true);
+        }
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.unlikeDoctor = unlikeDoctor;
+const getMyLikes = (doctorId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let likes = yield Likes_Model_1.default
+            .find({
+            doctor: doctorId,
+            $or: [{ unlike: { $exists: false } }, { unlike: false }],
+        })
+            .populate({ path: "doctor", select: Doctor_Controller_1.excludeDoctorFields })
+            .populate({ path: "likedBy", select: "-password" });
+        return Promise.resolve(likes);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.getMyLikes = getMyLikes;

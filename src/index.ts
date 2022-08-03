@@ -19,7 +19,8 @@ import { authenticatePatient } from "./authentication/Patient.auth";
 import mongoose from "mongoose";
 import * as cronJobService from "./Services/Cron-Jobs.Service";
 import { authenticateAdmin } from "./authentication/Admin.auth";
-
+import * as swaggerUi from "swagger-ui-express";
+import * as swaggerDoc from "../swagger.json";
 // Cron Jobs
 // cronJobService.cronFunctions.forEach((e: Function) => {
 //   e();
@@ -32,6 +33,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.use("/apiDocs", swaggerUi.serve, swaggerUi.setup(swaggerDoc));
 app.use("/doctor", doctorRouter);
 app.use("/hospital", hospitalRouter);
 app.use("/admin", adminRouter);
