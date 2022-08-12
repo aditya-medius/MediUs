@@ -123,7 +123,7 @@ export const doctorLogin = async (req: Request, res: Response) => {
       if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
         const OTP = Math.floor(100000 + Math.random() * 900000).toString();
 
-        if (!(body.phoneNumber == "9999999999")) {
+        if (!(body.phoneNumber == "9999799997")) {
           sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
             .then(async (message) => {})
             .catch((error) => {
@@ -955,6 +955,7 @@ export const viewAppointmentsByDate = async (req: Request, res: Response) => {
       .populate({ path: "patient", select: { password: 0, verified: 0 } })
       .populate({ path: "doctors", select: excludeDoctorFields })
       .populate({ path: "hospital" })
+      .populate({ path: "subPatient" })
       .limit(limit)
       .skip(skip)
       .lean();

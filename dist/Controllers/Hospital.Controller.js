@@ -102,7 +102,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             }
         }
         else {
-            if (body.phoneNumber == "9999999999") {
+            if (body.phoneNumber == "9999699996") {
                 const profile = yield Hospital_Model_1.default.findOne({
                     phoneNumber: body.phoneNumber,
                     deleted: false,
@@ -613,7 +613,7 @@ const searchHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 .map((e) => e.hospitalDetails.map((elem) => elem.hospital.toString()))
                 .flat();
             hospitalIds = new Set(hospitalIds);
-            const hospitalArray = yield Hospital_Model_1.default
+            let hospitalArray = yield Hospital_Model_1.default
                 .find({
                 $or: [
                     {
@@ -649,6 +649,10 @@ const searchHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
                     doctorDetails: 0,
                     hospitalDetails: 0,
                 },
+            });
+            hospitalArray = hospitalArray.filter((e) => {
+                var _a, _b;
+                return ((_b = (_a = e === null || e === void 0 ? void 0 : e.address) === null || _a === void 0 ? void 0 : _a.city) === null || _b === void 0 ? void 0 : _b._id.toString()) === city;
             });
             return (0, response_1.successResponse)(hospitalArray, "Success", res);
         }))
