@@ -129,7 +129,7 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         if (!("OTP" in body)) {
             if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
                 const OTP = Math.floor(100000 + Math.random() * 900000).toString();
-                if (!(body.phoneNumber == "9999999999")) {
+                if (!(body.phoneNumber == "9999799997")) {
                     (0, message_service_1.sendMessage)(`Your OTP is: ${OTP}`, body.phoneNumber)
                         .then((message) => __awaiter(void 0, void 0, void 0, function* () { }))
                         .catch((error) => {
@@ -862,6 +862,7 @@ const viewAppointmentsByDate = (req, res) => __awaiter(void 0, void 0, void 0, f
             .populate({ path: "patient", select: { password: 0, verified: 0 } })
             .populate({ path: "doctors", select: exports.excludeDoctorFields })
             .populate({ path: "hospital" })
+            .populate({ path: "subPatient" })
             .limit(limit)
             .skip(skip)
             .lean();

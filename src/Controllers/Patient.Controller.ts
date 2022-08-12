@@ -138,7 +138,7 @@ export const patientLogin = async (req: Request, res: Response) => {
         return errorResponse(error, res);
       }
     } else {
-      if (body.phoneNumber == "9999999999") {
+      if (body.phoneNumber == "9999899998") {
         const profile = await patientModel.findOne(
           {
             phoneNumber: body.phoneNumber,

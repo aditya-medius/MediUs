@@ -135,7 +135,7 @@ const patientLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             }
         }
         else {
-            if (body.phoneNumber == "9999999999") {
+            if (body.phoneNumber == "9999899998") {
                 const profile = yield Patient_Model_1.default.findOne({
                     phoneNumber: body.phoneNumber,
                     deleted: false,

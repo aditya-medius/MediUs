@@ -79,7 +79,7 @@ export const login = async (req: Request, res: Response) => {
         return errorResponse(error, res);
       }
     } else {
-      if (body.phoneNumber == "9999999999") {
+      if (body.phoneNumber == "9999699996") {
         const profile = await hospitalModel.findOne(
           {
             phoneNumber: body.phoneNumber,
@@ -668,7 +668,7 @@ export const searchHospital = async (req: Request, res: Response) => {
 
         hospitalIds = new Set(hospitalIds);
 
-        const hospitalArray = await hospitalModel
+        let hospitalArray = await hospitalModel
           .find(
             {
               $or: [
@@ -708,6 +708,10 @@ export const searchHospital = async (req: Request, res: Response) => {
               hospitalDetails: 0,
             },
           });
+
+          hospitalArray = hospitalArray.filter((e: any) => {
+            return e?.address?.city?._id.toString() === city
+          })
         return successResponse(hospitalArray, "Success", res);
       })
       .catch((error) => {
