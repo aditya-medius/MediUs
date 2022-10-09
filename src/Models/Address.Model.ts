@@ -35,7 +35,7 @@ const addressSchema = new Schema({
   },
   addressLine_1: {
     type: String,
-    required: true,
+    // required: true,
   },
   addressLine_2: {
     type: String,

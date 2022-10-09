@@ -50,6 +50,7 @@ const bcrypt = __importStar(require("bcrypt"));
 const response_1 = require("../Services/response");
 const message_service_1 = require("../Services/message.service");
 const SpecialityBody_Model_1 = __importDefault(require("../Admin Controlled Models/SpecialityBody.Model"));
+const Specialization_Model_1 = __importDefault(require("../Admin Controlled Models/Specialization.Model"));
 const underscore_1 = __importDefault(require("underscore"));
 const SpecialityDisease_Model_1 = __importDefault(require("../Admin Controlled Models/SpecialityDisease.Model"));
 const schemaNames_1 = require("../Services/schemaNames");
@@ -159,29 +160,37 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                     deleted: false,
                 }, exports.excludeDoctorFields)
                     .populate("qualification");
-                const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_DOCTOR_KEY);
-                let { firstName, lastName, gender, phoneNumber, email, _id, qualification, } = profile.toJSON();
-                qualification = qualification[0];
-                return (0, response_1.successResponse)({
-                    token,
-                    firstName,
-                    lastName,
-                    gender,
-                    phoneNumber,
-                    email,
-                    _id,
-                    qualification,
-                }, "Successfully logged in", res);
+                if (profile) {
+                    const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_DOCTOR_KEY);
+                    let { firstName, lastName, gender, phoneNumber, email, _id, qualification, } = profile.toJSON();
+                    qualification = qualification[0];
+                    return (0, response_1.successResponse)({
+                        token,
+                        firstName,
+                        lastName,
+                        gender,
+                        phoneNumber,
+                        email,
+                        _id,
+                        qualification,
+                    }, "Successfully logged in", res);
+                }
+                else {
+                    return (0, response_1.successResponse)({ message: "No Data found" }, "Create a new profile", res, 201);
+                }
             }
             const otpData = yield OTP_Model_1.default.findOne({
                 phoneNumber: body.phoneNumber,
             });
             try {
+                let data;
                 // Abhi k liye OTP verification hata di hai
-                const data = yield jwt.verify(otpData.otp, body.OTP);
-                if (Date.now() > data.expiresIn)
-                    return (0, response_1.errorResponse)(new Error("OTP expired"), res);
-                if (body.OTP === data.otp) {
+                if (process.env.ENVIRONMENT !== "TEST") {
+                    data = yield jwt.verify(otpData.otp, body.OTP);
+                    if (Date.now() > data.expiresIn)
+                        return (0, response_1.errorResponse)(new Error("OTP expired"), res);
+                }
+                if (body.OTP === (data === null || data === void 0 ? void 0 : data.otp) || process.env.ENVIRONMENT === "TEST") {
                     let profile = yield Doctors_Model_1.default.findOne({
                         phoneNumber: body.phoneNumber,
                         deleted: false,
@@ -563,6 +572,18 @@ const searchDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                 },
                 { $unwind: "$_id" },
             ]),
+            Specialization_Model_1.default.aggregate([
+                {
+                    $match: {
+                        specialityName: { $regex: term, $options: "i" },
+                    },
+                },
+                {
+                    $project: {
+                        _id: 1,
+                    },
+                },
+            ]),
         ];
         Promise.all(promiseArray)
             .then((specialityArray) => __awaiter(void 0, void 0, void 0, function* () {
@@ -570,13 +591,14 @@ const searchDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                 arr = arr.flat();
                 return underscore_1.default.map(arr, (e) => e.speciality ? e.speciality.toString() : e._id.toString());
             };
+            let SA = Object.assign([], specialityArray);
             let id = specialityArray.splice(-1, 1);
             id = formatArray(id);
-            specialityArray = formatArray(specialityArray);
+            SA = formatArray(SA);
             let doctorArray = yield Doctors_Model_1.default
                 .find({
                 $or: [
-                    Object.assign({ active: true, specialization: { $in: specialityArray } }, (gender && { gender })),
+                    Object.assign({ active: true, specialization: { $in: SA } }, (gender && { gender })),
                     {
                         _id: { $in: id },
                     },
@@ -590,7 +612,8 @@ const searchDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                     path: "address",
                     populate: { path: "city state locality country" },
                 },
-            });
+            })
+                .lean();
             if (city) {
                 doctorArray = doctorArray.filter((e) => {
                     let data = e.hospitalDetails.filter((elem) => {
@@ -601,6 +624,36 @@ const searchDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                     return data.length ? true : false;
                 });
             }
+            let arr = {};
+            doctorArray.filter((e) => {
+                e.hospitalDetails.filter((elem) => {
+                    var _a, _b;
+                    arr[e._id.toString()] = [
+                        ...((_a = arr[e._id.toString()]) !== null && _a !== void 0 ? _a : []),
+                        (_b = elem === null || elem === void 0 ? void 0 : elem.hospital) === null || _b === void 0 ? void 0 : _b._id.toString(),
+                    ];
+                });
+            });
+            let presciprtionValidty = yield Prescription_Model_1.default
+                .find({
+                doctorId: Object.keys(arr),
+            })
+                .lean();
+            let d_in = [];
+            doctorArray.forEach((e) => {
+                e.hospitalDetails = e.hospitalDetails.map((elem) => {
+                    let data = presciprtionValidty.filter((elements) => {
+                        var _a, _b, _c, _d;
+                        return (((_a = e === null || e === void 0 ? void 0 : e._id) === null || _a === void 0 ? void 0 : _a.toString()) === ((_b = elements === null || elements === void 0 ? void 0 : elements.doctorId) === null || _b === void 0 ? void 0 : _b.toString()) &&
+                            ((_c = elem === null || elem === void 0 ? void 0 : elem.hospital) === null || _c === void 0 ? void 0 : _c._id.toString()) ===
+                                ((_d = elements === null || elements === void 0 ? void 0 : elements.hospitalId) === null || _d === void 0 ? void 0 : _d.toString()));
+                    })[0];
+                    d_in = Object.assign({}, elem);
+                    d_in.hospital["prescriptionValidity"] = data !== null && data !== void 0 ? data : [];
+                    return d_in;
+                });
+                return e;
+            });
             return (0, response_1.successResponse)(doctorArray, "Success", res);
         }))
             .catch((error) => {
@@ -1587,6 +1640,7 @@ const getDoctorsOfflineAndOnlineAppointments = (req, res) => __awaiter(void 0, v
 });
 exports.getDoctorsOfflineAndOnlineAppointments = getDoctorsOfflineAndOnlineAppointments;
 const notificationService = __importStar(require("../Services/Notification/Notification.Service"));
+const Prescription_Model_1 = __importDefault(require("../Models/Prescription.Model"));
 const getDoctorsNotification = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         /* Notification jaha pe sender hospital hai */
@@ -1598,6 +1652,7 @@ const getDoctorsNotification = (req, res) => __awaiter(void 0, void 0, void 0, f
             notifications_whereSenderIsPatient,
         ])
             .then((result) => {
+            console.log(":lknjbhjgvh bfdfdf", result);
             let notifications = result.map((e) => e[0]);
             notifications = notifications.sort((a, b) => a.createdAt - b.createdAt);
             notifications = notifications.filter((e) => e);

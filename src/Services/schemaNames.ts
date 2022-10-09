@@ -47,3 +47,4 @@ export const prescriptionValidity: string = "prescriptions";
 export const holidayCalendar: string = "holidaycalendars";
 export const fee: string = "fees";
 export const ownership: string = "ownerships";
+export const suvedha: string = "suvedhas"

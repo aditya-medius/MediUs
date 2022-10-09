@@ -5,6 +5,7 @@ declare namespace Express {
     currentHospital: Object<any>;
     currentAdmin: Object<any>;
     currentAgent: Object<any>;
+    currentSuvedha: Object<any>;
   }
 }
 

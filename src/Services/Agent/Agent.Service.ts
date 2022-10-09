@@ -4,20 +4,43 @@ import * as dotenv from "dotenv";
 import { sendMessage } from "../message.service";
 import otpModel from "../../Models/OTP.Model";
 import * as jwt from "jsonwebtoken";
+import { createAddress } from "../Address/Address.Service";
+import suvedhaModel from "../../Models/Suvedha.Model";
 
 dotenv.config();
 
-export const createAgentProfile = async (body: any) => {
+export const createAgentProfile = async (suvedhaInfo: any) => {
   try {
-    // if (body.password) {
-    //   body.password = await encryptPassword(body.password);
-    // } else {
-    //   body.password = await encryptPassword(
-    //     process.env.DEFAULT_PASSWORD as string
-    //   );
-    // }
-    const agentData = await new agentModel(body).save();
-    return Promise.resolve(agentData);
+    let { state, city, locality, addressLine_1, pincode, ...rest } =
+      suvedhaInfo;
+    if (state || city || locality || addressLine_1 || pincode) {
+      let addressId = (
+        await createAddress({
+          state,
+          city,
+          locality,
+          addressLine_1,
+          pincode,
+        })
+      )._id;
+      rest["address"] = addressId;
+    }
+
+    let { password } = rest;
+    if (!password) {
+      let error = new Error("Enter password");
+      error.name = "empty_password";
+      throw error;
+    }
+    password = await encryptPassword(password);
+    rest["password"] = password;
+
+    let profile = await suvedhaModel.findOneAndUpdate(
+      { phoneNumber: suvedhaInfo?.phoneNumber },
+      { $set: rest },
+      { new: true, upsert: true }
+    );
+    return Promise.resolve(profile);
   } catch (error: any) {
     return Promise.reject(error);
   }
@@ -45,7 +68,7 @@ export const login = async (body: any) => {
 export const sendOTP = async (phoneNumber: string) => {
   try {
     if (/^[0]?[6789]\d{9}$/.test(phoneNumber)) {
-      let agentProfile: any = await agentModel.exists({
+      let agentProfile: any = await suvedhaModel.exists({
         phoneNumber: phoneNumber,
         "delData.deleted": false,
       });
@@ -88,7 +111,7 @@ export const verifyOtpAndLogin = async (body: any) => {
       return Promise.reject(new Error("OTP Expired"));
     if (body.OTP === data.otp) {
       // otpData.remove();
-      let profile = await agentModel.findOne(
+      let profile = await suvedhaModel.findOne(
         {
           phoneNumber: body.phoneNumber,
           // "delData.deleted": false,

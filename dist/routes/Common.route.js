@@ -18,6 +18,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -28,12 +37,17 @@ const Doctor_auth_1 = require("../authentication/Doctor.auth");
 const Patient_auth_1 = require("../authentication/Patient.auth");
 const Hospital_auth_1 = require("../authentication/Hospital.auth");
 const Admin_auth_1 = require("../authentication/Admin.auth");
+const Suvedha_auth_1 = require("../authentication/Suvedha.auth");
 const middlewareHelper_1 = require("../Services/middlewareHelper");
 const Utils_1 = require("../Services/Utils");
+const response_1 = require("../Services/response");
 const commonRouter = express_1.default.Router();
 let paths = "admin";
 const upload = (0, Utils_1.initUpload)(paths);
-commonRouter.post("/uploadImage", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital, Patient_auth_1.authenticatePatient, Admin_auth_1.authenticateAdmin), upload.single("profileImage"), (req, res) => {
+commonRouter.post("/uploadImage", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital, Patient_auth_1.authenticatePatient, Admin_auth_1.authenticateAdmin, Suvedha_auth_1.authenticateSuvedha), upload.single("profileImage"), (req, res) => {
     mediaController.uploadImage(req, res, paths);
 });
+commonRouter.post("/upload", upload.single("image"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    return (0, response_1.successResponse)({ response: req.file }, "Success", res);
+}));
 exports.default = commonRouter;

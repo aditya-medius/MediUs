@@ -50,7 +50,6 @@ export const approveHospitalRequest = async (req: Request, res: Response) => {
       let notificationId = await approvalService.getNotificationFromRequestId(
         requestId
       );
-      console.log("ssss", notificationId);
 
       await approvalService.updateNotificationReadStatus(notificationId);
       return successResponse(response, "Success", res);
@@ -66,11 +65,12 @@ export const approveHospitalRequest = async (req: Request, res: Response) => {
 
 export const denyHospitalRequest = async (req: Request, res: Response) => {
   try {
-
     // Is method me approve hospital jaisi same problem hai. Eventually yeh uske jaisa hi banega
     let { requestId } = req.body;
     requestId = await approvalService.getRequestIdFromNotificationId(requestId);
     let response = await approvalService.denyHospitalRequest(requestId);
+
+    approvalService.updateNotificationReadStatus(req.body.requestId);
     return successResponse(response, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
@@ -111,6 +111,14 @@ export const requestApprovalFromHospital = async (
 export const approveDoctorRequest = async (req: Request, res: Response) => {
   try {
     let { requestId } = req.body;
+
+    let exist = await approvalService.checkIfNotificationExist(requestId);
+    if (exist) {
+      requestId = await approvalService.getRequestIdFromNotificationId(
+        requestId
+      );
+    }
+
     let requestExist = await approvalService.canThisHospitalApproveThisRequest(
       requestId,
       req.currentHospital
@@ -118,6 +126,12 @@ export const approveDoctorRequest = async (req: Request, res: Response) => {
 
     if (requestExist) {
       let response = await approvalService.approveDoctorRequest(requestId);
+
+      let notificationId = await approvalService.getNotificationFromRequestId(
+        requestId
+      );
+      approvalService.updateNotificationReadStatus(notificationId);
+
       return successResponse(response, "Success", res);
     } else {
       throw new Error(
@@ -132,7 +146,19 @@ export const approveDoctorRequest = async (req: Request, res: Response) => {
 export const denyDoctorRequest = async (req: Request, res: Response) => {
   try {
     let { requestId } = req.body;
+    let exist = await approvalService.checkIfNotificationExist(requestId);
+    if (exist) {
+      requestId = await approvalService.getRequestIdFromNotificationId(
+        requestId
+      );
+    }
+
     let response = await approvalService.denyDoctorRequest(requestId);
+
+    let notificationId = await approvalService.getNotificationFromRequestId(
+      requestId
+    );
+    approvalService.updateNotificationReadStatus(notificationId);
     return successResponse(response, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);

@@ -27,29 +27,53 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAgentToken = exports.verifyOtpAndLogin = exports.sendOTP = exports.login = exports.createAgentProfile = void 0;
-const Agent_Model_1 = __importDefault(require("../../Models/Agent.Model"));
 const Utils_1 = require("../Utils");
 const dotenv = __importStar(require("dotenv"));
 const message_service_1 = require("../message.service");
 const OTP_Model_1 = __importDefault(require("../../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
+const Address_Service_1 = require("../Address/Address.Service");
+const Suvedha_Model_1 = __importDefault(require("../../Models/Suvedha.Model"));
 dotenv.config();
-const createAgentProfile = (body) => __awaiter(void 0, void 0, void 0, function* () {
+const createAgentProfile = (suvedhaInfo) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        // if (body.password) {
-        //   body.password = await encryptPassword(body.password);
-        // } else {
-        //   body.password = await encryptPassword(
-        //     process.env.DEFAULT_PASSWORD as string
-        //   );
-        // }
-        const agentData = yield new Agent_Model_1.default(body).save();
-        return Promise.resolve(agentData);
+        let { state, city, locality, addressLine_1, pincode } = suvedhaInfo, rest = __rest(suvedhaInfo, ["state", "city", "locality", "addressLine_1", "pincode"]);
+        if (state || city || locality || addressLine_1 || pincode) {
+            let addressId = (yield (0, Address_Service_1.createAddress)({
+                state,
+                city,
+                locality,
+                addressLine_1,
+                pincode,
+            }))._id;
+            rest["address"] = addressId;
+        }
+        let { password } = rest;
+        if (!password) {
+            let error = new Error("Enter password");
+            error.name = "empty_password";
+            throw error;
+        }
+        password = yield (0, Utils_1.encryptPassword)(password);
+        rest["password"] = password;
+        let profile = yield Suvedha_Model_1.default.findOneAndUpdate({ phoneNumber: suvedhaInfo === null || suvedhaInfo === void 0 ? void 0 : suvedhaInfo.phoneNumber }, { $set: rest }, { new: true, upsert: true });
+        return Promise.resolve(profile);
     }
     catch (error) {
         return Promise.reject(error);
@@ -80,7 +104,7 @@ exports.login = login;
 const sendOTP = (phoneNumber) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         if (/^[0]?[6789]\d{9}$/.test(phoneNumber)) {
-            let agentProfile = yield Agent_Model_1.default.exists({
+            let agentProfile = yield Suvedha_Model_1.default.exists({
                 phoneNumber: phoneNumber,
                 "delData.deleted": false,
             });
@@ -118,7 +142,7 @@ const verifyOtpAndLogin = (body) => __awaiter(void 0, void 0, void 0, function* 
             return Promise.reject(new Error("OTP Expired"));
         if (body.OTP === data.otp) {
             // otpData.remove();
-            let profile = yield Agent_Model_1.default.findOne({
+            let profile = yield Suvedha_Model_1.default.findOne({
                 phoneNumber: body.phoneNumber,
                 // "delData.deleted": false,
             }, {

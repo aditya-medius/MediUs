@@ -6,6 +6,7 @@ import {
   media,
   patient,
   specialization,
+  suvedha,
 } from "../Services/schemaNames";
 const mediaSchema = new Schema({
   user: {
@@ -15,7 +16,7 @@ const mediaSchema = new Schema({
   userType: {
     type: String,
     required: true,
-    enum: [patient, doctor, hospital, agent, specialization],
+    enum: [patient, doctor, hospital, agent, specialization, suvedha],
   },
   image: {
     type: String,

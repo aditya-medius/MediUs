@@ -24,6 +24,10 @@ const kycSchema = new mongoose_1.Schema({
         // minlength: 12,
         // unique: true,
     },
+    accountHolderName: {
+        type: String,
+        required: true,
+    },
 }, {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },

@@ -21,39 +21,20 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const schemaNames_1 = require("../Services/schemaNames");
-const addressSchema = new mongoose_1.Schema({
-    city: {
-        type: mongoose_1.default.Schema.Types.ObjectId,
-        required: true,
-        ref: schemaNames_1.city,
-    },
-    state: {
-        type: mongoose_1.default.Schema.Types.ObjectId,
-        required: true,
-        ref: schemaNames_1.state,
-    },
-    locality: {
-        type: mongoose_1.default.Schema.Types.ObjectId,
-        required: true,
-        ref: schemaNames_1.locality,
-    },
-    country: {
-        type: mongoose_1.default.Schema.Types.ObjectId,
-        required: true,
-        ref: schemaNames_1.country,
-    },
-    pincode: {
+const feedbackSchema = new mongoose_1.Schema({
+    feedback: {
         type: String,
         required: true,
     },
-    addressLine_1: {
-        type: String,
-        // required: true,
+    userId: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        required: true,
+        refPath: "InModel",
+        // ref: [doctor, patient, hospital],
     },
-    addressLine_2: {
+    InModel: {
         type: String,
-        // required: true
     },
 });
-const addressModel = (0, mongoose_1.model)(schemaNames_1.address, addressSchema);
-exports.default = addressModel;
+const feedbackModel = (0, mongoose_1.model)(schemaNames_1.feedback, feedbackSchema);
+exports.default = feedbackModel;

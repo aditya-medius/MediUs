@@ -180,7 +180,7 @@ hospitalSchema.pre("save", function (next) {
                 { deleted: false },
             ],
         });
-        if (/^[0]?[789]\d{9}$/.test(this.contactNumber)) {
+        if (/^[0]?[6789]\d{9}$/.test(this.contactNumber)) {
             if (!(hospitalExist || patientProfile || doctorProfile) ||
                 this.contactNumber == "9999999999") {
                 return next();
