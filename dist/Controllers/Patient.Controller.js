@@ -58,10 +58,10 @@ const likeService = __importStar(require("../Services/Like/Like.service"));
 const prescriptionValidityController = __importStar(require("../Controllers/Prescription-Validity.Controller"));
 const Order_Model_1 = __importDefault(require("../Models/Order.Model"));
 const Doctor_Service_1 = require("../Services/Doctor/Doctor.Service");
+const Patient_Service_1 = require("../Services/Patient/Patient.Service");
 exports.excludePatientFields = {
     password: 0,
     verified: 0,
-    DOB: 0,
 };
 exports.excludeHospitalFields = {
     location: 0,
@@ -918,7 +918,8 @@ const searchPatientByPhoneNumberOrEmail = (req, res) => __awaiter(void 0, void 0
             error.name = "Invalid Term";
             return (0, response_1.errorResponse)(error, res);
         }
-        const patientObj = yield Patient_Model_1.default.find({
+        let patientObj = yield Patient_Model_1.default
+            .find({
             $or: [
                 {
                     email: term,
@@ -927,8 +928,14 @@ const searchPatientByPhoneNumberOrEmail = (req, res) => __awaiter(void 0, void 0
                     phoneNumber: term,
                 },
             ],
-        }, exports.excludePatientFields);
+        }, exports.excludePatientFields)
+            .lean();
         if (patientObj) {
+            if (patientObj.length) {
+                patientObj = patientObj.map((e) => {
+                    return Object.assign(Object.assign({}, e), { age: (0, Patient_Service_1.calculateAge)(e["DOB"]) });
+                });
+            }
             return (0, response_1.successResponse)(patientObj, "Success", res);
         }
         return (0, response_1.successResponse)({}, "No data found", res);

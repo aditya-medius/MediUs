@@ -39,11 +39,11 @@ import * as likeService from "../Services/Like/Like.service";
 import * as prescriptionValidityController from "../Controllers/Prescription-Validity.Controller";
 import orderModel from "../Models/Order.Model";
 import { checkIfDoctorIsAvailableOnTheDay } from "../Services/Doctor/Doctor.Service";
+import { calculateAge } from "../Services/Patient/Patient.Service";
 
 export const excludePatientFields = {
   password: 0,
   verified: 0,
-  DOB: 0,
 };
 
 export const excludeHospitalFields = {
@@ -1039,20 +1039,31 @@ export const searchPatientByPhoneNumberOrEmail = async (
       return errorResponse(error, res);
     }
 
-    const patientObj = await patientModel.find(
-      {
-        $or: [
-          {
-            email: term,
-          },
-          {
-            phoneNumber: term,
-          },
-        ],
-      },
-      excludePatientFields
-    );
+    let patientObj: any = await patientModel
+      .find(
+        {
+          $or: [
+            {
+              email: term,
+            },
+            {
+              phoneNumber: term,
+            },
+          ],
+        },
+        excludePatientFields
+      )
+      .lean();
     if (patientObj) {
+      if (patientObj.length) {
+        patientObj = patientObj.map((e: any) => {
+          return {
+            ...e,
+            age: calculateAge(e["DOB"]),
+          };
+        });
+      }
+
       return successResponse(patientObj, "Success", res);
     }
     return successResponse({}, "No data found", res);

@@ -1082,14 +1082,32 @@ const searchDoctorByPhoneNumberOrEmail = (req, res) => __awaiter(void 0, void 0,
             doctorObj = yield Doctors_Model_1.default
                 .findOne({
                 phoneNumber: term,
-            }, { firstName: 1, lastName: 1, gender: 1, DOB: 1, KYCDetails: 0 })
+            }, {
+                firstName: 1,
+                lastName: 1,
+                gender: 1,
+                DOB: 1,
+                KYCDetails: 0,
+                specialization: 1,
+                qualification: 1,
+            })
+                .populate("specialization qualification")
                 .lean();
         }
         else if (email) {
             doctorObj = yield Doctors_Model_1.default
                 .findOne({
                 email: term,
-            }, { firstName: 1, lastName: 1, gender: 1, DOB: 1, KYCDetails: 0 })
+            }, {
+                firstName: 1,
+                lastName: 1,
+                gender: 1,
+                DOB: 1,
+                KYCDetails: 0,
+                specialization: 1,
+                qualification: 1,
+            })
+                .populate("qualification specialization")
                 .lean();
         }
         if (doctorObj) {

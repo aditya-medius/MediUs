@@ -1218,8 +1218,17 @@ export const searchDoctorByPhoneNumberOrEmail = async (
           {
             phoneNumber: term,
           },
-          { firstName: 1, lastName: 1, gender: 1, DOB: 1, KYCDetails: 0 }
+          {
+            firstName: 1,
+            lastName: 1,
+            gender: 1,
+            DOB: 1,
+            KYCDetails: 0,
+            specialization: 1,
+            qualification: 1,
+          }
         )
+        .populate("specialization qualification")
         .lean();
     } else if (email) {
       doctorObj = await doctorModel
@@ -1227,8 +1236,17 @@ export const searchDoctorByPhoneNumberOrEmail = async (
           {
             email: term,
           },
-          { firstName: 1, lastName: 1, gender: 1, DOB: 1, KYCDetails: 0 }
+          {
+            firstName: 1,
+            lastName: 1,
+            gender: 1,
+            DOB: 1,
+            KYCDetails: 0,
+            specialization: 1,
+            qualification: 1,
+          }
         )
+        .populate("qualification specialization")
         .lean();
     }
 
