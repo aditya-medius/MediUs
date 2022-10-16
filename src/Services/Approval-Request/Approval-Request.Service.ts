@@ -4,6 +4,7 @@ import doctorModel from "../../Models/Doctors.Model";
 import hospitalModel from "../../Models/Hospital.Model";
 import notificationsModel from "../../Models/Notification.Model";
 import { hospital, doctor, approvalRequest } from "../schemaNames";
+import { getAge } from "../Utils";
 
 export const requestApprovalFromDoctor = async (
   doctorId: string,
@@ -76,15 +77,15 @@ export const requestApprovalFromHospital = async (
 export const approveDoctorRequest = async (requestId: string) => {
   try {
     await changeRequestStatus(requestId, "Approved");
-    let request = await approvalModel.findOne(
-      { _id: requestId },
-      "requestFrom requestTo"
-    );
+    let request = await approvalModel
+      .findOne({ _id: requestId }, "requestFrom requestTo")
+      .lean();
+
     await addDoctorAndHospitalToEachOthersProfile(
       request.requestFrom,
       request.requestTo
     );
-    return Promise.resolve("Success");
+    return Promise.resolve(request);
     // return Promise.resolve(await changeRequestStatus(requestId, "Approved"));
   } catch (error: any) {
     return Promise.reject(error);
@@ -292,7 +293,7 @@ export const getListOfRequestedApprovals_ByDoctor = async (
 const doctorFields = {
   ...excludeDoctorFields,
   hospitalDetails: 0,
-  registration: 0,
+  // registration: 0,
   KYCDetails: 0,
   password: 0,
 };
@@ -313,7 +314,13 @@ export const getListOfRequestedApprovals_OfHospital = async (
         populate: {
           path: "qualification specialization",
         },
-      });
+      })
+      .lean();
+    requestedApprovals.forEach((e: any) => {
+      e.requestFrom["experience"] = getAge(
+        e?.requestFrom?.registration?.registrationDate
+      );
+    });
     return Promise.resolve(requestedApprovals);
   } catch (error: any) {
     return Promise.reject(error);
@@ -431,8 +438,9 @@ export const getRequestIdFromNotificationId = async (
 
 export const getNotificationFromRequestId = async (requestId: string) => {
   try {
+    console.log("khghvhbdsds", requestId);
     let { requestFrom, requestTo } = await approvalModel
-      .findOne({ _id: requestId, ref_From: "hospitals", ref_To: "doctors" })
+      .findOne({ _id: requestId })
       .lean();
 
     let { _id } = await notificationsModel

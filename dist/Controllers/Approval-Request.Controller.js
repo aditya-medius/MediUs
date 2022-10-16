@@ -56,7 +56,6 @@ const approveHospitalRequest = (req, res) => __awaiter(void 0, void 0, void 0, f
         if (requestExist) {
             let response = yield approvalService.approveHospitalRequest(requestId);
             let notificationId = yield approvalService.getNotificationFromRequestId(requestId);
-            console.log("ssss", notificationId);
             yield approvalService.updateNotificationReadStatus(notificationId);
             return (0, response_1.successResponse)(response, "Success", res);
         }
@@ -75,6 +74,7 @@ const denyHospitalRequest = (req, res) => __awaiter(void 0, void 0, void 0, func
         let { requestId } = req.body;
         requestId = yield approvalService.getRequestIdFromNotificationId(requestId);
         let response = yield approvalService.denyHospitalRequest(requestId);
+        approvalService.updateNotificationReadStatus(req.body.requestId);
         return (0, response_1.successResponse)(response, "Success", res);
     }
     catch (error) {
@@ -99,9 +99,15 @@ exports.requestApprovalFromHospital = requestApprovalFromHospital;
 const approveDoctorRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { requestId } = req.body;
+        let exist = yield approvalService.checkIfNotificationExist(requestId);
+        if (exist) {
+            requestId = yield approvalService.getRequestIdFromNotificationId(requestId);
+        }
         let requestExist = yield approvalService.canThisHospitalApproveThisRequest(requestId, req.currentHospital);
         if (requestExist) {
             let response = yield approvalService.approveDoctorRequest(requestId);
+            let notificationId = yield approvalService.getNotificationFromRequestId(requestId);
+            approvalService.updateNotificationReadStatus(notificationId);
             return (0, response_1.successResponse)(response, "Success", res);
         }
         else {
@@ -116,7 +122,13 @@ exports.approveDoctorRequest = approveDoctorRequest;
 const denyDoctorRequest = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { requestId } = req.body;
+        let exist = yield approvalService.checkIfNotificationExist(requestId);
+        if (exist) {
+            requestId = yield approvalService.getRequestIdFromNotificationId(requestId);
+        }
         let response = yield approvalService.denyDoctorRequest(requestId);
+        let notificationId = yield approvalService.getNotificationFromRequestId(requestId);
+        approvalService.updateNotificationReadStatus(notificationId);
         return (0, response_1.successResponse)(response, "Success", res);
     }
     catch (error) {

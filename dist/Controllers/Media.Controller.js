@@ -31,6 +31,9 @@ const uploadImage = (req, res, paths = "user") => __awaiter(void 0, void 0, void
         else if (req.currentPatient) {
             user = schemaNames_1.patient;
         }
+        else if (req.currentSuvedha) {
+            user = schemaNames_1.suvedha;
+        }
         else if (req.currentAdmin) {
             user = body.user;
         }

@@ -19,6 +19,7 @@ const Doctors_Model_1 = __importDefault(require("../../Models/Doctors.Model"));
 const Hospital_Model_1 = __importDefault(require("../../Models/Hospital.Model"));
 const Notification_Model_1 = __importDefault(require("../../Models/Notification.Model"));
 const schemaNames_1 = require("../schemaNames");
+const Utils_1 = require("../Utils");
 const requestApprovalFromDoctor = (doctorId, hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let approvalRequest = yield new Approval_Request_Model_1.default({
@@ -78,9 +79,11 @@ exports.requestApprovalFromHospital = requestApprovalFromHospital;
 const approveDoctorRequest = (requestId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield changeRequestStatus(requestId, "Approved");
-        let request = yield Approval_Request_Model_1.default.findOne({ _id: requestId }, "requestFrom requestTo");
+        let request = yield Approval_Request_Model_1.default
+            .findOne({ _id: requestId }, "requestFrom requestTo")
+            .lean();
         yield addDoctorAndHospitalToEachOthersProfile(request.requestFrom, request.requestTo);
-        return Promise.resolve("Success");
+        return Promise.resolve(request);
         // return Promise.resolve(await changeRequestStatus(requestId, "Approved"));
     }
     catch (error) {
@@ -267,7 +270,9 @@ const getListOfRequestedApprovals_ByDoctor = (doctorId) => __awaiter(void 0, voi
     }
 });
 exports.getListOfRequestedApprovals_ByDoctor = getListOfRequestedApprovals_ByDoctor;
-const doctorFields = Object.assign(Object.assign({}, Doctor_Controller_1.excludeDoctorFields), { hospitalDetails: 0, registration: 0, KYCDetails: 0, password: 0 });
+const doctorFields = Object.assign(Object.assign({}, Doctor_Controller_1.excludeDoctorFields), { hospitalDetails: 0, 
+    // registration: 0,
+    KYCDetails: 0, password: 0 });
 /* Hospital ko kitno ne approval k liye request ki hai */
 const getListOfRequestedApprovals_OfHospital = (hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -283,6 +288,11 @@ const getListOfRequestedApprovals_OfHospital = (hospitalId) => __awaiter(void 0,
             populate: {
                 path: "qualification specialization",
             },
+        })
+            .lean();
+        requestedApprovals.forEach((e) => {
+            var _a, _b;
+            e.requestFrom["experience"] = (0, Utils_1.getAge)((_b = (_a = e === null || e === void 0 ? void 0 : e.requestFrom) === null || _a === void 0 ? void 0 : _a.registration) === null || _b === void 0 ? void 0 : _b.registrationDate);
         });
         return Promise.resolve(requestedApprovals);
     }
@@ -379,8 +389,9 @@ const getRequestIdFromNotificationId = (notificationId) => __awaiter(void 0, voi
 exports.getRequestIdFromNotificationId = getRequestIdFromNotificationId;
 const getNotificationFromRequestId = (requestId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        console.log("khghvhbdsds", requestId);
         let { requestFrom, requestTo } = yield Approval_Request_Model_1.default
-            .findOne({ _id: requestId, ref_From: "hospitals", ref_To: "doctors" })
+            .findOne({ _id: requestId })
             .lean();
         let { _id } = yield Notification_Model_1.default
             .findOne({ sender: requestFrom, receiver: requestTo })

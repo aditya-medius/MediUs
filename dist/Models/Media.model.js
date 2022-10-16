@@ -29,7 +29,7 @@ const mediaSchema = new mongoose_1.Schema({
     userType: {
         type: String,
         required: true,
-        enum: [schemaNames_1.patient, schemaNames_1.doctor, schemaNames_1.hospital, schemaNames_1.agent, schemaNames_1.specialization],
+        enum: [schemaNames_1.patient, schemaNames_1.doctor, schemaNames_1.hospital, schemaNames_1.agent, schemaNames_1.specialization, schemaNames_1.suvedha],
     },
     image: {
         type: String,

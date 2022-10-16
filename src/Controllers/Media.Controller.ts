@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import doctorModel from "../Models/Doctors.Model";
 import mediaModel from "../Models/Media.model";
 import { errorResponse, successResponse } from "../Services/response";
-import { doctor, hospital, patient } from "../Services/schemaNames";
+import { doctor, hospital, patient, suvedha } from "../Services/schemaNames";
 import { excludeDoctorFields } from "./Doctor.Controller";
 export const uploadImage = async (
   req: Request,
@@ -18,6 +18,8 @@ export const uploadImage = async (
       user = hospital;
     } else if (req.currentPatient) {
       user = patient;
+    } else if (req.currentSuvedha) {
+      user = suvedha;
     } else if (req.currentAdmin) {
       user = body.user;
     }

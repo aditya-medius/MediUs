@@ -51,6 +51,7 @@ const jwt = __importStar(require("jsonwebtoken"));
 const SpecialityBody_Model_1 = __importDefault(require("../Admin Controlled Models/SpecialityBody.Model"));
 const SpecialityDisease_Model_1 = __importDefault(require("../Admin Controlled Models/SpecialityDisease.Model"));
 const SpecialityDoctorType_Model_1 = __importDefault(require("../Admin Controlled Models/SpecialityDoctorType.Model"));
+const Specialization_Model_1 = __importDefault(require("../Admin Controlled Models/Specialization.Model"));
 const schemaNames_1 = require("../Services/schemaNames");
 const underscore_1 = __importDefault(require("underscore"));
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
@@ -113,28 +114,27 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                     registration: 0,
                     KYCDetails: 0,
                 });
-                const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_HOSPITAL_KEY);
-                const { firstName, lastName, gender, phoneNumber, email, _id, password, } = profile.toJSON();
-                return (0, response_1.successResponse)({
-                    token,
-                    firstName,
-                    lastName,
-                    gender,
-                    phoneNumber,
-                    email,
-                    _id,
-                    password,
-                }, "Successfully logged in", res);
+                if (profile) {
+                    const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_HOSPITAL_KEY);
+                    const { name, contactNumber, _id, numberOfBed, password } = profile.toJSON();
+                    return (0, response_1.successResponse)({ token, name, contactNumber, _id, numberOfBed, password }, "Successfully logged in", res);
+                }
+                else {
+                    return (0, response_1.successResponse)({ message: "No Data found" }, "Create a new Hospital", res, 201);
+                }
             }
             const otpData = yield OTP_Model_1.default.findOne({
                 phoneNumber: body.phoneNumber,
             });
             try {
                 // Abhi k liye OTP verification hata di hai
-                const data = yield jwt.verify(otpData.otp, body.OTP);
-                if (Date.now() > data.expiresIn)
-                    return (0, response_1.errorResponse)(new Error("OTP expired"), res);
-                if (body.OTP === data.otp) {
+                let data;
+                if (process.env.ENVIRONMENT !== "TEST") {
+                    data = yield jwt.verify(otpData.otp, body.OTP);
+                    if (Date.now() > data.expiresIn)
+                        return (0, response_1.errorResponse)(new Error("OTP expired"), res);
+                }
+                if (body.OTP === (data === null || data === void 0 ? void 0 : data.otp) || process.env.ENVIRONMENT === "TEST") {
                     // if (true) {
                     const profile = yield Hospital_Model_1.default.findOne({
                         contactNumber: body.phoneNumber,
@@ -581,23 +581,35 @@ const searchHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 },
                 { $unwind: "$_id" },
             ]),
+            Specialization_Model_1.default.aggregate([
+                {
+                    $match: {
+                        specialityName: { $regex: term, $options: "i" },
+                    },
+                },
+                {
+                    $project: {
+                        _id: 1,
+                    },
+                },
+            ]),
         ];
         Promise.all(promiseArray)
             .then((specialityArray) => __awaiter(void 0, void 0, void 0, function* () {
-            console.log("speciality", specialityArray);
             let formatArray = (arr) => {
                 arr = arr.flat();
                 return underscore_1.default.map(arr, (e) => e.speciality ? e.speciality.toString() : e._id.toString());
             };
+            let SA = Object.assign([], specialityArray);
             let id = specialityArray.splice(-1, 1);
             id = formatArray(id);
-            specialityArray = formatArray(specialityArray);
+            SA = formatArray(SA);
             const doctorArray = yield Doctors_Model_1.default
                 .find({
                 $or: [
                     {
                         active: true,
-                        specialization: { $in: specialityArray },
+                        specialization: { $in: SA },
                     },
                     {
                         _id: { $in: id },
@@ -650,10 +662,12 @@ const searchHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
                     hospitalDetails: 0,
                 },
             });
-            hospitalArray = hospitalArray.filter((e) => {
-                var _a, _b;
-                return ((_b = (_a = e === null || e === void 0 ? void 0 : e.address) === null || _a === void 0 ? void 0 : _a.city) === null || _b === void 0 ? void 0 : _b._id.toString()) === city;
-            });
+            if (city) {
+                hospitalArray = hospitalArray.filter((e) => {
+                    var _a, _b;
+                    return ((_b = (_a = e === null || e === void 0 ? void 0 : e.address) === null || _a === void 0 ? void 0 : _a.city) === null || _b === void 0 ? void 0 : _b._id.toString()) === city;
+                });
+            }
             return (0, response_1.successResponse)(hospitalArray, "Success", res);
         }))
             .catch((error) => {
@@ -1017,6 +1031,7 @@ const updateHospitalAddress = (req, res) => __awaiter(void 0, void 0, void 0, fu
 exports.updateHospitalAddress = updateHospitalAddress;
 const getHospitalsSpecilization_AccordingToDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        console.log("\n\n\njhgvdhdjnkhdsbdnsjds", req.body.hospitalId);
         let data = yield hospitalService.getHospitalsSpecilization_AccordingToDoctor(req.body.hospitalId);
         return (0, response_1.successResponse)(data, "Success", res);
     }

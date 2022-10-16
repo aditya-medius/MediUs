@@ -7,6 +7,7 @@ import * as jwt from "jsonwebtoken";
 import specialityBodyModel from "../Admin Controlled Models/SpecialityBody.Model";
 import specialityDiseaseModel from "../Admin Controlled Models/SpecialityDisease.Model";
 import specialityDoctorTypeModel from "../Admin Controlled Models/SpecialityDoctorType.Model";
+import specialityModel from "../Admin Controlled Models/Specialization.Model";
 import {
   appointment,
   disease,
@@ -93,43 +94,39 @@ export const login = async (req: Request, res: Response) => {
             KYCDetails: 0,
           }
         );
-        const token = await jwt.sign(
-          profile.toJSON(),
-          process.env.SECRET_HOSPITAL_KEY as string
-        );
-        const {
-          firstName,
-          lastName,
-          gender,
-          phoneNumber,
-          email,
-          _id,
-          password,
-        } = profile.toJSON();
-        return successResponse(
-          {
-            token,
-            firstName,
-            lastName,
-            gender,
-            phoneNumber,
-            email,
-            _id,
-            password,
-          },
-          "Successfully logged in",
-          res
-        );
+        if (profile) {
+          const token = await jwt.sign(
+            profile.toJSON(),
+            process.env.SECRET_HOSPITAL_KEY as string
+          );
+          const { name, contactNumber, _id, numberOfBed, password } =
+            profile.toJSON();
+          return successResponse(
+            { token, name, contactNumber, _id, numberOfBed, password },
+            "Successfully logged in",
+            res
+          );
+        } else {
+          return successResponse(
+            { message: "No Data found" },
+            "Create a new Hospital",
+            res,
+            201
+          );
+        }
       }
       const otpData = await otpModel.findOne({
         phoneNumber: body.phoneNumber,
       });
       try {
         // Abhi k liye OTP verification hata di hai
-        const data: any = await jwt.verify(otpData.otp, body.OTP);
-        if (Date.now() > data.expiresIn)
-          return errorResponse(new Error("OTP expired"), res);
-        if (body.OTP === data.otp) {
+        let data: any;
+        if (process.env.ENVIRONMENT !== "TEST") {
+          data = await jwt.verify(otpData.otp, body.OTP);
+          if (Date.now() > data.expiresIn)
+            return errorResponse(new Error("OTP expired"), res);
+        }
+        if (body.OTP === data?.otp || process.env.ENVIRONMENT === "TEST") {
           // if (true) {
           const profile = await hospitalModel.findOne({
             contactNumber: body.phoneNumber,
@@ -621,11 +618,22 @@ export const searchHospital = async (req: Request, res: Response) => {
         },
         { $unwind: "$_id" },
       ]),
+      specialityModel.aggregate([
+        {
+          $match: {
+            specialityName: { $regex: term, $options: "i" },
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+          },
+        },
+      ]),
     ];
 
     Promise.all(promiseArray)
       .then(async (specialityArray: Array<any>) => {
-        console.log("speciality", specialityArray);
         let formatArray = (arr: Array<any>) => {
           arr = arr.flat();
           return _.map(arr, (e) =>
@@ -633,17 +641,18 @@ export const searchHospital = async (req: Request, res: Response) => {
           );
         };
 
+        let SA: Array<any> = Object.assign([], specialityArray);
         let id = specialityArray.splice(-1, 1);
         id = formatArray(id);
+        SA = formatArray(SA);
 
-        specialityArray = formatArray(specialityArray);
         const doctorArray = await doctorModel
           .find(
             {
               $or: [
                 {
                   active: true,
-                  specialization: { $in: specialityArray },
+                  specialization: { $in: SA },
                 },
                 {
                   _id: { $in: id },
@@ -708,10 +717,11 @@ export const searchHospital = async (req: Request, res: Response) => {
               hospitalDetails: 0,
             },
           });
-
+        if (city) {
           hospitalArray = hospitalArray.filter((e: any) => {
-            return e?.address?.city?._id.toString() === city
-          })
+            return e?.address?.city?._id.toString() === city;
+          });
+        }
         return successResponse(hospitalArray, "Success", res);
       })
       .catch((error) => {
@@ -1180,6 +1190,7 @@ export const getHospitalsSpecilization_AccordingToDoctor = async (
   res: Response
 ) => {
   try {
+    console.log("\n\n\njhgvdhdjnkhdsbdnsjds", req.body.hospitalId);
     let data =
       await hospitalService.getHospitalsSpecilization_AccordingToDoctor(
         req.body.hospitalId

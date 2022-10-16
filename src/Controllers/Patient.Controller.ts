@@ -39,11 +39,11 @@ import * as likeService from "../Services/Like/Like.service";
 import * as prescriptionValidityController from "../Controllers/Prescription-Validity.Controller";
 import orderModel from "../Models/Order.Model";
 import { checkIfDoctorIsAvailableOnTheDay } from "../Services/Doctor/Doctor.Service";
+import { calculateAge } from "../Services/Patient/Patient.Service";
 
 export const excludePatientFields = {
   password: 0,
   verified: 0,
-  DOB: 0,
 };
 
 export const excludeHospitalFields = {
@@ -149,27 +149,48 @@ export const patientLogin = async (req: Request, res: Response) => {
             verified: 0,
           }
         );
-        const token = await jwt.sign(
-          profile.toJSON(),
-          process.env.SECRET_PATIENT_KEY as string
-        );
-        const { firstName, lastName, gender, phoneNumber, email, _id, DOB } =
-          profile.toJSON();
-        return successResponse(
-          { token, firstName, lastName, gender, phoneNumber, email, _id, DOB },
-          "Successfully logged in",
-          res
-        );
+        if (profile) {
+          const token = await jwt.sign(
+            profile.toJSON(),
+            process.env.SECRET_PATIENT_KEY as string
+          );
+          const { firstName, lastName, gender, phoneNumber, email, _id, DOB } =
+            profile.toJSON();
+          return successResponse(
+            {
+              token,
+              firstName,
+              lastName,
+              gender,
+              phoneNumber,
+              email,
+              _id,
+              DOB,
+            },
+            "Successfully logged in",
+            res
+          );
+        } else {
+          return successResponse(
+            { message: "No Data found" },
+            "Create a new profile",
+            res,
+            201
+          );
+        }
       }
       const otpData = await otpModel.findOne({
         phoneNumber: body.phoneNumber,
       });
       try {
         // Abhi k liye OTP verification hata di hai
-        const data: any = await jwt.verify(otpData.otp, body.OTP);
-        if (Date.now() > data.expiresIn)
-          return errorResponse(new Error("OTP expired"), res);
-        if (body.OTP === data.otp) {
+        let data: any;
+        if (process.env.ENVIRONMENT !== "TEST") {
+          data = await jwt.verify(otpData.otp, body.OTP);
+          if (Date.now() > data.expiresIn)
+            return errorResponse(new Error("OTP expired"), res);
+        }
+        if (body.OTP === data?.otp || process.env.ENVIRONMENT === "TEST") {
           // if (true) {
           const profile = await patientModel.findOne(
             {
@@ -894,6 +915,9 @@ export const getHospitalsByCity = async (req: Request, res: Response) => {
         populate: {
           path: "city state locality country",
         },
+      })
+      .populate({
+        path: "services",
       });
     return successResponse(hospitalsInThatCity, "Success", res);
   } catch (error: any) {
@@ -1015,20 +1039,31 @@ export const searchPatientByPhoneNumberOrEmail = async (
       return errorResponse(error, res);
     }
 
-    const patientObj = await patientModel.find(
-      {
-        $or: [
-          {
-            email: term,
-          },
-          {
-            phoneNumber: term,
-          },
-        ],
-      },
-      excludePatientFields
-    );
+    let patientObj: any = await patientModel
+      .find(
+        {
+          $or: [
+            {
+              email: term,
+            },
+            {
+              phoneNumber: term,
+            },
+          ],
+        },
+        excludePatientFields
+      )
+      .lean();
     if (patientObj) {
+      if (patientObj.length) {
+        patientObj = patientObj.map((e: any) => {
+          return {
+            ...e,
+            age: calculateAge(e["DOB"]),
+          };
+        });
+      }
+
       return successResponse(patientObj, "Success", res);
     }
     return successResponse({}, "No data found", res);

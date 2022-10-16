@@ -58,10 +58,10 @@ const likeService = __importStar(require("../Services/Like/Like.service"));
 const prescriptionValidityController = __importStar(require("../Controllers/Prescription-Validity.Controller"));
 const Order_Model_1 = __importDefault(require("../Models/Order.Model"));
 const Doctor_Service_1 = require("../Services/Doctor/Doctor.Service");
+const Patient_Service_1 = require("../Services/Patient/Patient.Service");
 exports.excludePatientFields = {
     password: 0,
     verified: 0,
-    DOB: 0,
 };
 exports.excludeHospitalFields = {
     location: 0,
@@ -143,19 +143,36 @@ const patientLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                     password: 0,
                     verified: 0,
                 });
-                const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_PATIENT_KEY);
-                const { firstName, lastName, gender, phoneNumber, email, _id, DOB } = profile.toJSON();
-                return (0, response_1.successResponse)({ token, firstName, lastName, gender, phoneNumber, email, _id, DOB }, "Successfully logged in", res);
+                if (profile) {
+                    const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_PATIENT_KEY);
+                    const { firstName, lastName, gender, phoneNumber, email, _id, DOB } = profile.toJSON();
+                    return (0, response_1.successResponse)({
+                        token,
+                        firstName,
+                        lastName,
+                        gender,
+                        phoneNumber,
+                        email,
+                        _id,
+                        DOB,
+                    }, "Successfully logged in", res);
+                }
+                else {
+                    return (0, response_1.successResponse)({ message: "No Data found" }, "Create a new profile", res, 201);
+                }
             }
             const otpData = yield OTP_Model_1.default.findOne({
                 phoneNumber: body.phoneNumber,
             });
             try {
                 // Abhi k liye OTP verification hata di hai
-                const data = yield jwt.verify(otpData.otp, body.OTP);
-                if (Date.now() > data.expiresIn)
-                    return (0, response_1.errorResponse)(new Error("OTP expired"), res);
-                if (body.OTP === data.otp) {
+                let data;
+                if (process.env.ENVIRONMENT !== "TEST") {
+                    data = yield jwt.verify(otpData.otp, body.OTP);
+                    if (Date.now() > data.expiresIn)
+                        return (0, response_1.errorResponse)(new Error("OTP expired"), res);
+                }
+                if (body.OTP === (data === null || data === void 0 ? void 0 : data.otp) || process.env.ENVIRONMENT === "TEST") {
                     // if (true) {
                     const profile = yield Patient_Model_1.default.findOne({
                         phoneNumber: body.phoneNumber,
@@ -801,6 +818,9 @@ const getHospitalsByCity = (req, res) => __awaiter(void 0, void 0, void 0, funct
             populate: {
                 path: "city state locality country",
             },
+        })
+            .populate({
+            path: "services",
         });
         return (0, response_1.successResponse)(hospitalsInThatCity, "Success", res);
     }
@@ -898,7 +918,8 @@ const searchPatientByPhoneNumberOrEmail = (req, res) => __awaiter(void 0, void 0
             error.name = "Invalid Term";
             return (0, response_1.errorResponse)(error, res);
         }
-        const patientObj = yield Patient_Model_1.default.find({
+        let patientObj = yield Patient_Model_1.default
+            .find({
             $or: [
                 {
                     email: term,
@@ -907,8 +928,14 @@ const searchPatientByPhoneNumberOrEmail = (req, res) => __awaiter(void 0, void 0
                     phoneNumber: term,
                 },
             ],
-        }, exports.excludePatientFields);
+        }, exports.excludePatientFields)
+            .lean();
         if (patientObj) {
+            if (patientObj.length) {
+                patientObj = patientObj.map((e) => {
+                    return Object.assign(Object.assign({}, e), { age: (0, Patient_Service_1.calculateAge)(e["DOB"]) });
+                });
+            }
             return (0, response_1.successResponse)(patientObj, "Success", res);
         }
         return (0, response_1.successResponse)({}, "No data found", res);

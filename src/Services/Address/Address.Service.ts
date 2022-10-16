@@ -38,3 +38,12 @@ export const checkIfAddressBelongToTheHospital = async (
     return Promise.reject(error);
   }
 };
+
+export const createAddress = async (addressInfo: Object) => {
+  try {
+    let addressData = await new addressModel(addressInfo).save();
+    return Promise.resolve(addressData);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};

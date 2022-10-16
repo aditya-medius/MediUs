@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkIfAddressBelongToTheHospital = exports.updateAddress = void 0;
+exports.createAddress = exports.checkIfAddressBelongToTheHospital = exports.updateAddress = void 0;
 const Address_Model_1 = __importDefault(require("../../Models/Address.Model"));
 const Hospital_Model_1 = __importDefault(require("../../Models/Hospital.Model"));
 const updateAddress = (body) => __awaiter(void 0, void 0, void 0, function* () {
@@ -50,3 +50,13 @@ const checkIfAddressBelongToTheHospital = (hospitalId, addressId) => __awaiter(v
     }
 });
 exports.checkIfAddressBelongToTheHospital = checkIfAddressBelongToTheHospital;
+const createAddress = (addressInfo) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let addressData = yield new Address_Model_1.default(addressInfo).save();
+        return Promise.resolve(addressData);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.createAddress = createAddress;

@@ -6,6 +6,7 @@ import * as bcrypt from "bcrypt";
 import { errorResponse, successResponse } from "../Services/response";
 import { sendMessage } from "../Services/message.service";
 import specialityBodyModel from "../Admin Controlled Models/SpecialityBody.Model";
+import specialityModel from "../Admin Controlled Models/Specialization.Model";
 import bodyPartModel from "../Admin Controlled Models/BodyPart.Model";
 import _ from "underscore";
 import specialityDiseaseModel from "../Admin Controlled Models/SpecialityDisease.Model";
@@ -162,23 +163,12 @@ export const doctorLogin = async (req: Request, res: Response) => {
           )
           .populate("qualification");
 
-        const token = await jwt.sign(
-          profile.toJSON(),
-          process.env.SECRET_DOCTOR_KEY as string
-        );
-        let {
-          firstName,
-          lastName,
-          gender,
-          phoneNumber,
-          email,
-          _id,
-          qualification,
-        } = profile.toJSON();
-        qualification = qualification[0];
-        return successResponse(
-          {
-            token,
+        if (profile) {
+          const token = await jwt.sign(
+            profile.toJSON(),
+            process.env.SECRET_DOCTOR_KEY as string
+          );
+          let {
             firstName,
             lastName,
             gender,
@@ -186,20 +176,44 @@ export const doctorLogin = async (req: Request, res: Response) => {
             email,
             _id,
             qualification,
-          },
-          "Successfully logged in",
-          res
-        );
+          } = profile.toJSON();
+          qualification = qualification[0];
+          return successResponse(
+            {
+              token,
+              firstName,
+              lastName,
+              gender,
+              phoneNumber,
+              email,
+              _id,
+              qualification,
+            },
+            "Successfully logged in",
+            res
+          );
+        } else {
+          return successResponse(
+            { message: "No Data found" },
+            "Create a new profile",
+            res,
+            201
+          );
+        }
       }
       const otpData = await otpModel.findOne({
         phoneNumber: body.phoneNumber,
       });
       try {
+        let data: any;
         // Abhi k liye OTP verification hata di hai
-        const data: any = await jwt.verify(otpData.otp, body.OTP);
-        if (Date.now() > data.expiresIn)
-          return errorResponse(new Error("OTP expired"), res);
-        if (body.OTP === data.otp) {
+        if (process.env.ENVIRONMENT !== "TEST") {
+          data = await jwt.verify(otpData.otp, body.OTP);
+          if (Date.now() > data.expiresIn)
+            return errorResponse(new Error("OTP expired"), res);
+        }
+
+        if (body.OTP === data?.otp || process.env.ENVIRONMENT === "TEST") {
           let profile = await doctorModel.findOne(
             {
               phoneNumber: body.phoneNumber,
@@ -620,28 +634,40 @@ export const searchDoctor = async (req: Request, res: Response) => {
         },
         { $unwind: "$_id" },
       ]),
+      specialityModel.aggregate([
+        {
+          $match: {
+            specialityName: { $regex: term, $options: "i" },
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+          },
+        },
+      ]),
     ];
 
     Promise.all(promiseArray)
       .then(async (specialityArray: Array<any>) => {
         let formatArray = (arr: Array<any>) => {
-          arr = arr.flat();
+          arr = (arr as Array<any>).flat();
           return _.map(arr, (e) =>
             e.speciality ? e.speciality.toString() : e._id.toString()
           );
         };
 
+        let SA: Array<any> = Object.assign([], specialityArray);
         let id = specialityArray.splice(-1, 1);
         id = formatArray(id);
-
-        specialityArray = formatArray(specialityArray);
+        SA = formatArray(SA);
         let doctorArray = await doctorModel
           .find(
             {
               $or: [
                 {
                   active: true,
-                  specialization: { $in: specialityArray },
+                  specialization: { $in: SA },
                   ...(gender && { gender }),
                 },
                 {
@@ -663,7 +689,8 @@ export const searchDoctor = async (req: Request, res: Response) => {
               path: "address",
               populate: { path: "city state locality country" },
             },
-          });
+          })
+          .lean();
 
         if (city) {
           doctorArray = doctorArray.filter((e: any) => {
@@ -676,6 +703,38 @@ export const searchDoctor = async (req: Request, res: Response) => {
           });
         }
 
+        let arr: any = {};
+        doctorArray.filter((e: any) => {
+          e.hospitalDetails.filter((elem: any) => {
+            arr[e._id.toString()] = [
+              ...(arr[e._id.toString()] ?? []),
+              elem?.hospital?._id.toString(),
+            ];
+          });
+        });
+        let presciprtionValidty = await prescriptionModel
+          .find({
+            doctorId: Object.keys(arr),
+          })
+          .lean();
+
+        let d_in: any = [];
+        doctorArray.forEach((e: any) => {
+          e.hospitalDetails = e.hospitalDetails.map((elem: any) => {
+            let data: any = presciprtionValidty.filter((elements: any) => {
+              return (
+                e?._id?.toString() === elements?.doctorId?.toString() &&
+                elem?.hospital?._id.toString() ===
+                  elements?.hospitalId?.toString()
+              );
+            })[0];
+            d_in = Object.assign({}, elem);
+            d_in.hospital["prescriptionValidity"] = data ?? [];
+            return d_in;
+          });
+
+          return e;
+        });
         return successResponse(doctorArray, "Success", res);
       })
       .catch((error) => {
@@ -1159,8 +1218,17 @@ export const searchDoctorByPhoneNumberOrEmail = async (
           {
             phoneNumber: term,
           },
-          { firstName: 1, lastName: 1, gender: 1, DOB: 1, KYCDetails: 0 }
+          {
+            firstName: 1,
+            lastName: 1,
+            gender: 1,
+            DOB: 1,
+            KYCDetails: 0,
+            specialization: 1,
+            qualification: 1,
+          }
         )
+        .populate("specialization qualification")
         .lean();
     } else if (email) {
       doctorObj = await doctorModel
@@ -1168,8 +1236,17 @@ export const searchDoctorByPhoneNumberOrEmail = async (
           {
             email: term,
           },
-          { firstName: 1, lastName: 1, gender: 1, DOB: 1, KYCDetails: 0 }
+          {
+            firstName: 1,
+            lastName: 1,
+            gender: 1,
+            DOB: 1,
+            KYCDetails: 0,
+            specialization: 1,
+            qualification: 1,
+          }
         )
+        .populate("qualification specialization")
         .lean();
     }
 
@@ -1819,6 +1896,7 @@ export const getDoctorsOfflineAndOnlineAppointments = async (
 };
 
 import * as notificationService from "../Services/Notification/Notification.Service";
+import prescriptionModel from "../Models/Prescription.Model";
 
 export const getDoctorsNotification = async (req: Request, res: Response) => {
   try {
@@ -1839,6 +1917,7 @@ export const getDoctorsNotification = async (req: Request, res: Response) => {
       notifications_whereSenderIsPatient,
     ])
       .then((result: Array<any>) => {
+        console.log(":lknjbhjgvh bfdfdf", result);
         let notifications = result.map((e: any) => e[0]);
         notifications = notifications.sort(
           (a: any, b: any) => a.createdAt - b.createdAt

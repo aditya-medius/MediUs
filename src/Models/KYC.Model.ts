@@ -24,6 +24,10 @@ const kycSchema = new Schema(
       // minlength: 12,
       // unique: true,
     },
+    accountHolderName: {
+      type: String,
+      required: true,
+    },
   },
   {
     toJSON: { virtuals: true },
