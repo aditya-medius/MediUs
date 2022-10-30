@@ -42,6 +42,7 @@ const Patient_auth_1 = require("./authentication/Patient.auth");
 const Admin_auth_1 = require("./authentication/Admin.auth");
 const swaggerUi = __importStar(require("swagger-ui-express"));
 const swaggerDoc = __importStar(require("../swagger.json"));
+const Suvedha_route_1 = __importDefault(require("./routes/Suvedha.route"));
 // Cron Jobs
 // cronJobService.cronFunctions.forEach((e: Function) => {
 //   e();
@@ -59,6 +60,7 @@ app.use("/patient", Patient_route_1.default);
 app.use("/feedback", Feedback_route_1.default);
 app.use("/common", Common_route_1.default);
 app.use("/agent", Agent_route_1.default);
+app.use("/suvedha", Suvedha_route_1.default);
 app.use("/static", express_1.default.static(path_1.default.join(__dirname, "./src/uploads")));
 app.use("/static", middlewareHelper_1.tokenNikalo, (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital, Patient_auth_1.authenticatePatient, Admin_auth_1.authenticateAdmin), express_1.default.static(path_1.default.join(__dirname, "../uploads")));
 app.get("test", (req, res) => {

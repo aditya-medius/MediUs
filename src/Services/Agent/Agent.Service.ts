@@ -11,8 +11,9 @@ dotenv.config();
 
 export const createAgentProfile = async (suvedhaInfo: any) => {
   try {
-    let { state, city, locality, addressLine_1, pincode, ...rest } =
+    let { state, city, locality, addressLine_1, pincode, country, ...rest } =
       suvedhaInfo;
+    console.log(":lkbhvgfh ddsds", suvedhaInfo.country);
     if (state || city || locality || addressLine_1 || pincode) {
       let addressId = (
         await createAddress({
@@ -21,6 +22,7 @@ export const createAgentProfile = async (suvedhaInfo: any) => {
           locality,
           addressLine_1,
           pincode,
+          country,
         })
       )._id;
       rest["address"] = addressId;
@@ -139,6 +141,6 @@ export const verifyOtpAndLogin = async (body: any) => {
 };
 
 export const getAgentToken = async (body: any) => {
-  const token = await jwt.sign(body, process.env.SECRET_AGENT_KEY as string);
+  const token = await jwt.sign(body, process.env.SECRET_SUVEDHA_KEY as string);
   return token;
 };

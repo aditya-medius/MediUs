@@ -9,7 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createProfile = void 0;
+exports.getDoctors = exports.createProfile = void 0;
+const Doctor_Service_1 = require("../Services/Doctor/Doctor.Service");
 const response_1 = require("../Services/response");
 const Suvedha_Service_1 = require("../Services/Suvedha/Suvedha.Service");
 const createProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -22,3 +23,13 @@ const createProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.createProfile = createProfile;
+const getDoctors = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let doctors = yield (0, Doctor_Service_1.getDoctorsWithAdvancedFilters)(req.query);
+        return (0, response_1.successResponse)(doctors, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getDoctors = getDoctors;

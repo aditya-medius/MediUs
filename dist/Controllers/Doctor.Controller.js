@@ -1058,6 +1058,7 @@ const getDoctorWorkingInHospitals = (req, res) => __awaiter(void 0, void 0, void
             })[0]) === null || _a === void 0 ? void 0 : _a.validateTill;
             e["presciptionValidity"] = prescription !== null && prescription !== void 0 ? prescription : "Not found";
         });
+        console.log("doctorsWorkingInHospitaldoctorsWorkingInHospital", doctorsWorkingInHospital);
         return (0, response_1.successResponse)({ doctorDetails, doctorsWorkingInHospital }, 
         // doctorsWorkingInHospital,
         "Success", res);

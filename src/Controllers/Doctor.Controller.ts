@@ -1185,6 +1185,11 @@ export const getDoctorWorkingInHospitals = async (
       e["presciptionValidity"] = prescription ?? "Not found";
     });
 
+    console.log(
+      "doctorsWorkingInHospitaldoctorsWorkingInHospital",
+      doctorsWorkingInHospital
+    );
+
     return successResponse(
       { doctorDetails, doctorsWorkingInHospital },
       // doctorsWorkingInHospital,

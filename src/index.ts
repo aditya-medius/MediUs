@@ -21,6 +21,7 @@ import * as cronJobService from "./Services/Cron-Jobs.Service";
 import { authenticateAdmin } from "./authentication/Admin.auth";
 import * as swaggerUi from "swagger-ui-express";
 import * as swaggerDoc from "../swagger.json";
+import suvedhaRouter from "./routes/Suvedha.route";
 // Cron Jobs
 // cronJobService.cronFunctions.forEach((e: Function) => {
 //   e();
@@ -41,7 +42,7 @@ app.use("/patient", patientRouter);
 app.use("/feedback", feedbackRouter);
 app.use("/common", commonRouter);
 app.use("/agent", agentRouter);
-
+app.use("/suvedha", suvedhaRouter);
 app.use("/static", express.static(path.join(__dirname, "./src/uploads")));
 app.use(
   "/static",

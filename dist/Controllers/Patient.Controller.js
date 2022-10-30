@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDoctorsIHaveLikes = exports.checkIfDoctorIsOnHoliday = exports.getPatientsNotification = exports.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod = exports.searchPatientByPhoneNumberOrEmail = exports.checkDoctorAvailability = exports.uploadPrescription = exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.viewAppointById = exports.CancelAppointment = exports.doneAppointment = exports.rescheduleAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = exports.excludeHospitalFields = exports.excludePatientFields = void 0;
+exports.canDoctorTakeAppointment = exports.getDoctorsIHaveLikes = exports.checkIfDoctorIsOnHoliday = exports.getPatientsNotification = exports.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod = exports.searchPatientByPhoneNumberOrEmail = exports.checkDoctorAvailability = exports.uploadPrescription = exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.viewAppointById = exports.CancelAppointment = exports.doneAppointment = exports.rescheduleAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = exports.excludeHospitalFields = exports.excludePatientFields = void 0;
 const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
 // import { excludePatientFields } from "./Patient.Controller";
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
@@ -59,6 +59,7 @@ const prescriptionValidityController = __importStar(require("../Controllers/Pres
 const Order_Model_1 = __importDefault(require("../Models/Order.Model"));
 const Doctor_Service_1 = require("../Services/Doctor/Doctor.Service");
 const Patient_Service_1 = require("../Services/Patient/Patient.Service");
+const patientService = __importStar(require("../Services/Patient/Patient.Service"));
 exports.excludePatientFields = {
     password: 0,
     verified: 0,
@@ -422,7 +423,9 @@ const BookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
             body["Type"] = "Online";
         }
         /* Appointment ka token Number */
-        let appointmentTokenNumber = yield (0, Appointment_Service_1.getTokenNumber)(body);
+        console.log(":Ljh njkhb ddsd", (yield (0, Appointment_Service_1.getTokenNumber)(body)) + 1);
+        let appointmentTokenNumber = (yield (0, Appointment_Service_1.getTokenNumber)(body)) + 1;
+        console.log("appointmentTokenNumberappointmentTokenNumber", appointmentTokenNumber);
         /* Appointment ki Id */
         let appointmentId = (0, Appointment_Service_1.generateAppointmentId)();
         body["appointmentToken"] = appointmentTokenNumber;
@@ -624,6 +627,8 @@ exports.viewAppointById = viewAppointById;
 const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const page = parseInt(req.params.page);
+        let limit = req.query.limit;
+        limit = limit ? parseInt(limit) : 10;
         const appointmentData = yield Appointment_Model_1.default
             .find({
             patient: req.currentPatient,
@@ -636,7 +641,13 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
         })
             .populate({
             path: "doctors",
-            select: Object.assign(Object.assign({}, Doctor_Controller_1.excludeDoctorFields), { hospitalDetails: 0, specialization: 0, qualification: 0, email: 0, active: 0, deleted: 0, overallExperience: 0, gender: 0, image: 0 }),
+            select: Object.assign(Object.assign({}, Doctor_Controller_1.excludeDoctorFields), { hospitalDetails: 0, 
+                // specialization: 0,
+                // qualification: 0,
+                email: 0, active: 0, deleted: 0, overallExperience: 0, gender: 0, image: 0 }),
+            populate: {
+                path: "specialization qualification",
+            },
         })
             .populate({
             path: "subPatient",
@@ -646,7 +657,7 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
         })
             .sort({ "time.date": -1 })
             .skip(page > 1 ? (page - 1) * 2 : 0)
-            .limit(2);
+            .limit(limit);
         const page2 = appointmentData.length / 2;
         // const older_apppointmentData: Array<object> = await appointmentModel
         //   .find(
@@ -997,3 +1008,13 @@ const getDoctorsIHaveLikes = (req, res) => __awaiter(void 0, void 0, void 0, fun
     }
 });
 exports.getDoctorsIHaveLikes = getDoctorsIHaveLikes;
+const canDoctorTakeAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let response = yield patientService.canDoctorTakeAppointment(req.body);
+        return (0, response_1.successResponse)(response, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.canDoctorTakeAppointment = canDoctorTakeAppointment;

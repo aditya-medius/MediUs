@@ -234,6 +234,469 @@
         }
       }
     },
+    "hospital/address": {
+      "post": {
+        "deprecated": false,
+        "tags": ["Clinic"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {
+                "city": "61b37be91619add821752b83",
+                "state": "61b37c161619add821752b85",
+                "locality": "61b37c211619add821752b89",
+                "country": "61b37c1c1619add821752b87",
+                "addressLine_1": "Gala No 6 & 7, Laxmi Plaza, Laxmi Industrial Estate, New Link Road, Andheri West, Mumbai - 400053"
+              }
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "hospital/anemity": {
+      "post": {
+        "deprecated": false,
+        "tags": ["Clinic"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {
+                "name": "Parking",
+                "anemityType": "Primary"
+              }
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "hospital/deleteHospital": {
+      "post": {
+        "deprecated": false,
+        "tags": ["Clinic"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {}
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "hospital/updateHospital": {
+      "post": {
+        "deprecated": false,
+        "tags": ["Clinic"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {
+                "doctors": ["61e8492d966b4b000e3299d0"]
+              }
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "hospital/findHospitalBySpecialityOrBodyPart/:term": {
+      "get": {
+        "deprecated": false,
+        "tags": ["Clinic"],
+        "description": "Clinic basic details",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {}
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "hospital/removeDoctor": {
+      "post": {
+        "deprecated": false,
+        "tags": ["Clinic"],
+        "description": "Clinic basic details",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {
+                "doctors": "61b754f66932c8ff4b2de226"
+              }
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "hospital/loginWithPassword": {
+      "post": {
+        "deprecated": false,
+        "tags": ["Clinic"],
+        "description": "Clinic basic details",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {
+                "password": "12345",
+                "contactNumber": "9999999999"
+              }
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "hospital/getAppointmentByDate": {
+      "post": {
+        "deprecated": false,
+        "tags": ["Clinic"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {
+                "date": "2022-02-14"
+              }
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+
+    "hospital/checkVerificationStatus": {
+      "put": {
+        "deprecated": false,
+        "tags": ["Clinic"],
+        "description": "Clinic basic details",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {
+                "phoneNumber": "8826332442"
+              }
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "hospital/getHospitalInACity": {
+      "get": {
+        "deprecated": false,
+        "tags": ["Clinic"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {}
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "hospital/requestApprovalFromDoctor": {
+      "post": {
+        "deprecated": false,
+        "tags": ["Clinic"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {
+                "doctorId": "62e62eb2928aaaab6af26661",
+                "hospitalId": "62e6224e928aaaab6af265b7"
+              }
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "hospital/approveDoctorRequest": {
+      "post": {
+        "deprecated": false,
+        "tags": ["Clinic"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {
+                "requestId": "634304744ed5189c5d466604"
+              }
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+
+    "hospital/searchHospitalByPhoneNumber/:phoneNumber": {
+      "get": {
+        "deprecated": false,
+        "tags": ["Clinic"],
+        "description": "Clinic basic details",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {}
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+
+    "hospital/getListOfRequestedApprovals_OfHospital": {
+      "put": {
+        "deprecated": false,
+        "tags": ["Clinic"],
+        "description": "Clinic basic details",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {}
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "hospital/getHospitalsNotification": {
+      "get": {
+        "deprecated": false,
+        "tags": ["Hospital"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {}
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
     "agent/": {
       "post": {
         "deprecated": false,
@@ -310,6 +773,410 @@
         }
       }
     },
+    "doctor/findDoctorBySpecialityOrBodyPart/:ter,": {
+      "post": {
+        "deprecated": false,
+        "tags": ["Doctor"],
+        "description": "Like Doctor",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {}
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "doctor/getTotalEarnings": {
+      "get": {
+        "deprecated": false,
+        "tags": ["Doctor"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {}
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "doctor/verifyPayment": {
+      "get": {
+        "deprecated": false,
+        "tags": ["Doctor"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {
+                "orderId": "61f9233b1bc6a6aff1c4d88e",
+                "orderReceipt": "order_rcptid_950131",
+                "paymentId": "111",
+                "appointmentId": "61f923281bc6a6aff1c4d889",
+                "paymentSignature": "111"
+              }
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "doctor/withdraw": {
+      "post": {
+        "deprecated": false,
+        "tags": ["Doctor"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {
+                "withdrawalAmount": "900"
+              }
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "doctor/setSchedule": {
+      "put": {
+        "deprecated": false,
+        "tags": ["Doctor"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {
+                "hospitalId": "61f7a21c2d088d758c5a994b",
+                "workingHour": {
+                  "monday": {
+                    "capacity": 10,
+                    "from": {
+                      "division": 13,
+                      "time": 13
+                    },
+                    "till": {
+                      "division": 21,
+                      "time": 14
+                    },
+                    "working": true
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "doctor/deleteHospitalFromDoctor": {
+      "delete": {
+        "deprecated": false,
+        "tags": ["Doctor"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {
+                "hospital": "61e849caf1a46aea2b6a5833"
+              }
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "doctor/checkVerificationStatus": {
+      "put": {
+        "deprecated": false,
+        "tags": ["Doctor"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {
+                "phoneNumber": "8601500190"
+              }
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "doctor/addHospitalInDoctorProfile": {
+      "post": {
+        "deprecated": false,
+        "tags": ["Doctor"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {
+                "doctorId": "6200fe22ffa9d432368be7f3",
+                "hospital": "61c9f927254aa8c4764fedf1",
+                "workingHours": "62010735c00fff8932606b82",
+                "consultationFee": {
+                  "min": 500,
+                  "max": 500
+                }
+              }
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "doctor/approveHospitalRequest": {
+      "post": {
+        "deprecated": false,
+        "tags": ["Doctor"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {
+                "requestId": "625966844d591017310dfa41"
+              }
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "doctor/setConsultationFeeForDoctor": {
+      "post": {
+        "deprecated": false,
+        "tags": ["Doctor"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {
+                "hospitalId": "61c9f927254aa8c4764fedf1",
+                "consultationFee": {
+                  "min": 100,
+                  "max": 200
+                }
+              }
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+
+    "doctor/updateQualification/6342e8766b8351b2a50181b8": {
+      "put": {
+        "deprecated": false,
+        "tags": ["Doctor"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {
+                "qualificationName": "6342e8556b8351b2a50181b6",
+                "certificationOrganisation": " ddsdsjndsjn",
+                "duration": {
+                  "from": "Tue Nov 30 2021 22:47:17 GMT+0530 (India Standard Time)",
+                  "till": "Tue Nov 30 2021 22:47:17 GMT+0530 (India Standard Time)"
+                },
+                "email": "dsjsndn@gmail.com"
+              }
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+
+    "doctor/denyHospitalRequest": {
+      "put": {
+        "deprecated": false,
+        "tags": ["Doctor"],
+        "description": "Like Doctor",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object",
+            "schema": {
+              "type": "object",
+              "example": {
+                "requestId": "62e8dba5f6a6d2a588bf488f"
+              }
+            }
+          }
+        ],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
     "patient/getMyLikes/:id": {
       "get": {
         "deprecated": false,
@@ -327,6 +1194,168 @@
         }
       }
     },
+    "patient/getDoctorsByCity": {
+      "post": {
+        "deprecated": false,
+        "tags": ["Patient"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "example": {
+                "cityId": "61b37be91619add821752b83"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "patient/doneAppointment": {
+      "post": {
+        "deprecated": false,
+        "tags": ["Patient"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "example": {
+                "id": "6242c8ad9c76290a5c8c56b8"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "patient/getDoctorByDay": {
+      "post": {
+        "deprecated": false,
+        "tags": ["Patient"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "example": {}
+            }
+          }
+        ]
+      }
+    },
+    "patient/getSpecialityBodyPartAndDisease": {
+      "get": {
+        "deprecated": false,
+        "tags": ["Patient"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "example": {}
+            }
+          }
+        ]
+      }
+    },
+    "patient/viewAppointment/:page": {
+      "get": {
+        "deprecated": false,
+        "tags": ["Patient"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "example": {}
+            }
+          }
+        ]
+      }
+    },
+    "patient/getHospitalsByCity": {
+      "post": {
+        "deprecated": false,
+        "tags": ["Patient"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "example": {
+                "cityId": "61b37be91619add821752b83"
+              }
+            }
+          }
+        ]
+      }
+    },
     "doctor/login?phoneNumber=9999999999": {
       "post": {
         "deprecated": false,
@@ -342,6 +1371,95 @@
             "description": "Unauthorized"
           }
         }
+      }
+    },
+    "doctor/checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod": {
+      "post": {
+        "deprecated": false,
+        "tags": ["Doctor"],
+        "description": "Login (Doctor)",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "example": {
+                "patientId": "61e84943966b4b000e3299d9",
+                "doctorId": "61e8492d966b4b000e3299d0",
+                "hospitalId": "61c9f927254aa8c4764fedf1",
+                "subPatientId": "61daed225eee7d8903f51b20"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "doctor/cancelAppointments": {
+      "put": {
+        "deprecated": false,
+        "tags": ["Doctor"],
+        "description": "Login (Doctor)",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "example": {
+                "appointmentId": "6242c8709c76290a5c8c5660"
+              }
+            }
+          }
+        ]
+      }
+    },
+
+    "doctor/requestApprovalFromHospital": {
+      "put": {
+        "deprecated": false,
+        "tags": ["Doctor"],
+        "description": "Login (Doctor)",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "example": {
+                "doctorId": "62e63d78928aaaab6af2673e",
+                "hospitalId": "62e6325d928aaaab6af266bf"
+              }
+            }
+          }
+        ]
       }
     },
     "doctor/login?OTP=351808&phoneNumber=9999999999": {
@@ -535,6 +1653,76 @@
         ]
       }
     },
+    "patient/cancelAppointment": {
+      "post": {
+        "deprecated": false,
+        "tags": ["Patient"],
+        "description": "Order for patient",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "example": {
+                "id": "6242c8719c76290a5c8c566f"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "patient/bookAppointment": {
+      "post": {
+        "deprecated": false,
+        "tags": ["Patient"],
+        "description": "Order for patient",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "example": {
+                "patient": "61e84943966b4b000e3299d9",
+                "doctors": "61e8492d966b4b000e3299d0",
+                "hospital": "62e6224e928aaaab6af265b7",
+                "time": {
+                  "from": {
+                    "time": 16,
+                    "division": 1
+                  },
+                  "till": {
+                    "time": 17,
+                    "division": 1
+                  },
+                  "date": "Mon Oct 31 2022 05:47:17 GMT+0530 (India Standard Time)"
+                },
+                "subPatient": "62591f739d0d98bbfa8bf232"
+              }
+            }
+          }
+        ]
+      }
+    },
     "doctor/getMyLikes": {
       "post": {
         "deprecated": false,
@@ -558,6 +1746,142 @@
               "example": {
                 "doctorId": "61e846964fffd2dfc73b8ab9"
               }
+            }
+          }
+        ]
+      }
+    },
+    "doctor/getWorkingHours": {
+      "post": {
+        "deprecated": false,
+        "tags": ["Doctor"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "example": {
+                "doctorDetails": "6200fe22ffa9d432368be7f3",
+                "hospitalDetails": "61c9f927254aa8c4764fedf1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "doctor/getDoctorWorkingInHospitals/:id": {
+      "get": {
+        "deprecated": false,
+        "tags": ["Doctor"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "example": {}
+            }
+          }
+        ]
+      }
+    },
+    "doctor/searchDoctorByPhoneNumberOrEmail/:phonenumber": {
+      "get": {
+        "deprecated": false,
+        "tags": ["Doctor"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "example": {}
+            }
+          }
+        ]
+      }
+    },
+    "doctor/viewAppointmentsByDate/:page": {
+      "post": {
+        "deprecated": false,
+        "tags": ["Doctor"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "example": {
+                "date": "{{date}}"
+              }
+            }
+          }
+        ]
+      }
+    },
+
+    "doctor/viewAppointment/:page": {
+      "get": {
+        "deprecated": false,
+        "tags": ["Clinic"],
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "example": {}
             }
           }
         ]
@@ -779,6 +2103,35 @@
             "description": "Unauthorized"
           }
         }
+      }
+    },
+    "doctor/setPrescriptionValidity": {
+      "put": {
+        "deprecated": false,
+        "tags": ["Doctor"],
+        "description": "Get doctor's notification",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "response": {
+          "200": {
+            "description": "Successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "example": {
+                "validateTill": 4,
+                "hospitalId": "62e6224e928aaaab6af265b7"
+              }
+            }
+          }
+        ]
       }
     },
     "doctor/getDoctorsOfflineAndOnlineAppointments": {

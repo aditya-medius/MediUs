@@ -3,11 +3,12 @@ import mongoose from "mongoose";
 
 export const getTokenNumber = async (body: any) => {
   try {
-    let { patient, hospital, time } = body;
+    let { patient, hospital, time, doctors } = body;
     let appointment = await appointmentModel.aggregate([
       {
         $match: {
-          patient: new mongoose.Types.ObjectId(patient),
+          // patient: new mongoose.Types.ObjectId(patient),
+          doctors: new mongoose.Types.ObjectId(doctors),
           hospital: new mongoose.Types.ObjectId(hospital),
           "time.from.time": time.from.time,
           "time.till.time": time.till.time,

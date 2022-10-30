@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.convenienceFee = exports.getAdminToken = exports.handleCSV_locality = exports.handleCSV_city = exports.handleCSV_state = exports.checkIfMapExist = exports.getLocalityByCity = exports.getCityByState = exports.getStateByCountry = exports.createCityMap = exports.createStateMap = exports.createCountryMap = void 0;
+exports.convenienceFee = exports.getSpecialization = exports.getCityIdFromName = exports.getAdminToken = exports.handleCSV_locality = exports.handleCSV_city = exports.handleCSV_state = exports.checkIfMapExist = exports.getLocalityByCity = exports.getCityByState = exports.getStateByCountry = exports.createCityMap = exports.createStateMap = exports.createCountryMap = void 0;
 const dotenv = __importStar(require("dotenv"));
 const jwt = __importStar(require("jsonwebtoken"));
 const mongoose_1 = __importDefault(require("mongoose"));
@@ -278,6 +278,7 @@ const csv = require("csvtojson");
 const State_Model_1 = __importDefault(require("../../Admin Controlled Models/State.Model"));
 const City_Model_1 = __importDefault(require("../../Admin Controlled Models/City.Model"));
 const Locality_Model_1 = __importDefault(require("../../Admin Controlled Models/Locality.Model"));
+const Specialization_Model_1 = __importDefault(require("../../Admin Controlled Models/Specialization.Model"));
 const handleCSV_state = (body) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let csvResult = yield csv().fromFile(path.join(body.destination, body.filename));
@@ -350,4 +351,16 @@ const getAdminToken = (body) => __awaiter(void 0, void 0, void 0, function* () {
     return token;
 });
 exports.getAdminToken = getAdminToken;
+const getCityIdFromName = (cityName) => __awaiter(void 0, void 0, void 0, function* () {
+    let city = yield City_Model_1.default.findOne({ name: cityName });
+    return Promise.resolve(city);
+});
+exports.getCityIdFromName = getCityIdFromName;
+const getSpecialization = (specialization) => __awaiter(void 0, void 0, void 0, function* () {
+    specialization = yield Specialization_Model_1.default.findOne({
+        specialityName: { $regex: specialization, $options: "i" },
+    });
+    return Promise.resolve(specialization);
+});
+exports.getSpecialization = getSpecialization;
 exports.convenienceFee = 1;
