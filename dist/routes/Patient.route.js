@@ -68,7 +68,17 @@ patientRouter.post("/doneAppointment", (0, middlewareHelper_1.oneOf)(Patient_aut
 patientRouter.put("/viewAppointById/:id", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital, Patient_auth_1.authenticatePatient), patientController.viewAppointById);
 patientRouter.post("/getDoctorByDay", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.getDoctorByDay);
 patientRouter.post("/generateOrderId", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital), paymentController.generateOrderId);
-patientRouter.post("/verifyPayment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), paymentController.verifyPayment);
+patientRouter.post("/verifyPayment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let doctorId = req.body.doctors, patientId = req.body.patient, hospitalId = req.body.hospital, subPatientId = req.body.subPatient;
+        let valid = yield prescriptionValidtiyService.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod({ doctorId, patientId, hospitalId, subPatientId });
+        req.body["appointmentType"] = valid ? "Follow up" : "Fresh";
+        next();
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+}), paymentController.verifyPayment);
 patientRouter.get("/viewAppointment/:page", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.ViewAppointment);
 // Get all the entities of filter
 patientRouter.get("/getSpecialityBodyPartAndDisease", patientController.getSpecialityBodyPartAndDisease);
@@ -100,5 +110,6 @@ patientRouter.get("/getFees", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authe
     }
 }));
 patientRouter.post("/checkIfDoctorIsOnHoliday", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital, Doctor_auth_1.authenticateDoctor), patientController.checkIfDoctorIsOnHoliday);
+patientRouter.post("/canDoctorTakeAppointment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital), patientController.canDoctorTakeAppointment);
 patientRouter.get("/getMyLikes/:id", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.getDoctorsIHaveLikes);
 exports.default = patientRouter;

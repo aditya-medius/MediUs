@@ -256,6 +256,7 @@ import cityModel from "../../Admin Controlled Models/City.Model";
 import localityModel from "../../Admin Controlled Models/Locality.Model";
 
 import { groupBy, map } from "lodash";
+import specialityModel from "../../Admin Controlled Models/Specialization.Model";
 export const handleCSV_state = async (body: any) => {
   try {
     let csvResult = await csv().fromFile(
@@ -348,4 +349,15 @@ export const getAdminToken = async (body: any) => {
   return token;
 };
 
+export const getCityIdFromName = async (cityName: string) => {
+  let city = await cityModel.findOne({ name: cityName });
+  return Promise.resolve(city);
+};
+
+export const getSpecialization = async (specialization: string) => {
+  specialization = await specialityModel.findOne({
+    specialityName: { $regex: specialization, $options: "i" },
+  });
+  return Promise.resolve(specialization);
+};
 export const convenienceFee = 1;

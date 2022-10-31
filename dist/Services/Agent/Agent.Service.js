@@ -53,7 +53,8 @@ const Suvedha_Model_1 = __importDefault(require("../../Models/Suvedha.Model"));
 dotenv.config();
 const createAgentProfile = (suvedhaInfo) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let { state, city, locality, addressLine_1, pincode } = suvedhaInfo, rest = __rest(suvedhaInfo, ["state", "city", "locality", "addressLine_1", "pincode"]);
+        let { state, city, locality, addressLine_1, pincode, country } = suvedhaInfo, rest = __rest(suvedhaInfo, ["state", "city", "locality", "addressLine_1", "pincode", "country"]);
+        console.log(":lkbhvgfh ddsds", suvedhaInfo.country);
         if (state || city || locality || addressLine_1 || pincode) {
             let addressId = (yield (0, Address_Service_1.createAddress)({
                 state,
@@ -61,6 +62,7 @@ const createAgentProfile = (suvedhaInfo) => __awaiter(void 0, void 0, void 0, fu
                 locality,
                 addressLine_1,
                 pincode,
+                country,
             }))._id;
             rest["address"] = addressId;
         }
@@ -166,7 +168,7 @@ const verifyOtpAndLogin = (body) => __awaiter(void 0, void 0, void 0, function* 
 });
 exports.verifyOtpAndLogin = verifyOtpAndLogin;
 const getAgentToken = (body) => __awaiter(void 0, void 0, void 0, function* () {
-    const token = yield jwt.sign(body, process.env.SECRET_AGENT_KEY);
+    const token = yield jwt.sign(body, process.env.SECRET_SUVEDHA_KEY);
     return token;
 });
 exports.getAgentToken = getAgentToken;

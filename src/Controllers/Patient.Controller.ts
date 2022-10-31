@@ -40,7 +40,7 @@ import * as prescriptionValidityController from "../Controllers/Prescription-Val
 import orderModel from "../Models/Order.Model";
 import { checkIfDoctorIsAvailableOnTheDay } from "../Services/Doctor/Doctor.Service";
 import { calculateAge } from "../Services/Patient/Patient.Service";
-
+import * as patientService from "../Services/Patient/Patient.Service";
 export const excludePatientFields = {
   password: 0,
   verified: 0,
@@ -471,7 +471,12 @@ export const BookAppointment = async (req: Request, res: Response) => {
     }
 
     /* Appointment ka token Number */
-    let appointmentTokenNumber = await getTokenNumber(body);
+    console.log(":Ljh njkhb ddsd", (await getTokenNumber(body)) + 1);
+    let appointmentTokenNumber = (await getTokenNumber(body)) + 1;
+    console.log(
+      "appointmentTokenNumberappointmentTokenNumber",
+      appointmentTokenNumber
+    );
 
     /* Appointment ki Id */
     let appointmentId = generateAppointmentId();
@@ -691,6 +696,9 @@ export const viewAppointById = async (req: Request, res: Response) => {
 export const ViewAppointment = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.params.page);
+    let limit: any = req.query.limit;
+    limit = limit ? parseInt(limit) : 10;
+
     const appointmentData: Array<object> = await appointmentModel
       .find({
         patient: req.currentPatient,
@@ -711,14 +719,17 @@ export const ViewAppointment = async (req: Request, res: Response) => {
         select: {
           ...excludeDoctorFields,
           hospitalDetails: 0,
-          specialization: 0,
-          qualification: 0,
+          // specialization: 0,
+          // qualification: 0,
           email: 0,
           active: 0,
           deleted: 0,
           overallExperience: 0,
           gender: 0,
           image: 0,
+        },
+        populate: {
+          path: "specialization qualification",
         },
       })
       .populate({
@@ -729,7 +740,7 @@ export const ViewAppointment = async (req: Request, res: Response) => {
       })
       .sort({ "time.date": -1 })
       .skip(page > 1 ? (page - 1) * 2 : 0)
-      .limit(2);
+      .limit(limit);
 
     const page2 = appointmentData.length / 2;
 
@@ -1127,6 +1138,15 @@ export const getDoctorsIHaveLikes = async (req: Request, res: Response) => {
     let { id } = req.params;
     let myLikes = await likeService.getDoctorsIHaveLikes(id);
     return successResponse(myLikes, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const canDoctorTakeAppointment = async (req: Request, res: Response) => {
+  try {
+    let response = await patientService.canDoctorTakeAppointment(req.body);
+    return successResponse(response, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

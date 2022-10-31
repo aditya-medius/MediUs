@@ -19,6 +19,13 @@ import holidayModel from "../../Models/Holiday-Calendar.Model";
 import likeModel from "../../Models/Likes.Model";
 
 import * as likeService from "../../Services/Like/Like.service";
+import {
+  createCityFilterForDoctor,
+  createGenderFilterForDoctor,
+  createNameFilterForDoctor,
+  createSpecilizationFilterForDoctor,
+} from "../Suvedha/Suvedha.Service";
+import { getCityIdFromName, getSpecialization } from "../Admin/Admin.Service";
 dotenv.config();
 
 export const getUser = async (req: Request) => {
@@ -571,6 +578,34 @@ export const getMyLikes = async (doctorId: string) => {
       .populate({ path: "doctor", select: excludeDoctorFields })
       .populate({ path: "likedBy", select: "-password" });
     return Promise.resolve(likes);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const getDoctorsWithAdvancedFilters = async (query: any = {}) => {
+  try {
+    let { gender, experience, city, name, specialization } = query;
+    let aggregate = [
+      {
+        $match: {},
+      },
+    ];
+    if (city) {
+      city = await getCityIdFromName(city);
+    }
+    if (specialization) {
+      specialization = await getSpecialization(specialization);
+    }
+
+    city && aggregate.push(...createCityFilterForDoctor(city._id));
+    gender && aggregate.push(...createGenderFilterForDoctor(gender));
+    name && aggregate.push(...createNameFilterForDoctor(name));
+    specialization &&
+      aggregate.push(...createSpecilizationFilterForDoctor(specialization._id));
+
+    let doctors = await doctorModel.aggregate(aggregate);
+    return Promise.resolve(doctors);
   } catch (error: any) {
     return Promise.reject(error);
   }

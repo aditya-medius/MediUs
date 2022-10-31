@@ -42,6 +42,7 @@ patientRouter.post(
 );
 
 import * as prescriptionValidtiyService from "../Controllers/Prescription-Validity.Controller";
+import patientModel from "../Models/Patient.Model";
 patientRouter.post(
   "/BookAppointment",
   oneOf(authenticatePatient, authenticateHospital),
@@ -55,7 +56,6 @@ patientRouter.post(
         await prescriptionValidtiyService.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod(
           { doctorId, patientId, hospitalId, subPatientId }
         );
-
       req.body["appointmentType"] = valid ? "Follow up" : "Fresh";
       next();
     } catch (error: any) {
@@ -98,6 +98,22 @@ patientRouter.post(
 patientRouter.post(
   "/verifyPayment",
   oneOf(authenticatePatient),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      let doctorId = req.body.doctors,
+        patientId = req.body.patient,
+        hospitalId = req.body.hospital,
+        subPatientId = req.body.subPatient;
+      let valid =
+        await prescriptionValidtiyService.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod(
+          { doctorId, patientId, hospitalId, subPatientId }
+        );
+      req.body["appointmentType"] = valid ? "Follow up" : "Fresh";
+      next();
+    } catch (error: any) {
+      return errorResponse(error, res);
+    }
+  },
   paymentController.verifyPayment
 );
 patientRouter.get(
@@ -207,6 +223,12 @@ patientRouter.post(
   "/checkIfDoctorIsOnHoliday",
   oneOf(authenticatePatient, authenticateHospital, authenticateDoctor),
   patientController.checkIfDoctorIsOnHoliday
+);
+
+patientRouter.post(
+  "/canDoctorTakeAppointment",
+  oneOf(authenticatePatient, authenticateHospital),
+  patientController.canDoctorTakeAppointment
 );
 
 patientRouter.get(

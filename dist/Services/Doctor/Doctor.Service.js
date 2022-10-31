@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMyLikes = exports.unlikeDoctor = exports.likeDoctor = exports.checkIfDoctorIsAvailableOnTheDay = exports.getDoctorFeeInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = void 0;
+exports.getDoctorsWithAdvancedFilters = exports.getMyLikes = exports.unlikeDoctor = exports.likeDoctor = exports.checkIfDoctorIsAvailableOnTheDay = exports.getDoctorFeeInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const AppointmentPayment_Model_1 = __importDefault(require("../../Models/AppointmentPayment.Model"));
 const CreditAmount_Model_1 = __importDefault(require("../../Models/CreditAmount.Model"));
@@ -47,6 +47,8 @@ const schemaNames_1 = require("../schemaNames");
 const Holiday_Calendar_Model_1 = __importDefault(require("../../Models/Holiday-Calendar.Model"));
 const Likes_Model_1 = __importDefault(require("../../Models/Likes.Model"));
 const likeService = __importStar(require("../../Services/Like/Like.service"));
+const Suvedha_Service_1 = require("../Suvedha/Suvedha.Service");
+const Admin_Service_1 = require("../Admin/Admin.Service");
 dotenv.config();
 const getUser = (req) => __awaiter(void 0, void 0, void 0, function* () {
     return req.currentDoctor ? req.currentDoctor : req.currentHospital;
@@ -561,3 +563,30 @@ const getMyLikes = (doctorId) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.getMyLikes = getMyLikes;
+const getDoctorsWithAdvancedFilters = (query = {}) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let { gender, experience, city, name, specialization } = query;
+        let aggregate = [
+            {
+                $match: {},
+            },
+        ];
+        if (city) {
+            city = yield (0, Admin_Service_1.getCityIdFromName)(city);
+        }
+        if (specialization) {
+            specialization = yield (0, Admin_Service_1.getSpecialization)(specialization);
+        }
+        city && aggregate.push(...(0, Suvedha_Service_1.createCityFilterForDoctor)(city._id));
+        gender && aggregate.push(...(0, Suvedha_Service_1.createGenderFilterForDoctor)(gender));
+        name && aggregate.push(...(0, Suvedha_Service_1.createNameFilterForDoctor)(name));
+        specialization &&
+            aggregate.push(...(0, Suvedha_Service_1.createSpecilizationFilterForDoctor)(specialization._id));
+        let doctors = yield Doctors_Model_1.default.aggregate(aggregate);
+        return Promise.resolve(doctors);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.getDoctorsWithAdvancedFilters = getDoctorsWithAdvancedFilters;

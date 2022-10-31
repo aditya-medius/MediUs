@@ -23,9 +23,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createSuvedhaProfile = void 0;
+exports.createSpecilizationFilterForDoctor = exports.createNameFilterForDoctor = exports.createGenderFilterForDoctor = exports.createCityFilterForDoctor = exports.createSuvedhaProfile = void 0;
 const Suvedha_Model_1 = __importDefault(require("../../Models/Suvedha.Model"));
 const Address_Service_1 = require("../Address/Address.Service");
+const schemaNames_1 = require("../schemaNames");
+const mongoose_1 = require("mongoose");
 const createSuvedhaProfile = (suvedhaInfo) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { state, city, locality, addressLine_1, pincode } = suvedhaInfo, rest = __rest(suvedhaInfo, ["state", "city", "locality", "addressLine_1", "pincode"]);
@@ -48,3 +50,66 @@ const createSuvedhaProfile = (suvedhaInfo) => __awaiter(void 0, void 0, void 0, 
     }
 });
 exports.createSuvedhaProfile = createSuvedhaProfile;
+const createCityFilterForDoctor = (cityId) => {
+    let query = [
+        {
+            $lookup: {
+                from: schemaNames_1.hospital,
+                localField: "hospitalDetails.hospital",
+                foreignField: "_id",
+                as: "hospitalDetails",
+            },
+        },
+        {
+            $unwind: "$hospitalDetails",
+        },
+        {
+            $lookup: {
+                from: schemaNames_1.address,
+                localField: "hospitalDetails.address",
+                foreignField: "_id",
+                as: "hospitalDetails.address",
+            },
+        },
+        {
+            $match: {
+                "hospitalDetails.address.city": new mongoose_1.Types.ObjectId(cityId),
+            },
+        },
+    ];
+    return query;
+};
+exports.createCityFilterForDoctor = createCityFilterForDoctor;
+const createGenderFilterForDoctor = (gender) => {
+    let query = [
+        {
+            $match: {
+                gender,
+            },
+        },
+    ];
+    return query;
+};
+exports.createGenderFilterForDoctor = createGenderFilterForDoctor;
+const createNameFilterForDoctor = (name) => {
+    let query = [
+        {
+            $match: {
+                firstName: { $regex: name, $options: "i" },
+            },
+        },
+    ];
+    return query;
+};
+exports.createNameFilterForDoctor = createNameFilterForDoctor;
+const createSpecilizationFilterForDoctor = (specializationId) => {
+    let query = [
+        {
+            $match: {
+                specialization: specializationId,
+            },
+        },
+    ];
+    return query;
+};
+exports.createSpecilizationFilterForDoctor = createSpecilizationFilterForDoctor;
