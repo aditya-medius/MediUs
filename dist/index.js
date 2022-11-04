@@ -39,6 +39,7 @@ const middlewareHelper_1 = require("./Services/middlewareHelper");
 const Doctor_auth_1 = require("./authentication/Doctor.auth");
 const Hospital_auth_1 = require("./authentication/Hospital.auth");
 const Patient_auth_1 = require("./authentication/Patient.auth");
+const Suvedha_auth_1 = require("./authentication/Suvedha.auth");
 const Admin_auth_1 = require("./authentication/Admin.auth");
 const swaggerUi = __importStar(require("swagger-ui-express"));
 const swaggerDoc = __importStar(require("../swagger.json"));
@@ -62,7 +63,7 @@ app.use("/common", Common_route_1.default);
 app.use("/agent", Agent_route_1.default);
 app.use("/suvedha", Suvedha_route_1.default);
 app.use("/static", express_1.default.static(path_1.default.join(__dirname, "./src/uploads")));
-app.use("/static", middlewareHelper_1.tokenNikalo, (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital, Patient_auth_1.authenticatePatient, Admin_auth_1.authenticateAdmin), express_1.default.static(path_1.default.join(__dirname, "../uploads")));
+app.use("/static", middlewareHelper_1.tokenNikalo, (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital, Patient_auth_1.authenticatePatient, Admin_auth_1.authenticateAdmin, Suvedha_auth_1.authenticateSuvedha), express_1.default.static(path_1.default.join(__dirname, "../uploads")));
 app.get("test", (req, res) => {
     res.send("Hello");
 });

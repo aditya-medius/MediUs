@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDoctorsWithAdvancedFilters = exports.getMyLikes = exports.unlikeDoctor = exports.likeDoctor = exports.checkIfDoctorIsAvailableOnTheDay = exports.getDoctorFeeInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = void 0;
+exports.getDoctorById_ForSuvedha = exports.getDoctorsWithAdvancedFilters = exports.getMyLikes = exports.unlikeDoctor = exports.likeDoctor = exports.checkIfDoctorIsAvailableOnTheDay = exports.getDoctorFeeInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const AppointmentPayment_Model_1 = __importDefault(require("../../Models/AppointmentPayment.Model"));
 const CreditAmount_Model_1 = __importDefault(require("../../Models/CreditAmount.Model"));
@@ -590,3 +590,27 @@ const getDoctorsWithAdvancedFilters = (query = {}) => __awaiter(void 0, void 0, 
     }
 });
 exports.getDoctorsWithAdvancedFilters = getDoctorsWithAdvancedFilters;
+const getDoctorById_ForSuvedha = (doctorId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let doctor = yield Doctors_Model_1.default.aggregate([
+            {
+                $match: {
+                    _id: new mongoose_1.default.Types.ObjectId(doctorId),
+                },
+            },
+            {
+                $lookup: {
+                    from: schemaNames_1.hospital,
+                    localField: "hospitalDetails.hospital",
+                    foreignField: "_id",
+                    as: "hospitalDetails.hospital",
+                },
+            },
+        ]);
+        return Promise.resolve(doctor);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.getDoctorById_ForSuvedha = getDoctorById_ForSuvedha;

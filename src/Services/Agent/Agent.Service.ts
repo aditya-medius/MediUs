@@ -108,7 +108,9 @@ export const verifyOtpAndLogin = async (body: any) => {
       "delData.deleted": false,
     });
 
-    const data: any = await jwt.verify(otpData.otp, body.OTP);
+    console.log("HEllod di di d", otpData.otp, "ffffff", body.OTP);
+    const data: any = jwt.verify(otpData.otp, body.OTP);
+    console.log("dsnjhbkdsdsddsdsds", data);
     if (Date.now() > data.expiresIn)
       return Promise.reject(new Error("OTP Expired"));
     if (body.OTP === data.otp) {

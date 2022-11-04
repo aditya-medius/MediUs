@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDoctors = exports.createProfile = void 0;
+exports.getDoctorInfo = exports.getDoctors = exports.createProfile = void 0;
 const Doctor_Service_1 = require("../Services/Doctor/Doctor.Service");
 const response_1 = require("../Services/response");
 const Suvedha_Service_1 = require("../Services/Suvedha/Suvedha.Service");
@@ -33,3 +33,15 @@ const getDoctors = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.getDoctors = getDoctors;
+const getDoctorInfo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let { id } = req.params;
+        let doctors = yield (0, Doctor_Service_1.getDoctorById_ForSuvedha)(id);
+        console.log(":lhbv dsdds", doctors);
+        return (0, response_1.successResponse)(doctors, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getDoctorInfo = getDoctorInfo;
