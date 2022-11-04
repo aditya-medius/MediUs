@@ -16,6 +16,7 @@ import { oneOf, tokenNikalo } from "./Services/middlewareHelper";
 import { authenticateDoctor } from "./authentication/Doctor.auth";
 import { authenticateHospital } from "./authentication/Hospital.auth";
 import { authenticatePatient } from "./authentication/Patient.auth";
+import { authenticateSuvedha } from "./authentication/Suvedha.auth";
 import mongoose from "mongoose";
 import * as cronJobService from "./Services/Cron-Jobs.Service";
 import { authenticateAdmin } from "./authentication/Admin.auth";
@@ -51,7 +52,8 @@ app.use(
     authenticateDoctor,
     authenticateHospital,
     authenticatePatient,
-    authenticateAdmin
+    authenticateAdmin,
+    authenticateSuvedha
   ),
   express.static(path.join(__dirname, "../uploads"))
 );

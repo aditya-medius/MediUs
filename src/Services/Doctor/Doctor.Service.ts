@@ -610,3 +610,27 @@ export const getDoctorsWithAdvancedFilters = async (query: any = {}) => {
     return Promise.reject(error);
   }
 };
+
+export const getDoctorById_ForSuvedha = async (doctorId: string) => {
+  try {
+    let doctor = await doctorModel.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(doctorId),
+        },
+      },
+      {
+        $lookup: {
+          from: hospital,
+          localField: "hospitalDetails.hospital",
+          foreignField: "_id",
+          as: "hospitalDetails.hospital",
+        },
+      },
+    ]);
+
+    return Promise.resolve(doctor);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};

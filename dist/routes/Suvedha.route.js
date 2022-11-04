@@ -1,9 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
+const Hospital_auth_1 = require("../authentication/Hospital.auth");
 const Suvedha_auth_1 = require("../authentication/Suvedha.auth");
 const suvedha_Controller_1 = require("../Controllers/suvedha.Controller");
 const middlewareHelper_1 = require("../Services/middlewareHelper");
 const suvedhaRouter = (0, express_1.Router)();
 suvedhaRouter.get("/getDoctors", (0, middlewareHelper_1.oneOf)(Suvedha_auth_1.authenticateSuvedha), suvedha_Controller_1.getDoctors);
+suvedhaRouter.get("/getDoctorById/:id", (0, middlewareHelper_1.oneOf)(Suvedha_auth_1.authenticateSuvedha, Hospital_auth_1.authenticateHospital), suvedha_Controller_1.getDoctorInfo);
 exports.default = suvedhaRouter;
