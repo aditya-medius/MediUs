@@ -51,6 +51,7 @@ patientRouter.post("/getPatientById/:id", (0, middlewareHelper_1.oneOf)(Patient_
 patientRouter.post("/updateProfile", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.updatePatientProfile);
 patientRouter.post("/deleteProfile", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.deleteProfile);
 const prescriptionValidtiyService = __importStar(require("../Controllers/Prescription-Validity.Controller"));
+const Suvedha_auth_1 = require("../authentication/Suvedha.auth");
 patientRouter.post("/BookAppointment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let doctorId = req.body.doctors, patientId = req.body.patient, hospitalId = req.body.hospital, subPatientId = req.body.subPatient;
@@ -85,7 +86,7 @@ patientRouter.get("/getSpecialityBodyPartAndDisease", patientController.getSpeci
 // Get hospitals by city
 patientRouter.post("/getHospitalsByCity", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.getHospitalsByCity);
 // Get doctors by city
-patientRouter.post("/getDoctorsByCity", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.getDoctorsByCity);
+patientRouter.post("/getDoctorsByCity", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Suvedha_auth_1.authenticateSuvedha), patientController.getDoctorsByCity);
 //upload prescription
 patientRouter.post("/uploadPrescription", upload.single("prescription"), Patient_auth_1.authenticatePatient, patientController.uploadPrescription);
 // Sub Patient
@@ -95,9 +96,9 @@ patientRouter.put("/deleteSubPatient/:id", (0, middlewareHelper_1.oneOf)(Patient
 patientRouter.get("/getSubPatientById/:id", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), subPatientController.getSubPatientById);
 patientRouter.put("/updateSubPatient/:id", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), subPatientController.updateSubPatient);
 // Check kro k doctor available hai uss din
-patientRouter.post("/checkDoctorAvailability", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), patientController.checkDoctorAvailability);
+patientRouter.post("/checkDoctorAvailability", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient, Suvedha_auth_1.authenticateSuvedha), patientController.checkDoctorAvailability);
 // Search patient
-patientRouter.get("/searchPatientByPhoneNumberOrEmail/:term", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital), patientController.searchPatientByPhoneNumberOrEmail);
+patientRouter.get("/searchPatientByPhoneNumberOrEmail/:term", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital, Suvedha_auth_1.authenticateSuvedha), patientController.searchPatientByPhoneNumberOrEmail);
 patientRouter.put("/checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod);
 patientRouter.get("/getPatientsNotification", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.getPatientsNotification);
 patientRouter.get("/getFees", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), (req, res) => __awaiter(void 0, void 0, void 0, function* () {

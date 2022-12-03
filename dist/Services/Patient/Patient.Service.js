@@ -17,7 +17,7 @@ const WorkingHours_Model_1 = __importDefault(require("../../Models/WorkingHours.
 const Appointment_Model_1 = __importDefault(require("../../Models/Appointment.Model"));
 const moment_1 = __importDefault(require("moment"));
 const Appointment_Service_1 = require("../Appointment/Appointment.Service");
-const BookAppointment = (body) => __awaiter(void 0, void 0, void 0, function* () {
+const BookAppointment = (body, isHospital = false) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const rd = new Date(body.time.date);
         const d = rd.getDay();
@@ -129,12 +129,18 @@ const BookAppointment = (body) => __awaiter(void 0, void 0, void 0, function* ()
                 appCount++;
             }
         });
+        let message = "Successfully booked appointment";
         if (!(appCount < capacity.capacity)) {
             //   return errorResponse(
             //     new Error("Doctor cannot take any more appointments"),
             //     res
             //   );
-            return Promise.reject(new Error("Doctor cannot take any more appointments"));
+            if (isHospital) {
+                message = `Doctor's appointment have exceeded doctor's capacity for the day by ${appCount - capacity.capacity + 1}`;
+            }
+            else {
+                return Promise.reject(new Error("Doctor cannot take any more appointments"));
+            }
         }
         let appointmentTokenNumber = (yield (0, Appointment_Service_1.getTokenNumber)(body)) + 1;
         let appointmentId = (0, Appointment_Service_1.generateAppointmentId)();

@@ -32,7 +32,7 @@ const likeSchema = new mongoose_1.Schema({
     },
     reference: {
         type: String,
-        enum: [schemaNames_1.patient, schemaNames_1.hospital],
+        enum: [schemaNames_1.patient, schemaNames_1.hospital, schemaNames_1.suvedha],
     },
     createdAt: {
         type: Date,

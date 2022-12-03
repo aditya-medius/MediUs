@@ -16,6 +16,7 @@ import { checkHospitalsApprovalStatus } from "../Services/Approval-Request/Appro
 import { oneOf } from "../Services/middlewareHelper";
 import { errorResponse, successResponse } from "../Services/response";
 import * as feeService from "../Module/Payment/Service/Fee.Service";
+import { authenticateSuvedha } from "../authentication/Suvedha.auth";
 const hospitalRouter = express.Router();
 
 hospitalRouter.get(
@@ -104,7 +105,7 @@ hospitalRouter.get(
 // Get hospital by id
 hospitalRouter.get(
   "/getHospitalById/:id",
-  oneOf(authenticatePatient, authenticateDoctor, authenticateHospital),
+  oneOf(authenticatePatient, authenticateDoctor, authenticateHospital, authenticateSuvedha),
   hospitalController.getHospitalById
 );
 
@@ -186,7 +187,7 @@ hospitalRouter.put(
 
 hospitalRouter.put(
   "/getHospitalsSpecilization_AccordingToDoctor",
-  oneOf(authenticateHospital,authenticatePatient),
+  oneOf(authenticateHospital, authenticatePatient),
   hospitalController.getHospitalsSpecilization_AccordingToDoctor
 );
 hospitalRouter.put(

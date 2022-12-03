@@ -43,6 +43,7 @@ patientRouter.post(
 
 import * as prescriptionValidtiyService from "../Controllers/Prescription-Validity.Controller";
 import patientModel from "../Models/Patient.Model";
+import { authenticateSuvedha } from "../authentication/Suvedha.auth";
 patientRouter.post(
   "/BookAppointment",
   oneOf(authenticatePatient, authenticateHospital),
@@ -138,7 +139,7 @@ patientRouter.post(
 // Get doctors by city
 patientRouter.post(
   "/getDoctorsByCity",
-  oneOf(authenticatePatient),
+  oneOf(authenticatePatient, authenticateSuvedha),
   patientController.getDoctorsByCity
 );
 //upload prescription
@@ -183,14 +184,14 @@ patientRouter.put(
 // Check kro k doctor available hai uss din
 patientRouter.post(
   "/checkDoctorAvailability",
-  oneOf(authenticateDoctor, authenticatePatient),
+  oneOf(authenticateDoctor, authenticatePatient, authenticateSuvedha),
   patientController.checkDoctorAvailability
 );
 
 // Search patient
 patientRouter.get(
   "/searchPatientByPhoneNumberOrEmail/:term",
-  oneOf(authenticateDoctor, authenticatePatient, authenticateHospital),
+  oneOf(authenticateDoctor, authenticatePatient, authenticateHospital, authenticateSuvedha),
   patientController.searchPatientByPhoneNumberOrEmail
 );
 

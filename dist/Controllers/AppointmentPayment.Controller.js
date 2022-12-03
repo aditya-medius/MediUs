@@ -74,7 +74,8 @@ const verifyPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         var response = { signatureIsValid: "false" };
         if (expectedSignature === req.body.paymentSignature) {
             response = { signatureIsValid: "true" };
-            const appointmentBook = yield (0, Patient_Service_1.BookAppointment)(b.appointment);
+            let isHospital = req.currentHospital ? true : false;
+            const appointmentBook = yield (0, Patient_Service_1.BookAppointment)(b.appointment, isHospital);
             const { paymentId, orderId, paymentSignature, orderReceipt } = b;
             const paymentObj = yield new AppointmentPayment_Model_1.default({
                 paymentId,

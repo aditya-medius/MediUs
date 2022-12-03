@@ -39,6 +39,7 @@ const path = __importStar(require("path"));
 const Admin_auth_1 = require("../authentication/Admin.auth");
 const Approval_Request_Controller_1 = require("../Controllers/Approval-Request.Controller");
 const Prescription_Validity_Controller_1 = require("../Controllers/Prescription-Validity.Controller");
+const Suvedha_auth_1 = require("../authentication/Suvedha.auth");
 const storage = multer_1.default.diskStorage({
     destination: function (req, file, cb) {
         cb(null, "uploads/user");
@@ -93,7 +94,7 @@ doctorRouter.post("/updateProfile", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.
 // },
 doctorController.updateDoctorProfile);
 doctorRouter.delete("/deleteProfile", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.deleteProfile);
-doctorRouter.get("/findDoctorBySpecialityOrBodyPart/:term", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.searchDoctor);
+doctorRouter.get("/findDoctorBySpecialityOrBodyPart/:term", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient, Suvedha_auth_1.authenticateSuvedha), doctorController.searchDoctor);
 doctorRouter.get("/searchDoctorByPhoneNumberOrEmail/:term", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital), doctorController.searchDoctorByPhoneNumberOrEmail);
 doctorRouter.put("/setSchedule", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), 
 // doctorController.setSchedule
@@ -202,7 +203,7 @@ doctorRouter.post("/getListOfAllAppointments/:page", (0, middlewareHelper_1.oneO
 doctorRouter.put("/deleteWorkingHour", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), workingHoursController.deleteWorkingHour);
 doctorRouter.get("/getAppointmentFeeFromAppointmentId/:appointmentId", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getAppointmentFeeFromAppointmentId);
 doctorRouter.put("/getFeeAndValidity", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), doctorController.getPrescriptionValidityAndFeesOfDoctorInHospital);
-doctorRouter.post("/likeUnlikeDoctor", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.likeADoctor);
+doctorRouter.post("/likeUnlikeDoctor", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient, Suvedha_auth_1.authenticateSuvedha), doctorController.likeADoctor);
 doctorRouter.post("/unlikeDoctor", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.unlikeDoctor);
 doctorRouter.post("/getMyLikes", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.getMyLikes);
 exports.default = doctorRouter;

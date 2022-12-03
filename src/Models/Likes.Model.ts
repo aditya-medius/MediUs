@@ -1,5 +1,5 @@
 import mongoose, { Schema, model } from "mongoose";
-import { doctor, like, patient, hospital } from "../Services/schemaNames";
+import { doctor, like, patient, hospital, suvedha } from "../Services/schemaNames";
 
 const likeSchema = new Schema({
   doctor: {
@@ -12,7 +12,7 @@ const likeSchema = new Schema({
   },
   reference: {
     type: String,
-    enum: [patient, hospital],
+    enum: [patient, hospital, suvedha],
   },
   createdAt: {
     type: Date,

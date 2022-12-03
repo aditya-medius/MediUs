@@ -1778,10 +1778,15 @@ exports.getPrescriptionValidityAndFeesOfDoctorInHospital = getPrescriptionValidi
 const likeADoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { likedDoctorId, likedById } = req.body;
+        console.log("bvdsds dsdds", req.currentHospital);
+        console.log("dsdsdsdssd", req.currentSuvedha);
         let hospitalExist = yield hospitalService.doesHospitalExist(likedById);
         let reference;
         if (hospitalExist) {
             reference = schemaNames_1.hospital;
+        }
+        if (req.currentSuvedha) {
+            reference = schemaNames_1.suvedha;
         }
         let likedDoctor = yield doctorService.likeDoctor(likedDoctorId, likedById, reference);
         return (0, response_1.successResponse)(likedDoctor, "Success", res);

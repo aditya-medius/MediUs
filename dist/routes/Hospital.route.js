@@ -41,6 +41,7 @@ const WorkingHours_Controller_1 = require("../Controllers/WorkingHours.Controlle
 const middlewareHelper_1 = require("../Services/middlewareHelper");
 const response_1 = require("../Services/response");
 const feeService = __importStar(require("../Module/Payment/Service/Fee.Service"));
+const Suvedha_auth_1 = require("../authentication/Suvedha.auth");
 const hospitalRouter = express_1.default.Router();
 hospitalRouter.get("/", 
 // oneOf(authenticateHospital),
@@ -90,7 +91,7 @@ hospitalRouter.post("/removeDoctor", (0, middlewareHelper_1.oneOf)(Hospital_auth
 //View Appointments
 hospitalRouter.get("/viewAppointment/:page", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.viewAppointment);
 // Get hospital by id
-hospitalRouter.get("/getHospitalById/:id", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), hospitalController.getHospitalById);
+hospitalRouter.get("/getHospitalById/:id", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital, Suvedha_auth_1.authenticateSuvedha), hospitalController.getHospitalById);
 // Hospital opening hours
 hospitalRouter.post("/createOpeningHours", WorkingHours_Controller_1.createOpeningHours);
 // hospital me kaam krne waale doctors
