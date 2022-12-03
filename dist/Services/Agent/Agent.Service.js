@@ -139,9 +139,7 @@ const verifyOtpAndLogin = (body) => __awaiter(void 0, void 0, void 0, function* 
             phoneNumber: body.phoneNumber,
             "delData.deleted": false,
         });
-        console.log("HEllod di di d", otpData.otp, "ffffff", body.OTP);
         const data = jwt.verify(otpData.otp, body.OTP);
-        console.log("dsnjhbkdsdsddsdsds", data);
         if (Date.now() > data.expiresIn)
             return Promise.reject(new Error("OTP Expired"));
         if (body.OTP === data.otp) {

@@ -14,7 +14,20 @@ import {
   excludePatientFields,
 } from "../../Controllers/Patient.Controller";
 import { excludeDoctorFields } from "../../Controllers/Doctor.Controller";
-import { doctor, hospital, patient, specialization } from "../schemaNames";
+import {
+  address,
+  appointment,
+  city,
+  doctor,
+  hospital,
+  like,
+  locality,
+  patient,
+  prescription,
+  qualification,
+  qualificationNames,
+  specialization,
+} from "../schemaNames";
 import holidayModel from "../../Models/Holiday-Calendar.Model";
 import likeModel from "../../Models/Likes.Model";
 
@@ -26,7 +39,18 @@ import {
   createSpecilizationFilterForDoctor,
 } from "../Suvedha/Suvedha.Service";
 import { getCityIdFromName, getSpecialization } from "../Admin/Admin.Service";
+import workingHourModel from "../../Models/WorkingHours.Model";
 dotenv.config();
+
+export const WEEKDAYS = [
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "sunday",
+];
 
 export const getUser = async (req: Request) => {
   return req.currentDoctor ? req.currentDoctor : req.currentHospital;
@@ -160,7 +184,6 @@ export const getAgeOfDoctor = (dob: Date) => {
   if (age < 1) {
     age = currentDate.diff(exp, "months");
   }
-  console.log("dsjnbdsDS:", age);
   return age;
 };
 
@@ -523,11 +546,9 @@ export const likeDoctor = async (
         likedDoctorId,
         likedById
       );
-      console.log("unliked", unlike && unlike);
       if (unlike) {
         likeModel.findOneAndUpdate({ _id }, { $set: { unlike: false } });
       } else {
-        console.log("dsdsjbdsnbdsjsdds", { _id });
         likeModel.findOneAndUpdate({ _id }, { $set: { unlike: true } });
       }
       return Promise.resolve(!unlike);
@@ -583,7 +604,10 @@ export const getMyLikes = async (doctorId: string) => {
   }
 };
 
-export const getDoctorsWithAdvancedFilters = async (query: any = {}) => {
+export const getDoctorsWithAdvancedFilters = async function (
+  userId: string,
+  query: any = {}
+) {
   try {
     let { gender, experience, city, name, specialization } = query;
     let aggregate = [
@@ -604,7 +628,71 @@ export const getDoctorsWithAdvancedFilters = async (query: any = {}) => {
     specialization &&
       aggregate.push(...createSpecilizationFilterForDoctor(specialization._id));
 
-    let doctors = await doctorModel.aggregate(aggregate);
+    let doctors = await doctorModel.aggregate([
+      ...aggregate,
+      {
+        $lookup: {
+          from: like,
+          localField: "_id",
+          foreignField: "doctor",
+          as: "like",
+        },
+      },
+      {
+        $addFields: {
+          liked: {
+            $filter: {
+              input: "$like",
+              as: "like",
+              cond: {
+                $eq: ["$$like.likedBy", new mongoose.Types.ObjectId(userId)],
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "specializations",
+          localField: "specialization",
+          foreignField: "_id",
+          as: "specialization",
+        },
+      },
+      {
+        $lookup: {
+          from: qualification,
+          localField: "qualification",
+          foreignField: "_id",
+          as: "qualification",
+        },
+      },
+      {
+        $lookup: {
+          from: qualificationNames,
+          localField: "qualification.qualificationName",
+          foreignField: "_id",
+          as: "qualificationName",
+        },
+      },
+      {
+        $addFields: {
+          "qualification.qualificationName": "$qualificationName",
+        },
+      },
+      {
+        $project: {
+          firstName: 1,
+          lastName: 1,
+          gender: 1,
+          qualification: 1,
+          specialization: 1,
+          image: 1,
+          overallExperience: 1,
+          liked: 1,
+        },
+      },
+    ]);
     return Promise.resolve(doctors);
   } catch (error: any) {
     return Promise.reject(error);
@@ -630,6 +718,312 @@ export const getDoctorById_ForSuvedha = async (doctorId: string) => {
     ]);
 
     return Promise.resolve(doctor);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+// Doctor inme se kis date me available hai
+// export const getValidDateOfDoctorsSchedule = async (dates: Array<string>) => {
+//   try {
+//     let days: Array<string> = []
+
+//     dates.forEach((e: string) => {
+//       days.push(WEEKDAYS[new Date(e).getDay()])
+//       days = [...new Set(days)]
+//     })
+//     return Promise.resolve({})
+//   } catch (error: any) {
+//     return Promise.reject(error)
+//   }
+// }
+
+export const getDoctorWorkingDays = async (doctorId: string) => {
+  try {
+    let days = await workingHourModel.find(
+      { doctorDetails: doctorId, "deleted.isDeleted": false },
+      "-doctorDetails -hospitalDetails -byHospital -deleted"
+    );
+    return Promise.resolve(days);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+// Doctor ki in dates me chutti hai kya?
+export const isDateHolidayForDoctor = async (
+  dates: Array<string>,
+  doctorId: string
+) => {
+  try {
+    let calendar = await holidayModel.find({ doctorId, date: { $in: dates } });
+    return Promise.resolve(calendar.map((e: any) => e.date));
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+// Doctor in dates me aur appointments le skta hai?
+export const canDoctorTakeMoreAppointments = async (
+  date: Array<string>,
+  doctorId: string
+) => {
+  try {
+    let appointments: any = [];
+
+    date.forEach((e: string) => {
+      let d = new Date(e);
+      let gtDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      let ltDate = new Date(gtDate);
+      gtDate.setDate(gtDate.getDate() + 1);
+      gtDate.setUTCHours(18, 30, 0, 0);
+
+      appointments.push(
+        appointmentModel.find({
+          doctors: doctorId,
+          "time.date": {
+            $gte: ltDate,
+            $lte: gtDate,
+          },
+        })
+      );
+    });
+    let data = (await Promise.all(appointments)).flat();
+    return Promise.resolve(data.map((e: any) => e.time.date));
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const getDoctorInfo = async (doctorId: string, date: string) => {
+  try {
+    const time = new Date(date);
+
+    let d: any = time.getDay();
+
+    let day = WEEKDAYS[d - 1];
+
+    let common = [
+      {
+        $lookup: {
+          from: hospital,
+          localField: "hospitalDetails",
+          foreignField: "_id",
+          as: "hospitalDetails",
+        },
+      },
+      {
+        $unwind: "$hospitalDetails",
+      },
+      {
+        $lookup: {
+          from: address,
+          localField: "hospitalDetails.address",
+          foreignField: "_id",
+          as: "hospitalDetails.address",
+        },
+      },
+      {
+        $lookup: {
+          from: locality,
+          localField: "hospitalDetails.address.locality",
+          foreignField: "_id",
+          as: "hospitalDetails.address.locality",
+        },
+      },
+      {
+        $lookup: {
+          from: doctor,
+          localField: "doctorDetails",
+          foreignField: "_id",
+          as: "doctorDetails",
+        },
+      },
+      {
+        $unwind: "$doctorDetails",
+      },
+      {
+        $lookup: {
+          from: "prescriptions",
+          localField: "doctorDetails._id",
+          foreignField: "doctorId",
+          as: "temp",
+        },
+      },
+      {
+        $lookup: {
+          from: "holidaycalendars",
+          localField: "doctorDetails._id",
+          foreignField: "doctorId",
+          as: "holidayCalendar",
+        },
+      },
+      {
+        $addFields: {
+          "hospitalDetails.prescription": {
+            $function: {
+              body: function (args: any, id: string) {
+                return args.filter(
+                  (e: any) => e.hospital.toString() === id.toString()
+                );
+              },
+              args: ["$doctorDetails.hospitalDetails", "$hospitalDetails._id"],
+              lang: "js",
+            },
+          },
+          "hospitalDetails.validity": {
+            $function: {
+              body: function (args: any, id: string) {
+                return args.filter(
+                  (e: any) => e.hospitalId.toString() === id.toString()
+                );
+              },
+              args: ["$temp", "$hospitalDetails._id"],
+              lang: "js",
+            },
+          },
+          holidayCalendar: {
+            $filter: {
+              input: "$holidayCalendar",
+              as: "holidayCalendar",
+              cond: {
+                $eq: ["$$holidayCalendar.hospitalId", "$hospitalDetails._id"],
+              },
+            },
+          },
+          fee: {
+            $filter: {
+              input: "$doctorDetails.hospitalDetails",
+              as: "fee",
+              cond: {
+                $eq: ["$$fee.hospital", "$hospitalDetails._id"],
+              },
+            },
+          },
+        },
+      },
+    ];
+
+    let doctors = await workingHourModel.aggregate([
+      {
+        $facet: {
+          matchedData: [
+            {
+              $match: {
+                doctorDetails: new mongoose.Types.ObjectId(doctorId),
+                [day]: { $exists: true },
+              },
+            },
+
+            ...common,
+
+            {
+              $addFields: {
+                "hospitalDetails.prescription": {
+                  $function: {
+                    body: function (args: any, id: string) {
+                      return args.filter(
+                        (e: any) => e.hospital.toString() === id.toString()
+                      );
+                    },
+                    args: [
+                      "$doctorDetails.hospitalDetails",
+                      "$hospitalDetails._id",
+                    ],
+                    lang: "js",
+                  },
+                },
+                "hospitalDetails.validity": {
+                  $function: {
+                    body: function (args: any, id: string) {
+                      return args.filter(
+                        (e: any) => e.hospitalId.toString() === id.toString()
+                      );
+                    },
+                    args: ["$temp", "$hospitalDetails._id"],
+                    lang: "js",
+                  },
+                },
+                holidayCalendar: {
+                  $filter: {
+                    input: "$holidayCalendar",
+                    as: "holidayCalendar",
+                    cond: {
+                      $eq: [
+                        "$$holidayCalendar.hospitalId",
+                        "$hospitalDetails._id",
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          ],
+          unmatchedData: [
+            {
+              $match: {
+                doctorDetails: new mongoose.Types.ObjectId(doctorId),
+                [day]: { $exists: false },
+              },
+            },
+            ...common,
+
+            {
+              $addFields: {
+                "hospitalDetails.prescription":
+                  "$doctorDetails.hospitalDetails",
+                "hospitalDetails.validity": "$temp",
+                holidayCalendar: {
+                  $filter: {
+                    input: "$holidayCalendar",
+                    as: "holidayCalendar",
+                    cond: {
+                      $eq: [
+                        "$$holidayCalendar.hospitalId",
+                        "$hospitalDetails._id",
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $project: {
+          data: {
+            $setUnion: ["$matchedData", "$unmatchedData"],
+          },
+        },
+      },
+
+      { $unwind: "$data" },
+      { $replaceRoot: { newRoot: "$data" } },
+    ]);
+    return Promise.resolve(doctors);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const getDoctorsHolidayByQuery = async (query: any) => {
+  try {
+    // const time = new Date(date);
+
+    // let year = time.getFullYear(),
+    //   month = time.getMonth(),
+    //   currentDate = time.getDate();
+
+    // let startDate = new Date(year, month, currentDate);
+    // let endDate = new Date(year, month, currentDate + 1);
+
+    // let holiday = await holidayModel.find({
+    //   date: { gte: ltDate, $lte: gtDate },
+    // });
+
+    let holiday = await holidayModel.find(query);
+    return Promise.resolve(holiday);
   } catch (error: any) {
     return Promise.reject(error);
   }

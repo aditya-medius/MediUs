@@ -47,7 +47,9 @@ export const verifyPayment = async (req: Request, res: Response) => {
     var response: any = { signatureIsValid: "false" };
     if (expectedSignature === req.body.paymentSignature) {
       response = { signatureIsValid: "true" };
-      const appointmentBook = await BookAppointment(b.appointment);
+
+      let isHospital = req.currentHospital ? true : false;
+      const appointmentBook = await BookAppointment(b.appointment, isHospital);
       const { paymentId, orderId, paymentSignature, orderReceipt } = b;
 
       const paymentObj = await new appointmentPaymentModel({

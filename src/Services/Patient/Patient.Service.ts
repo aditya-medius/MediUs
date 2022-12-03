@@ -6,7 +6,7 @@ import {
   getTokenNumber,
 } from "../Appointment/Appointment.Service";
 
-export const BookAppointment = async (body: any) => {
+export const BookAppointment = async (body: any, isHospital = false) => {
   try {
     const rd: Date = new Date(body.time.date);
     const d = rd.getDay();
@@ -112,14 +112,22 @@ export const BookAppointment = async (body: any) => {
       }
     });
 
+    let message = "Successfully booked appointment";
+
     if (!(appCount < capacity.capacity)) {
       //   return errorResponse(
       //     new Error("Doctor cannot take any more appointments"),
       //     res
       //   );
-      return Promise.reject(
-        new Error("Doctor cannot take any more appointments")
-      );
+      if (isHospital) {
+        message = `Doctor's appointment have exceeded doctor's capacity for the day by ${
+          appCount - capacity.capacity + 1
+        }`;
+      } else {
+        return Promise.reject(
+          new Error("Doctor cannot take any more appointments")
+        );
+      }
     }
     let appointmentTokenNumber = (await getTokenNumber(body)) + 1;
     let appointmentId = generateAppointmentId();

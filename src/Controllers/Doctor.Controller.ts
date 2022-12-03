@@ -17,6 +17,7 @@ import {
   doctorType,
   hospital,
   specialization,
+  suvedha,
   workingHour,
 } from "../Services/schemaNames";
 import specialityDoctorTypeModel from "../Admin Controlled Models/SpecialityDoctorType.Model";
@@ -2056,10 +2057,15 @@ export const getPrescriptionValidityAndFeesOfDoctorInHospital = async (
 export const likeADoctor = async (req: Request, res: Response) => {
   try {
     let { likedDoctorId, likedById } = req.body;
+    console.log("bvdsds dsdds", req.currentHospital);
+    console.log("dsdsdsdssd", req.currentSuvedha);
     let hospitalExist = await hospitalService.doesHospitalExist(likedById);
     let reference;
     if (hospitalExist) {
       reference = hospital;
+    }
+    if (req.currentSuvedha) {
+      reference = suvedha;
     }
     let likedDoctor = await doctorService.likeDoctor(
       likedDoctorId,

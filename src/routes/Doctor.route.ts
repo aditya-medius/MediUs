@@ -26,6 +26,7 @@ import {
 } from "../Controllers/Approval-Request.Controller";
 import { setConsultationFeeForDoctor } from "../Services/Doctor/Doctor.Service";
 import { setPrescriptionValidity } from "../Controllers/Prescription-Validity.Controller";
+import { authenticateSuvedha } from "../authentication/Suvedha.auth";
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -114,7 +115,7 @@ doctorRouter.delete(
 
 doctorRouter.get(
   "/findDoctorBySpecialityOrBodyPart/:term",
-  oneOf(authenticateDoctor, authenticatePatient),
+  oneOf(authenticateDoctor, authenticatePatient, authenticateSuvedha),
   doctorController.searchDoctor
 );
 doctorRouter.get(
@@ -419,7 +420,7 @@ doctorRouter.put(
 );
 doctorRouter.post(
   "/likeUnlikeDoctor",
-  oneOf(authenticateDoctor, authenticatePatient),
+  oneOf(authenticateDoctor, authenticatePatient, authenticateSuvedha),
   doctorController.likeADoctor
 );
 doctorRouter.post(

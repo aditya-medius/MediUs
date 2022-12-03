@@ -8,4 +8,8 @@ const middlewareHelper_1 = require("../Services/middlewareHelper");
 const suvedhaRouter = (0, express_1.Router)();
 suvedhaRouter.get("/getDoctors", (0, middlewareHelper_1.oneOf)(Suvedha_auth_1.authenticateSuvedha), suvedha_Controller_1.getDoctors);
 suvedhaRouter.get("/getDoctorById/:id", (0, middlewareHelper_1.oneOf)(Suvedha_auth_1.authenticateSuvedha, Hospital_auth_1.authenticateHospital), suvedha_Controller_1.getDoctorInfo);
+suvedhaRouter.post("/getValidDateOfDoctorsSchedule", (0, middlewareHelper_1.oneOf)(Suvedha_auth_1.authenticateSuvedha), suvedha_Controller_1.getValidDateOfDoctorsSchedule);
+suvedhaRouter.post("/getDoctorInfo", (0, middlewareHelper_1.oneOf)(Suvedha_auth_1.authenticateSuvedha), suvedha_Controller_1.getDoctorInformation);
+suvedhaRouter.get("/hospitalList", (0, middlewareHelper_1.oneOf)(Suvedha_auth_1.authenticateSuvedha), suvedha_Controller_1.getHospital);
+suvedhaRouter.put("/doctors/in/hospital", (0, middlewareHelper_1.oneOf)(Suvedha_auth_1.authenticateSuvedha), suvedha_Controller_1.getDoctorsInAHospital);
 exports.default = suvedhaRouter;
