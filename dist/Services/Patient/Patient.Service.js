@@ -72,10 +72,24 @@ const BookAppointment = (body, isHospital = false) => __awaiter(void 0, void 0, 
             query["saturday.till.time"] = b.time.till.time;
             query["saturday.till.division"] = b.time.till.division;
         }
+        let WEEK_DAYS = [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+        ];
+        body.time.date = new Date(body.time.date);
+        // body.time.date = new Date(body.time.date);
+        const requestDate = new Date(body.time.date);
+        const day = requestDate.getDay();
         // @TODO check if working hour exist first
         let capacity = yield WorkingHours_Model_1.default.findOne({
             doctorDetails: body.doctors,
             hospitalDetails: body.hospital,
+            [WEEK_DAYS[day]]: { $exists: true },
         });
         if (!capacity) {
             let error = new Error("Error");
@@ -83,10 +97,6 @@ const BookAppointment = (body, isHospital = false) => __awaiter(void 0, void 0, 
             // return errorResponse(error, res);
             throw error;
         }
-        body.time.date = new Date(body.time.date);
-        // body.time.date = new Date(body.time.date);
-        const requestDate = new Date(body.time.date);
-        const day = requestDate.getDay();
         if (day == 0) {
             capacity = capacity.sunday;
         }

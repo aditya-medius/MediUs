@@ -91,7 +91,7 @@ hospitalRouter.post("/removeDoctor", (0, middlewareHelper_1.oneOf)(Hospital_auth
 //View Appointments
 hospitalRouter.get("/viewAppointment/:page", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.viewAppointment);
 // Get hospital by id
-hospitalRouter.get("/getHospitalById/:id", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital, Suvedha_auth_1.authenticateSuvedha), hospitalController.getHospitalById);
+hospitalRouter.put("/getHospitalById/:id", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital, Suvedha_auth_1.authenticateSuvedha), hospitalController.getHospitalById);
 // Hospital opening hours
 hospitalRouter.post("/createOpeningHours", WorkingHours_Controller_1.createOpeningHours);
 // hospital me kaam krne waale doctors
@@ -128,4 +128,7 @@ hospitalRouter.get("/getFees", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.aut
 hospitalRouter.put("/getPatientsAppointmentsInThisHospital/:page", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getPatientsAppointmentsInThisHospital);
 hospitalRouter.post("/verifyPayment", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.verifyPayment);
 hospitalRouter.post("/generateOrderId", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.generateOrderId);
+hospitalRouter.put("/doctors/in/hospital", 
+// oneOf(authenticateHospital),
+hospitalController.doctorsInHospitalWithTimings);
 exports.default = hospitalRouter;

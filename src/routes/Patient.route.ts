@@ -93,12 +93,12 @@ patientRouter.post(
 
 patientRouter.post(
   "/generateOrderId",
-  oneOf(authenticatePatient, authenticateHospital),
+  oneOf(authenticatePatient, authenticateHospital, authenticateSuvedha),
   paymentController.generateOrderId
 );
 patientRouter.post(
   "/verifyPayment",
-  oneOf(authenticatePatient),
+  oneOf(authenticatePatient, authenticateSuvedha),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       let doctorId = req.body.doctors,

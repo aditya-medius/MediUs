@@ -170,7 +170,7 @@ doctorRouter.put(
   doctorController.cancelAppointments
 );
 
-doctorRouter.get(
+doctorRouter.put(
   "/getDoctorWorkingInHospitals/:id",
   oneOf(authenticateDoctor, authenticatePatient),
   doctorController.getDoctorWorkingInHospitals

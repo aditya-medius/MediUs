@@ -169,6 +169,9 @@ export const getDoctorsInAHospital = async (
     let startDate = new Date(year, month, currentDate);
     let endDate = new Date(year, month, currentDate + 1);
 
+    console.log("ygstratggc", startDate);
+    console.log("knhgvdbdd", endDate);
+
     let doctors = await hospitalModel.aggregate([
       [
         {
@@ -279,9 +282,29 @@ export const getDoctorsInAHospital = async (
             },
           },
         },
+        // {
+        //   $match: {
+        //     "doctors.holiday.date": { $gte: startDate, $lte: endDate },
+        //   },
+        // },
         {
-          $match: {
-            "doctors.holiday.date": { $gte: startDate, $lte: endDate },
+          $addFields: {
+            "doctors.holiday": {
+              $filter: {
+                input: "$doctors.holiday",
+                as: "holiday",
+                cond: {
+                  $and: [
+                    {
+                      $gte: ["$$holiday.date", startDate],
+                    },
+                    {
+                      $lte: ["$$holiday.date", endDate],
+                    },
+                  ],
+                },
+              },
+            },
           },
         },
         {

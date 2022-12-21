@@ -103,9 +103,14 @@ hospitalRouter.get(
 );
 
 // Get hospital by id
-hospitalRouter.get(
+hospitalRouter.put(
   "/getHospitalById/:id",
-  oneOf(authenticatePatient, authenticateDoctor, authenticateHospital, authenticateSuvedha),
+  oneOf(
+    authenticatePatient,
+    authenticateDoctor,
+    authenticateHospital,
+    authenticateSuvedha
+  ),
   hospitalController.getHospitalById
 );
 
@@ -231,4 +236,11 @@ hospitalRouter.post(
   oneOf(authenticateHospital),
   hospitalController.generateOrderId
 );
+
+hospitalRouter.put(
+  "/doctors/in/hospital",
+  // oneOf(authenticateHospital),
+  hospitalController.doctorsInHospitalWithTimings
+);
+
 export default hospitalRouter;

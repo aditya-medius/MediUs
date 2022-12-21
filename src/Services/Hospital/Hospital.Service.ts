@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import {
   appointmentPayment,
   doctor,
+  holidayCalendar,
   hospital,
   order,
   patient,
@@ -22,6 +23,11 @@ import { BookAppointment } from "../Patient/Patient.Service";
 import creditAmountModel from "../../Models/CreditAmount.Model";
 import appointmentPaymentModel from "../../Models/AppointmentPayment.Model";
 import * as orderController from "../../Controllers/Order.Controller";
+import holidayModel from "../../Models/Holiday-Calendar.Model";
+import workingHourModel from "../../Models/WorkingHours.Model";
+import { getPreEmitDiagnostics } from "typescript";
+import prescriptionModel from "../../Models/Prescription.Model";
+import doctorModel from "../../Models/Doctors.Model";
 dotenv.config();
 
 export const getHospitalToken = async (body: any) => {
@@ -728,6 +734,364 @@ export const doesHospitalExist = async (id: string) => {
   try {
     let hospitalExist = await hospitalModel.exists({ _id: id });
     return Promise.resolve(hospitalExist);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const getHolidayTimigsOfDoctorsInHospital = async (
+  hospitalId: string,
+  doctorId: Array<string>,
+  timings: string
+) => {
+  try {
+    const time = new Date(timings);
+
+    let year = time.getFullYear(),
+      month = time.getMonth(),
+      currentDate = time.getDate();
+
+    let startDate = new Date(year, month, currentDate);
+    let endDate = new Date(year, month, currentDate + 1);
+
+    let holidays: any = await holidayModel
+      .find({
+        hospitalId,
+        doctorId: { $in: doctorId },
+        date: { $gte: startDate, $lte: endDate },
+        "delData.deleted": false,
+      })
+      .lean();
+
+    return holidays;
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const getDoctorsWorkingHourInHospital = async (
+  hospitalId: string,
+  doctorId: Array<string>,
+  day: string
+) => {
+  try {
+    let workingHours = await workingHourModel.find({
+      hospitalDetails: hospitalId,
+      doctorDetails: { $in: doctorId },
+      [day]: { $exists: true },
+    });
+
+    return Promise.resolve(workingHours);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const getDoctorsPrescriptionValidityInHospital = async (
+  hospitalId: string,
+  doctorId: Array<String>
+) => {
+  try {
+    let prescription = await prescriptionModel
+      .find({
+        hospitalId: hospitalId,
+        doctorId: { $in: doctorId },
+      })
+      .lean();
+
+    return Promise.resolve(prescription);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const doctorsInHospital = async (
+  hospitalId: string,
+  timings: string
+) => {
+  try {
+    let day: any = new Date(timings).getDay();
+
+    let WEEK_DAYS = [
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+    ];
+    day = WEEK_DAYS[day];
+
+    let hospital: any = await hospitalModel
+      .findOne({
+        _id: hospitalId,
+      })
+      .populate({
+        path: "doctors",
+        populate: {
+          path: "qualification specialization",
+        },
+      })
+      .populate({
+        path: "address",
+        populate: {
+          path: "city locality",
+        },
+      })
+      .lean();
+
+    let doctors = hospital.doctors.map((e: any) => e._id.toString());
+
+    // Get holiday timings of doctors in hospital
+    let holiday: any = await getHolidayTimigsOfDoctorsInHospital(
+      hospital,
+      doctors,
+      timings
+    );
+
+    // Doctors working hours in hospital
+    let workingHours: any = await getDoctorsWorkingHourInHospital(
+      hospitalId,
+      doctors,
+      day
+    );
+
+    // Doctor's prescription for hospital
+    let prescriptions: any = await getDoctorsPrescriptionValidityInHospital(
+      hospitalId,
+      doctors
+    );
+
+    let newData = hospital.doctors.map((e: any) => {
+      let exist = holiday.find(
+        (elem: any) => elem.doctorId.toString() === e._id.toString(0)
+      );
+
+      let WH = workingHours.filter(
+        (elem: any) => elem.doctorDetails.toString() === e._id.toString()
+      );
+
+      let PRES = prescriptions.find(
+        (elem: any) => elem.doctorId.toString() === e._id.toString()
+      );
+
+      let obj = {
+        ...e,
+        workingHours: WH,
+        prescription: PRES,
+        available: true,
+        scheduleAvailable: true,
+      };
+
+      if (exist) {
+        obj = {
+          ...e,
+          available: false,
+          workingHours: WH,
+          prescription: PRES,
+          scheduleAvailable: true,
+        };
+      }
+      console.log("WHHHHHH", WH);
+      if (!WH.length) {
+        obj = {
+          ...obj,
+          available: false,
+          scheduleAvailable: false,
+          prescription: PRES,
+        };
+      }
+
+      return obj;
+    });
+
+    hospital.doctors = newData;
+
+    return Promise.resolve(hospital);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const getHolidayTimigsOfHospitalsInDoctor = async (
+  doctorId: string,
+  hospitalId: Array<string>,
+  timings: string
+) => {
+  try {
+    const time = new Date(timings);
+    let year = time.getFullYear(),
+      month = time.getMonth(),
+      currentDate = time.getDate();
+
+    let startDate = new Date(year, month, currentDate);
+    let endDate = new Date(year, month, currentDate + 1);
+
+    let holidays: any = await holidayModel
+      .find({
+        doctorId,
+        hospitalId: { $in: hospitalId },
+        date: { $gte: startDate, $lte: endDate },
+        "delData.deleted": false,
+      })
+      .lean();
+
+    console.log("ljhgfcghvdssds", holidays);
+
+    return holidays;
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const getHospitalsWorkingHourInDoctor = async (
+  doctorId: string,
+  hospitalId: Array<string>,
+  day: string
+) => {
+  try {
+    let workingHours = await workingHourModel
+      .find({
+        hospitalDetails: { $in: hospitalId },
+        doctorDetails: doctorId,
+        [day]: { $exists: true },
+      })
+      .lean();
+
+    return Promise.resolve(workingHours);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const getHospitalsPrescriptionValidityInDoctor = async (
+  doctorId: string,
+  hospitalId: Array<string>
+) => {
+  try {
+    console.log("doctorsd", doctorId);
+    console.log("hsiusihjbsss", hospitalId);
+    let prescription = await prescriptionModel
+      .find({
+        hospitalId: { $in: hospitalId },
+        doctorId: doctorId,
+      })
+      .lean();
+
+    return Promise.resolve(prescription);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const hospitalsInDoctor = async (doctorId: string, timings: string) => {
+  try {
+    let day: any = new Date(timings).getDay();
+
+    let WEEK_DAYS = [
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+    ];
+    day = WEEK_DAYS[day];
+
+    let doctors: any = await doctorModel
+      .findOne({ _id: doctorId })
+      .populate({
+        path: "specialization qualification",
+      })
+      .populate({
+        path: "hospitalDetails.hospital",
+        populate: {
+          path: "address",
+          populate: {
+            path: "city locality",
+          },
+        },
+      })
+      .lean();
+    // .populate({
+    //   path: "hospitalDetails.hospital.address",
+    //   // populate: {
+    //   //   path: "hospitalDetails.hospital.address.city hospitalDetails.hospital.address.locality",
+    //   // },
+    // });
+
+    let hospitals: Array<string> = doctors.hospitalDetails.map((e: any) =>
+      e?.hospital?._id?.toString()
+    );
+
+    // Get holiday timings of doctors in hospital
+    let holiday: any = await getHolidayTimigsOfHospitalsInDoctor(
+      doctors._id,
+      hospitals,
+      timings
+    );
+
+    // // Doctors working hours in hospital
+    let workingHours: any = await getHospitalsWorkingHourInDoctor(
+      doctors._id,
+      hospitals,
+      day
+    );
+
+    // // Doctor's prescription for hospital
+    let prescriptions: any = await getHospitalsPrescriptionValidityInDoctor(
+      doctors._id,
+      hospitals
+    );
+
+    let newData = doctors.hospitalDetails.map((e: any) => {
+      let exist = holiday.find(
+        (elem: any) =>
+          elem.hospitalId.toString() === e?.hospital?._id.toString(0)
+      );
+
+      let WH = workingHours.filter(
+        (elem: any) =>
+          elem.hospitalDetails.toString() === e?.hospital?._id.toString()
+      );
+
+      let PRES = prescriptions.find(
+        (elem: any) =>
+          elem.hospitalId.toString() === e?.hospital?._id.toString()
+      );
+
+      let obj = {
+        ...e,
+        workingHours: WH,
+        prescription: PRES,
+        available: true,
+        scheduleAvailable: true,
+      };
+
+      if (exist) {
+        obj = {
+          ...e,
+          available: false,
+          workingHours: WH,
+          prescription: PRES,
+          scheduleAvailable: true,
+        };
+      }
+      if (!WH) {
+        obj = {
+          ...obj,
+          available: false,
+          scheduleAvailable: false,
+          prescription: PRES,
+        };
+      }
+
+      return obj;
+    });
+    doctors.hospitalDetails = newData;
+    return Promise.resolve(doctors);
   } catch (error: any) {
     return Promise.reject(error);
   }

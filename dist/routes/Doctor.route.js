@@ -119,7 +119,7 @@ doctorRouter.get("/viewAppointments/:page", (0, middlewareHelper_1.oneOf)(Doctor
 doctorRouter.post("/viewAppointmentsByDate/:page", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.viewAppointmentsByDate);
 // Cancel doctor's appointments
 doctorRouter.put("/cancelAppointments", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.cancelAppointments);
-doctorRouter.get("/getDoctorWorkingInHospitals/:id", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.getDoctorWorkingInHospitals);
+doctorRouter.put("/getDoctorWorkingInHospitals/:id", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.getDoctorWorkingInHospitals);
 doctorRouter.post("/getWorkingHours", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital), workingHoursController.getWorkingHours);
 //Preferred Pharma Routes
 //add the preferred pharma

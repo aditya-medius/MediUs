@@ -736,7 +736,19 @@ export const searchDoctor = async (req: Request, res: Response) => {
 
           return e;
         });
-        return successResponse(doctorArray, "Success", res);
+
+        let data = doctorArray.map((e: any) => {
+          return {
+            _id: e._id,
+            name: `${e.firstName} ${e.lastName}`,
+            specilization: e?.specialization[0]?.specialityName,
+            Qualification: e?.qualification[0]?.qualificationName?.abbreviation,
+            experience: e?.overallExperience ?? null,
+          };
+        });
+
+        // return successResponse(doctorArray, "Success", res);
+        return successResponse(data, "Success", res);
       })
       .catch((error) => {
         return errorResponse(error, res);
@@ -982,6 +994,7 @@ export const viewAppointmentsByDate = async (req: Request, res: Response) => {
     const skip: number = parseInt(req.params.page) * limit;
     const date: Date = req.body.date;
     let d = new Date(date);
+    const { hospital_id } = req.body;
     // console.log("date", d);
     // let gtDate: Date = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
 
@@ -1010,7 +1023,7 @@ export const viewAppointmentsByDate = async (req: Request, res: Response) => {
       query["hospital"] = req.body.hospital;
     }
 
-    const appointments = await appointmentModel
+    let appointments = await appointmentModel
       .find(query)
       .populate({ path: "patient", select: { password: 0, verified: 0 } })
       .populate({ path: "doctors", select: excludeDoctorFields })
@@ -1023,7 +1036,50 @@ export const viewAppointmentsByDate = async (req: Request, res: Response) => {
     appointments.forEach((appointment: any) => {
       appointment.patient["age"] = calculateAge(appointment.patient.DOB);
     });
-    return successResponse(appointments, "Success", res);
+
+    let subPatient = [
+      {
+        _id: "630205794a8101f7aa5c8cf9",
+        sub_pat_name: "Kuldeep",
+        sub_pat_age: "31.20338674070859 years",
+        sub_pat_gender: "Male",
+        name: "Abhishek Singh",
+        age: "31.20338674070859 years",
+        gender: "Male",
+        timing: "10:50 to 16:54",
+        hospital_name: "natya cliic",
+      },
+    ];
+
+    appointments = appointments.map((e: any) => {
+      let time = e?.time;
+      let subpatient = e?.subPatient;
+      return {
+        _id: e?.patient?._id,
+        name: `${e?.patient?.firstName} ${e?.patient?.lastName}`,
+        age: e?.patient?.age,
+        gender: e?.patient?.gender,
+        timing: `${time?.from?.time}:${time?.from?.division} to ${time?.till?.time}:${time?.till?.division}`,
+        hospital: {
+          _id: e?.hospital?._id,
+          name: e?.hospital?.name,
+        },
+        subPatient: {
+          _id: subpatient._id,
+          sub_pat_name: `${subpatient.firstName} ${subpatient.lastName}`,
+          sub_pat_age: subpatient?.DOB,
+          sub_pat_gender: subpatient?.gender,
+        },
+      };
+    });
+
+    if (hospital_id) {
+      appointments = appointments.filter(
+        (e: any) => e?.hospital?._id?.toString() === hospital_id
+      );
+    }
+
+    return successResponse({ patientdetails: appointments }, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }
@@ -1067,141 +1123,259 @@ export const cancelAppointments = async (req: Request, res: Response) => {
   }
 };
 
+// export const getDoctorWorkingInHospitals = async (
+//   req: Request,
+//   res: Response
+// ) => {
+//   try {
+//     let doctorDetails = await doctorModel
+//       .findOne({ _id: req.params.id }, { ...excludeDoctorFields })
+//       .populate("specialization qualification");
+//     let hospitalIds_Array = doctorDetails.hospitalDetails.map(
+//       (e: any) => e.hospital
+//     );
+
+//     let workingHourObj = await workingHourModel
+//       .find({
+//         doctorDetails: req.params.id,
+//         hospitalDetails: { $in: hospitalIds_Array },
+//       })
+//       .distinct("hospitalDetails");
+
+//     let hospitals = await hospitalModel
+//       .find(
+//         { _id: { $in: workingHourObj } },
+//         {
+//           payment: 0,
+//         }
+//       )
+//       .populate({
+//         path: "address",
+//         populate: {
+//           path: "city state locality country",
+//         },
+//       })
+//       .populate("anemity")
+//       .populate("openingHour");
+
+//     const doctorObj = await workingHourModel.aggregate([
+//       {
+//         $match: {
+//           doctorDetails: new mongoose.Types.ObjectId(req.params.id),
+//         },
+//       },
+//       {
+//         $project: {
+//           hospitalDetails: 1,
+//           monday: 1,
+//           tuesday: 1,
+//           wednesday: 1,
+//           thursday: 1,
+//           friday: 1,
+//           saturday: 1,
+//           sunday: 1,
+//         },
+//       },
+//       {
+//         $group: {
+//           _id: "$hospitalDetails",
+//           workingHours: {
+//             $push: {
+//               monday: "$monday",
+//               tuesday: "$tuesday",
+//               wednesday: "$wednesday",
+//               thursday: "$thursday",
+//               friday: "$friday",
+//               saturday: "$saturday",
+//               sunday: "$sunday",
+//             },
+//           },
+//         },
+//       },
+//       {
+//         $lookup: {
+//           from: "hospitals",
+//           localField: "_id",
+//           foreignField: "_id",
+//           as: "hospital",
+//         },
+//       },
+//       {
+//         $project: {
+//           workingHours: 1,
+//         },
+//       },
+//     ]);
+
+//     let index: number;
+//     let doctorsWorkingInHospital: Array<any> = hospitals.map((element: any) => {
+//       index = doctorObj.findIndex((e: any) => {
+//         return e._id.toString() == element._id.toString();
+//       });
+//       return {
+//         hospital: element,
+//         ...doctorObj[index],
+//       };
+//     });
+
+//     await doctorsWorkingInHospital.forEach(async (e: any) => {
+//       e.workingHours = formatWorkingHour(e.workingHours);
+//     });
+
+//     let fee = doctorDetails.hospitalDetails;
+//     doctorsWorkingInHospital.forEach((e: any) => {
+//       let { consultationFee } = fee.filter((elem: any) => {
+//         return elem.hospital.toString() == e.hospital._id.toString();
+//       })[0];
+//       e["Consultation_Fee"] = consultationFee;
+//     });
+
+//     doctorDetails = doctorDetails.toObject();
+//     delete doctorDetails.hospitalDetails;
+
+//     let allPrescriptions =
+//       await prescriptionController.getDoctorPrescriptionValidity(req.params.id);
+//     doctorsWorkingInHospital.map((e) => {
+//       let prescription = allPrescriptions.filter((elem) => {
+//         return elem.hospitalId.toString() === e.hospital._id.toString();
+//       })[0]?.validateTill;
+//       e["presciptionValidity"] = prescription ?? "Not found";
+//     });
+
+//     doctorDetails = {
+//       name: `${doctorDetails.firstName} ${doctorDetails.lastName}`,
+//       specilization: doctorDetails?.specialization?.[0]?.specialityName,
+//       qualification: doctorDetails?.qualification?.[0]?.qualificationName?.name,
+//       experience: doctorDetails?.overallExperience,
+//       _id: doctorDetails._id,
+//     };
+
+//     doctorsWorkingInHospital = doctorsWorkingInHospital.map((e: any) => {
+//       return {
+//         _id: e?.hospital?._id,
+//         name: e?.hospital?.name,
+//         address: `${e?.hospital?.address?.locality?.name}, ${e?.hospital?.address?.city?.name}`,
+//         fee: e?.Consultation_Fee?.min,
+//         prescription_validity: `${e?.presciptionValidity} Days`,
+//         // time: [{ availble: true, time: "12:00 to 13:00" }],
+//         time: e?.workingHours.map((elem: any) => {
+//           return {
+//             time: `${elem?.timings?.from?.time}:${elem?.timings?.from?.division} ${elem?.timings?.till?.time}:${elem?.timings?.till?.division}`,
+//           };
+//         }),
+//       };
+//     });
+//     return successResponse(
+//       { doctorDetails, doctorsWorkingInHospital },
+//       "Success",
+//       res
+//     );
+
+//     return successResponse(
+//       { doctorDetails, doctorsWorkingInHospital },
+//       "Success",
+//       res
+//     );
+//   } catch (error: any) {
+//     return errorResponse(error, res);
+//   }
+// };
+
 export const getDoctorWorkingInHospitals = async (
   req: Request,
   res: Response
 ) => {
   try {
-    let doctorDetails = await doctorModel
-      .findOne({ _id: req.params.id }, { ...excludeDoctorFields })
-      .populate("specialization qualification");
-    let hospitalIds_Array = doctorDetails.hospitalDetails.map(
-      (e: any) => e.hospital
-    );
+    let { timings } = req.body,
+      { id: doctorId } = req.params;
+    let doctors = await hospitalService.hospitalsInDoctor(doctorId, timings);
+    let doctordetails = {
+      _id: doctors?._id,
+      name: `${doctors.firstName} ${doctors.lastName}`,
+      specilization: doctors?.specialization?.[0]?.specialityName,
+      qualification: doctors?.qualification?.[0]?.qualificationName?.name,
+      experience: doctors?.overallExperience,
+    };
 
-    let workingHourObj = await workingHourModel
-      .find({
-        doctorDetails: req.params.id,
-        hospitalDetails: { $in: hospitalIds_Array },
-      })
-      .distinct("hospitalDetails");
+    let day: any = new Date(timings).getDay();
 
-    let hospitals = await hospitalModel
-      .find(
-        { _id: { $in: workingHourObj } },
-        {
-          payment: 0,
-        }
-      )
-      .populate({
-        path: "address",
-        populate: {
-          path: "city state locality country",
-        },
-      })
-      .populate("anemity")
-      .populate("openingHour");
+    let WEEK_DAYS = [
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+    ];
 
-    const doctorObj = await workingHourModel.aggregate([
-      {
-        $match: {
-          doctorDetails: new mongoose.Types.ObjectId(req.params.id),
-        },
-      },
-      {
-        $project: {
-          hospitalDetails: 1,
-          monday: 1,
-          tuesday: 1,
-          wednesday: 1,
-          thursday: 1,
-          friday: 1,
-          saturday: 1,
-          sunday: 1,
-        },
-      },
-      {
-        $group: {
-          _id: "$hospitalDetails",
-          workingHours: {
-            $push: {
-              monday: "$monday",
-              tuesday: "$tuesday",
-              wednesday: "$wednesday",
-              thursday: "$thursday",
-              friday: "$friday",
-              saturday: "$saturday",
-              sunday: "$sunday",
-            },
-          },
-        },
-      },
-      {
-        $lookup: {
-          from: "hospitals",
-          localField: "_id",
-          foreignField: "_id",
-          as: "hospital",
-        },
-      },
-      {
-        $project: {
-          workingHours: 1,
-        },
-      },
-    ]);
-
-    let index: number;
-    let doctorsWorkingInHospital: Array<any> = hospitals.map((element: any) => {
-      index = doctorObj.findIndex((e: any) => {
-        return e._id.toString() == element._id.toString();
-      });
+    let hospitaldetails = doctors?.hospitalDetails.map((e: any) => {
+      let data = e?.hospital;
       return {
-        hospital: element,
-        ...doctorObj[index],
+        id: data?._id,
+        name: data?.name,
+        address: `${data?.address?.locality?.name}, ${data?.address?.city?.name}`,
+        fee: e?.consultationFee?.min,
+        prescription_validity: e?.prescription?.validateTill,
+        time: e?.workingHours?.map((elem: any) => {
+          return `${elem[WEEK_DAYS[day]]?.from.time}:${
+            elem[WEEK_DAYS[day]]?.from.division
+          } to ${elem[WEEK_DAYS[day]]?.till.time}:${
+            elem[WEEK_DAYS[day]]?.till.division
+          }`;
+        }),
+        available: e?.available,
+        scheduleAvailable: e?.scheduleAvailable,
       };
     });
+    return successResponse({ doctordetails, hospitaldetails }, "Successs", res);
 
-    await doctorsWorkingInHospital.forEach(async (e: any) => {
-      e.workingHours = formatWorkingHour(e.workingHours);
-    });
+    // let hospitalDetails = await hospitalService.doctorsInHospital(
+    //   hospitalId,
+    //   timings
+    // );
 
-    let fee = doctorDetails.hospitalDetails;
-    doctorsWorkingInHospital.forEach((e: any) => {
-      let { consultationFee } = fee.filter((elem: any) => {
-        return elem.hospital.toString() == e.hospital._id.toString();
-      })[0];
-      e["Consultation_Fee"] = consultationFee;
-    });
+    // let { doctors } = hospitalDetails;
 
-    doctorDetails = doctorDetails.toObject();
-    delete doctorDetails.hospitalDetails;
+    // let day: any = new Date(timings).getDay();
 
-    let allPrescriptions =
-      await prescriptionController.getDoctorPrescriptionValidity(req.params.id);
-    doctorsWorkingInHospital.map((e) => {
-      let prescription = allPrescriptions.filter((elem) => {
-        return elem.hospitalId.toString() === e.hospital._id.toString();
-      })[0]?.validateTill;
-      e["presciptionValidity"] = prescription ?? "Not found";
-    });
+    // let WEEK_DAYS = [
+    //   "sunday",
+    //   "monday",
+    //   "tuesday",
+    //   "wednesday",
+    //   "thursday",
+    //   "friday",
+    //   "saturday",
+    // ];
 
-    console.log(
-      "doctorsWorkingInHospitaldoctorsWorkingInHospital",
-      doctorsWorkingInHospital
-    );
+    // doctors = doctors.map((e: any) => {
+    //   return {
+    //     _id: e?._id,
+    //     name: `${e.firstName} ${e.lastName}`,
+    //     specilization: e?.specialization[0]?.specialityName,
+    //     Qualification: e?.qualification[0]?.qualificationName?.abbreviation,
+    //     Exeperience: e?.overallExperience,
+    //     Fee: e?.hospitalDetails.find(
+    //       (elem: any) => elem.hospital.toString() === hospitalId
+    //     )?.consultationFee.max,
+    //     workinghour: e?.workingHours.map((elem: any) => {
+    //       return `${elem[WEEK_DAYS[day]]?.from.time}:${
+    //         elem[WEEK_DAYS[day]]?.from.division
+    //       } to ${elem[WEEK_DAYS[day]]?.till.time}:${
+    //         elem[WEEK_DAYS[day]]?.till.division
+    //       }`;
+    //     }),
+    //     available: e?.available,
+    //     scheduleAvailable: e?.scheduleAvailable,
+    //   };
+    // });
 
-    return successResponse(
-      { doctorDetails, doctorsWorkingInHospital },
-      // doctorsWorkingInHospital,
-      "Success",
-      res
-    );
+    // return successResponse(doctors, "Successs", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }
 };
-
 export const searchDoctorByPhoneNumberOrEmail = async (
   req: Request,
   res: Response
@@ -1319,8 +1493,23 @@ export const getHospitalListByDoctorId = async (
       });
 
     if (doctorData) {
-      const hospitalDetails = doctorData.hospitalDetails.map((e: any) => {
+      let hospitalDetails = doctorData.hospitalDetails.map((e: any) => {
         return e.hospital;
+      });
+
+      // "hospitalDetails":[
+
+      //   {
+      //   "id":"535435353",
+      //   "name":"Tulsi hospital",
+      //   }
+      //   ]
+
+      hospitalDetails = hospitalDetails.map((e: any) => {
+        return {
+          _id: e._id,
+          name: e.name,
+        };
       });
       return successResponse(
         { hospitalDetails },

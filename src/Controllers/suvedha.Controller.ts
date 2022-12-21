@@ -233,6 +233,8 @@ export const getDoctorsInAHospital = async (req: Request, res: Response) => {
       };
     });
 
+    // doctors = data;
+
     return successResponse(doctors, "Success", res);
     return successResponse(data, "Success", res);
   } catch (error: any) {

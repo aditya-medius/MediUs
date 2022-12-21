@@ -56,10 +56,27 @@ export const BookAppointment = async (body: any, isHospital = false) => {
       query["saturday.till.division"] = b.time.till.division;
     }
 
+    let WEEK_DAYS = [
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+    ];
+
+    body.time.date = new Date(body.time.date);
+    // body.time.date = new Date(body.time.date);
+    const requestDate: Date = new Date(body.time.date);
+
+    const day = requestDate.getDay();
+
     // @TODO check if working hour exist first
     let capacity = await workingHourModel.findOne({
       doctorDetails: body.doctors,
       hospitalDetails: body.hospital,
+      [WEEK_DAYS[day]]: { $exists: true },
     });
     if (!capacity) {
       let error: Error = new Error("Error");
@@ -68,10 +85,6 @@ export const BookAppointment = async (body: any, isHospital = false) => {
       throw error;
     }
 
-    body.time.date = new Date(body.time.date);
-    // body.time.date = new Date(body.time.date);
-    const requestDate: Date = new Date(body.time.date);
-    const day = requestDate.getDay();
     if (day == 0) {
       capacity = capacity.sunday;
     } else if (day == 1) {
