@@ -1096,6 +1096,14 @@ export const getHospitalById = async (req: Request, res: Response) => {
             elem[WEEK_DAYS[day]]?.till.division
           }`;
         }),
+        capacityAndToken: e?.workingHours.map((elem: any) => {
+          return {
+            capacity: elem[WEEK_DAYS[day]].capacity,
+            largestToken: elem[WEEK_DAYS[day]].appointmentsBooked,
+          };
+        }),
+        capacity: "",
+        highestToken: "",
         available: e?.available,
         scheduleAvailable: e?.scheduleAvailable,
       };
@@ -1382,7 +1390,9 @@ export const generateOrderId = async (req: Request, res: Response) => {
 };
 export const verifyPayment = async (req: Request, res: Response) => {
   try {
-    await hospitalService.verifyPayment(req.body);
+    let isHospital = req.currentHospital ? true : false;
+
+    await hospitalService.verifyPayment(req.body, isHospital);
     return successResponse({}, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
@@ -1431,6 +1441,12 @@ export const doctorsInHospitalWithTimings = async (
             elem[WEEK_DAYS[day]]?.till.division
           }`;
         }),
+        capacityAndToken: e?.workingHours.map((elem: any) => {
+          return {
+            capacity: elem[WEEK_DAYS[day]].capacity,
+            largestToken: elem[WEEK_DAYS[day]].appointmentsBooked,
+          };
+        }),
         available: e?.available,
         scheduleAvailable: e?.scheduleAvailable,
       };
@@ -1442,4 +1458,35 @@ export const doctorsInHospitalWithTimings = async (
   }
 };
 
-// export const
+export const getHospitalDetails = async (req: Request, res: Response) => {
+  try {
+    let data = (await hospitalService.getHospitalById(req.params.id))[0];
+    // data = {
+    //   Name: data.name,
+    //   Address: data.address,
+    // };
+
+    data = {
+      Address: {
+        address_id: data?.address?._id,
+        state_id: data?.address?.state,
+        city_id: data?.address?.city,
+        locality_id: data?.address?.locality,
+        addressLine_1: data?.address?.addressLine_1,
+        pincode: data?.address?.pincode,
+      },
+
+      RegistrationDetails: data?.registrationDetails,
+
+      PaymentDetails: data?.paymentDetails,
+
+      Service: data?.services,
+      Anemity: data?.anemity,
+
+      TYPE_HOSPITAL: data?.type,
+    };
+    return successResponse(data, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};

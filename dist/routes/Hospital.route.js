@@ -42,6 +42,7 @@ const middlewareHelper_1 = require("../Services/middlewareHelper");
 const response_1 = require("../Services/response");
 const feeService = __importStar(require("../Module/Payment/Service/Fee.Service"));
 const Suvedha_auth_1 = require("../authentication/Suvedha.auth");
+const Prescription_Validity_Controller_1 = require("../Controllers/Prescription-Validity.Controller");
 const hospitalRouter = express_1.default.Router();
 hospitalRouter.get("/", 
 // oneOf(authenticateHospital),
@@ -126,9 +127,28 @@ hospitalRouter.get("/getFees", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.aut
     }
 }));
 hospitalRouter.put("/getPatientsAppointmentsInThisHospital/:page", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getPatientsAppointmentsInThisHospital);
-hospitalRouter.post("/verifyPayment", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.verifyPayment);
+hospitalRouter.post("/verifyPayment", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let doctorId = req.body.doctors, patientId = req.body.patient, hospitalId = req.body.hospital, subPatientId = req.body.subPatient;
+        let valid = yield (0, Prescription_Validity_Controller_1.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod)({
+            doctorId,
+            patientId,
+            hospitalId,
+            subPatientId,
+        });
+        req.body["appointmentType"] = valid ? "Follow up" : "Fresh";
+        if (req.currentHospital) {
+            req.body.appointment["appointmentBookedBy"] = "Hospital";
+        }
+        next();
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+}), hospitalController.verifyPayment);
 hospitalRouter.post("/generateOrderId", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.generateOrderId);
 hospitalRouter.put("/doctors/in/hospital", 
 // oneOf(authenticateHospital),
 hospitalController.doctorsInHospitalWithTimings);
+hospitalRouter.get("/getHospitalDetails/:id", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getHospitalDetails);
 exports.default = hospitalRouter;

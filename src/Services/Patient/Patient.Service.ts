@@ -167,6 +167,8 @@ export const calculateAge = (DOB: Date) => {
 
   let age: any = currentDate.diff(exp, "years", true);
 
+  age = parseInt(age).toFixed(2);
+
   if (age < 1) {
     age = `${currentDate.diff(exp, "months")} months`;
   } else {

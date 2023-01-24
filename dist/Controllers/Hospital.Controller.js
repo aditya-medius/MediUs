@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.doctorsInHospitalWithTimings = exports.verifyPayment = exports.generateOrderId = exports.getPatientsAppointmentsInThisHospital = exports.searchHospitalByPhoneNumber = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.updateHospitalAddress = exports.getHospitalsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.checkVerificationStatus = exports.getDoctorsInHospital = exports.getHospitalById = exports.getAppointmentByDate = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.deleteAnemities = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
+exports.getHospitalDetails = exports.doctorsInHospitalWithTimings = exports.verifyPayment = exports.generateOrderId = exports.getPatientsAppointmentsInThisHospital = exports.searchHospitalByPhoneNumber = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.updateHospitalAddress = exports.getHospitalsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.checkVerificationStatus = exports.getDoctorsInHospital = exports.getHospitalById = exports.getAppointmentByDate = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.deleteAnemities = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Anemities_Model_1 = __importDefault(require("../Models/Anemities.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
@@ -970,6 +970,14 @@ const getHospitalById = (req, res) => __awaiter(void 0, void 0, void 0, function
                     var _a, _b, _c, _d;
                     return `${(_a = elem[WEEK_DAYS[day]]) === null || _a === void 0 ? void 0 : _a.from.time}:${(_b = elem[WEEK_DAYS[day]]) === null || _b === void 0 ? void 0 : _b.from.division} to ${(_c = elem[WEEK_DAYS[day]]) === null || _c === void 0 ? void 0 : _c.till.time}:${(_d = elem[WEEK_DAYS[day]]) === null || _d === void 0 ? void 0 : _d.till.division}`;
                 }),
+                capacityAndToken: e === null || e === void 0 ? void 0 : e.workingHours.map((elem) => {
+                    return {
+                        capacity: elem[WEEK_DAYS[day]].capacity,
+                        largestToken: elem[WEEK_DAYS[day]].appointmentsBooked,
+                    };
+                }),
+                capacity: "",
+                highestToken: "",
                 available: e === null || e === void 0 ? void 0 : e.available,
                 scheduleAvailable: e === null || e === void 0 ? void 0 : e.scheduleAvailable,
             };
@@ -1186,7 +1194,8 @@ const generateOrderId = (req, res) => __awaiter(void 0, void 0, void 0, function
 exports.generateOrderId = generateOrderId;
 const verifyPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield hospitalService.verifyPayment(req.body);
+        let isHospital = req.currentHospital ? true : false;
+        yield hospitalService.verifyPayment(req.body, isHospital);
         return (0, response_1.successResponse)({}, "Success", res);
     }
     catch (error) {
@@ -1222,6 +1231,12 @@ const doctorsInHospitalWithTimings = (req, res) => __awaiter(void 0, void 0, voi
                     var _a, _b, _c, _d;
                     return `${(_a = elem[WEEK_DAYS[day]]) === null || _a === void 0 ? void 0 : _a.from.time}:${(_b = elem[WEEK_DAYS[day]]) === null || _b === void 0 ? void 0 : _b.from.division} to ${(_c = elem[WEEK_DAYS[day]]) === null || _c === void 0 ? void 0 : _c.till.time}:${(_d = elem[WEEK_DAYS[day]]) === null || _d === void 0 ? void 0 : _d.till.division}`;
                 }),
+                capacityAndToken: e === null || e === void 0 ? void 0 : e.workingHours.map((elem) => {
+                    return {
+                        capacity: elem[WEEK_DAYS[day]].capacity,
+                        largestToken: elem[WEEK_DAYS[day]].appointmentsBooked,
+                    };
+                }),
                 available: e === null || e === void 0 ? void 0 : e.available,
                 scheduleAvailable: e === null || e === void 0 ? void 0 : e.scheduleAvailable,
             };
@@ -1233,4 +1248,33 @@ const doctorsInHospitalWithTimings = (req, res) => __awaiter(void 0, void 0, voi
     }
 });
 exports.doctorsInHospitalWithTimings = doctorsInHospitalWithTimings;
-// export const
+const getHospitalDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _f, _g, _h, _j, _k, _l;
+    try {
+        let data = (yield hospitalService.getHospitalById(req.params.id))[0];
+        // data = {
+        //   Name: data.name,
+        //   Address: data.address,
+        // };
+        data = {
+            Address: {
+                address_id: (_f = data === null || data === void 0 ? void 0 : data.address) === null || _f === void 0 ? void 0 : _f._id,
+                state_id: (_g = data === null || data === void 0 ? void 0 : data.address) === null || _g === void 0 ? void 0 : _g.state,
+                city_id: (_h = data === null || data === void 0 ? void 0 : data.address) === null || _h === void 0 ? void 0 : _h.city,
+                locality_id: (_j = data === null || data === void 0 ? void 0 : data.address) === null || _j === void 0 ? void 0 : _j.locality,
+                addressLine_1: (_k = data === null || data === void 0 ? void 0 : data.address) === null || _k === void 0 ? void 0 : _k.addressLine_1,
+                pincode: (_l = data === null || data === void 0 ? void 0 : data.address) === null || _l === void 0 ? void 0 : _l.pincode,
+            },
+            RegistrationDetails: data === null || data === void 0 ? void 0 : data.registrationDetails,
+            PaymentDetails: data === null || data === void 0 ? void 0 : data.paymentDetails,
+            Service: data === null || data === void 0 ? void 0 : data.services,
+            Anemity: data === null || data === void 0 ? void 0 : data.anemity,
+            TYPE_HOSPITAL: data === null || data === void 0 ? void 0 : data.type,
+        };
+        return (0, response_1.successResponse)(data, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getHospitalDetails = getHospitalDetails;

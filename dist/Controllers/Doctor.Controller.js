@@ -98,6 +98,11 @@ const createDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             body.password = yield bcrypt.hash(body.password, cryptSalt);
         }
         let doctorObj = yield new Doctors_Model_1.default(body).save();
+        if (body === null || body === void 0 ? void 0 : body.specialization) {
+            Specialization_Model_1.default
+                .updateMany({ _id: { $in: body === null || body === void 0 ? void 0 : body.specialization } }, { $set: { active: true } })
+                .then();
+        }
         yield doctorObj.populate("qualification");
         doctorObj = doctorObj.toObject();
         doctorObj.qualification = doctorObj.qualification[0];
@@ -895,7 +900,7 @@ const viewAppointments = (req, res) => __awaiter(void 0, void 0, void 0, functio
 exports.viewAppointments = viewAppointments;
 const viewAppointmentsByDate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const limit = 2;
+        const limit = 20;
         const skip = parseInt(req.params.page) * limit;
         const date = req.body.date;
         let d = new Date(date);
@@ -933,23 +938,11 @@ const viewAppointmentsByDate = (req, res) => __awaiter(void 0, void 0, void 0, f
         appointments.forEach((appointment) => {
             appointment.patient["age"] = (0, Patient_Service_1.calculateAge)(appointment.patient.DOB);
         });
-        let subPatient = [
-            {
-                _id: "630205794a8101f7aa5c8cf9",
-                sub_pat_name: "Kuldeep",
-                sub_pat_age: "31.20338674070859 years",
-                sub_pat_gender: "Male",
-                name: "Abhishek Singh",
-                age: "31.20338674070859 years",
-                gender: "Male",
-                timing: "10:50 to 16:54",
-                hospital_name: "natya cliic",
-            },
-        ];
         appointments = appointments.map((e) => {
             var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
             let time = e === null || e === void 0 ? void 0 : e.time;
             let subpatient = e === null || e === void 0 ? void 0 : e.subPatient;
+            console.log("subpatient?.firstNamesubpatient?.firstName", subpatient === null || subpatient === void 0 ? void 0 : subpatient.firstName);
             return {
                 _id: (_a = e === null || e === void 0 ? void 0 : e.patient) === null || _a === void 0 ? void 0 : _a._id,
                 name: `${(_b = e === null || e === void 0 ? void 0 : e.patient) === null || _b === void 0 ? void 0 : _b.firstName} ${(_c = e === null || e === void 0 ? void 0 : e.patient) === null || _c === void 0 ? void 0 : _c.lastName}`,
@@ -960,12 +953,19 @@ const viewAppointmentsByDate = (req, res) => __awaiter(void 0, void 0, void 0, f
                     _id: (_k = e === null || e === void 0 ? void 0 : e.hospital) === null || _k === void 0 ? void 0 : _k._id,
                     name: (_l = e === null || e === void 0 ? void 0 : e.hospital) === null || _l === void 0 ? void 0 : _l.name,
                 },
-                subPatient: {
-                    _id: subpatient._id,
-                    sub_pat_name: `${subpatient.firstName} ${subpatient.lastName}`,
-                    sub_pat_age: subpatient === null || subpatient === void 0 ? void 0 : subpatient.DOB,
+                subPatient: Object.assign({}, ((subpatient === null || subpatient === void 0 ? void 0 : subpatient.firstName) && {
+                    _id: subpatient === null || subpatient === void 0 ? void 0 : subpatient._id,
+                    sub_pat_name: (subpatient === null || subpatient === void 0 ? void 0 : subpatient.firstName) &&
+                        `${subpatient === null || subpatient === void 0 ? void 0 : subpatient.firstName} ${subpatient === null || subpatient === void 0 ? void 0 : subpatient.lastName}`,
+                    sub_pat_age: (0, Patient_Service_1.calculateAge)(subpatient === null || subpatient === void 0 ? void 0 : subpatient.DOB),
                     sub_pat_gender: subpatient === null || subpatient === void 0 ? void 0 : subpatient.gender,
-                },
+                })),
+                // subPatient: {
+                //   _id: subpatient?._id,
+                //   sub_pat_name: `${subpatient?.firstName} ${subpatient?.lastName}`,
+                //   sub_pat_age: subpatient?.DOB,
+                //   sub_pat_gender: subpatient?.gender,
+                // },
             };
         });
         if (hospital_id) {
@@ -1189,10 +1189,17 @@ const getDoctorWorkingInHospitals = (req, res) => __awaiter(void 0, void 0, void
                     var _a, _b, _c, _d;
                     return `${(_a = elem[WEEK_DAYS[day]]) === null || _a === void 0 ? void 0 : _a.from.time}:${(_b = elem[WEEK_DAYS[day]]) === null || _b === void 0 ? void 0 : _b.from.division} to ${(_c = elem[WEEK_DAYS[day]]) === null || _c === void 0 ? void 0 : _c.till.time}:${(_d = elem[WEEK_DAYS[day]]) === null || _d === void 0 ? void 0 : _d.till.division}`;
                 }),
+                capacityAndToken: e === null || e === void 0 ? void 0 : e.workingHours.map((elem) => {
+                    return {
+                        capacity: elem[WEEK_DAYS[day]].capacity,
+                        largestToken: elem[WEEK_DAYS[day]].appointmentsBooked,
+                    };
+                }),
                 available: e === null || e === void 0 ? void 0 : e.available,
                 scheduleAvailable: e === null || e === void 0 ? void 0 : e.scheduleAvailable,
             };
         });
+        // let hospitaldetails = doctors?.hospitalDetails
         return (0, response_1.successResponse)({ doctordetails, hospitaldetails }, "Successs", res);
         // let hospitalDetails = await hospitalService.doctorsInHospital(
         //   hospitalId,

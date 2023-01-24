@@ -110,6 +110,12 @@ patientRouter.post(
           { doctorId, patientId, hospitalId, subPatientId }
         );
       req.body["appointmentType"] = valid ? "Follow up" : "Fresh";
+
+      if (req.currentPatient) {
+        req.body.appointment["appointmentBookedBy"] = "Patient";
+      } else if (req.currentSuvedha) {
+        req.body.appointment["appointmentBookedBy"] = "Suvedha";
+      }
       next();
     } catch (error: any) {
       return errorResponse(error, res);
@@ -191,7 +197,12 @@ patientRouter.post(
 // Search patient
 patientRouter.get(
   "/searchPatientByPhoneNumberOrEmail/:term",
-  oneOf(authenticateDoctor, authenticatePatient, authenticateHospital, authenticateSuvedha),
+  oneOf(
+    authenticateDoctor,
+    authenticatePatient,
+    authenticateHospital,
+    authenticateSuvedha
+  ),
   patientController.searchPatientByPhoneNumberOrEmail
 );
 

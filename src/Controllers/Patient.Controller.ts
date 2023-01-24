@@ -889,7 +889,10 @@ export const getSpecialityBodyPartAndDisease = async (
     const Conn = mongoose.createConnection();
     await Conn.openUri(<string>process.env.DB_PATH);
 
-    const speciality = Conn.collection("special").find();
+    const speciality = Conn.collection("special")
+      .find()
+      .sort({ specialityName: 1 })
+      .sort({ active: -1 });
     const bodyParts = bodyPartModel.find();
     const disease = diseaseModel.find();
 
@@ -897,8 +900,13 @@ export const getSpecialityBodyPartAndDisease = async (
     const [S, B, D] = SBD;
 
     Conn.close();
+
     return successResponse(
-      { Speciality: S, BodyPart: B, Disease: D },
+      {
+        Speciality: S,
+        BodyPart: B,
+        Disease: D,
+      },
       "Success",
       res
     );

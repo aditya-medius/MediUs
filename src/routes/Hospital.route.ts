@@ -17,6 +17,7 @@ import { oneOf } from "../Services/middlewareHelper";
 import { errorResponse, successResponse } from "../Services/response";
 import * as feeService from "../Module/Payment/Service/Fee.Service";
 import { authenticateSuvedha } from "../authentication/Suvedha.auth";
+import { checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod } from "../Controllers/Prescription-Validity.Controller";
 const hospitalRouter = express.Router();
 
 hospitalRouter.get(
@@ -229,6 +230,31 @@ hospitalRouter.put(
 hospitalRouter.post(
   "/verifyPayment",
   oneOf(authenticateHospital),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      let doctorId = req.body.doctors,
+        patientId = req.body.patient,
+        hospitalId = req.body.hospital,
+        subPatientId = req.body.subPatient;
+      let valid =
+        await checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod({
+          doctorId,
+          patientId,
+          hospitalId,
+          subPatientId,
+        });
+      req.body["appointmentType"] = valid ? "Follow up" : "Fresh";
+
+      if (req.currentHospital) {
+        req.body.appointment["appointmentBookedBy"] = "Hospital";
+      }
+
+      next();
+    } catch (error: any) {
+      return errorResponse(error, res);
+    }
+  },
+
   hospitalController.verifyPayment
 );
 hospitalRouter.post(
@@ -243,4 +269,9 @@ hospitalRouter.put(
   hospitalController.doctorsInHospitalWithTimings
 );
 
+hospitalRouter.get(
+  "/getHospitalDetails/:id",
+  oneOf(authenticateHospital),
+  hospitalController.getHospitalDetails
+);
 export default hospitalRouter;

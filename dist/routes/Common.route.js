@@ -41,6 +41,7 @@ const Suvedha_auth_1 = require("../authentication/Suvedha.auth");
 const middlewareHelper_1 = require("../Services/middlewareHelper");
 const Utils_1 = require("../Services/Utils");
 const response_1 = require("../Services/response");
+const hospitalService = __importStar(require("../Services/Hospital/Hospital.Service"));
 const commonRouter = express_1.default.Router();
 let paths = "admin";
 const upload = (0, Utils_1.initUpload)(paths);
@@ -49,5 +50,14 @@ commonRouter.post("/uploadImage", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.au
 });
 commonRouter.post("/upload", upload.single("image"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, response_1.successResponse)({ response: req.file }, "Success", res);
+}));
+commonRouter.get("/cities", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital, Patient_auth_1.authenticatePatient, Admin_auth_1.authenticateAdmin, Suvedha_auth_1.authenticateSuvedha), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let cities = yield hospitalService.getCitiesWhereHospitalsExist();
+        return (0, response_1.successResponse)({ cities }, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
 }));
 exports.default = commonRouter;

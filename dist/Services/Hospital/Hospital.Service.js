@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.hospitalsInDoctor = exports.getHospitalsPrescriptionValidityInDoctor = exports.getHospitalsWorkingHourInDoctor = exports.getHolidayTimigsOfHospitalsInDoctor = exports.doctorsInHospital = exports.getDoctorsPrescriptionValidityInHospital = exports.getDoctorsWorkingHourInHospital = exports.getHolidayTimigsOfDoctorsInHospital = exports.doesHospitalExist = exports.generateOrderId = exports.verifyPayment = exports.getPatientsAppointmentsInThisHospital = exports.getPatientFromPhoneNumber = exports.getHospitalsOfflineAndOnlineAppointments = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.getHospitalToken = void 0;
+exports.getCitiesWhereHospitalsExist = exports.getHospitalById = exports.hospitalsInDoctor = exports.getHospitalsPrescriptionValidityInDoctor = exports.getHospitalsWorkingHourInDoctor = exports.getHolidayTimigsOfHospitalsInDoctor = exports.doctorsInHospital = exports.getDoctorsPrescriptionValidityInHospital = exports.getDoctorsWorkingHourInHospital = exports.getHolidayTimigsOfDoctorsInHospital = exports.doesHospitalExist = exports.generateOrderId = exports.verifyPayment = exports.getPatientsAppointmentsInThisHospital = exports.getPatientFromPhoneNumber = exports.getHospitalsOfflineAndOnlineAppointments = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.getHospitalToken = void 0;
 const jwt = __importStar(require("jsonwebtoken"));
 const dotenv = __importStar(require("dotenv"));
 const Hospital_Model_1 = __importDefault(require("../../Models/Hospital.Model"));
@@ -690,12 +690,12 @@ const getPatientsAppointmentsInThisHospital = (hospitalId, phoneNumber_patient, 
     }
 });
 exports.getPatientsAppointmentsInThisHospital = getPatientsAppointmentsInThisHospital;
-const verifyPayment = (body) => __awaiter(void 0, void 0, void 0, function* () {
+const verifyPayment = (body, isHospital = false) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // payment Id aur payment signature
         let paymentId = `payment_id_gen_${Math.floor(100000 + Math.random() * 900000).toString()}`;
         let paymentSignature = `payment_sign_gen_${Math.floor(100000 + Math.random() * 900000).toString()}`;
-        const appointmentBook = yield (0, Patient_Service_1.BookAppointment)(body.appointment);
+        const appointmentBook = yield (0, Patient_Service_1.BookAppointment)(body.appointment, isHospital);
         const { orderId, orderReceipt } = body;
         const paymentObj = yield new AppointmentPayment_Model_1.default({
             paymentId,
@@ -834,7 +834,6 @@ const doctorsInHospital = (hospitalId, timings) => __awaiter(void 0, void 0, voi
             if (exist) {
                 obj = Object.assign(Object.assign({}, e), { available: false, workingHours: WH, prescription: PRES, scheduleAvailable: true });
             }
-            console.log("WHHHHHH", WH);
             if (!WH.length) {
                 obj = Object.assign(Object.assign({}, obj), { available: false, scheduleAvailable: false, prescription: PRES });
             }
@@ -965,3 +964,55 @@ const hospitalsInDoctor = (doctorId, timings) => __awaiter(void 0, void 0, void 
     }
 });
 exports.hospitalsInDoctor = hospitalsInDoctor;
+const getHospitalById = (hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let hospitalData = yield Hospital_Model_1.default
+            .find({ _id: hospitalId })
+            .populate({
+            path: "address",
+            populate: {
+                path: "city state locality",
+            },
+        })
+            .populate({
+            path: "anemity services",
+        });
+        return Promise.resolve(hospitalData);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.getHospitalById = getHospitalById;
+const getCitiesWhereHospitalsExist = () => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let data = yield Hospital_Model_1.default
+            .find({})
+            .populate({
+            path: "address",
+            select: "city",
+            populate: {
+                path: "city",
+            },
+        })
+            .select("address")
+            .lean();
+        let cities = [];
+        data.map((e) => {
+            var _a, _b;
+            let city = e === null || e === void 0 ? void 0 : e.address;
+            let exist = cities.find((elem) => { var _a; return (elem === null || elem === void 0 ? void 0 : elem._id) === ((_a = city === null || city === void 0 ? void 0 : city.city) === null || _a === void 0 ? void 0 : _a._id); });
+            if (!exist) {
+                cities.push({
+                    _id: (_a = city === null || city === void 0 ? void 0 : city.city) === null || _a === void 0 ? void 0 : _a._id,
+                    name: (_b = city === null || city === void 0 ? void 0 : city.city) === null || _b === void 0 ? void 0 : _b.name,
+                });
+            }
+        });
+        return cities;
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.getCitiesWhereHospitalsExist = getCitiesWhereHospitalsExist;

@@ -127,6 +127,10 @@ const appointmentSchema = new mongoose_1.Schema({
         type: String,
         enum: ["Fresh", "Follow up"],
     },
+    // Kisne appointments book ki hai. User, hospital or suvedha
+    appointmentBookedBy: {
+        type: String,
+    },
 });
 appointmentSchema.post("save", function (result) {
     return __awaiter(this, void 0, void 0, function* () {

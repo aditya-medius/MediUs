@@ -13,11 +13,27 @@ export const setPrescriptionValidity = async (req: Request, res: Response) => {
       validateTill,
       hospitalId,
     } = req.body;
-    let prescription = await new prescriptionValidityModel({
-      doctorId,
-      hospitalId,
-      validateTill,
-    }).save();
+    // let prescription = await new prescriptionValidityModel({
+    //   doctorId,
+    //   hospitalId,
+    //   validateTill,
+    // }).save();
+
+    let prescription = await prescriptionValidityModel.findOneAndUpdate(
+      {
+        doctorId,
+        hospitalId,
+      },
+      {
+        $set: {
+          validateTill,
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+      }
+    );
     return successResponse(prescription, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);

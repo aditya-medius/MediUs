@@ -79,6 +79,15 @@ export const createDoctor = async (req: Request, res: Response) => {
       body.password = await bcrypt.hash(body.password, cryptSalt);
     }
     let doctorObj = await new doctorModel(body).save();
+
+    if (body?.specialization) {
+      specialityModel
+        .updateMany(
+          { _id: { $in: body?.specialization } },
+          { $set: { active: true } }
+        )
+        .then();
+    }
     await doctorObj.populate("qualification");
     doctorObj = doctorObj.toObject();
     doctorObj.qualification = doctorObj.qualification[0];
@@ -990,7 +999,7 @@ export const viewAppointments = async (req: Request, res: Response) => {
 
 export const viewAppointmentsByDate = async (req: Request, res: Response) => {
   try {
-    const limit: number = 2;
+    const limit: number = 20;
     const skip: number = parseInt(req.params.page) * limit;
     const date: Date = req.body.date;
     let d = new Date(date);
@@ -1037,23 +1046,13 @@ export const viewAppointmentsByDate = async (req: Request, res: Response) => {
       appointment.patient["age"] = calculateAge(appointment.patient.DOB);
     });
 
-    let subPatient = [
-      {
-        _id: "630205794a8101f7aa5c8cf9",
-        sub_pat_name: "Kuldeep",
-        sub_pat_age: "31.20338674070859 years",
-        sub_pat_gender: "Male",
-        name: "Abhishek Singh",
-        age: "31.20338674070859 years",
-        gender: "Male",
-        timing: "10:50 to 16:54",
-        hospital_name: "natya cliic",
-      },
-    ];
-
     appointments = appointments.map((e: any) => {
       let time = e?.time;
       let subpatient = e?.subPatient;
+      console.log(
+        "subpatient?.firstNamesubpatient?.firstName",
+        subpatient?.firstName
+      );
       return {
         _id: e?.patient?._id,
         name: `${e?.patient?.firstName} ${e?.patient?.lastName}`,
@@ -1065,11 +1064,21 @@ export const viewAppointmentsByDate = async (req: Request, res: Response) => {
           name: e?.hospital?.name,
         },
         subPatient: {
-          _id: subpatient._id,
-          sub_pat_name: `${subpatient.firstName} ${subpatient.lastName}`,
-          sub_pat_age: subpatient?.DOB,
-          sub_pat_gender: subpatient?.gender,
+          ...(subpatient?.firstName && {
+            _id: subpatient?._id,
+            sub_pat_name:
+              subpatient?.firstName &&
+              `${subpatient?.firstName} ${subpatient?.lastName}`,
+            sub_pat_age: calculateAge(subpatient?.DOB),
+            sub_pat_gender: subpatient?.gender,
+          }),
         },
+        // subPatient: {
+        //   _id: subpatient?._id,
+        //   sub_pat_name: `${subpatient?.firstName} ${subpatient?.lastName}`,
+        //   sub_pat_age: subpatient?.DOB,
+        //   sub_pat_gender: subpatient?.gender,
+        // },
       };
     });
 
@@ -1324,10 +1333,19 @@ export const getDoctorWorkingInHospitals = async (
             elem[WEEK_DAYS[day]]?.till.division
           }`;
         }),
+
+        capacityAndToken: e?.workingHours.map((elem: any) => {
+          return {
+            capacity: elem[WEEK_DAYS[day]].capacity,
+            largestToken: elem[WEEK_DAYS[day]].appointmentsBooked,
+          };
+        }),
         available: e?.available,
         scheduleAvailable: e?.scheduleAvailable,
       };
     });
+
+    // let hospitaldetails = doctors?.hospitalDetails
     return successResponse({ doctordetails, hospitaldetails }, "Successs", res);
 
     // let hospitalDetails = await hospitalService.doctorsInHospital(

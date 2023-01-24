@@ -801,13 +801,20 @@ const getSpecialityBodyPartAndDisease = (_req, res) => __awaiter(void 0, void 0,
         */
         const Conn = mongoose_1.default.createConnection();
         yield Conn.openUri(process.env.DB_PATH);
-        const speciality = Conn.collection("special").find();
+        const speciality = Conn.collection("special")
+            .find()
+            .sort({ specialityName: 1 })
+            .sort({ active: -1 });
         const bodyParts = BodyPart_Model_1.default.find();
         const disease = Disease_Model_1.default.find();
         const SBD = yield Promise.all([speciality.toArray(), bodyParts, disease]);
         const [S, B, D] = SBD;
         Conn.close();
-        return (0, response_1.successResponse)({ Speciality: S, BodyPart: B, Disease: D }, "Success", res);
+        return (0, response_1.successResponse)({
+            Speciality: S,
+            BodyPart: B,
+            Disease: D,
+        }, "Success", res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);

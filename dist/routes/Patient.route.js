@@ -74,6 +74,12 @@ patientRouter.post("/verifyPayment", (0, middlewareHelper_1.oneOf)(Patient_auth_
         let doctorId = req.body.doctors, patientId = req.body.patient, hospitalId = req.body.hospital, subPatientId = req.body.subPatient;
         let valid = yield prescriptionValidtiyService.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod({ doctorId, patientId, hospitalId, subPatientId });
         req.body["appointmentType"] = valid ? "Follow up" : "Fresh";
+        if (req.currentPatient) {
+            req.body.appointment["appointmentBookedBy"] = "Patient";
+        }
+        else if (req.currentSuvedha) {
+            req.body.appointment["appointmentBookedBy"] = "Suvedha";
+        }
         next();
     }
     catch (error) {

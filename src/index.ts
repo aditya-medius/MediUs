@@ -23,6 +23,7 @@ import { authenticateAdmin } from "./authentication/Admin.auth";
 import * as swaggerUi from "swagger-ui-express";
 import * as swaggerDoc from "../swagger.json";
 import suvedhaRouter from "./routes/Suvedha.route";
+import { setSpecializationActiveStatus } from "./Services/Doctor/Doctor.Service";
 // Cron Jobs
 // cronJobService.cronFunctions.forEach((e: Function) => {
 //   e();
@@ -64,3 +65,5 @@ app.get("test", (req: Request, res: Response) => {
 app.listen(port, () => {
   console.log(`Running on port ${port}`);
 });
+
+setSpecializationActiveStatus();

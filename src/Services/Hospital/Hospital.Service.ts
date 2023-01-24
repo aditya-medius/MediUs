@@ -681,7 +681,7 @@ export const getPatientsAppointmentsInThisHospital = async (
   }
 };
 
-export const verifyPayment = async (body: any) => {
+export const verifyPayment = async (body: any, isHospital: boolean = false) => {
   try {
     // payment Id aur payment signature
     let paymentId = `payment_id_gen_${Math.floor(
@@ -692,7 +692,7 @@ export const verifyPayment = async (body: any) => {
       100000 + Math.random() * 900000
     ).toString()}`;
 
-    const appointmentBook = await BookAppointment(body.appointment);
+    const appointmentBook = await BookAppointment(body.appointment, isHospital);
     const { orderId, orderReceipt } = body;
     const paymentObj = await new appointmentPaymentModel({
       paymentId,
@@ -893,7 +893,6 @@ export const doctorsInHospital = async (
           scheduleAvailable: true,
         };
       }
-      console.log("WHHHHHH", WH);
       if (!WH.length) {
         obj = {
           ...obj,
@@ -1092,6 +1091,58 @@ export const hospitalsInDoctor = async (doctorId: string, timings: string) => {
     });
     doctors.hospitalDetails = newData;
     return Promise.resolve(doctors);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const getHospitalById = async (hospitalId: string) => {
+  try {
+    let hospitalData = await hospitalModel
+      .find({ _id: hospitalId })
+      .populate({
+        path: "address",
+        populate: {
+          path: "city state locality",
+        },
+      })
+      .populate({
+        path: "anemity services",
+      });
+    return Promise.resolve(hospitalData);
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+};
+
+export const getCitiesWhereHospitalsExist = async () => {
+  try {
+    let data = await hospitalModel
+      .find({})
+      .populate({
+        path: "address",
+        select: "city",
+        populate: {
+          path: "city",
+        },
+      })
+      .select("address")
+      .lean();
+
+    let cities: Array<any> = [];
+
+    data.map((e: any) => {
+      let city = e?.address;
+      let exist = cities.find((elem: any) => elem?._id === city?.city?._id);
+      if (!exist) {
+        cities.push({
+          _id: city?.city?._id,
+          name: city?.city?.name,
+        });
+      }
+    });
+
+    return cities;
   } catch (error: any) {
     return Promise.reject(error);
   }
