@@ -93,12 +93,12 @@ patientRouter.post(
 
 patientRouter.post(
   "/generateOrderId",
-  oneOf(authenticatePatient, authenticateHospital),
+  oneOf(authenticatePatient, authenticateHospital, authenticateSuvedha),
   paymentController.generateOrderId
 );
 patientRouter.post(
   "/verifyPayment",
-  oneOf(authenticatePatient),
+  oneOf(authenticatePatient, authenticateSuvedha),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       let doctorId = req.body.doctors,
@@ -110,6 +110,12 @@ patientRouter.post(
           { doctorId, patientId, hospitalId, subPatientId }
         );
       req.body["appointmentType"] = valid ? "Follow up" : "Fresh";
+
+      if (req.currentPatient) {
+        req.body.appointment["appointmentBookedBy"] = "Patient";
+      } else if (req.currentSuvedha) {
+        req.body.appointment["appointmentBookedBy"] = "Suvedha";
+      }
       next();
     } catch (error: any) {
       return errorResponse(error, res);
@@ -191,7 +197,12 @@ patientRouter.post(
 // Search patient
 patientRouter.get(
   "/searchPatientByPhoneNumberOrEmail/:term",
-  oneOf(authenticateDoctor, authenticatePatient, authenticateHospital, authenticateSuvedha),
+  oneOf(
+    authenticateDoctor,
+    authenticatePatient,
+    authenticateHospital,
+    authenticateSuvedha
+  ),
   patientController.searchPatientByPhoneNumberOrEmail
 );
 

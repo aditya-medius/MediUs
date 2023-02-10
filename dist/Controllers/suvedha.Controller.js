@@ -230,6 +230,7 @@ const getDoctorsInAHospital = (req, res) => __awaiter(void 0, void 0, void 0, fu
                 prescription: `${doc.prescription.validateTill} Days`,
             };
         });
+        // doctors = data;
         return (0, response_1.successResponse)(doctors, "Success", res);
         return (0, response_1.successResponse)(data, "Success", res);
     }

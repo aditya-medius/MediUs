@@ -44,6 +44,7 @@ const Admin_auth_1 = require("./authentication/Admin.auth");
 const swaggerUi = __importStar(require("swagger-ui-express"));
 const swaggerDoc = __importStar(require("../swagger.json"));
 const Suvedha_route_1 = __importDefault(require("./routes/Suvedha.route"));
+const Doctor_Service_1 = require("./Services/Doctor/Doctor.Service");
 // Cron Jobs
 // cronJobService.cronFunctions.forEach((e: Function) => {
 //   e();
@@ -67,6 +68,7 @@ app.use("/static", middlewareHelper_1.tokenNikalo, (0, middlewareHelper_1.oneOf)
 app.get("test", (req, res) => {
     res.send("Hello");
 });
-app.listen(port, () => {
+app.listen(3000, () => {
     console.log(`Running on port ${port}`);
 });
+(0, Doctor_Service_1.setSpecializationActiveStatus)();

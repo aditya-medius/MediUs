@@ -1,15 +1,20 @@
 import mongoose, { Schema, model } from "mongoose";
 import {
   doctor,
+  hospital,
   patient,
   preferredPharma,
   prescription,
 } from "../Services/schemaNames";
 
 const prescriptionSchema = new Schema({
-  doctor: {
+  doctorId: {
     type: mongoose.Types.ObjectId,
     ref: doctor,
+  },
+  hospitalId: {
+    type: mongoose.Types.ObjectId,
+    ref: hospital,
   },
   patient: {
     type: mongoose.Types.ObjectId,

@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMyLikes = exports.unlikeDoctor = exports.likeADoctor = exports.getPrescriptionValidityAndFeesOfDoctorInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getHospitalsOfflineAndOnlineAppointments = exports.deleteHolidayCalendar = exports.getDoctorsHolidayList = exports.setHolidayCalendar = exports.getDoctorsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.setConsultationFeeForDoctor = exports.addHospitalInDoctorProfile = exports.checkVerificationStatus = exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
+exports.getSpecializationByCity = exports.getMyLikes = exports.unlikeDoctor = exports.likeADoctor = exports.getPrescriptionValidityAndFeesOfDoctorInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getHospitalsOfflineAndOnlineAppointments = exports.deleteHolidayCalendar = exports.getDoctorsHolidayList = exports.setHolidayCalendar = exports.getDoctorsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.setConsultationFeeForDoctor = exports.addHospitalInDoctorProfile = exports.checkVerificationStatus = exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -60,7 +60,6 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const Appointment_Model_1 = __importDefault(require("../Models/Appointment.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
 const Validation_Service_1 = require("../Services/Validation.Service");
-const WorkingHour_helper_1 = require("../Services/WorkingHour.helper");
 const doctorService = __importStar(require("../Services/Doctor/Doctor.Service"));
 const Withdrawal_Model_1 = __importDefault(require("../Models/Withdrawal.Model"));
 const Qualification_Model_1 = __importDefault(require("../Models/Qualification.Model"));
@@ -99,6 +98,11 @@ const createDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             body.password = yield bcrypt.hash(body.password, cryptSalt);
         }
         let doctorObj = yield new Doctors_Model_1.default(body).save();
+        if (body === null || body === void 0 ? void 0 : body.specialization) {
+            Specialization_Model_1.default
+                .updateMany({ _id: { $in: body === null || body === void 0 ? void 0 : body.specialization } }, { $set: { active: true } })
+                .then();
+        }
         yield doctorObj.populate("qualification");
         doctorObj = doctorObj.toObject();
         doctorObj.qualification = doctorObj.qualification[0];
@@ -654,7 +658,18 @@ const searchDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                 });
                 return e;
             });
-            return (0, response_1.successResponse)(doctorArray, "Success", res);
+            let data = doctorArray.map((e) => {
+                var _a, _b, _c, _d;
+                return {
+                    _id: e._id,
+                    name: `${e.firstName} ${e.lastName}`,
+                    specilization: (_a = e === null || e === void 0 ? void 0 : e.specialization[0]) === null || _a === void 0 ? void 0 : _a.specialityName,
+                    Qualification: (_c = (_b = e === null || e === void 0 ? void 0 : e.qualification[0]) === null || _b === void 0 ? void 0 : _b.qualificationName) === null || _c === void 0 ? void 0 : _c.abbreviation,
+                    experience: (_d = e === null || e === void 0 ? void 0 : e.overallExperience) !== null && _d !== void 0 ? _d : null,
+                };
+            });
+            // return successResponse(doctorArray, "Success", res);
+            return (0, response_1.successResponse)(data, "Success", res);
         }))
             .catch((error) => {
             return (0, response_1.errorResponse)(error, res);
@@ -885,10 +900,11 @@ const viewAppointments = (req, res) => __awaiter(void 0, void 0, void 0, functio
 exports.viewAppointments = viewAppointments;
 const viewAppointmentsByDate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const limit = 2;
+        const limit = 20;
         const skip = parseInt(req.params.page) * limit;
         const date = req.body.date;
         let d = new Date(date);
+        const { hospital_id } = req.body;
         // console.log("date", d);
         // let gtDate: Date = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
         // let ltDate: Date = new Date(gtDate);
@@ -910,7 +926,7 @@ const viewAppointmentsByDate = (req, res) => __awaiter(void 0, void 0, void 0, f
         if (req.body.hospital) {
             query["hospital"] = req.body.hospital;
         }
-        const appointments = yield Appointment_Model_1.default
+        let appointments = yield Appointment_Model_1.default
             .find(query)
             .populate({ path: "patient", select: { password: 0, verified: 0 } })
             .populate({ path: "doctors", select: exports.excludeDoctorFields })
@@ -922,7 +938,40 @@ const viewAppointmentsByDate = (req, res) => __awaiter(void 0, void 0, void 0, f
         appointments.forEach((appointment) => {
             appointment.patient["age"] = (0, Patient_Service_1.calculateAge)(appointment.patient.DOB);
         });
-        return (0, response_1.successResponse)(appointments, "Success", res);
+        appointments = appointments.map((e) => {
+            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+            let time = e === null || e === void 0 ? void 0 : e.time;
+            let subpatient = e === null || e === void 0 ? void 0 : e.subPatient;
+            console.log("subpatient?.firstNamesubpatient?.firstName", subpatient === null || subpatient === void 0 ? void 0 : subpatient.firstName);
+            return {
+                _id: (_a = e === null || e === void 0 ? void 0 : e.patient) === null || _a === void 0 ? void 0 : _a._id,
+                name: `${(_b = e === null || e === void 0 ? void 0 : e.patient) === null || _b === void 0 ? void 0 : _b.firstName} ${(_c = e === null || e === void 0 ? void 0 : e.patient) === null || _c === void 0 ? void 0 : _c.lastName}`,
+                age: (_d = e === null || e === void 0 ? void 0 : e.patient) === null || _d === void 0 ? void 0 : _d.age,
+                gender: (_e = e === null || e === void 0 ? void 0 : e.patient) === null || _e === void 0 ? void 0 : _e.gender,
+                timing: `${(_f = time === null || time === void 0 ? void 0 : time.from) === null || _f === void 0 ? void 0 : _f.time}:${(_g = time === null || time === void 0 ? void 0 : time.from) === null || _g === void 0 ? void 0 : _g.division} to ${(_h = time === null || time === void 0 ? void 0 : time.till) === null || _h === void 0 ? void 0 : _h.time}:${(_j = time === null || time === void 0 ? void 0 : time.till) === null || _j === void 0 ? void 0 : _j.division}`,
+                hospital: {
+                    _id: (_k = e === null || e === void 0 ? void 0 : e.hospital) === null || _k === void 0 ? void 0 : _k._id,
+                    name: (_l = e === null || e === void 0 ? void 0 : e.hospital) === null || _l === void 0 ? void 0 : _l.name,
+                },
+                subPatient: Object.assign({}, ((subpatient === null || subpatient === void 0 ? void 0 : subpatient.firstName) && {
+                    _id: subpatient === null || subpatient === void 0 ? void 0 : subpatient._id,
+                    sub_pat_name: (subpatient === null || subpatient === void 0 ? void 0 : subpatient.firstName) &&
+                        `${subpatient === null || subpatient === void 0 ? void 0 : subpatient.firstName} ${subpatient === null || subpatient === void 0 ? void 0 : subpatient.lastName}`,
+                    sub_pat_age: (0, Patient_Service_1.calculateAge)(subpatient === null || subpatient === void 0 ? void 0 : subpatient.DOB),
+                    sub_pat_gender: subpatient === null || subpatient === void 0 ? void 0 : subpatient.gender,
+                })),
+                // subPatient: {
+                //   _id: subpatient?._id,
+                //   sub_pat_name: `${subpatient?.firstName} ${subpatient?.lastName}`,
+                //   sub_pat_age: subpatient?.DOB,
+                //   sub_pat_gender: subpatient?.gender,
+                // },
+            };
+        });
+        if (hospital_id) {
+            appointments = appointments.filter((e) => { var _a, _b; return ((_b = (_a = e === null || e === void 0 ? void 0 : e.hospital) === null || _a === void 0 ? void 0 : _a._id) === null || _b === void 0 ? void 0 : _b.toString()) === hospital_id; });
+        }
+        return (0, response_1.successResponse)({ patientdetails: appointments }, "Success", res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);
@@ -959,109 +1008,236 @@ const cancelAppointments = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.cancelAppointments = cancelAppointments;
+// export const getDoctorWorkingInHospitals = async (
+//   req: Request,
+//   res: Response
+// ) => {
+//   try {
+//     let doctorDetails = await doctorModel
+//       .findOne({ _id: req.params.id }, { ...excludeDoctorFields })
+//       .populate("specialization qualification");
+//     let hospitalIds_Array = doctorDetails.hospitalDetails.map(
+//       (e: any) => e.hospital
+//     );
+//     let workingHourObj = await workingHourModel
+//       .find({
+//         doctorDetails: req.params.id,
+//         hospitalDetails: { $in: hospitalIds_Array },
+//       })
+//       .distinct("hospitalDetails");
+//     let hospitals = await hospitalModel
+//       .find(
+//         { _id: { $in: workingHourObj } },
+//         {
+//           payment: 0,
+//         }
+//       )
+//       .populate({
+//         path: "address",
+//         populate: {
+//           path: "city state locality country",
+//         },
+//       })
+//       .populate("anemity")
+//       .populate("openingHour");
+//     const doctorObj = await workingHourModel.aggregate([
+//       {
+//         $match: {
+//           doctorDetails: new mongoose.Types.ObjectId(req.params.id),
+//         },
+//       },
+//       {
+//         $project: {
+//           hospitalDetails: 1,
+//           monday: 1,
+//           tuesday: 1,
+//           wednesday: 1,
+//           thursday: 1,
+//           friday: 1,
+//           saturday: 1,
+//           sunday: 1,
+//         },
+//       },
+//       {
+//         $group: {
+//           _id: "$hospitalDetails",
+//           workingHours: {
+//             $push: {
+//               monday: "$monday",
+//               tuesday: "$tuesday",
+//               wednesday: "$wednesday",
+//               thursday: "$thursday",
+//               friday: "$friday",
+//               saturday: "$saturday",
+//               sunday: "$sunday",
+//             },
+//           },
+//         },
+//       },
+//       {
+//         $lookup: {
+//           from: "hospitals",
+//           localField: "_id",
+//           foreignField: "_id",
+//           as: "hospital",
+//         },
+//       },
+//       {
+//         $project: {
+//           workingHours: 1,
+//         },
+//       },
+//     ]);
+//     let index: number;
+//     let doctorsWorkingInHospital: Array<any> = hospitals.map((element: any) => {
+//       index = doctorObj.findIndex((e: any) => {
+//         return e._id.toString() == element._id.toString();
+//       });
+//       return {
+//         hospital: element,
+//         ...doctorObj[index],
+//       };
+//     });
+//     await doctorsWorkingInHospital.forEach(async (e: any) => {
+//       e.workingHours = formatWorkingHour(e.workingHours);
+//     });
+//     let fee = doctorDetails.hospitalDetails;
+//     doctorsWorkingInHospital.forEach((e: any) => {
+//       let { consultationFee } = fee.filter((elem: any) => {
+//         return elem.hospital.toString() == e.hospital._id.toString();
+//       })[0];
+//       e["Consultation_Fee"] = consultationFee;
+//     });
+//     doctorDetails = doctorDetails.toObject();
+//     delete doctorDetails.hospitalDetails;
+//     let allPrescriptions =
+//       await prescriptionController.getDoctorPrescriptionValidity(req.params.id);
+//     doctorsWorkingInHospital.map((e) => {
+//       let prescription = allPrescriptions.filter((elem) => {
+//         return elem.hospitalId.toString() === e.hospital._id.toString();
+//       })[0]?.validateTill;
+//       e["presciptionValidity"] = prescription ?? "Not found";
+//     });
+//     doctorDetails = {
+//       name: `${doctorDetails.firstName} ${doctorDetails.lastName}`,
+//       specilization: doctorDetails?.specialization?.[0]?.specialityName,
+//       qualification: doctorDetails?.qualification?.[0]?.qualificationName?.name,
+//       experience: doctorDetails?.overallExperience,
+//       _id: doctorDetails._id,
+//     };
+//     doctorsWorkingInHospital = doctorsWorkingInHospital.map((e: any) => {
+//       return {
+//         _id: e?.hospital?._id,
+//         name: e?.hospital?.name,
+//         address: `${e?.hospital?.address?.locality?.name}, ${e?.hospital?.address?.city?.name}`,
+//         fee: e?.Consultation_Fee?.min,
+//         prescription_validity: `${e?.presciptionValidity} Days`,
+//         // time: [{ availble: true, time: "12:00 to 13:00" }],
+//         time: e?.workingHours.map((elem: any) => {
+//           return {
+//             time: `${elem?.timings?.from?.time}:${elem?.timings?.from?.division} ${elem?.timings?.till?.time}:${elem?.timings?.till?.division}`,
+//           };
+//         }),
+//       };
+//     });
+//     return successResponse(
+//       { doctorDetails, doctorsWorkingInHospital },
+//       "Success",
+//       res
+//     );
+//     return successResponse(
+//       { doctorDetails, doctorsWorkingInHospital },
+//       "Success",
+//       res
+//     );
+//   } catch (error: any) {
+//     return errorResponse(error, res);
+//   }
+// };
 const getDoctorWorkingInHospitals = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _b, _c, _d, _e, _f;
     try {
-        let doctorDetails = yield Doctors_Model_1.default
-            .findOne({ _id: req.params.id }, Object.assign({}, exports.excludeDoctorFields))
-            .populate("specialization qualification");
-        let hospitalIds_Array = doctorDetails.hospitalDetails.map((e) => e.hospital);
-        let workingHourObj = yield WorkingHours_Model_1.default
-            .find({
-            doctorDetails: req.params.id,
-            hospitalDetails: { $in: hospitalIds_Array },
-        })
-            .distinct("hospitalDetails");
-        let hospitals = yield Hospital_Model_1.default
-            .find({ _id: { $in: workingHourObj } }, {
-            payment: 0,
-        })
-            .populate({
-            path: "address",
-            populate: {
-                path: "city state locality country",
-            },
-        })
-            .populate("anemity")
-            .populate("openingHour");
-        const doctorObj = yield WorkingHours_Model_1.default.aggregate([
-            {
-                $match: {
-                    doctorDetails: new mongoose_1.default.Types.ObjectId(req.params.id),
-                },
-            },
-            {
-                $project: {
-                    hospitalDetails: 1,
-                    monday: 1,
-                    tuesday: 1,
-                    wednesday: 1,
-                    thursday: 1,
-                    friday: 1,
-                    saturday: 1,
-                    sunday: 1,
-                },
-            },
-            {
-                $group: {
-                    _id: "$hospitalDetails",
-                    workingHours: {
-                        $push: {
-                            monday: "$monday",
-                            tuesday: "$tuesday",
-                            wednesday: "$wednesday",
-                            thursday: "$thursday",
-                            friday: "$friday",
-                            saturday: "$saturday",
-                            sunday: "$sunday",
-                        },
-                    },
-                },
-            },
-            {
-                $lookup: {
-                    from: "hospitals",
-                    localField: "_id",
-                    foreignField: "_id",
-                    as: "hospital",
-                },
-            },
-            {
-                $project: {
-                    workingHours: 1,
-                },
-            },
-        ]);
-        let index;
-        let doctorsWorkingInHospital = hospitals.map((element) => {
-            index = doctorObj.findIndex((e) => {
-                return e._id.toString() == element._id.toString();
-            });
-            return Object.assign({ hospital: element }, doctorObj[index]);
+        let { timings } = req.body, { id: doctorId } = req.params;
+        let doctors = yield hospitalService.hospitalsInDoctor(doctorId, timings);
+        let doctordetails = {
+            _id: doctors === null || doctors === void 0 ? void 0 : doctors._id,
+            name: `${doctors.firstName} ${doctors.lastName}`,
+            specilization: (_c = (_b = doctors === null || doctors === void 0 ? void 0 : doctors.specialization) === null || _b === void 0 ? void 0 : _b[0]) === null || _c === void 0 ? void 0 : _c.specialityName,
+            qualification: (_f = (_e = (_d = doctors === null || doctors === void 0 ? void 0 : doctors.qualification) === null || _d === void 0 ? void 0 : _d[0]) === null || _e === void 0 ? void 0 : _e.qualificationName) === null || _f === void 0 ? void 0 : _f.name,
+            experience: doctors === null || doctors === void 0 ? void 0 : doctors.overallExperience,
+        };
+        let day = new Date(timings).getDay();
+        let WEEK_DAYS = [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+        ];
+        let hospitaldetails = doctors === null || doctors === void 0 ? void 0 : doctors.hospitalDetails.map((e) => {
+            var _a, _b, _c, _d, _e, _f, _g;
+            let data = e === null || e === void 0 ? void 0 : e.hospital;
+            return {
+                id: data === null || data === void 0 ? void 0 : data._id,
+                name: data === null || data === void 0 ? void 0 : data.name,
+                address: `${(_b = (_a = data === null || data === void 0 ? void 0 : data.address) === null || _a === void 0 ? void 0 : _a.locality) === null || _b === void 0 ? void 0 : _b.name}, ${(_d = (_c = data === null || data === void 0 ? void 0 : data.address) === null || _c === void 0 ? void 0 : _c.city) === null || _d === void 0 ? void 0 : _d.name}`,
+                fee: (_e = e === null || e === void 0 ? void 0 : e.consultationFee) === null || _e === void 0 ? void 0 : _e.min,
+                prescription_validity: (_f = e === null || e === void 0 ? void 0 : e.prescription) === null || _f === void 0 ? void 0 : _f.validateTill,
+                time: (_g = e === null || e === void 0 ? void 0 : e.workingHours) === null || _g === void 0 ? void 0 : _g.map((elem) => {
+                    var _a, _b, _c, _d;
+                    return `${(_a = elem[WEEK_DAYS[day]]) === null || _a === void 0 ? void 0 : _a.from.time}:${(_b = elem[WEEK_DAYS[day]]) === null || _b === void 0 ? void 0 : _b.from.division} to ${(_c = elem[WEEK_DAYS[day]]) === null || _c === void 0 ? void 0 : _c.till.time}:${(_d = elem[WEEK_DAYS[day]]) === null || _d === void 0 ? void 0 : _d.till.division}`;
+                }),
+                capacityAndToken: e === null || e === void 0 ? void 0 : e.workingHours.map((elem) => {
+                    return {
+                        capacity: elem[WEEK_DAYS[day]].capacity,
+                        largestToken: elem[WEEK_DAYS[day]].appointmentsBooked,
+                    };
+                }),
+                available: e === null || e === void 0 ? void 0 : e.available,
+                scheduleAvailable: e === null || e === void 0 ? void 0 : e.scheduleAvailable,
+            };
         });
-        yield doctorsWorkingInHospital.forEach((e) => __awaiter(void 0, void 0, void 0, function* () {
-            e.workingHours = (0, WorkingHour_helper_1.formatWorkingHour)(e.workingHours);
-        }));
-        let fee = doctorDetails.hospitalDetails;
-        doctorsWorkingInHospital.forEach((e) => {
-            let { consultationFee } = fee.filter((elem) => {
-                return elem.hospital.toString() == e.hospital._id.toString();
-            })[0];
-            e["Consultation_Fee"] = consultationFee;
-        });
-        doctorDetails = doctorDetails.toObject();
-        delete doctorDetails.hospitalDetails;
-        let allPrescriptions = yield prescriptionController.getDoctorPrescriptionValidity(req.params.id);
-        doctorsWorkingInHospital.map((e) => {
-            var _a;
-            let prescription = (_a = allPrescriptions.filter((elem) => {
-                return elem.hospitalId.toString() === e.hospital._id.toString();
-            })[0]) === null || _a === void 0 ? void 0 : _a.validateTill;
-            e["presciptionValidity"] = prescription !== null && prescription !== void 0 ? prescription : "Not found";
-        });
-        console.log("doctorsWorkingInHospitaldoctorsWorkingInHospital", doctorsWorkingInHospital);
-        return (0, response_1.successResponse)({ doctorDetails, doctorsWorkingInHospital }, 
-        // doctorsWorkingInHospital,
-        "Success", res);
+        // let hospitaldetails = doctors?.hospitalDetails
+        return (0, response_1.successResponse)({ doctordetails, hospitaldetails }, "Successs", res);
+        // let hospitalDetails = await hospitalService.doctorsInHospital(
+        //   hospitalId,
+        //   timings
+        // );
+        // let { doctors } = hospitalDetails;
+        // let day: any = new Date(timings).getDay();
+        // let WEEK_DAYS = [
+        //   "sunday",
+        //   "monday",
+        //   "tuesday",
+        //   "wednesday",
+        //   "thursday",
+        //   "friday",
+        //   "saturday",
+        // ];
+        // doctors = doctors.map((e: any) => {
+        //   return {
+        //     _id: e?._id,
+        //     name: `${e.firstName} ${e.lastName}`,
+        //     specilization: e?.specialization[0]?.specialityName,
+        //     Qualification: e?.qualification[0]?.qualificationName?.abbreviation,
+        //     Exeperience: e?.overallExperience,
+        //     Fee: e?.hospitalDetails.find(
+        //       (elem: any) => elem.hospital.toString() === hospitalId
+        //     )?.consultationFee.max,
+        //     workinghour: e?.workingHours.map((elem: any) => {
+        //       return `${elem[WEEK_DAYS[day]]?.from.time}:${
+        //         elem[WEEK_DAYS[day]]?.from.division
+        //       } to ${elem[WEEK_DAYS[day]]?.till.time}:${
+        //         elem[WEEK_DAYS[day]]?.till.division
+        //       }`;
+        //     }),
+        //     available: e?.available,
+        //     scheduleAvailable: e?.scheduleAvailable,
+        //   };
+        // });
+        // return successResponse(doctors, "Successs", res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);
@@ -1170,8 +1346,20 @@ const getHospitalListByDoctorId = (req, res) => __awaiter(void 0, void 0, void 0
             },
         });
         if (doctorData) {
-            const hospitalDetails = doctorData.hospitalDetails.map((e) => {
+            let hospitalDetails = doctorData.hospitalDetails.map((e) => {
                 return e.hospital;
+            });
+            // "hospitalDetails":[
+            //   {
+            //   "id":"535435353",
+            //   "name":"Tulsi hospital",
+            //   }
+            //   ]
+            hospitalDetails = hospitalDetails.map((e) => {
+                return {
+                    _id: e._id,
+                    name: e.name,
+                };
             });
             return (0, response_1.successResponse)({ hospitalDetails }, "Successfully fetched doctor details", res);
         }
@@ -1579,7 +1767,7 @@ exports.checkVerificationStatus = checkVerificationStatus;
 /* Hospital khud ko doctor ki profile me add kr ske */
 const addHospitalInDoctorProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let _b = req.body, { doctorId } = _b, rest = __rest(_b, ["doctorId"]);
+        let _g = req.body, { doctorId } = _g, rest = __rest(_g, ["doctorId"]);
         let keys = Object.keys(rest);
         if (!(keys.includes("hospital") &&
             keys.includes("workingHours") &&
@@ -1826,3 +2014,38 @@ const getMyLikes = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.getMyLikes = getMyLikes;
+const getSpecializationByCity = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let { cityId } = req.query;
+        let hospitals = yield (0, Patient_Service_1.getHospitalsInACity)(cityId);
+        hospitals = hospitals.map((e) => {
+            return {
+                _id: e._id.toString(),
+            };
+        });
+        let docsInHospitals = yield doctorService.getDoctorsInHospitalByQuery({
+            _id: { $in: hospitals },
+            $expr: { $gt: [{ $size: "$doctors" }, 0] },
+        }, {
+            doctors: 1,
+        });
+        let specality = docsInHospitals
+            .map((hospital) => {
+            return hospital.doctors.map((docs) => docs.specialization).flat();
+        })
+            .flat();
+        const Conn = mongoose_1.default.createConnection();
+        yield Conn.openUri(process.env.DB_PATH);
+        const special = Conn.collection("special").find({
+            _id: { $in: specality.flat() },
+        });
+        let SBD = yield Promise.all([special.toArray()]);
+        let [S] = SBD;
+        Conn.close();
+        return (0, response_1.successResponse)({ Speciality: S }, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getSpecializationByCity = getSpecializationByCity;

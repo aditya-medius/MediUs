@@ -163,6 +163,8 @@ const getDoctorsInAHospital = (hospitalId, date) => __awaiter(void 0, void 0, vo
         let year = time.getFullYear(), month = time.getMonth(), currentDate = time.getDate();
         let startDate = new Date(year, month, currentDate);
         let endDate = new Date(year, month, currentDate + 1);
+        console.log("ygstratggc", startDate);
+        console.log("knhgvdbdd", endDate);
         let doctors = yield Hospital_Model_1.default.aggregate([
             [
                 {
@@ -273,9 +275,29 @@ const getDoctorsInAHospital = (hospitalId, date) => __awaiter(void 0, void 0, vo
                         },
                     },
                 },
+                // {
+                //   $match: {
+                //     "doctors.holiday.date": { $gte: startDate, $lte: endDate },
+                //   },
+                // },
                 {
-                    $match: {
-                        "doctors.holiday.date": { $gte: startDate, $lte: endDate },
+                    $addFields: {
+                        "doctors.holiday": {
+                            $filter: {
+                                input: "$doctors.holiday",
+                                as: "holiday",
+                                cond: {
+                                    $and: [
+                                        {
+                                            $gte: ["$$holiday.date", startDate],
+                                        },
+                                        {
+                                            $lte: ["$$holiday.date", endDate],
+                                        },
+                                    ],
+                                },
+                            },
+                        },
                     },
                 },
                 {

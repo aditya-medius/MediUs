@@ -42,11 +42,22 @@ const Prescription_Model_1 = __importDefault(require("../Models/Prescription.Mod
 const setPrescriptionValidity = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { doctorId = req.currentDoctor ? req.currentDoctor : req.body.doctorId, validateTill, hospitalId, } = req.body;
-        let prescription = yield new Prescription_Validity_Model_1.default({
+        // let prescription = await new prescriptionValidityModel({
+        //   doctorId,
+        //   hospitalId,
+        //   validateTill,
+        // }).save();
+        let prescription = yield Prescription_Validity_Model_1.default.findOneAndUpdate({
             doctorId,
             hospitalId,
-            validateTill,
-        }).save();
+        }, {
+            $set: {
+                validateTill,
+            },
+        }, {
+            new: true,
+            upsert: true,
+        });
         return (0, response_1.successResponse)(prescription, "Success", res);
     }
     catch (error) {

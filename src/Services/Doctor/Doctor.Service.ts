@@ -40,6 +40,8 @@ import {
 } from "../Suvedha/Suvedha.Service";
 import { getCityIdFromName, getSpecialization } from "../Admin/Admin.Service";
 import workingHourModel from "../../Models/WorkingHours.Model";
+import specialityModel from "../../Admin Controlled Models/Specialization.Model";
+import hospitalModel from "../../Models/Hospital.Model";
 dotenv.config();
 
 export const WEEKDAYS = [
@@ -1027,4 +1029,37 @@ export const getDoctorsHolidayByQuery = async (query: any) => {
   } catch (error: any) {
     return Promise.reject(error);
   }
+};
+
+// This function is supposed to be run ony once
+export const setSpecializationActiveStatus = async () => {
+  try {
+    let speclizationIds = await doctorModel
+      .find({}, { specialization: 1 })
+      .lean();
+
+    speclizationIds = speclizationIds
+      .map((e: any) => e.specialization)
+      .flat()
+      .map((e: any) => e.toString());
+
+    speclizationIds = [...new Set(speclizationIds)];
+
+    specialityModel.updateMany(
+      { _id: { $in: speclizationIds } },
+      { $set: { active: true } }
+    );
+    return Promise.resolve(speclizationIds);
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+export const getDoctorsInHospitalByQuery = async (
+  query: Object = {},
+  select: Object = {}
+) => {
+  let doctors = await hospitalModel.find(query, select).populate("doctors");
+
+  return doctors;
 };

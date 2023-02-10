@@ -119,7 +119,7 @@ doctorRouter.get("/viewAppointments/:page", (0, middlewareHelper_1.oneOf)(Doctor
 doctorRouter.post("/viewAppointmentsByDate/:page", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.viewAppointmentsByDate);
 // Cancel doctor's appointments
 doctorRouter.put("/cancelAppointments", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.cancelAppointments);
-doctorRouter.get("/getDoctorWorkingInHospitals/:id", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.getDoctorWorkingInHospitals);
+doctorRouter.put("/getDoctorWorkingInHospitals/:id", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.getDoctorWorkingInHospitals);
 doctorRouter.post("/getWorkingHours", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital), workingHoursController.getWorkingHours);
 //Preferred Pharma Routes
 //add the preferred pharma
@@ -206,4 +206,5 @@ doctorRouter.put("/getFeeAndValidity", (0, middlewareHelper_1.oneOf)(Doctor_auth
 doctorRouter.post("/likeUnlikeDoctor", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient, Suvedha_auth_1.authenticateSuvedha), doctorController.likeADoctor);
 doctorRouter.post("/unlikeDoctor", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.unlikeDoctor);
 doctorRouter.post("/getMyLikes", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.getMyLikes);
+doctorRouter.get("/city/specializations", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital, Patient_auth_1.authenticatePatient, Suvedha_auth_1.authenticateSuvedha), doctorController.getSpecializationByCity);
 exports.default = doctorRouter;

@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifyPayment = exports.generateOrderId = exports.getPatientsAppointmentsInThisHospital = exports.searchHospitalByPhoneNumber = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.updateHospitalAddress = exports.getHospitalsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.checkVerificationStatus = exports.getDoctorsInHospital = exports.getHospitalById = exports.getAppointmentByDate = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.deleteAnemities = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
+exports.getHospitalDetails = exports.doctorsInHospitalWithTimings = exports.verifyPayment = exports.generateOrderId = exports.getPatientsAppointmentsInThisHospital = exports.searchHospitalByPhoneNumber = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.updateHospitalAddress = exports.getHospitalsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.checkVerificationStatus = exports.getDoctorsInHospital = exports.getHospitalById = exports.getAppointmentByDate = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.deleteAnemities = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Anemities_Model_1 = __importDefault(require("../Models/Anemities.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
@@ -58,9 +58,7 @@ const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const Appointment_Model_1 = __importDefault(require("../Models/Appointment.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const message_service_1 = require("../Services/message.service");
-const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
 const Patient_Controller_1 = require("./Patient.Controller");
-const WorkingHour_helper_1 = require("../Services/WorkingHour.helper");
 const bcrypt = __importStar(require("bcrypt"));
 const Services_Model_1 = __importDefault(require("../Admin Controlled Models/Services.Model"));
 const Hospital_Service_1 = require("../Services/Hospital/Hospital.Service");
@@ -668,7 +666,16 @@ const searchHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
                     return ((_b = (_a = e === null || e === void 0 ? void 0 : e.address) === null || _a === void 0 ? void 0 : _a.city) === null || _b === void 0 ? void 0 : _b._id.toString()) === city;
                 });
             }
-            return (0, response_1.successResponse)(hospitalArray, "Success", res);
+            let data = hospitalArray.map((e) => {
+                var _a, _b;
+                return {
+                    _id: e === null || e === void 0 ? void 0 : e._id,
+                    name: e === null || e === void 0 ? void 0 : e.name,
+                    Address: (_b = (_a = e === null || e === void 0 ? void 0 : e.address) === null || _a === void 0 ? void 0 : _a.locality) === null || _b === void 0 ? void 0 : _b.name,
+                };
+            });
+            // return successResponse(hospitalArray, "Success", res);
+            return (0, response_1.successResponse)(data, "Success", res);
         }))
             .catch((error) => {
             return (0, response_1.errorResponse)(error, res);
@@ -797,115 +804,190 @@ const getAppointmentByDate = (req, res) => __awaiter(void 0, void 0, void 0, fun
     }
 });
 exports.getAppointmentByDate = getAppointmentByDate;
+// export const getHospitalById = async (req: Request, res: Response) => {
+//   try {
+//     let hospital = await hospitalModel
+//       .findOne({
+//         _id: req.params.id,
+//       })
+//       .populate({
+//         path: "address",
+//         populate: {
+//           path: "city state locality country",
+//         },
+//       })
+//       .populate({
+//         path: "doctors",
+//         select: {
+//           firstName: 1,
+//           lastName: 1,
+//           specialization: 1,
+//           hospitalDetails: 1,
+//           qualification: 1,
+//           overallExperience: 1,
+//         },
+//         populate: {
+//           path: "specialization qualification hospitalDetails.workingHours",
+//           select: {
+//             doctorDetails: 0,
+//             hospitalDetails: 0,
+//           },
+//         },
+//       })
+//       .populate("anemity")
+//       .populate("payment")
+//       .populate("specialisedIn")
+//       .populate({
+//         path: "openingHour",
+//         select: {
+//           _id: 0,
+//           __v: 0,
+//           byHospital: 0,
+//         },
+//       })
+//       .populate("services")
+//       .lean();
+//     if (hospital.doctors.length == 0) {
+//       return successResponse({ hospital }, "Success", res);
+//     }
+//     const doctorIds: Array<string> = hospital.doctors.map((e: any) => {
+//       return e._id.toString();
+//     });
+//     let workingHours: any = await workingHourModel
+//       .find({
+//         doctorDetails: { $in: doctorIds },
+//         hospitalDetails: req.params.id,
+//       })
+//       .select({
+//         hosptial: 0,
+//         _id: 0,
+//         __v: 0,
+//         byHospital: 0,
+//         hospitalDetails: 0,
+//       })
+//       .lean();
+//     workingHours = workingHours.reduce((r: any, a: any) => {
+//       r[a.doctorDetails.toString()] = [
+//         ...(r[a.doctorDetails.toString()] || []),
+//         a,
+//       ];
+//       return r;
+//     }, {});
+//     hospital.doctors.map((e: any) => {
+//       e.hospitalDetails = e.hospitalDetails.filter(
+//         (elem: any) => elem.hospital.toString() == req.params.id
+//       );
+//     });
+//     let doctors = hospital.doctors.map((e: any) => {
+//       if (e.hospitalDetails.length != 0) {
+//         return {
+//           _id: e._id,
+//           firstName: e.firstName,
+//           lastName: e.lastName,
+//           specialization: e.specialization,
+//           qualification: e.qualification,
+//           KYCDetails: e.KYCDetails,
+//           overallExperience: e.overallExperience,
+//           hospitalDetails: [
+//             {
+//               workingHour: formatWorkingHour(
+//                 workingHours[e._id.toString()]
+//                   ? workingHours[e._id.toString()]
+//                   : []
+//               ),
+//               consultationFee: e.hospitalDetails[0].consultationFee,
+//               _id: e.hospitalDetails._id,
+//             },
+//           ],
+//         };
+//       }
+//       // return ...[]
+//       // return;
+//     });
+//     if (hospital.openingHour) {
+//       hospital.openingHour = formatWorkingHour([hospital.openingHour]);
+//     }
+//     if (doctors.includes(undefined) && doctors.length == 1) {
+//       hospital.doctors = [];
+//     } else {
+//       if (doctors.includes(undefined)) {
+//         doctors = doctors.filter((e: any) => e);
+//       }
+//       hospital.doctors = doctors;
+//     }
+//     let hospitalDetails = {
+//       name: hospital?.name,
+//       address: `${hospital?.hospital?.address?.locality?.name}, ${hospital?.hospital?.address?.city?.name}`,
+//       _id: hospital._id,
+//     };
+//     let doctordetails = hospital?.doctors.map((e: any) => {
+//       return {
+//         id: e?._id,
+//         name: `${e.firstName} ${e.lastName}`,
+//         specilization: e?.specialization?.[0]?.specialityName,
+//         qualification: e?.qualification?.[0]?.qualificationName?.name,
+//         fee: e?.hospitalDetails?.[0]?.consultationFee?.min,
+//         experience: e?.overallExperience,
+//         time: e?.hospitalDetails?.[0]?.workingHour.map((elem: any) => {
+//           return {
+//             time: `${elem?.timings?.from?.time}:${elem?.timings?.from?.division} ${elem?.timings?.till?.time}:${elem?.timings?.till?.division}`,
+//           };
+//         }),
+//       };
+//     });
+//     return successResponse({ hospitalDetails, doctordetails }, "Success", res);
+//     // return successResponse({ hospital }, "Success", res);
+//   } catch (error: any) {
+//     return errorResponse(error, res);
+//   }
+// };
 const getHospitalById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _b, _c, _d, _e;
     try {
-        let hospital = yield Hospital_Model_1.default
-            .findOne({
-            _id: req.params.id,
-        })
-            .populate({
-            path: "address",
-            populate: {
-                path: "city state locality country",
-            },
-        })
-            .populate({
-            path: "doctors",
-            select: {
-                firstName: 1,
-                lastName: 1,
-                specialization: 1,
-                hospitalDetails: 1,
-                qualification: 1,
-                overallExperience: 1,
-            },
-            populate: {
-                path: "specialization qualification hospitalDetails.workingHours",
-                select: {
-                    doctorDetails: 0,
-                    hospitalDetails: 0,
-                },
-            },
-        })
-            .populate("anemity")
-            .populate("payment")
-            .populate("specialisedIn")
-            .populate({
-            path: "openingHour",
-            select: {
-                _id: 0,
-                __v: 0,
-                byHospital: 0,
-            },
-        })
-            .populate("services")
-            .lean();
-        if (hospital.doctors.length == 0) {
-            return (0, response_1.successResponse)({ hospital }, "Success", res);
-        }
-        const doctorIds = hospital.doctors.map((e) => {
-            return e._id.toString();
+        let { timings } = req.body, { id: hospitalId } = req.params;
+        let hospitalDetails = yield hospitalService.doctorsInHospital(hospitalId, timings);
+        let { doctors } = hospitalDetails;
+        let day = new Date(timings).getDay();
+        let WEEK_DAYS = [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+        ];
+        doctors = doctors.map((e) => {
+            var _a, _b, _c, _d;
+            return {
+                _id: e === null || e === void 0 ? void 0 : e._id,
+                name: `${e.firstName} ${e.lastName}`,
+                specilization: (_a = e === null || e === void 0 ? void 0 : e.specialization[0]) === null || _a === void 0 ? void 0 : _a.specialityName,
+                Qualification: (_c = (_b = e === null || e === void 0 ? void 0 : e.qualification[0]) === null || _b === void 0 ? void 0 : _b.qualificationName) === null || _c === void 0 ? void 0 : _c.abbreviation,
+                Exeperience: e === null || e === void 0 ? void 0 : e.overallExperience,
+                Fee: (_d = e === null || e === void 0 ? void 0 : e.hospitalDetails.find((elem) => elem.hospital.toString() === hospitalId)) === null || _d === void 0 ? void 0 : _d.consultationFee.max,
+                workinghour: e === null || e === void 0 ? void 0 : e.workingHours.map((elem) => {
+                    var _a, _b, _c, _d;
+                    return `${(_a = elem[WEEK_DAYS[day]]) === null || _a === void 0 ? void 0 : _a.from.time}:${(_b = elem[WEEK_DAYS[day]]) === null || _b === void 0 ? void 0 : _b.from.division} to ${(_c = elem[WEEK_DAYS[day]]) === null || _c === void 0 ? void 0 : _c.till.time}:${(_d = elem[WEEK_DAYS[day]]) === null || _d === void 0 ? void 0 : _d.till.division}`;
+                }),
+                capacityAndToken: e === null || e === void 0 ? void 0 : e.workingHours.map((elem) => {
+                    return {
+                        capacity: elem[WEEK_DAYS[day]].capacity,
+                        largestToken: elem[WEEK_DAYS[day]].appointmentsBooked,
+                    };
+                }),
+                capacity: "",
+                highestToken: "",
+                available: e === null || e === void 0 ? void 0 : e.available,
+                scheduleAvailable: e === null || e === void 0 ? void 0 : e.scheduleAvailable,
+            };
         });
-        let workingHours = yield WorkingHours_Model_1.default
-            .find({
-            doctorDetails: { $in: doctorIds },
-            hospitalDetails: req.params.id,
-        })
-            .select({
-            hosptial: 0,
-            _id: 0,
-            __v: 0,
-            byHospital: 0,
-            hospitalDetails: 0,
-        })
-            .lean();
-        workingHours = workingHours.reduce((r, a) => {
-            r[a.doctorDetails.toString()] = [
-                ...(r[a.doctorDetails.toString()] || []),
-                a,
-            ];
-            return r;
-        }, {});
-        hospital.doctors.map((e) => {
-            e.hospitalDetails = e.hospitalDetails.filter((elem) => elem.hospital.toString() == req.params.id);
-        });
-        let doctors = hospital.doctors.map((e) => {
-            if (e.hospitalDetails.length != 0) {
-                return {
-                    _id: e._id,
-                    firstName: e.firstName,
-                    lastName: e.lastName,
-                    specialization: e.specialization,
-                    qualification: e.qualification,
-                    KYCDetails: e.KYCDetails,
-                    overallExperience: e.overallExperience,
-                    hospitalDetails: [
-                        {
-                            workingHour: (0, WorkingHour_helper_1.formatWorkingHour)(workingHours[e._id.toString()]
-                                ? workingHours[e._id.toString()]
-                                : []),
-                            consultationFee: e.hospitalDetails[0].consultationFee,
-                            _id: e.hospitalDetails._id,
-                        },
-                    ],
-                };
-            }
-            // return ...[]
-            // return;
-        });
-        if (hospital.openingHour) {
-            hospital.openingHour = (0, WorkingHour_helper_1.formatWorkingHour)([hospital.openingHour]);
-        }
-        if (doctors.includes(undefined) && doctors.length == 1) {
-            hospital.doctors = [];
-        }
-        else {
-            if (doctors.includes(undefined)) {
-                doctors = doctors.filter((e) => e);
-            }
-            hospital.doctors = doctors;
-        }
-        return (0, response_1.successResponse)({ hospital }, "Success", res);
+        hospitalDetails = {
+            _id: hospitalDetails._id,
+            name: hospitalDetails.name,
+            address: `${(_c = (_b = hospitalDetails === null || hospitalDetails === void 0 ? void 0 : hospitalDetails.address) === null || _b === void 0 ? void 0 : _b.locality) === null || _c === void 0 ? void 0 : _c.name} ${(_e = (_d = hospitalDetails === null || hospitalDetails === void 0 ? void 0 : hospitalDetails.address) === null || _d === void 0 ? void 0 : _d.city) === null || _e === void 0 ? void 0 : _e.name}`,
+        };
+        return (0, response_1.successResponse)({ doctordetails: doctors, hospitalDetails }, "Successs", res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);
@@ -1112,7 +1194,8 @@ const generateOrderId = (req, res) => __awaiter(void 0, void 0, void 0, function
 exports.generateOrderId = generateOrderId;
 const verifyPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield hospitalService.verifyPayment(req.body);
+        let isHospital = req.currentHospital ? true : false;
+        yield hospitalService.verifyPayment(req.body, isHospital);
         return (0, response_1.successResponse)({}, "Success", res);
     }
     catch (error) {
@@ -1120,3 +1203,78 @@ const verifyPayment = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.verifyPayment = verifyPayment;
+const doctorsInHospitalWithTimings = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let { hospitalId, timings } = req.body;
+        let hospitalDetails = yield hospitalService.doctorsInHospital(hospitalId, timings);
+        let { doctors } = hospitalDetails;
+        let day = new Date(timings).getDay();
+        let WEEK_DAYS = [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+        ];
+        doctors = doctors.map((e) => {
+            var _a, _b, _c, _d;
+            return {
+                _id: e === null || e === void 0 ? void 0 : e._id,
+                name: `${e.firstName} ${e.lastName}`,
+                specilization: (_a = e === null || e === void 0 ? void 0 : e.specialization[0]) === null || _a === void 0 ? void 0 : _a.specialityName,
+                Qualification: (_c = (_b = e === null || e === void 0 ? void 0 : e.qualification[0]) === null || _b === void 0 ? void 0 : _b.qualificationName) === null || _c === void 0 ? void 0 : _c.abbreviation,
+                Exeperience: e === null || e === void 0 ? void 0 : e.overallExperience,
+                Fee: (_d = e === null || e === void 0 ? void 0 : e.hospitalDetails.find((elem) => elem.hospital.toString() === hospitalId)) === null || _d === void 0 ? void 0 : _d.consultationFee.max,
+                workinghour: e === null || e === void 0 ? void 0 : e.workingHours.map((elem) => {
+                    var _a, _b, _c, _d;
+                    return `${(_a = elem[WEEK_DAYS[day]]) === null || _a === void 0 ? void 0 : _a.from.time}:${(_b = elem[WEEK_DAYS[day]]) === null || _b === void 0 ? void 0 : _b.from.division} to ${(_c = elem[WEEK_DAYS[day]]) === null || _c === void 0 ? void 0 : _c.till.time}:${(_d = elem[WEEK_DAYS[day]]) === null || _d === void 0 ? void 0 : _d.till.division}`;
+                }),
+                capacityAndToken: e === null || e === void 0 ? void 0 : e.workingHours.map((elem) => {
+                    return {
+                        capacity: elem[WEEK_DAYS[day]].capacity,
+                        largestToken: elem[WEEK_DAYS[day]].appointmentsBooked,
+                    };
+                }),
+                available: e === null || e === void 0 ? void 0 : e.available,
+                scheduleAvailable: e === null || e === void 0 ? void 0 : e.scheduleAvailable,
+            };
+        });
+        return (0, response_1.successResponse)(doctors, "Successs", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.doctorsInHospitalWithTimings = doctorsInHospitalWithTimings;
+const getHospitalDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _f, _g, _h, _j, _k, _l;
+    try {
+        let data = (yield hospitalService.getHospitalById(req.params.id))[0];
+        // data = {
+        //   Name: data.name,
+        //   Address: data.address,
+        // };
+        data = {
+            Address: {
+                address_id: (_f = data === null || data === void 0 ? void 0 : data.address) === null || _f === void 0 ? void 0 : _f._id,
+                state_id: (_g = data === null || data === void 0 ? void 0 : data.address) === null || _g === void 0 ? void 0 : _g.state,
+                city_id: (_h = data === null || data === void 0 ? void 0 : data.address) === null || _h === void 0 ? void 0 : _h.city,
+                locality_id: (_j = data === null || data === void 0 ? void 0 : data.address) === null || _j === void 0 ? void 0 : _j.locality,
+                addressLine_1: (_k = data === null || data === void 0 ? void 0 : data.address) === null || _k === void 0 ? void 0 : _k.addressLine_1,
+                pincode: (_l = data === null || data === void 0 ? void 0 : data.address) === null || _l === void 0 ? void 0 : _l.pincode,
+            },
+            RegistrationDetails: data === null || data === void 0 ? void 0 : data.registrationDetails,
+            PaymentDetails: data === null || data === void 0 ? void 0 : data.paymentDetails,
+            Service: data === null || data === void 0 ? void 0 : data.services,
+            Anemity: data === null || data === void 0 ? void 0 : data.anemity,
+            TYPE_HOSPITAL: data === null || data === void 0 ? void 0 : data.type,
+        };
+        return (0, response_1.successResponse)(data, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getHospitalDetails = getHospitalDetails;

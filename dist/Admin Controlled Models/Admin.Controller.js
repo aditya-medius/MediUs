@@ -338,7 +338,8 @@ const getCityStateLocalityCountry = (req, res) => __awaiter(void 0, void 0, void
             }
         }
         else {
-            response = { city: Ci, state: S, locality: L, country: Co };
+            // response = { city: Ci, state: S, locality: L, country: Co };
+            response = { state: S };
         }
         return (0, response_1.successResponse)(Object.assign({}, response), "Success", res);
     }

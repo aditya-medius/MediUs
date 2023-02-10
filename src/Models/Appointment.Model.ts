@@ -100,6 +100,11 @@ const appointmentSchema = new Schema({
     type: String,
     enum: ["Fresh", "Follow up"],
   },
+
+  // Kisne appointments book ki hai. User, hospital or suvedha
+  appointmentBookedBy: {
+    type: String,
+  },
 });
 
 appointmentSchema.post("save", async function (result: any) {

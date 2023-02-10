@@ -22,9 +22,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const schemaNames_1 = require("../Services/schemaNames");
 const prescriptionSchema = new mongoose_1.Schema({
-    doctor: {
+    doctorId: {
         type: mongoose_1.default.Types.ObjectId,
         ref: schemaNames_1.doctor,
+    },
+    hospitalId: {
+        type: mongoose_1.default.Types.ObjectId,
+        ref: schemaNames_1.hospital,
     },
     patient: {
         type: mongoose_1.default.Types.ObjectId,

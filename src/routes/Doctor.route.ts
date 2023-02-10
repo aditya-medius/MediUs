@@ -170,7 +170,7 @@ doctorRouter.put(
   doctorController.cancelAppointments
 );
 
-doctorRouter.get(
+doctorRouter.put(
   "/getDoctorWorkingInHospitals/:id",
   oneOf(authenticateDoctor, authenticatePatient),
   doctorController.getDoctorWorkingInHospitals
@@ -434,4 +434,16 @@ doctorRouter.post(
   oneOf(authenticateDoctor, authenticatePatient),
   doctorController.getMyLikes
 );
+
+doctorRouter.get(
+  "/city/specializations",
+  oneOf(
+    authenticateDoctor,
+    authenticateHospital,
+    authenticatePatient,
+    authenticateSuvedha
+  ),
+  doctorController.getSpecializationByCity
+);
+
 export default doctorRouter;

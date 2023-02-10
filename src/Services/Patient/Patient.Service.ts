@@ -5,6 +5,8 @@ import {
   generateAppointmentId,
   getTokenNumber,
 } from "../Appointment/Appointment.Service";
+import addressModel from "../../Models/Address.Model";
+import hospitalModel from "../../Models/Hospital.Model";
 
 export const BookAppointment = async (body: any, isHospital = false) => {
   try {
@@ -56,10 +58,27 @@ export const BookAppointment = async (body: any, isHospital = false) => {
       query["saturday.till.division"] = b.time.till.division;
     }
 
+    let WEEK_DAYS = [
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+    ];
+
+    body.time.date = new Date(body.time.date);
+    // body.time.date = new Date(body.time.date);
+    const requestDate: Date = new Date(body.time.date);
+
+    const day = requestDate.getDay();
+
     // @TODO check if working hour exist first
     let capacity = await workingHourModel.findOne({
       doctorDetails: body.doctors,
       hospitalDetails: body.hospital,
+      [WEEK_DAYS[day]]: { $exists: true },
     });
     if (!capacity) {
       let error: Error = new Error("Error");
@@ -68,10 +87,6 @@ export const BookAppointment = async (body: any, isHospital = false) => {
       throw error;
     }
 
-    body.time.date = new Date(body.time.date);
-    // body.time.date = new Date(body.time.date);
-    const requestDate: Date = new Date(body.time.date);
-    const day = requestDate.getDay();
     if (day == 0) {
       capacity = capacity.sunday;
     } else if (day == 1) {
@@ -153,6 +168,8 @@ export const calculateAge = (DOB: Date) => {
   const currentDate = moment(new Date());
 
   let age: any = currentDate.diff(exp, "years", true);
+
+  age = parseInt(age).toFixed(2);
 
   if (age < 1) {
     age = `${currentDate.diff(exp, "months")} months`;
@@ -277,4 +294,33 @@ export const canDoctorTakeAppointment = async (body: any) => {
     );
   }
   return Promise.resolve(true);
+};
+
+export const getHospitalsInACity = async (
+  cityId: string
+): Promise<Array<Object>> => {
+  const addressById: Array<any> = await addressModel.find(
+    { city: cityId },
+    { _id: 1 }
+  );
+  let addressIds: Array<string> = addressById.map((e: any) => {
+    return e._id;
+  });
+
+  const hospitalsInThatCity = await hospitalModel
+    .find({
+      address: { $in: addressIds },
+    })
+    .populate({
+      path: "address",
+      populate: {
+        path: "city state locality country",
+      },
+    })
+    .populate({
+      path: "services",
+    })
+    .lean();
+
+  return hospitalsInThatCity;
 };

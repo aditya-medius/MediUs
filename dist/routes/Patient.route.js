@@ -68,12 +68,18 @@ patientRouter.post("/CancelAppointment", (0, middlewareHelper_1.oneOf)(Patient_a
 patientRouter.post("/doneAppointment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.doneAppointment);
 patientRouter.put("/viewAppointById/:id", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital, Patient_auth_1.authenticatePatient), patientController.viewAppointById);
 patientRouter.post("/getDoctorByDay", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.getDoctorByDay);
-patientRouter.post("/generateOrderId", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital), paymentController.generateOrderId);
-patientRouter.post("/verifyPayment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+patientRouter.post("/generateOrderId", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital, Suvedha_auth_1.authenticateSuvedha), paymentController.generateOrderId);
+patientRouter.post("/verifyPayment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Suvedha_auth_1.authenticateSuvedha), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let doctorId = req.body.doctors, patientId = req.body.patient, hospitalId = req.body.hospital, subPatientId = req.body.subPatient;
         let valid = yield prescriptionValidtiyService.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod({ doctorId, patientId, hospitalId, subPatientId });
         req.body["appointmentType"] = valid ? "Follow up" : "Fresh";
+        if (req.currentPatient) {
+            req.body.appointment["appointmentBookedBy"] = "Patient";
+        }
+        else if (req.currentSuvedha) {
+            req.body.appointment["appointmentBookedBy"] = "Suvedha";
+        }
         next();
     }
     catch (error) {

@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDoctorsHolidayByQuery = exports.getDoctorInfo = exports.canDoctorTakeMoreAppointments = exports.isDateHolidayForDoctor = exports.getDoctorWorkingDays = exports.getDoctorById_ForSuvedha = exports.getDoctorsWithAdvancedFilters = exports.getMyLikes = exports.unlikeDoctor = exports.likeDoctor = exports.checkIfDoctorIsAvailableOnTheDay = exports.getDoctorFeeInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = exports.WEEKDAYS = void 0;
+exports.getDoctorsInHospitalByQuery = exports.setSpecializationActiveStatus = exports.getDoctorsHolidayByQuery = exports.getDoctorInfo = exports.canDoctorTakeMoreAppointments = exports.isDateHolidayForDoctor = exports.getDoctorWorkingDays = exports.getDoctorById_ForSuvedha = exports.getDoctorsWithAdvancedFilters = exports.getMyLikes = exports.unlikeDoctor = exports.likeDoctor = exports.checkIfDoctorIsAvailableOnTheDay = exports.getDoctorFeeInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = exports.WEEKDAYS = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const AppointmentPayment_Model_1 = __importDefault(require("../../Models/AppointmentPayment.Model"));
 const CreditAmount_Model_1 = __importDefault(require("../../Models/CreditAmount.Model"));
@@ -50,6 +50,8 @@ const likeService = __importStar(require("../../Services/Like/Like.service"));
 const Suvedha_Service_1 = require("../Suvedha/Suvedha.Service");
 const Admin_Service_1 = require("../Admin/Admin.Service");
 const WorkingHours_Model_1 = __importDefault(require("../../Models/WorkingHours.Model"));
+const Specialization_Model_1 = __importDefault(require("../../Admin Controlled Models/Specialization.Model"));
+const Hospital_Model_1 = __importDefault(require("../../Models/Hospital.Model"));
 dotenv.config();
 exports.WEEKDAYS = [
     "monday",
@@ -962,3 +964,27 @@ const getDoctorsHolidayByQuery = (query) => __awaiter(void 0, void 0, void 0, fu
     }
 });
 exports.getDoctorsHolidayByQuery = getDoctorsHolidayByQuery;
+// This function is supposed to be run ony once
+const setSpecializationActiveStatus = () => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let speclizationIds = yield Doctors_Model_1.default
+            .find({}, { specialization: 1 })
+            .lean();
+        speclizationIds = speclizationIds
+            .map((e) => e.specialization)
+            .flat()
+            .map((e) => e.toString());
+        speclizationIds = [...new Set(speclizationIds)];
+        Specialization_Model_1.default.updateMany({ _id: { $in: speclizationIds } }, { $set: { active: true } });
+        return Promise.resolve(speclizationIds);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.setSpecializationActiveStatus = setSpecializationActiveStatus;
+const getDoctorsInHospitalByQuery = (query = {}, select = {}) => __awaiter(void 0, void 0, void 0, function* () {
+    let doctors = yield Hospital_Model_1.default.find(query, select).populate("doctors");
+    return doctors;
+});
+exports.getDoctorsInHospitalByQuery = getDoctorsInHospitalByQuery;

@@ -1,1 +1,0 @@
-{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"speciality":{"$numberInt":"1"}},"name":"speciality_1","background":true,"unique":true}],"uuid":"517c5cde2af24d0aaa1df343a39f1341","collectionName":"specialitydoctortypes","type":"collection"}

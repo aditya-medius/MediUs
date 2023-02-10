@@ -889,15 +889,24 @@ export const getSpecialityBodyPartAndDisease = async (
     const Conn = mongoose.createConnection();
     await Conn.openUri(<string>process.env.DB_PATH);
 
-    const speciality = Conn.collection("special").find();
+    const speciality = Conn.collection("special")
+      .find()
+      .sort({ specialityName: 1 })
+      .sort({ active: -1 });
     const bodyParts = bodyPartModel.find();
     const disease = diseaseModel.find();
 
     const SBD = await Promise.all([speciality.toArray(), bodyParts, disease]);
     const [S, B, D] = SBD;
 
+    Conn.close();
+
     return successResponse(
-      { Speciality: S, BodyPart: B, Disease: D },
+      {
+        Speciality: S,
+        BodyPart: B,
+        Disease: D,
+      },
       "Success",
       res
     );
@@ -930,7 +939,29 @@ export const getHospitalsByCity = async (req: Request, res: Response) => {
       .populate({
         path: "services",
       });
-    return successResponse(hospitalsInThatCity, "Success", res);
+
+    let hospitals = hospitalsInThatCity.map((e: any) => {
+      return {
+        _id: e?._id,
+        name: e?.name,
+      };
+    });
+
+    const Conn = mongoose.createConnection();
+    await Conn.openUri(<string>process.env.DB_PATH);
+
+    const speciality = Conn.collection("special").find();
+    const SBD = await Promise.all([speciality.toArray()]);
+    let [S] = SBD;
+    Conn.close();
+    S = S.map((e: any) => ({
+      _id: e?._id,
+      name: e?.specialityName,
+      img: e?.img,
+    }));
+
+    // return successResponse(hospitalsInThatCity, "Success", res);
+    return successResponse({ hospitals, specilization: S }, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }
@@ -997,7 +1028,30 @@ export const getDoctorsByCity = async (req: Request, res: Response) => {
         },
       });
     // .populate("hospitalDetails.hospital");
-    return successResponse(doctorsInThatCity, "Success", res);
+
+    let doctors = doctorsInThatCity.map((e: any) => {
+      return {
+        _id: e?._id,
+        name: `${e?.firstName} ${e?.lastName}`,
+      };
+    });
+
+    const Conn = mongoose.createConnection();
+    await Conn.openUri(<string>process.env.DB_PATH);
+
+    const speciality = Conn.collection("special").find();
+    const SBD = await Promise.all([speciality.toArray()]);
+    let [S] = SBD;
+
+    Conn.close();
+
+    S = S.map((e: any) => ({
+      _id: e?._id,
+      name: e?.specialityName,
+      img: e?.img,
+    }));
+    return successResponse({ doctors, specilization: S }, "Success", res);
+    // return successResponse(doctorsInThatCity, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

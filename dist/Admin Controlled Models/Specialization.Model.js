@@ -7,6 +7,10 @@ const specialitySchema = new mongoose_1.Schema({
         type: String,
         required: true,
     },
+    active: {
+        type: Boolean,
+        default: false,
+    },
 }, { timestamps: true });
 const specialityModel = (0, mongoose_1.model)(schemaNames_1.specialization, specialitySchema);
 exports.default = specialityModel;

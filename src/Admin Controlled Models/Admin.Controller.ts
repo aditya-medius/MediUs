@@ -321,7 +321,8 @@ export const getCityStateLocalityCountry = async (
         response[region] = Co;
       }
     } else {
-      response = { city: Ci, state: S, locality: L, country: Co };
+      // response = { city: Ci, state: S, locality: L, country: Co };
+      response = { state: S };
     }
 
     return successResponse({ ...response }, "Success", res);
