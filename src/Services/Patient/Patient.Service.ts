@@ -5,6 +5,8 @@ import {
   generateAppointmentId,
   getTokenNumber,
 } from "../Appointment/Appointment.Service";
+import addressModel from "../../Models/Address.Model";
+import hospitalModel from "../../Models/Hospital.Model";
 
 export const BookAppointment = async (body: any, isHospital = false) => {
   try {
@@ -292,4 +294,33 @@ export const canDoctorTakeAppointment = async (body: any) => {
     );
   }
   return Promise.resolve(true);
+};
+
+export const getHospitalsInACity = async (
+  cityId: string
+): Promise<Array<Object>> => {
+  const addressById: Array<any> = await addressModel.find(
+    { city: cityId },
+    { _id: 1 }
+  );
+  let addressIds: Array<string> = addressById.map((e: any) => {
+    return e._id;
+  });
+
+  const hospitalsInThatCity = await hospitalModel
+    .find({
+      address: { $in: addressIds },
+    })
+    .populate({
+      path: "address",
+      populate: {
+        path: "city state locality country",
+      },
+    })
+    .populate({
+      path: "services",
+    })
+    .lean();
+
+  return hospitalsInThatCity;
 };

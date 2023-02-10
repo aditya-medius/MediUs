@@ -37,7 +37,10 @@ import appointmentPaymentModel from "../Models/AppointmentPayment.Model";
 import * as doctorService from "../Services/Doctor/Doctor.Service";
 import withdrawModel from "../Models/Withdrawal.Model";
 import qualificationModel from "../Models/Qualification.Model";
-import { calculateAge } from "../Services/Patient/Patient.Service";
+import {
+  calculateAge,
+  getHospitalsInACity,
+} from "../Services/Patient/Patient.Service";
 import * as approvalService from "../Services/Approval-Request/Approval-Request.Service";
 import * as holidayService from "../Services/Holiday-Calendar/Holiday-Calendar.Service";
 import * as hospitalService from "../Services/Hospital/Hospital.Service";
@@ -2110,6 +2113,7 @@ export const getDoctorsOfflineAndOnlineAppointments = async (
 
 import * as notificationService from "../Services/Notification/Notification.Service";
 import prescriptionModel from "../Models/Prescription.Model";
+import addressModel from "../Models/Address.Model";
 
 export const getDoctorsNotification = async (req: Request, res: Response) => {
   try {
@@ -2311,6 +2315,50 @@ export const getMyLikes = async (req: Request, res: Response) => {
     }
     let likes = await doctorService.getMyLikes(doctorId);
     return successResponse(likes, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getSpecializationByCity = async (req: Request, res: Response) => {
+  try {
+    let { cityId } = req.query;
+
+    let hospitals = await getHospitalsInACity(cityId as string);
+
+    hospitals = hospitals.map((e: any) => {
+      return {
+        _id: e._id.toString(),
+      };
+    });
+    let docsInHospitals = await doctorService.getDoctorsInHospitalByQuery(
+      {
+        _id: { $in: hospitals },
+        $expr: { $gt: [{ $size: "$doctors" }, 0] },
+      },
+      {
+        doctors: 1,
+      }
+    );
+
+    let specality = docsInHospitals
+      .map((hospital: any) => {
+        return hospital.doctors.map((docs: any) => docs.specialization).flat();
+      })
+      .flat();
+
+    const Conn = mongoose.createConnection();
+    await Conn.openUri(<string>process.env.DB_PATH);
+
+    const special = Conn.collection("special").find({
+      _id: { $in: specality.flat() },
+    });
+    let SBD = await Promise.all([special.toArray()]);
+    let [S] = SBD;
+
+    Conn.close();
+
+    return successResponse({ Speciality: S }, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

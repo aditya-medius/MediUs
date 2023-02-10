@@ -62,7 +62,7 @@ app.get("test", (req: Request, res: Response) => {
   res.send("Hello");
 });
 
-app.listen(port, () => {
+app.listen(3000, () => {
   console.log(`Running on port ${port}`);
 });
 

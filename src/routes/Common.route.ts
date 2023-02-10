@@ -57,4 +57,54 @@ commonRouter.get(
   }
 );
 
+commonRouter.get("/app/version/:app", async (req: Request, res: Response) => {
+  try {
+    let { app } = req.params;
+    const status = process.env.APP_STATUS as string;
+    console.log("status", status);
+    let obj: any;
+    switch (app) {
+      case "medius_user": {
+        obj = { version: parseInt(process.env.medius_user_version as string) };
+        break;
+      }
+      case "medius_clinic": {
+        obj = {
+          version: parseInt(process.env.medius_clinic_version as string),
+        };
+        break;
+      }
+      case "medius_doctor": {
+        obj = {
+          version: parseInt(process.env.medius_doctor_version as string),
+        };
+        break;
+      }
+    }
+    switch (status) {
+      case "maintenance": {
+        obj = {
+          ...obj,
+          status: false,
+          msg: "Application is under maintenance",
+        };
+        break;
+      }
+
+      case "online": {
+        obj = {
+          ...obj,
+          status: true,
+          msg: "Application is online",
+        };
+        break;
+      }
+    }
+
+    return successResponse({ ...obj }, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+});
+
 export default commonRouter;

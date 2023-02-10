@@ -434,4 +434,16 @@ doctorRouter.post(
   oneOf(authenticateDoctor, authenticatePatient),
   doctorController.getMyLikes
 );
+
+doctorRouter.get(
+  "/city/specializations",
+  oneOf(
+    authenticateDoctor,
+    authenticateHospital,
+    authenticatePatient,
+    authenticateSuvedha
+  ),
+  doctorController.getSpecializationByCity
+);
+
 export default doctorRouter;

@@ -68,7 +68,7 @@ app.use("/static", middlewareHelper_1.tokenNikalo, (0, middlewareHelper_1.oneOf)
 app.get("test", (req, res) => {
     res.send("Hello");
 });
-app.listen(port, () => {
+app.listen(3000, () => {
     console.log(`Running on port ${port}`);
 });
 (0, Doctor_Service_1.setSpecializationActiveStatus)();

@@ -12,11 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.canDoctorTakeAppointment = exports.calculateAge = exports.BookAppointment = void 0;
+exports.getHospitalsInACity = exports.canDoctorTakeAppointment = exports.calculateAge = exports.BookAppointment = void 0;
 const WorkingHours_Model_1 = __importDefault(require("../../Models/WorkingHours.Model"));
 const Appointment_Model_1 = __importDefault(require("../../Models/Appointment.Model"));
 const moment_1 = __importDefault(require("moment"));
 const Appointment_Service_1 = require("../Appointment/Appointment.Service");
+const Address_Model_1 = __importDefault(require("../../Models/Address.Model"));
+const Hospital_Model_1 = __importDefault(require("../../Models/Hospital.Model"));
 const BookAppointment = (body, isHospital = false) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const rd = new Date(body.time.date);
@@ -304,3 +306,25 @@ const canDoctorTakeAppointment = (body) => __awaiter(void 0, void 0, void 0, fun
     return Promise.resolve(true);
 });
 exports.canDoctorTakeAppointment = canDoctorTakeAppointment;
+const getHospitalsInACity = (cityId) => __awaiter(void 0, void 0, void 0, function* () {
+    const addressById = yield Address_Model_1.default.find({ city: cityId }, { _id: 1 });
+    let addressIds = addressById.map((e) => {
+        return e._id;
+    });
+    const hospitalsInThatCity = yield Hospital_Model_1.default
+        .find({
+        address: { $in: addressIds },
+    })
+        .populate({
+        path: "address",
+        populate: {
+            path: "city state locality country",
+        },
+    })
+        .populate({
+        path: "services",
+    })
+        .lean();
+    return hospitalsInThatCity;
+});
+exports.getHospitalsInACity = getHospitalsInACity;

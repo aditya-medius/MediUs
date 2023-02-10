@@ -41,6 +41,7 @@ import {
 import { getCityIdFromName, getSpecialization } from "../Admin/Admin.Service";
 import workingHourModel from "../../Models/WorkingHours.Model";
 import specialityModel from "../../Admin Controlled Models/Specialization.Model";
+import hospitalModel from "../../Models/Hospital.Model";
 dotenv.config();
 
 export const WEEKDAYS = [
@@ -1052,4 +1053,13 @@ export const setSpecializationActiveStatus = async () => {
   } catch (error) {
     return Promise.reject(error);
   }
+};
+
+export const getDoctorsInHospitalByQuery = async (
+  query: Object = {},
+  select: Object = {}
+) => {
+  let doctors = await hospitalModel.find(query, select).populate("doctors");
+
+  return doctors;
 };

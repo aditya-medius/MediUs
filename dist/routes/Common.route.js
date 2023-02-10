@@ -60,4 +60,44 @@ commonRouter.get("/cities", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenti
         return (0, response_1.errorResponse)(error, res);
     }
 }));
+commonRouter.get("/app/version/:app", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let { app } = req.params;
+        const status = process.env.APP_STATUS;
+        console.log("status", status);
+        let obj;
+        switch (app) {
+            case "medius_user": {
+                obj = { version: parseInt(process.env.medius_user_version) };
+                break;
+            }
+            case "medius_clinic": {
+                obj = {
+                    version: parseInt(process.env.medius_clinic_version),
+                };
+                break;
+            }
+            case "medius_doctor": {
+                obj = {
+                    version: parseInt(process.env.medius_doctor_version),
+                };
+                break;
+            }
+        }
+        switch (status) {
+            case "maintenance": {
+                obj = Object.assign(Object.assign({}, obj), { status: false, msg: "Application is under maintenance" });
+                break;
+            }
+            case "online": {
+                obj = Object.assign(Object.assign({}, obj), { status: true, msg: "Application is online" });
+                break;
+            }
+        }
+        return (0, response_1.successResponse)(Object.assign({}, obj), "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+}));
 exports.default = commonRouter;

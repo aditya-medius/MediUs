@@ -1,1 +1,0 @@
-{"options":{"viewOn":"specializations","pipeline":[{"$lookup":{"from":"medias","localField":"_id","foreignField":"user","as":"img"}},{"$unwind":{"path":"$img"}},{"$addFields":{"img":{"$function":{"args":["$img"],"lang":"js","body":"function(image){\n        return image.image\n      }"}}}}]},"indexes":[],"collectionName":"special","type":"view"}
