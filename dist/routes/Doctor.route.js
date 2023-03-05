@@ -62,7 +62,7 @@ doctorRouter.post("/", doctorController.createDoctor);
   Doctor profile creation routes - END
 */
 doctorRouter.get("/", doctorController.getAllDoctorsList);
-doctorRouter.post("/getDoctorById/:id", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.getDoctorById);
+doctorRouter.post("/getDoctorById/:id", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient, Admin_auth_1.authenticateAdmin), doctorController.getDoctorById);
 doctorRouter.get("/getHospitalListByDoctorId/:id", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.getHospitalListByDoctorId);
 doctorRouter.post("/updateProfile", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), 
 // async (req: Request, res: Response, next: NextFunction) => {
