@@ -46,6 +46,7 @@ const Doctor_Controller_1 = require("./Doctor.Controller");
 const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
 const BodyPart_Model_1 = __importDefault(require("../Admin Controlled Models/BodyPart.Model"));
 const Disease_Model_1 = __importDefault(require("../Admin Controlled Models/Disease.Model"));
+const Specialization_Model_1 = __importDefault(require("../Admin Controlled Models/Specialization.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Prescription_Model_1 = __importDefault(require("../Models/Prescription.Model"));
@@ -801,13 +802,17 @@ const getSpecialityBodyPartAndDisease = (_req, res) => __awaiter(void 0, void 0,
         */
         const Conn = mongoose_1.default.createConnection();
         yield Conn.openUri(process.env.DB_PATH);
-        const speciality = Conn.collection("special")
+        // const speciality = Conn.collection("special")
+        //   .find()
+        //   .sort({ specialityName: 1 })
+        //   .sort({ active: -1 });
+        const speciality = Specialization_Model_1.default
             .find()
             .sort({ specialityName: 1 })
             .sort({ active: -1 });
         const bodyParts = BodyPart_Model_1.default.find();
         const disease = Disease_Model_1.default.find();
-        const SBD = yield Promise.all([speciality.toArray(), bodyParts, disease]);
+        const SBD = yield Promise.all([speciality, bodyParts, disease]);
         const [S, B, D] = SBD;
         Conn.close();
         return (0, response_1.successResponse)({
@@ -849,8 +854,9 @@ const getHospitalsByCity = (req, res) => __awaiter(void 0, void 0, void 0, funct
         });
         const Conn = mongoose_1.default.createConnection();
         yield Conn.openUri(process.env.DB_PATH);
-        const speciality = Conn.collection("special").find();
-        const SBD = yield Promise.all([speciality.toArray()]);
+        // const speciality = Conn.collection("special").find();
+        const speciality = Specialization_Model_1.default.find();
+        const SBD = yield Promise.all([speciality]);
         let [S] = SBD;
         Conn.close();
         S = S.map((e) => ({
@@ -920,8 +926,9 @@ const getDoctorsByCity = (req, res) => __awaiter(void 0, void 0, void 0, functio
         });
         const Conn = mongoose_1.default.createConnection();
         yield Conn.openUri(process.env.DB_PATH);
-        const speciality = Conn.collection("special").find();
-        const SBD = yield Promise.all([speciality.toArray()]);
+        // const speciality = Conn.collection("special").find();
+        const speciality = Specialization_Model_1.default.find();
+        const SBD = yield Promise.all([speciality]);
         let [S] = SBD;
         Conn.close();
         S = S.map((e) => ({
