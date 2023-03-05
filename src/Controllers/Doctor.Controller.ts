@@ -2350,10 +2350,13 @@ export const getSpecializationByCity = async (req: Request, res: Response) => {
     const Conn = mongoose.createConnection();
     await Conn.openUri(<string>process.env.DB_PATH);
 
-    const special = Conn.collection("special").find({
-      _id: { $in: specality.flat() },
-    });
-    let SBD = await Promise.all([special.toArray()]);
+    // const special = Conn.collection("special").find({
+    //   _id: { $in: specality.flat() },
+    // });
+
+    const special = specialityModel.find({ _id: { $in: specality.flat() } });
+
+    let SBD = await Promise.all([special]);
     let [S] = SBD;
 
     Conn.close();

@@ -889,14 +889,18 @@ export const getSpecialityBodyPartAndDisease = async (
     const Conn = mongoose.createConnection();
     await Conn.openUri(<string>process.env.DB_PATH);
 
-    const speciality = Conn.collection("special")
+    // const speciality = Conn.collection("special")
+    //   .find()
+    //   .sort({ specialityName: 1 })
+    //   .sort({ active: -1 });
+    const speciality = specialityModel
       .find()
       .sort({ specialityName: 1 })
       .sort({ active: -1 });
     const bodyParts = bodyPartModel.find();
     const disease = diseaseModel.find();
 
-    const SBD = await Promise.all([speciality.toArray(), bodyParts, disease]);
+    const SBD = await Promise.all([speciality, bodyParts, disease]);
     const [S, B, D] = SBD;
 
     Conn.close();
@@ -950,8 +954,9 @@ export const getHospitalsByCity = async (req: Request, res: Response) => {
     const Conn = mongoose.createConnection();
     await Conn.openUri(<string>process.env.DB_PATH);
 
-    const speciality = Conn.collection("special").find();
-    const SBD = await Promise.all([speciality.toArray()]);
+    // const speciality = Conn.collection("special").find();
+    const speciality = specialityModel.find();
+    const SBD = await Promise.all([speciality]);
     let [S] = SBD;
     Conn.close();
     S = S.map((e: any) => ({
@@ -1039,8 +1044,9 @@ export const getDoctorsByCity = async (req: Request, res: Response) => {
     const Conn = mongoose.createConnection();
     await Conn.openUri(<string>process.env.DB_PATH);
 
-    const speciality = Conn.collection("special").find();
-    const SBD = await Promise.all([speciality.toArray()]);
+    // const speciality = Conn.collection("special").find();
+    const speciality = specialityModel.find();
+    const SBD = await Promise.all([speciality]);
     let [S] = SBD;
 
     Conn.close();
