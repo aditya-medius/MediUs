@@ -67,7 +67,7 @@ doctorRouter.post("/", doctorController.createDoctor);
 doctorRouter.get("/", doctorController.getAllDoctorsList);
 doctorRouter.post(
   "/getDoctorById/:id",
-  oneOf(authenticateDoctor, authenticatePatient),
+  oneOf(authenticateDoctor, authenticatePatient, authenticateAdmin),
   doctorController.getDoctorById
 );
 doctorRouter.get(
