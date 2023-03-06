@@ -2034,15 +2034,15 @@ const getSpecializationByCity = (req, res) => __awaiter(void 0, void 0, void 0, 
             return hospital.doctors.map((docs) => docs.specialization).flat();
         })
             .flat();
-        const Conn = mongoose_1.default.createConnection();
-        yield Conn.openUri(process.env.DB_PATH);
+        // const Conn = mongoose.createConnection();
+        // await Conn.openUri(<string>process.env.DB_PATH);
         // const special = Conn.collection("special").find({
         //   _id: { $in: specality.flat() },
         // });
         const special = Specialization_Model_1.default.find({ _id: { $in: specality.flat() } });
         let SBD = yield Promise.all([special]);
         let [S] = SBD;
-        Conn.close();
+        // Conn.close();
         return (0, response_1.successResponse)({ Speciality: S }, "Success", res);
     }
     catch (error) {
