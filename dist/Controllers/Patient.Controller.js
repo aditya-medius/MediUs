@@ -805,10 +805,9 @@ const getSpecialityBodyPartAndDisease = (_req, res) => __awaiter(void 0, void 0,
         //   .find()
         //   .sort({ specialityName: 1 })
         //   .sort({ active: -1 });
-        const speciality = Specialization_Model_1.default
-            .find()
-            .sort({ specialityName: 1 })
-            .sort({ active: -1 });
+        const speciality = Specialization_Model_1.default.find();
+        // .sort({ specialityName: 1 })
+        // .sort({ active: -1 });
         const bodyParts = BodyPart_Model_1.default.find();
         const disease = Disease_Model_1.default.find();
         const SBD = yield Promise.all([speciality, bodyParts, disease]);
@@ -821,6 +820,7 @@ const getSpecialityBodyPartAndDisease = (_req, res) => __awaiter(void 0, void 0,
         }, "Success", res);
     }
     catch (error) {
+        console.log("dhdfdfdfd,", error);
         return (0, response_1.errorResponse)(error, res);
     }
 });

@@ -893,16 +893,14 @@ export const getSpecialityBodyPartAndDisease = async (
     //   .find()
     //   .sort({ specialityName: 1 })
     //   .sort({ active: -1 });
-    const speciality = specialityModel
-      .find()
-      .sort({ specialityName: 1 })
-      .sort({ active: -1 });
+    const speciality = specialityModel.find();
+    // .sort({ specialityName: 1 })
+    // .sort({ active: -1 });
     const bodyParts = bodyPartModel.find();
     const disease = diseaseModel.find();
 
     const SBD = await Promise.all([speciality, bodyParts, disease]);
     const [S, B, D] = SBD;
-
     // Conn.close();
 
     return successResponse(
@@ -915,6 +913,7 @@ export const getSpecialityBodyPartAndDisease = async (
       res
     );
   } catch (error: any) {
+    console.log("dhdfdfdfd,", error);
     return errorResponse(error, res);
   }
 };
