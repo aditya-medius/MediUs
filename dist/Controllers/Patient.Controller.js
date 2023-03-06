@@ -51,7 +51,6 @@ const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Prescription_Model_1 = __importDefault(require("../Models/Prescription.Model"));
 const doctorController = __importStar(require("../Controllers/Doctor.Controller"));
-const mongoose_1 = __importDefault(require("mongoose"));
 const notificationService = __importStar(require("../Services/Notification/Notification.Service"));
 const Validation_Service_1 = require("../Services/Validation.Service");
 const Appointment_Service_1 = require("../Services/Appointment/Appointment.Service");
@@ -800,21 +799,20 @@ const getSpecialityBodyPartAndDisease = (_req, res) => __awaiter(void 0, void 0,
         /*
           connect to database
         */
-        const Conn = mongoose_1.default.createConnection();
-        yield Conn.openUri(process.env.DB_PATH);
+        // const Conn = mongoose.createConnection();
+        // await Conn.openUri(<string>process.env.DB_PATH);
         // const speciality = Conn.collection("special")
         //   .find()
         //   .sort({ specialityName: 1 })
         //   .sort({ active: -1 });
-        const speciality = Specialization_Model_1.default
-            .find()
-            .sort({ specialityName: 1 })
-            .sort({ active: -1 });
+        const speciality = Specialization_Model_1.default.find();
+        // .sort({ specialityName: 1 })
+        // .sort({ active: -1 });
         const bodyParts = BodyPart_Model_1.default.find();
         const disease = Disease_Model_1.default.find();
         const SBD = yield Promise.all([speciality, bodyParts, disease]);
         const [S, B, D] = SBD;
-        Conn.close();
+        // Conn.close();
         return (0, response_1.successResponse)({
             Speciality: S,
             BodyPart: B,
@@ -822,6 +820,7 @@ const getSpecialityBodyPartAndDisease = (_req, res) => __awaiter(void 0, void 0,
         }, "Success", res);
     }
     catch (error) {
+        console.log("dhdfdfdfd,", error);
         return (0, response_1.errorResponse)(error, res);
     }
 });
@@ -852,13 +851,13 @@ const getHospitalsByCity = (req, res) => __awaiter(void 0, void 0, void 0, funct
                 name: e === null || e === void 0 ? void 0 : e.name,
             };
         });
-        const Conn = mongoose_1.default.createConnection();
-        yield Conn.openUri(process.env.DB_PATH);
+        // const Conn = mongoose.createConnection();
+        // await Conn.openUri(<string>process.env.DB_PATH);
         // const speciality = Conn.collection("special").find();
         const speciality = Specialization_Model_1.default.find();
         const SBD = yield Promise.all([speciality]);
         let [S] = SBD;
-        Conn.close();
+        // Conn.close();
         S = S.map((e) => ({
             _id: e === null || e === void 0 ? void 0 : e._id,
             name: e === null || e === void 0 ? void 0 : e.specialityName,
@@ -924,13 +923,13 @@ const getDoctorsByCity = (req, res) => __awaiter(void 0, void 0, void 0, functio
                 name: `${e === null || e === void 0 ? void 0 : e.firstName} ${e === null || e === void 0 ? void 0 : e.lastName}`,
             };
         });
-        const Conn = mongoose_1.default.createConnection();
-        yield Conn.openUri(process.env.DB_PATH);
+        // const Conn = mongoose.createConnection();
+        // await Conn.openUri(<string>process.env.DB_PATH);
         // const speciality = Conn.collection("special").find();
         const speciality = Specialization_Model_1.default.find();
         const SBD = yield Promise.all([speciality]);
         let [S] = SBD;
-        Conn.close();
+        // Conn.close();
         S = S.map((e) => ({
             _id: e === null || e === void 0 ? void 0 : e._id,
             name: e === null || e === void 0 ? void 0 : e.specialityName,

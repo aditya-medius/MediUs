@@ -2347,8 +2347,8 @@ export const getSpecializationByCity = async (req: Request, res: Response) => {
       })
       .flat();
 
-    const Conn = mongoose.createConnection();
-    await Conn.openUri(<string>process.env.DB_PATH);
+    // const Conn = mongoose.createConnection();
+    // await Conn.openUri(<string>process.env.DB_PATH);
 
     // const special = Conn.collection("special").find({
     //   _id: { $in: specality.flat() },
@@ -2359,7 +2359,7 @@ export const getSpecializationByCity = async (req: Request, res: Response) => {
     let SBD = await Promise.all([special]);
     let [S] = SBD;
 
-    Conn.close();
+    // Conn.close();
 
     return successResponse({ Speciality: S }, "Success", res);
   } catch (error: any) {
