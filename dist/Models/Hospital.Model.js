@@ -201,16 +201,19 @@ hospitalSchema.pre("findOneAndUpdate", function (next) {
         if ("contactNumber" in UpdateQuery) {
             UpdateQuery = UpdateQuery["$set"];
             const query = this.getQuery();
-            const hospitalExist = yield this.model.findOne({
-                _id: { $ne: query._id },
-                $or: [{ contactNumber: UpdateQuery.contactNumber }],
-            });
-            if (hospitalExist) {
-                throw new Error("Hospital alredy exist. Select a different contact number");
+            if (!UpdateQuery.phoneNumberUpdate) {
+                const hospitalExist = yield this.model.findOne({
+                    _id: { $ne: query._id },
+                    $or: [{ contactNumber: UpdateQuery.contactNumber }],
+                });
+                if (hospitalExist) {
+                    throw new Error("Hospital alredy exist. Select a different contact number");
+                }
+                else {
+                    return next();
+                }
             }
-            else {
-                return next();
-            }
+            return next();
         }
         else {
             return next();

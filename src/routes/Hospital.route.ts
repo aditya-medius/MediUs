@@ -274,4 +274,17 @@ hospitalRouter.get(
   oneOf(authenticateHospital),
   hospitalController.getHospitalDetails
 );
+
+hospitalRouter.post(
+  "/updateNumber",
+  oneOf(authenticateHospital),
+  hospitalController.sendOTPToUpdateNumber
+);
+
+hospitalRouter.put(
+  "/verify/updateNumber",
+  oneOf(authenticateHospital),
+  hospitalController.verifyOTPToUpdateNumber
+);
+
 export default hospitalRouter;

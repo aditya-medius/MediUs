@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getHospitalDetails = exports.doctorsInHospitalWithTimings = exports.verifyPayment = exports.generateOrderId = exports.getPatientsAppointmentsInThisHospital = exports.searchHospitalByPhoneNumber = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.updateHospitalAddress = exports.getHospitalsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.checkVerificationStatus = exports.getDoctorsInHospital = exports.getHospitalById = exports.getAppointmentByDate = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.deleteAnemities = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
+exports.verifyOTPToUpdateNumber = exports.sendOTPToUpdateNumber = exports.getHospitalDetails = exports.doctorsInHospitalWithTimings = exports.verifyPayment = exports.generateOrderId = exports.getPatientsAppointmentsInThisHospital = exports.searchHospitalByPhoneNumber = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.updateHospitalAddress = exports.getHospitalsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.checkVerificationStatus = exports.getDoctorsInHospital = exports.getHospitalById = exports.getAppointmentByDate = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.deleteAnemities = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Anemities_Model_1 = __importDefault(require("../Models/Anemities.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
@@ -127,12 +127,15 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             try {
                 // Abhi k liye OTP verification hata di hai
                 let data;
-                if (process.env.ENVIRONMENT !== "TEST") {
+                // if (process.env.ENVIRONMENT !== "TEST") {
+                if (!["TEST", "PROD"].includes(process.env.ENVIRONMENT)) {
                     data = yield jwt.verify(otpData.otp, body.OTP);
                     if (Date.now() > data.expiresIn)
                         return (0, response_1.errorResponse)(new Error("OTP expired"), res);
                 }
-                if (body.OTP === (data === null || data === void 0 ? void 0 : data.otp) || process.env.ENVIRONMENT === "TEST") {
+                // if (body.OTP === data?.otp || process.env.ENVIRONMENT === "TEST") {
+                if (body.OTP === (data === null || data === void 0 ? void 0 : data.otp) ||
+                    ["TEST", "PROD"].includes(process.env.ENVIRONMENT)) {
                     // if (true) {
                     const profile = yield Hospital_Model_1.default.findOne({
                         contactNumber: body.phoneNumber,
@@ -1278,3 +1281,47 @@ const getHospitalDetails = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.getHospitalDetails = getHospitalDetails;
+const sendOTPToUpdateNumber = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        (0, Utils_1.sendOTPForPasswordChange)(req.body.phoneNumber);
+        return (0, response_1.successResponse)({}, "OTP send successfully", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.sendOTPToUpdateNumber = sendOTPToUpdateNumber;
+const verifyOTPToUpdateNumber = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let { phoneNumber, OTP, newPhoneNumber } = req.body;
+        if (!newPhoneNumber) {
+            throw new Error("Enter new phone number");
+        }
+        let result = yield (0, Utils_1.verifyPasswordChangeOTP)(newPhoneNumber, OTP);
+        if (result) {
+            let exist = yield Hospital_Model_1.default.exists({
+                contactNumber: newPhoneNumber,
+            });
+            if (exist) {
+                throw new Error("Phone number already exist");
+            }
+            let data = yield Hospital_Model_1.default.findOne({ contactNumber: phoneNumber });
+            Hospital_Model_1.default.findOneAndUpdate({
+                _id: data._id,
+            }, {
+                $set: {
+                    contactNumber: newPhoneNumber,
+                    phoneNumberUpdate: true,
+                },
+            });
+            return (0, response_1.successResponse)({}, "Success", res);
+        }
+        else {
+            throw new Error("Invalid OTP");
+        }
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.verifyOTPToUpdateNumber = verifyOTPToUpdateNumber;

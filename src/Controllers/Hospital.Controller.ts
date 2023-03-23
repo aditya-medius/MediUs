@@ -30,7 +30,11 @@ import servicesModel from "../Admin Controlled Models/Services.Model";
 import { request } from "http";
 import { getHospitalToken } from "../Services/Hospital/Hospital.Service";
 import { getAgeOfDoctor } from "../Services/Doctor/Doctor.Service";
-import { getAge } from "../Services/Utils";
+import {
+  getAge,
+  sendOTPForPasswordChange,
+  verifyPasswordChangeOTP,
+} from "../Services/Utils";
 import * as approvalService from "../Services/Approval-Request/Approval-Request.Service";
 import * as addressService from "../Services/Address/Address.Service";
 import * as hospitalService from "../Services/Hospital/Hospital.Service";
@@ -121,12 +125,18 @@ export const login = async (req: Request, res: Response) => {
       try {
         // Abhi k liye OTP verification hata di hai
         let data: any;
-        if (process.env.ENVIRONMENT !== "TEST") {
+        // if (process.env.ENVIRONMENT !== "TEST") {
+        if (!["TEST", "PROD"].includes(process.env.ENVIRONMENT as string)) {
           data = await jwt.verify(otpData.otp, body.OTP);
           if (Date.now() > data.expiresIn)
             return errorResponse(new Error("OTP expired"), res);
         }
-        if (body.OTP === data?.otp || process.env.ENVIRONMENT === "TEST") {
+        // if (body.OTP === data?.otp || process.env.ENVIRONMENT === "TEST") {
+
+        if (
+          body.OTP === data?.otp ||
+          ["TEST", "PROD"].includes(process.env.ENVIRONMENT as string)
+        ) {
           // if (true) {
           const profile = await hospitalModel.findOne({
             contactNumber: body.phoneNumber,
@@ -1486,6 +1496,52 @@ export const getHospitalDetails = async (req: Request, res: Response) => {
       TYPE_HOSPITAL: data?.type,
     };
     return successResponse(data, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const sendOTPToUpdateNumber = async (req: Request, res: Response) => {
+  try {
+    sendOTPForPasswordChange(req.body.phoneNumber);
+    return successResponse({}, "OTP send successfully", res);
+  } catch (error) {
+    return errorResponse(error, res);
+  }
+};
+
+export const verifyOTPToUpdateNumber = async (req: Request, res: Response) => {
+  try {
+    let { phoneNumber, OTP, newPhoneNumber } = req.body;
+    if (!newPhoneNumber) {
+      throw new Error("Enter new phone number");
+    }
+    let result = await verifyPasswordChangeOTP(newPhoneNumber, OTP);
+    if (result) {
+      let exist = await hospitalModel.exists({
+        contactNumber: newPhoneNumber,
+      });
+      if (exist) {
+        throw new Error("Phone number already exist");
+      }
+
+      let data = await hospitalModel.findOne({ contactNumber: phoneNumber });
+
+      hospitalModel.findOneAndUpdate(
+        {
+          _id: data._id,
+        },
+        {
+          $set: {
+            contactNumber: newPhoneNumber,
+            phoneNumberUpdate: true,
+          },
+        }
+      );
+      return successResponse({}, "Success", res);
+    } else {
+      throw new Error("Invalid OTP");
+    }
   } catch (error: any) {
     return errorResponse(error, res);
   }

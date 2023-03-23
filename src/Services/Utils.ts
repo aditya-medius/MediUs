@@ -3,6 +3,8 @@ import * as jwt from "jsonwebtoken";
 import moment from "moment";
 import multer from "multer";
 import * as path from "path";
+import otpModel from "../Models/OTP.Model";
+import { sendMessage } from "./message.service";
 
 export const phoneNumberRegex: RegExp = /^[0]?[6789]\d{9}$/;
 
@@ -26,7 +28,6 @@ export const encryptPassword = async (password: string) => {
 export const generateOTP = async (phoneNumber: string) => {
   if (phoneNumberRegex.test(phoneNumber)) {
     const OTP = Math.floor(100000 + Math.random() * 900000).toString();
-    console.log("jdfjnjndf", OTP);
     return Promise.resolve(OTP);
   } else {
     return Promise.reject("Invalid Phone Number");
@@ -173,4 +174,53 @@ export const getRangeOfDates = (year: number, month: number): [Date, Date] => {
   );
 
   return [startDate, endDate];
+};
+
+export const sendOTPForPasswordChange = async (phoneNumber: string) => {
+  let OTP = await generateOTP(phoneNumber);
+  let otpToken = generateOTPtoken(OTP);
+
+  await otpModel.findOneAndUpdate(
+    { phoneNumber: phoneNumber, for: "PASSWORD_CHANGE" },
+    {
+      $set: { phoneNumber: phoneNumber, otp: otpToken, for: "PASSWORD_CHANGE" },
+    },
+    { upsert: true }
+  );
+
+  sendMessage(`Your OTP is: ${OTP}`, phoneNumber)
+    .then(async (message: any) => {
+      // Add OTP and phone number to temporary collection
+    })
+    .catch((error: any) => {
+      return Promise.reject(error);
+    });
+};
+
+export const verifyPasswordChangeOTP = async (
+  phoneNumber: string,
+  OTP: string
+) => {
+  try {
+    const otpData = await otpModel.findOne({
+      phoneNumber: phoneNumber,
+      for: "PASSWORD_CHANGE",
+      "delData.deleted": false,
+    });
+
+    const data: any = jwt.verify(otpData.otp, OTP);
+    if (Date.now() > data.expiresIn)
+      return Promise.reject(new Error("OTP Expired"));
+    if (OTP === data.otp) {
+      otpModel.findOneAndDelete({
+        phoneNumber: phoneNumber,
+        for: "PASSWORD_CHANGE",
+      });
+      return Promise.resolve(true);
+    } else {
+      return Promise.resolve(false);
+    }
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
 };

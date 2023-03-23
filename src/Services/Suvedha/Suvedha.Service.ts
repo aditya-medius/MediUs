@@ -169,9 +169,6 @@ export const getDoctorsInAHospital = async (
     let startDate = new Date(year, month, currentDate);
     let endDate = new Date(year, month, currentDate + 1);
 
-    console.log("ygstratggc", startDate);
-    console.log("knhgvdbdd", endDate);
-
     let doctors = await hospitalModel.aggregate([
       [
         {

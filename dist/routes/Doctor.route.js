@@ -207,4 +207,6 @@ doctorRouter.post("/likeUnlikeDoctor", (0, middlewareHelper_1.oneOf)(Doctor_auth
 doctorRouter.post("/unlikeDoctor", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.unlikeDoctor);
 doctorRouter.post("/getMyLikes", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Patient_auth_1.authenticatePatient), doctorController.getMyLikes);
 doctorRouter.get("/city/specializations", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital, Patient_auth_1.authenticatePatient, Suvedha_auth_1.authenticateSuvedha), doctorController.getSpecializationByCity);
+doctorRouter.post("/updateNumber", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.sendOTPToUpdateNumber);
+doctorRouter.put("/verify/updateNumber", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.verifyOTPToUpdateNumber);
 exports.default = doctorRouter;

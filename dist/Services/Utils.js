@@ -31,12 +31,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRangeOfDates = exports.groupBy = exports.initUpload = exports.updateWorkingHour = exports.formatWorkingHourDayForAppointment = exports.setFormatForWorkingHours = exports.getDayFromWorkingHours = exports.getAge = exports.generateOTPtoken = exports.generateOTP = exports.encryptPassword = exports.phoneNumberRegex = void 0;
+exports.verifyPasswordChangeOTP = exports.sendOTPForPasswordChange = exports.getRangeOfDates = exports.groupBy = exports.initUpload = exports.updateWorkingHour = exports.formatWorkingHourDayForAppointment = exports.setFormatForWorkingHours = exports.getDayFromWorkingHours = exports.getAge = exports.generateOTPtoken = exports.generateOTP = exports.encryptPassword = exports.phoneNumberRegex = void 0;
 const bcrypt = __importStar(require("bcrypt"));
 const jwt = __importStar(require("jsonwebtoken"));
 const moment_1 = __importDefault(require("moment"));
 const multer_1 = __importDefault(require("multer"));
 const path = __importStar(require("path"));
+const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
+const message_service_1 = require("./message.service");
 exports.phoneNumberRegex = /^[0]?[6789]\d{9}$/;
 const encryptPassword = (password) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -58,7 +60,6 @@ exports.encryptPassword = encryptPassword;
 const generateOTP = (phoneNumber) => __awaiter(void 0, void 0, void 0, function* () {
     if (exports.phoneNumberRegex.test(phoneNumber)) {
         const OTP = Math.floor(100000 + Math.random() * 900000).toString();
-        console.log("jdfjnjndf", OTP);
         return Promise.resolve(OTP);
     }
     else {
@@ -190,3 +191,44 @@ const getRangeOfDates = (year, month) => {
     return [startDate, endDate];
 };
 exports.getRangeOfDates = getRangeOfDates;
+const sendOTPForPasswordChange = (phoneNumber) => __awaiter(void 0, void 0, void 0, function* () {
+    let OTP = yield (0, exports.generateOTP)(phoneNumber);
+    let otpToken = (0, exports.generateOTPtoken)(OTP);
+    yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: phoneNumber, for: "PASSWORD_CHANGE" }, {
+        $set: { phoneNumber: phoneNumber, otp: otpToken, for: "PASSWORD_CHANGE" },
+    }, { upsert: true });
+    (0, message_service_1.sendMessage)(`Your OTP is: ${OTP}`, phoneNumber)
+        .then((message) => __awaiter(void 0, void 0, void 0, function* () {
+        // Add OTP and phone number to temporary collection
+    }))
+        .catch((error) => {
+        return Promise.reject(error);
+    });
+});
+exports.sendOTPForPasswordChange = sendOTPForPasswordChange;
+const verifyPasswordChangeOTP = (phoneNumber, OTP) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const otpData = yield OTP_Model_1.default.findOne({
+            phoneNumber: phoneNumber,
+            for: "PASSWORD_CHANGE",
+            "delData.deleted": false,
+        });
+        const data = jwt.verify(otpData.otp, OTP);
+        if (Date.now() > data.expiresIn)
+            return Promise.reject(new Error("OTP Expired"));
+        if (OTP === data.otp) {
+            OTP_Model_1.default.findOneAndDelete({
+                phoneNumber: phoneNumber,
+                for: "PASSWORD_CHANGE",
+            });
+            return Promise.resolve(true);
+        }
+        else {
+            return Promise.resolve(false);
+        }
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.verifyPasswordChangeOTP = verifyPasswordChangeOTP;

@@ -220,13 +220,19 @@ export const doctorLogin = async (req: Request, res: Response) => {
       try {
         let data: any;
         // Abhi k liye OTP verification hata di hai
-        if (process.env.ENVIRONMENT !== "TEST") {
+        // if (
+        //   process.env.ENVIRONMENT !== "TEST" ||
+        // )
+        if (!["TEST", "PROD"].includes(process.env.ENVIRONMENT as string)) {
           data = await jwt.verify(otpData.otp, body.OTP);
           if (Date.now() > data.expiresIn)
             return errorResponse(new Error("OTP expired"), res);
         }
 
-        if (body.OTP === data?.otp || process.env.ENVIRONMENT === "TEST") {
+        if (
+          body.OTP === data?.otp ||
+          ["TEST", "PROD"].includes(process.env.ENVIRONMENT as string)
+        ) {
           let profile = await doctorModel.findOne(
             {
               phoneNumber: body.phoneNumber,
@@ -2114,6 +2120,10 @@ export const getDoctorsOfflineAndOnlineAppointments = async (
 import * as notificationService from "../Services/Notification/Notification.Service";
 import prescriptionModel from "../Models/Prescription.Model";
 import addressModel from "../Models/Address.Model";
+import {
+  sendOTPForPasswordChange,
+  verifyPasswordChangeOTP,
+} from "../Services/Utils";
 
 export const getDoctorsNotification = async (req: Request, res: Response) => {
   try {
@@ -2362,6 +2372,54 @@ export const getSpecializationByCity = async (req: Request, res: Response) => {
     // Conn.close();
 
     return successResponse({ Speciality: S }, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const sendOTPToUpdateNumber = async (req: Request, res: Response) => {
+  try {
+    sendOTPForPasswordChange(req.body.phoneNumber);
+    return successResponse({}, "OTP send successfully", res);
+  } catch (error) {
+    return errorResponse(error, res);
+  }
+};
+
+export const verifyOTPToUpdateNumber = async (req: Request, res: Response) => {
+  try {
+    let { phoneNumber, OTP, newPhoneNumber } = req.body;
+    if (!newPhoneNumber) {
+      throw new Error("Enter new phone number");
+    }
+    let result = await verifyPasswordChangeOTP(newPhoneNumber, OTP);
+    if (result) {
+      let exist = await doctorModel.exists({
+        phoneNumber: newPhoneNumber,
+      });
+      console.log("hds lknsjdsdsds", exist);
+      if (exist) {
+        throw new Error("Phone number already exist");
+      }
+
+      let userData = await doctorModel.findOne({ phoneNumber });
+      doctorModel
+        .findOneAndUpdate(
+          {
+            _id: userData._id,
+          },
+          {
+            $set: {
+              phoneNumber: newPhoneNumber,
+              phoneNumberUpdate: true,
+            },
+          }
+        )
+        .then((res) => console.log("resss", res));
+      return successResponse({}, "Success", res);
+    } else {
+      throw new Error("Invalid OTP");
+    }
   } catch (error: any) {
     return errorResponse(error, res);
   }

@@ -66,6 +66,7 @@ adminRouter.put("/verifyAgent/:agentId", adminController.verifyAgents);
 adminRouter.get("/getAllDoctorsList", adminController.getAllDoctorsList);
 adminRouter.get("/getAllHospitalList", adminController.getAllHospitalList);
 adminRouter.get("/getAllAgentList", adminController.getAllAgentList);
+adminRouter.get("/getAllSuvedhaList", adminController.getAllSuvedhaList);
 adminRouter.get("/getAllPatientList", adminController.getAllPatientList);
 adminRouter.get("/getListOfSpecialityBodyPartAndDisease", patientController.getSpecialityBodyPartAndDisease);
 adminRouter.post("/setCountryMap", adminController.setCountryMap);
@@ -91,4 +92,5 @@ adminRouter.post("/addOwnership", (0, middlewareHelper_1.oneOf)(Admin_auth_1.aut
 adminRouter.get("/getOwnership", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), adminController.getOwnership);
 adminRouter.post("/deleteOwnership/:id", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), adminController.deleteOwnership);
 adminRouter.get("/getFees", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), adminController.getFees);
+adminRouter.post("/editSpeciality", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), adminController.editSpeciality);
 exports.default = adminRouter;

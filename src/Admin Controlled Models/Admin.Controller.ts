@@ -215,6 +215,9 @@ export const addCity = async (req: Request, res: Response) => {
       return errorResponse(new Error("City already exist"), res);
     }
     let cityObj = await new cityModel(body).save();
+
+    cityObj["city-id"] = cityObj._id;
+    cityObj.save();
     return successResponse(cityObj, "City has been successfully added", res);
   } catch (error: any) {
     return errorResponse(error, res);
@@ -244,6 +247,9 @@ export const addLocality = async (req: Request, res: Response) => {
       return errorResponse(new Error("Locality already exist"), res);
     }
     let localityObj = await new LocalityModel(body).save();
+
+    localityObj["localityid"] = localityObj._id;
+    localityObj.save();
     return successResponse(
       localityObj,
       "Locality has been successfully added",
@@ -301,9 +307,19 @@ export const getCityStateLocalityCountry = async (
   res: Response
 ) => {
   try {
+    let { page = 0, limit = 20 } = req.query;
+
+    page = parseInt(page as string);
+    limit = parseInt(limit as string);
+
     const city = await cityModel.find();
     const state = await stateModel.find();
-    const locality = await LocalityModel.find();
+    const locality = await LocalityModel.find()
+      .skip(limit * page)
+      .limit(limit);
+
+    const localityCount = await LocalityModel.count();
+
     const country = await countryModel.find();
 
     const [Ci, S, L, Co] = await Promise.all([city, state, locality, country]);
@@ -317,6 +333,7 @@ export const getCityStateLocalityCountry = async (
         response[region] = S;
       } else if (region === "locality") {
         response[region] = L;
+        response["count"] = localityCount;
       } else if (region === "country") {
         response[region] = Co;
       }
@@ -588,8 +605,8 @@ export const getAllDoctorsList = async (req: Request, res: Response) => {
             $function: {
               body: function (dob: any) {
                 dob = new Date(dob);
-                let currentDate = new Date();
-                let age: string | number =
+                var currentDate = new Date();
+                var age: string | number =
                   currentDate.getFullYear() - dob.getFullYear();
                 if (age > 0) {
                   age = `${age} years`;
@@ -657,6 +674,23 @@ export const getAllAgentList = async (req: Request, res: Response) => {
       adminSearch: true,
     });
     return successResponse(agentList, "Successfully fetched Agent's list", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getAllSuvedhaList = async (req: Request, res: Response) => {
+  try {
+    const suvedhaList = await suvedhaModel
+      .find({
+        deleted: false,
+      })
+      .populate({ path: "address", populate: "city locality state" });
+    return successResponse(
+      suvedhaList,
+      "Successfully fetched Agent's list",
+      res
+    );
   } catch (error: any) {
     return errorResponse(error, res);
   }
@@ -761,6 +795,8 @@ import StateMapModel from "../Admin Controlled Models/State.Map.Model";
 import CityMapModel from "../Admin Controlled Models/City.Map.Model";
 import qualificationNameModel from "./QualificationName.Model";
 import ownershipModel from "../Models/Ownership.Model";
+import { city } from "../Services/schemaNames";
+import suvedhaModel from "../Models/Suvedha.Model";
 
 export const setCountryMap = async (req: Request, res: Response) => {
   try {
@@ -853,7 +889,6 @@ export const getLocalityByCity = async (req: Request, res: Response) => {
 
 export const uploadCSV_state = async (req: Request, res: Response) => {
   try {
-    console.log("wwwww:", req.body);
     let data = await adminService.handleCSV_state(req.file);
     return successResponse(data, "Success", res);
   } catch (error: any) {
@@ -900,6 +935,7 @@ export const getAllAppointments = async (req: Request, res: Response) => {
       .populate({
         path: "doctors",
         select: excludeDoctorFields,
+        populate: "specialization",
       })
       .populate({
         path: "hospital",
@@ -956,6 +992,32 @@ export const deleteOwnership = async (req: Request, res: Response) => {
       "Success",
       res
     );
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const editSpeciality = async (req: Request, res: Response) => {
+  try {
+    const { specialityId } = req.body;
+    let exist = await specialityModel.exists({ _id: specialityId });
+    if (!exist) {
+      return errorResponse(new Error("Speciality doesn't exist"), res);
+    }
+    let { image, name } = req.body;
+
+    let data = await specialityModel.findOneAndUpdate(
+      { _id: specialityId },
+      {
+        $set: {
+          ...(image && { image }),
+          ...(name && { specialityName: name }),
+        },
+      }
+    );
+
+
+    return successResponse({ success: true }, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }
