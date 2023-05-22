@@ -44,6 +44,16 @@ patientRouter.post(
 import * as prescriptionValidtiyService from "../Controllers/Prescription-Validity.Controller";
 import patientModel from "../Models/Patient.Model";
 import { authenticateSuvedha } from "../authentication/Suvedha.auth";
+import doctorModel from "../Models/Doctors.Model";
+import hospitalModel from "../Models/Hospital.Model";
+import {
+  digiMilesSMS,
+  sendNotificationToDoctor,
+  sendNotificationToHospital,
+  sendNotificationToPatient,
+} from "../Services/Utils";
+import moment from "moment";
+import subPatientModel from "../Models/SubPatient.Model";
 patientRouter.post(
   "/BookAppointment",
   oneOf(authenticatePatient, authenticateHospital),
@@ -101,10 +111,10 @@ patientRouter.post(
   oneOf(authenticatePatient, authenticateSuvedha),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      let doctorId = req.body.doctors,
-        patientId = req.body.patient,
-        hospitalId = req.body.hospital,
-        subPatientId = req.body.subPatient;
+      let doctorId = req.body.appointment.doctors,
+        patientId = req.body.appointment.patient,
+        hospitalId = req.body.appointment.hospital,
+        subPatientId = req.body.appointment.subPatient;
       let valid =
         await prescriptionValidtiyService.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod(
           { doctorId, patientId, hospitalId, subPatientId }
@@ -117,6 +127,77 @@ patientRouter.post(
         req.body.appointment["appointmentBookedBy"] = "Suvedha";
       }
       next();
+
+      const body = "You have a new appoitment";
+      const title = "New appointment";
+      const notification = { body, title };
+
+      const doctorData = doctorModel.findOne({ _id: doctorId });
+      const hospitalData = hospitalModel.findOne({ _id: hospitalId });
+
+      let patientData;
+      if (subPatientId) {
+        patientData = subPatientModel.findOne({ _id: subPatientId });
+      } else {
+        patientData = patientModel.findOne({ _id: patientId });
+      }
+
+      Promise.all([doctorData, hospitalData, patientData]).then((result) => {
+        const [D, H, P] = result;
+        // const { firebaseToken: doctorFirebaseToken } = D,
+        //   { firebaseToken: hospitalFirebaseToken } = H;
+
+        const doctorFirebaseToken = D.firebaseToken,
+          hospitalFirebaseToken = H.firebaseToken,
+          patientFirebaseToken = P.firebaseToken;
+
+        sendNotificationToDoctor(doctorFirebaseToken, {
+          title: "New appointment",
+          body: `${P.firstName} ${P.lastName} has booked an appointment at ${
+            H.name
+          } and ${moment(req.body.appointment.time.date).format(
+            "DD-MM-YYYY"
+          )} ${req.body.appointment.time.from.time}:${
+            req.body.appointment.time.from.division
+          } -${req.body.appointment.time.till.time}:${
+            req.body.appointment.time.till.division
+          } `,
+        });
+        sendNotificationToHospital(hospitalFirebaseToken, {
+          title: "New appointment",
+          body: `${P.firstName} ${P.lastName} has booked an appointment with ${
+            D.firstName
+          } ${D.lastName} and ${moment(req.body.appointment.time.date).format(
+            "DD-MM-YYYY"
+          )} ${req.body.appointment.time.from.time}:${
+            req.body.appointment.time.from.division
+          } -${req.body.appointment.time.till.time}:${
+            req.body.appointment.time.till.division
+          } `,
+        });
+
+        sendNotificationToPatient(patientFirebaseToken, {
+          title: "New appointment",
+          body: `${P.firstName} ${P.lastName} has booked an appointment for ${
+            D.firstName
+          } ${D.lastName} at ${H.name} and ${moment(
+            req.body.appointment.time.date
+          ).format("DD-MM-YYYY")} ${req.body.appointment.time.from.time}:${
+            req.body.appointment.time.from.division
+          } -${req.body.appointment.time.till.time}:${
+            req.body.appointment.time.till.division
+          } `,
+        });
+
+        digiMilesSMS.sendAppointmentConfirmationNotification(
+          P.phoneNumber,
+          `${P.firstName} ${P.lastName}`,
+          `${D.firstName} ${D.lastName}`,
+          H.name,
+          moment(req.body.appointment.time.date).format("DD-MM-YYYY"),
+          `${req.body.appointment.time.from.time}:${req.body.appointment.time.from.division} -${req.body.appointment.time.till.time}:${req.body.appointment.time.till.division}`
+        );
+      });
     } catch (error: any) {
       return errorResponse(error, res);
     }
@@ -223,7 +304,7 @@ patientRouter.get(
   oneOf(authenticatePatient),
   async (req: Request, res: Response) => {
     try {
-      let data = await feeService.getAllFees();
+      let data = await feeService.getAllFees({ name: "Convenience Fee" });
       return successResponse(data, "Success", res);
     } catch (error: any) {
       return errorResponse(error, res);

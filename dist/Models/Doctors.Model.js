@@ -119,6 +119,13 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
     verified: {
         type: Boolean,
         default: false,
+    }, 
+    // In months
+    preBookingTime: {
+        type: Number,
+    }, firebaseToken: {
+        type: String,
+        // required: true,
     } }), {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },

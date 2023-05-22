@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editSpeciality = exports.deleteOwnership = exports.getOwnership = exports.addOwnership = exports.getFees = exports.createFee = exports.getAllAppointments = exports.addQualificationn = exports.uploadCSV_locality = exports.uploadCSV_city = exports.uploadCSV_state = exports.getLocalityByCity = exports.getCityByState = exports.getStateByCountry = exports.setCityMap = exports.setStateMap = exports.setCountryMap = exports.getAllHospitalList = exports.getAllSuvedhaList = exports.getAllAgentList = exports.getAllPatientList = exports.verifyAgents = exports.getAllDoctorsList = exports.verifyHospitals = exports.verifyDoctors = exports.getUnverifiedDoctors = exports.deleteHospitalService = exports.addHospitalService = exports.create = exports.login = exports.getCityStateLocalityCountry = exports.getPayments = exports.addPayment = exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityDoctorType = exports.addSpecialityDoctorType = exports.addDoctorType = exports.addToSpecialityDisease = exports.addSpecialityDisease = exports.addDisease = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
+exports.getDoctorById = exports.getHospitalById = exports.editFee = exports.editSpeciality = exports.deleteOwnership = exports.getOwnership = exports.addOwnership = exports.getFees = exports.createFee = exports.getAllAppointments = exports.addQualificationn = exports.uploadCSV_locality = exports.uploadCSV_city = exports.uploadCSV_state = exports.getLocalityByCity = exports.getCityByState = exports.getStateByCountry = exports.setCityMap = exports.setStateMap = exports.setCountryMap = exports.getAllHospitalList = exports.getAllSuvedhaList = exports.getAllAgentList = exports.getAllPatientList = exports.verifyAgents = exports.getAllDoctorsList = exports.verifyHospitals = exports.verifyDoctors = exports.getUnverifiedDoctors = exports.deleteHospitalService = exports.addHospitalService = exports.create = exports.login = exports.getCityStateLocalityCountry = exports.getPayments = exports.addPayment = exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityDoctorType = exports.addSpecialityDoctorType = exports.addDoctorType = exports.addToSpecialityDisease = exports.addSpecialityDisease = exports.addDisease = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
 const BodyPart_Model_1 = __importDefault(require("./BodyPart.Model"));
 const SpecialityBody_Model_1 = __importDefault(require("./SpecialityBody.Model"));
 const SpecialityDisease_Model_1 = __importDefault(require("./SpecialityDisease.Model"));
@@ -788,6 +788,7 @@ const State_Map_Model_1 = __importDefault(require("../Admin Controlled Models/St
 const City_Map_Model_1 = __importDefault(require("../Admin Controlled Models/City.Map.Model"));
 const QualificationName_Model_1 = __importDefault(require("./QualificationName.Model"));
 const Suvedha_Model_1 = __importDefault(require("../Models/Suvedha.Model"));
+const Fee_Model_1 = __importDefault(require("../Module/Payment/Model/Fee.Model"));
 const setCountryMap = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
@@ -934,7 +935,8 @@ const getAllAppointments = (req, res) => __awaiter(void 0, void 0, void 0, funct
         })
             .populate({
             path: "subPatient",
-        });
+        })
+            .sort({ createdAt: -1 });
         return (0, response_1.successResponse)(appointments, "Success", res);
     }
     catch (error) {
@@ -1009,3 +1011,52 @@ const editSpeciality = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.editSpeciality = editSpeciality;
+const editFee = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { feeId, name, amount } = req.body;
+        let exist = yield Fee_Model_1.default.exists({ _id: feeId });
+        if (!exist) {
+            return (0, response_1.errorResponse)(new Error("Fee doesn't exist"), res);
+        }
+        Fee_Model_1.default
+            .findOneAndUpdate({
+            _id: feeId,
+        }, {
+            $set: Object.assign(Object.assign({}, (amount && { feeAmount: amount })), (name && { name })),
+        })
+            .then((result) => {
+            console.log("dsjgfdvsdds", result);
+        });
+        return (0, response_1.successResponse)({ success: true }, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.editFee = editFee;
+const getHospitalById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const hospital = yield Hospital_Model_1.default
+            .findOne({ _id: req.params.id }, "-password ")
+            .populate("doctors anemity services")
+            .populate({
+            path: "address",
+            populate: "city locality",
+        });
+        return (0, response_1.successResponse)(hospital, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getHospitalById = getHospitalById;
+const getDoctorById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const doctor = yield Doctors_Model_1.default.findOne({ _id: req.params.id }, "-password");
+        return (0, response_1.successResponse)(doctor, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getDoctorById = getDoctorById;

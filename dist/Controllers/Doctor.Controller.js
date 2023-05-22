@@ -42,13 +42,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifyOTPToUpdateNumber = exports.sendOTPToUpdateNumber = exports.getSpecializationByCity = exports.getMyLikes = exports.unlikeDoctor = exports.likeADoctor = exports.getPrescriptionValidityAndFeesOfDoctorInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getHospitalsOfflineAndOnlineAppointments = exports.deleteHolidayCalendar = exports.getDoctorsHolidayList = exports.setHolidayCalendar = exports.getDoctorsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.setConsultationFeeForDoctor = exports.addHospitalInDoctorProfile = exports.checkVerificationStatus = exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
+exports.getDoctorQualificationList = exports.deleteDoctorQualification = exports.verifyOTPToUpdateNumber = exports.sendOTPToUpdateNumber = exports.getSpecializationByCity = exports.getMyLikes = exports.unlikeDoctor = exports.likeADoctor = exports.getPrescriptionValidityAndFeesOfDoctorInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getHospitalsOfflineAndOnlineAppointments = exports.deleteHolidayCalendar = exports.getDoctorsHolidayList = exports.setHolidayCalendar = exports.getDoctorsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.setConsultationFeeForDoctor = exports.addHospitalInDoctorProfile = exports.checkVerificationStatus = exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
 const bcrypt = __importStar(require("bcrypt"));
 const response_1 = require("../Services/response");
-const message_service_1 = require("../Services/message.service");
 const SpecialityBody_Model_1 = __importDefault(require("../Admin Controlled Models/SpecialityBody.Model"));
 const Specialization_Model_1 = __importDefault(require("../Admin Controlled Models/Specialization.Model"));
 const underscore_1 = __importDefault(require("underscore"));
@@ -135,11 +134,12 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
                 const OTP = Math.floor(100000 + Math.random() * 900000).toString();
                 if (!(body.phoneNumber == "9999799997")) {
-                    (0, message_service_1.sendMessage)(`Your OTP is: ${OTP}`, body.phoneNumber)
-                        .then((message) => __awaiter(void 0, void 0, void 0, function* () { }))
-                        .catch((error) => {
-                        throw error;
-                    });
+                    // sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
+                    //   .then(async (message) => {})
+                    //   .catch((error) => {
+                    //     throw error;
+                    //   });
+                    Utils_1.digiMilesSMS.sendOTPToPhoneNumber(body.phoneNumber, OTP);
                     const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 }, OTP);
                     // Add OTP and phone number to temporary collection
                     yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: body.phoneNumber }, { $set: { phoneNumber: body.phoneNumber, otp: otpToken } }, { upsert: true });
@@ -166,7 +166,7 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                     .populate("qualification");
                 if (profile) {
                     const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_DOCTOR_KEY);
-                    let { firstName, lastName, gender, phoneNumber, email, _id, qualification, } = profile.toJSON();
+                    let { firstName, lastName, gender, phoneNumber, email, _id, qualification, preBookingTime, } = profile.toJSON();
                     qualification = qualification[0];
                     return (0, response_1.successResponse)({
                         token,
@@ -177,6 +177,7 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                         email,
                         _id,
                         qualification,
+                        preBookingTime,
                     }, "Successfully logged in", res);
                 }
                 else {
@@ -222,7 +223,17 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                         yield profile.populate("qualification");
                         profile = profile.toObject();
                         profile.qualification = profile.qualification[0];
-                        const { firstName, lastName, gender, phoneNumber, email, _id, qualification, verified, } = profile;
+                        const { firstName, lastName, gender, phoneNumber, email, _id, qualification, verified, preBookingTime, } = profile;
+                        Doctors_Model_1.default
+                            .findOneAndUpdate({
+                            phoneNumber: body.phoneNumber,
+                            deleted: false,
+                        }, {
+                            $set: {
+                                firebaseToken: body.firebaseToken,
+                            },
+                        })
+                            .then((result) => console.log("jhdsdsdsd", result));
                         return (0, response_1.successResponse)({
                             token,
                             firstName,
@@ -233,10 +244,17 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                             _id,
                             qualification,
                             verified,
+                            preBookingTime,
                         }, "Successfully logged in", res);
                     }
                     else {
                         otpData.remove();
+                        Doctors_Model_1.default.findOneAndUpdate({
+                            phoneNumber: body.phoneNumber,
+                            deleted: false,
+                        }, {
+                            firebaseToken: body.firebaseToken,
+                        });
                         return (0, response_1.successResponse)({ message: "No Data found" }, "Create a new profile", res, 201);
                     }
                 }
@@ -294,6 +312,7 @@ const getDoctorById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             },
         })
             .lean();
+        console.log(":ldsvdsdsds", doctorData);
         if (doctorData) {
             doctorData.hospitalDetails = doctorData.hospitalDetails.map((elem) => {
                 return {
@@ -1853,6 +1872,8 @@ exports.getDoctorsOfflineAndOnlineAppointments = getDoctorsOfflineAndOnlineAppoi
 const notificationService = __importStar(require("../Services/Notification/Notification.Service"));
 const Prescription_Model_1 = __importDefault(require("../Models/Prescription.Model"));
 const Utils_1 = require("../Services/Utils");
+const Suvedha_Model_1 = __importDefault(require("../Models/Suvedha.Model"));
+const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
 const getDoctorsNotification = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         /* Notification jaha pe sender hospital hai */
@@ -2071,13 +2092,28 @@ const verifyOTPToUpdateNumber = (req, res) => __awaiter(void 0, void 0, void 0, 
         if (!newPhoneNumber) {
             throw new Error("Enter new phone number");
         }
-        let result = yield (0, Utils_1.verifyPasswordChangeOTP)(newPhoneNumber, OTP);
+        let result = true;
+        if (!["TEST"].includes(process.env.ENVIRONMENT)) {
+            result = yield (0, Utils_1.verifyPasswordChangeOTP)(newPhoneNumber, OTP);
+        }
+        // let result = await verifyPasswordChangeOTP(newPhoneNumber, OTP);
         if (result) {
             let exist = yield Doctors_Model_1.default.exists({
                 phoneNumber: newPhoneNumber,
             });
-            console.log("hds lknsjdsdsds", exist);
-            if (exist) {
+            let existHospital = Hospital_Model_1.default.exists({
+                contactNumber: newPhoneNumber,
+            });
+            let existSuvedha = Suvedha_Model_1.default.exists({ phoneNumber: newPhoneNumber });
+            let existPatient = Patient_Model_1.default.exists({ phoneNumber: newPhoneNumber });
+            let existResult = yield Promise.all([
+                exist,
+                existHospital,
+                existSuvedha,
+                existPatient,
+            ]);
+            // if (exist) {
+            if (existResult.includes(true)) {
                 throw new Error("Phone number already exist");
             }
             let userData = yield Doctors_Model_1.default.findOne({ phoneNumber });
@@ -2102,3 +2138,40 @@ const verifyOTPToUpdateNumber = (req, res) => __awaiter(void 0, void 0, void 0, 
     }
 });
 exports.verifyOTPToUpdateNumber = verifyOTPToUpdateNumber;
+const deleteDoctorQualification = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let { qualificationId } = req.body;
+        Doctors_Model_1.default
+            .findOneAndUpdate({
+            _id: req.currentDoctor,
+        }, {
+            $pull: { qualification: qualificationId },
+        })
+            .then((result) => {
+            console.log("jgdshbds sdds", result);
+        });
+        return (0, response_1.successResponse)({}, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.deleteDoctorQualification = deleteDoctorQualification;
+const getDoctorQualificationList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let doctor = yield Doctors_Model_1.default
+            .findOne({ _id: req.currentDoctor })
+            .populate("qualification");
+        let { qualification } = doctor;
+        qualification = qualification.map((e) => ({
+            id: e._id,
+            name: e.qualificationName.abbreviation,
+            certificationorgnisation: e.certificationOrganisation,
+        }));
+        return (0, response_1.successResponse)(qualification, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getDoctorQualificationList = getDoctorQualificationList;

@@ -138,11 +138,13 @@ export const doctorLogin = async (req: Request, res: Response) => {
         const OTP = Math.floor(100000 + Math.random() * 900000).toString();
 
         if (!(body.phoneNumber == "9999799997")) {
-          sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
-            .then(async (message) => {})
-            .catch((error) => {
-              throw error;
-            });
+          // sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
+          //   .then(async (message) => {})
+          //   .catch((error) => {
+          //     throw error;
+          //   });
+
+          digiMilesSMS.sendOTPToPhoneNumber(body.phoneNumber, OTP);
           const otpToken = jwt.sign(
             { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
             OTP
@@ -189,6 +191,7 @@ export const doctorLogin = async (req: Request, res: Response) => {
             email,
             _id,
             qualification,
+            preBookingTime,
           } = profile.toJSON();
           qualification = qualification[0];
           return successResponse(
@@ -201,6 +204,7 @@ export const doctorLogin = async (req: Request, res: Response) => {
               email,
               _id,
               qualification,
+              preBookingTime,
             },
             "Successfully logged in",
             res
@@ -277,7 +281,21 @@ export const doctorLogin = async (req: Request, res: Response) => {
               _id,
               qualification,
               verified,
+              preBookingTime,
             } = profile;
+            doctorModel
+              .findOneAndUpdate(
+                {
+                  phoneNumber: body.phoneNumber,
+                  deleted: false,
+                },
+                {
+                  $set: {
+                    firebaseToken: body.firebaseToken,
+                  },
+                }
+              )
+              .then((result) => console.log("jhdsdsdsd", result));
             return successResponse(
               {
                 token,
@@ -289,12 +307,22 @@ export const doctorLogin = async (req: Request, res: Response) => {
                 _id,
                 qualification,
                 verified,
+                preBookingTime,
               },
               "Successfully logged in",
               res
             );
           } else {
             otpData.remove();
+            doctorModel.findOneAndUpdate(
+              {
+                phoneNumber: body.phoneNumber,
+                deleted: false,
+              },
+              {
+                firebaseToken: body.firebaseToken,
+              }
+            );
             return successResponse(
               { message: "No Data found" },
               "Create a new profile",
@@ -354,6 +382,8 @@ export const getDoctorById = async (req: Request, res: Response) => {
         },
       })
       .lean();
+
+    console.log(":ldsvdsdsds", doctorData);
 
     if (doctorData) {
       doctorData.hospitalDetails = doctorData.hospitalDetails.map(
@@ -2121,9 +2151,12 @@ import * as notificationService from "../Services/Notification/Notification.Serv
 import prescriptionModel from "../Models/Prescription.Model";
 import addressModel from "../Models/Address.Model";
 import {
+  digiMilesSMS,
   sendOTPForPasswordChange,
   verifyPasswordChangeOTP,
 } from "../Services/Utils";
+import suvedhaModel from "../Models/Suvedha.Model";
+import patientModel from "../Models/Patient.Model";
 
 export const getDoctorsNotification = async (req: Request, res: Response) => {
   try {
@@ -2392,13 +2425,35 @@ export const verifyOTPToUpdateNumber = async (req: Request, res: Response) => {
     if (!newPhoneNumber) {
       throw new Error("Enter new phone number");
     }
-    let result = await verifyPasswordChangeOTP(newPhoneNumber, OTP);
+
+    let result = true;
+    if (!["TEST"].includes(process.env.ENVIRONMENT as string)) {
+      result = await verifyPasswordChangeOTP(newPhoneNumber, OTP);
+    }
+
+    // let result = await verifyPasswordChangeOTP(newPhoneNumber, OTP);
     if (result) {
       let exist = await doctorModel.exists({
         phoneNumber: newPhoneNumber,
       });
-      console.log("hds lknsjdsdsds", exist);
-      if (exist) {
+
+      let existHospital = hospitalModel.exists({
+        contactNumber: newPhoneNumber,
+      });
+
+      let existSuvedha = suvedhaModel.exists({ phoneNumber: newPhoneNumber });
+
+      let existPatient = patientModel.exists({ phoneNumber: newPhoneNumber });
+
+      let existResult = await Promise.all([
+        exist,
+        existHospital,
+        existSuvedha,
+        existPatient,
+      ]);
+
+      // if (exist) {
+      if (existResult.includes(true)) {
         throw new Error("Phone number already exist");
       }
 
@@ -2420,6 +2475,53 @@ export const verifyOTPToUpdateNumber = async (req: Request, res: Response) => {
     } else {
       throw new Error("Invalid OTP");
     }
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const deleteDoctorQualification = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    let { qualificationId } = req.body;
+
+    doctorModel
+      .findOneAndUpdate(
+        {
+          _id: req.currentDoctor,
+        },
+        {
+          $pull: { qualification: qualificationId },
+        }
+      )
+      .then((result: any) => {
+        console.log("jgdshbds sdds", result);
+      });
+    return successResponse({}, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getDoctorQualificationList = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    let doctor = await doctorModel
+      .findOne({ _id: req.currentDoctor })
+      .populate("qualification");
+
+    let { qualification } = doctor;
+
+    qualification = qualification.map((e: any) => ({
+      id: e._id,
+      name: e.qualificationName.abbreviation,
+      certificationorgnisation: e.certificationOrganisation,
+    }));
+    return successResponse(qualification, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

@@ -5,6 +5,8 @@ import multer from "multer";
 import * as path from "path";
 import otpModel from "../Models/OTP.Model";
 import { sendMessage } from "./message.service";
+import * as http from "http";
+import axios from "axios";
 
 export const phoneNumberRegex: RegExp = /^[0]?[6789]\d{9}$/;
 
@@ -188,13 +190,15 @@ export const sendOTPForPasswordChange = async (phoneNumber: string) => {
     { upsert: true }
   );
 
-  sendMessage(`Your OTP is: ${OTP}`, phoneNumber)
-    .then(async (message: any) => {
-      // Add OTP and phone number to temporary collection
-    })
-    .catch((error: any) => {
-      return Promise.reject(error);
-    });
+  // sendMessage(`Your OTP is: ${OTP}`, phoneNumber)
+  //   .then(async (message: any) => {
+  //     // Add OTP and phone number to temporary collection
+  //   })
+  //   .catch((error: any) => {
+  //     return Promise.reject(error);
+  //   });
+
+  digiMilesSMS.sendOTPToPhoneNumber(phoneNumber, OTP);
 };
 
 export const verifyPasswordChangeOTP = async (
@@ -223,4 +227,95 @@ export const verifyPasswordChangeOTP = async (
   } catch (error: any) {
     return Promise.reject(error);
   }
+};
+
+export const firebaseAxiosDoctor = axios.create({
+  baseURL: "https://fcm.googleapis.com",
+});
+firebaseAxiosDoctor.interceptors.request.use((req) => {
+  let headers = {
+    "Content-Type": "application/json",
+    Authorization: `key=${process.env.FIREBASE_DOCTOR_API_KEY as string}`,
+  };
+  req.headers = headers;
+
+  return req;
+});
+
+export const firebaseAxiosHospital = axios.create({
+  baseURL: "https://fcm.googleapis.com",
+});
+firebaseAxiosHospital.interceptors.request.use((req) => {
+  let headers = {
+    "Content-Type": "application/json",
+    Authorization: `key=${process.env.FIREBASE_HOSPITAL_API_KEY as string}`,
+  };
+
+  req.headers = headers;
+
+  return req;
+});
+
+export const firebaseAxiosPatient = axios.create({
+  baseURL: "https://fcm.googleapis.com",
+});
+firebaseAxiosPatient.interceptors.request.use((req) => {
+  let headers = {
+    "Content-Type": "application/json",
+    Authorization: `key=${process.env.FIREBASE_PATIENT_API_KEY as string}`,
+  };
+  req.headers = headers;
+
+  return req;
+});
+
+export const sendNotificationToDoctor = async (
+  doctorFirebaseToken: string,
+  notification: { body: string; title: string }
+) => {
+  firebaseAxiosDoctor.post("/fcm/send", {
+    to: doctorFirebaseToken,
+    notification,
+  });
+};
+
+export const sendNotificationToHospital = async (
+  hospitalFirebaseToken: string,
+  notification: { body: string; title: string }
+) => {
+  firebaseAxiosHospital.post("/fcm/send", {
+    to: hospitalFirebaseToken,
+    notification,
+  });
+};
+
+export const sendNotificationToPatient = async (
+  patientFirebaseToken: string,
+  notification: { body: string; title: string }
+) => {
+  firebaseAxiosPatient.post("/fcm/send", {
+    to: patientFirebaseToken,
+    notification,
+  });
+};
+
+export const digiMilesSMS = {
+  sendAppointmentConfirmationNotification: (
+    phoneNumber: string,
+    patientName: string,
+    doctorName: string,
+    hospitalName: string,
+    date: string,
+    time: string
+  ) => {
+    return axios.get(
+      `http://route.digimiles.in/bulksms/bulksms?username=DG35-medius&password=digimile&type=0&dlr=1&destination=${phoneNumber}&source=MEDUST&message=Hi, ${patientName}. Your appointment with Dr. ${doctorName} at ${hospitalName} PM has been booked on ${date} between ${time}. Team Medius.&entityid=1501583880000052401&tempid=1507166324070972086`
+    );
+  },
+
+  sendOTPToPhoneNumber: (phoneNumber: string, otp: string) => {
+    return axios.get(
+      `http://route.digimiles.in/bulksms/bulksms?username=DG35-medius&password=digimile&type=0&dlr=1&destination=${phoneNumber}&source=MEDUST&message=${otp} is the OTP to validate your account with Medius. OTP is valid only for 60 seconds. Team Medius.&entityid=1501583880000052401&tempid=1507166324007499032`
+    );
+  },
 };

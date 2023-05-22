@@ -458,4 +458,15 @@ doctorRouter.put(
   doctorController.verifyOTPToUpdateNumber
 );
 
+doctorRouter.post(
+  "/qualification",
+  oneOf(authenticateDoctor),
+  doctorController.deleteDoctorQualification
+);
+
+doctorRouter.get(
+  "/qualification/list",
+  oneOf(authenticateDoctor),
+  doctorController.getDoctorQualificationList
+);
 export default doctorRouter;

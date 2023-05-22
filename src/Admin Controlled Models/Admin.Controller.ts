@@ -797,6 +797,7 @@ import qualificationNameModel from "./QualificationName.Model";
 import ownershipModel from "../Models/Ownership.Model";
 import { city } from "../Services/schemaNames";
 import suvedhaModel from "../Models/Suvedha.Model";
+import feeModel from "../Module/Payment/Model/Fee.Model";
 
 export const setCountryMap = async (req: Request, res: Response) => {
   try {
@@ -942,7 +943,8 @@ export const getAllAppointments = async (req: Request, res: Response) => {
       })
       .populate({
         path: "subPatient",
-      });
+      })
+      .sort({ createdAt: -1 });
     return successResponse(appointments, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
@@ -1016,8 +1018,63 @@ export const editSpeciality = async (req: Request, res: Response) => {
       }
     );
 
-
     return successResponse({ success: true }, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const editFee = async (req: Request, res: Response) => {
+  try {
+    const { feeId, name, amount } = req.body;
+    let exist = await feeModel.exists({ _id: feeId });
+
+    if (!exist) {
+      return errorResponse(new Error("Fee doesn't exist"), res);
+    }
+    feeModel
+      .findOneAndUpdate(
+        {
+          _id: feeId,
+        },
+        {
+          $set: {
+            ...(amount && { feeAmount: amount }),
+            ...(name && { name }),
+          },
+        }
+      )
+      .then((result: any) => {
+        console.log("dsjgfdvsdds", result);
+      });
+    return successResponse({ success: true }, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getHospitalById = async (req: Request, res: Response) => {
+  try {
+    const hospital = await hospitalModel
+      .findOne({ _id: req.params.id }, "-password ")
+      .populate("doctors anemity services")
+      .populate({
+        path: "address",
+        populate: "city locality",
+      });
+    return successResponse(hospital, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res);
+  }
+};
+
+export const getDoctorById = async (req: Request, res: Response) => {
+  try {
+    const doctor = await doctorModel.findOne(
+      { _id: req.params.id },
+      "-password"
+    );
+    return successResponse(doctor, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
   }

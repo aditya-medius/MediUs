@@ -153,6 +153,10 @@ const hospitalSchema = new mongoose_1.Schema({
         IFSC: String,
         PAN: String,
     },
+    firebaseToken: {
+        type: String,
+        // required: true,
+    },
 });
 hospitalSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {

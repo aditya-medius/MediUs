@@ -22,6 +22,10 @@ const patientSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: address,
   },
+  firebaseToken: {
+    type: String,
+    // required: true,
+  },
 });
 
 patientSchema.pre("save", async function (next) {

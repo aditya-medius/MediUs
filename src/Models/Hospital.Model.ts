@@ -140,6 +140,11 @@ const hospitalSchema = new Schema({
     IFSC: String,
     PAN: String,
   },
+
+  firebaseToken: {
+    type: String,
+    // required: true,
+  },
 });
 
 hospitalSchema.pre("save", async function (next) {

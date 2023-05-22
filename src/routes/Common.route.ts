@@ -6,7 +6,7 @@ import { authenticateHospital } from "../authentication/Hospital.auth";
 import { authenticateAdmin } from "../authentication/Admin.auth";
 import { authenticateSuvedha } from "../authentication/Suvedha.auth";
 import { oneOf } from "../Services/middlewareHelper";
-import { initUpload } from "../Services/Utils";
+import { initUpload, sendNotificationToDoctor } from "../Services/Utils";
 import { errorResponse, successResponse } from "../Services/response";
 import * as hospitalService from "../Services/Hospital/Hospital.Service";
 
@@ -105,6 +105,11 @@ commonRouter.get("/app/version/:app", async (req: Request, res: Response) => {
   } catch (error: any) {
     return errorResponse(error, res);
   }
+});
+
+commonRouter.post("/test/notification", async (req: Request, res: Response) => {
+  sendNotificationToDoctor("", { body: "", title: "" });
+  return errorResponse({ error: "Error" }, res);
 });
 
 export default commonRouter;

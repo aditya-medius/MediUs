@@ -27,9 +27,9 @@ const setFee = (name, feeAmount) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.setFee = setFee;
-const getAllFees = () => __awaiter(void 0, void 0, void 0, function* () {
+const getAllFees = (query = {}) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let feeData = yield Fee_Model_1.default.find();
+        let feeData = yield Fee_Model_1.default.find(query);
         return Promise.resolve(feeData);
     }
     catch (error) {

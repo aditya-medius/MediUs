@@ -175,4 +175,18 @@ adminRouter.post(
   oneOf(authenticateAdmin),
   adminController.editSpeciality
 );
+
+adminRouter.post("/editFee", oneOf(authenticateAdmin), adminController.editFee);
+
+adminRouter.get(
+  "/get/hospital/:id",
+  oneOf(authenticateAdmin),
+  adminController.getHospitalById
+);
+
+adminRouter.get(
+  "/get/doctor/:id",
+  oneOf(authenticateAdmin),
+  adminController.getDoctorById
+);
 export default adminRouter;

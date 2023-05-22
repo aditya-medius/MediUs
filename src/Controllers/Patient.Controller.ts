@@ -41,6 +41,7 @@ import orderModel from "../Models/Order.Model";
 import { checkIfDoctorIsAvailableOnTheDay } from "../Services/Doctor/Doctor.Service";
 import { calculateAge } from "../Services/Patient/Patient.Service";
 import * as patientService from "../Services/Patient/Patient.Service";
+import { digiMilesSMS } from "../Services/Utils";
 export const excludePatientFields = {
   password: 0,
   verified: 0,
@@ -113,13 +114,15 @@ export const patientLogin = async (req: Request, res: Response) => {
         const OTP = Math.floor(100000 + Math.random() * 900000).toString();
 
         // Implement message service API
-        sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
-          .then(async (message) => {})
-          .catch((error) => {
-            // throw error;
-            console.log("error :", error);
-            // return errorResponse(error, res);
-          });
+        // sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
+        //   .then(async (message) => {})
+        //   .catch((error) => {
+        //     // throw error;
+        //     console.log("error :", error);
+        //     // return errorResponse(error, res);
+        //   });
+
+        digiMilesSMS.sendOTPToPhoneNumber(body.phoneNumber, OTP);
         const otpToken = jwt.sign(
           { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
           OTP
@@ -156,6 +159,21 @@ export const patientLogin = async (req: Request, res: Response) => {
           );
           const { firstName, lastName, gender, phoneNumber, email, _id, DOB } =
             profile.toJSON();
+
+          patientModel
+            .findOneAndUpdate(
+              {
+                phoneNumber: body.phoneNumber,
+                deleted: false,
+              },
+              {
+                $set: {
+                  firebaseToken: body.firebaseToken,
+                },
+              }
+            )
+            .then((result) => console.log);
+
           return successResponse(
             {
               token,
@@ -217,6 +235,21 @@ export const patientLogin = async (req: Request, res: Response) => {
               _id,
               DOB,
             } = profile.toJSON();
+
+            patientModel
+              .findOneAndUpdate(
+                {
+                  phoneNumber: body.phoneNumber,
+                  deleted: false,
+                },
+                {
+                  $set: {
+                    firebaseToken: body.firebaseToken,
+                  },
+                }
+              )
+              .then((result) => console.log);
+
             return successResponse(
               {
                 token,

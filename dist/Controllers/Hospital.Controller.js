@@ -57,7 +57,6 @@ const underscore_1 = __importDefault(require("underscore"));
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const Appointment_Model_1 = __importDefault(require("../Models/Appointment.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
-const message_service_1 = require("../Services/message.service");
 const Patient_Controller_1 = require("./Patient.Controller");
 const bcrypt = __importStar(require("bcrypt"));
 const Services_Model_1 = __importDefault(require("../Admin Controlled Models/Services.Model"));
@@ -84,11 +83,12 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
                 const OTP = Math.floor(100000 + Math.random() * 900000).toString();
                 // Implement message service API
-                (0, message_service_1.sendMessage)(`Your OTP is: ${OTP}`, body.phoneNumber)
-                    .then((message) => __awaiter(void 0, void 0, void 0, function* () { }))
-                    .catch((error) => {
-                    throw error;
-                });
+                // sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
+                //   .then(async (message) => {})
+                //   .catch((error) => {
+                //     throw error;
+                //   });
+                Utils_1.digiMilesSMS.sendOTPToPhoneNumber(body.phoneNumber, OTP);
                 const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 }, OTP);
                 // Add OTP and phone number to temporary collection
                 yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: body.phoneNumber }, { $set: { phoneNumber: body.phoneNumber, otp: otpToken } }, { upsert: true });
@@ -115,6 +115,16 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 if (profile) {
                     const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_HOSPITAL_KEY);
                     const { name, contactNumber, _id, numberOfBed, password } = profile.toJSON();
+                    Hospital_Model_1.default
+                        .findOneAndUpdate({
+                        contactNumber: body.phoneNumber,
+                        deleted: false,
+                    }, {
+                        $set: {
+                            firebaseToken: body.firebaseToken,
+                        },
+                    })
+                        .then((result) => console.log("result", result));
                     return (0, response_1.successResponse)({ token, name, contactNumber, _id, numberOfBed, password }, "Successfully logged in", res);
                 }
                 else {
@@ -145,6 +155,17 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                         const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_HOSPITAL_KEY);
                         otpData.remove();
                         const { name, contactNumber, _id, numberOfBed, password } = profile.toJSON();
+                        console.log("body.phoneNumberbody.phoneNumber", body.phoneNumber);
+                        Hospital_Model_1.default
+                            .findOneAndUpdate({
+                            contactNumber: body.phoneNumber,
+                            deleted: false,
+                        }, {
+                            $set: {
+                                firebaseToken: body.firebaseToken,
+                            },
+                        })
+                            .then((result) => console.log("result", result));
                         return (0, response_1.successResponse)({ token, name, contactNumber, _id, numberOfBed, password }, "Successfully logged in", res);
                     }
                     else {
@@ -1084,6 +1105,8 @@ const getDoctorsOfflineAndOnlineAppointments = (req, res) => __awaiter(void 0, v
 });
 exports.getDoctorsOfflineAndOnlineAppointments = getDoctorsOfflineAndOnlineAppointments;
 const notificationService = __importStar(require("../Services/Notification/Notification.Service"));
+const Suvedha_Model_1 = __importDefault(require("../Models/Suvedha.Model"));
+const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
 const getHospitalsNotification = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         /* Notification jaha pe sender hospital hai */
@@ -1297,22 +1320,45 @@ const verifyOTPToUpdateNumber = (req, res) => __awaiter(void 0, void 0, void 0, 
         if (!newPhoneNumber) {
             throw new Error("Enter new phone number");
         }
-        let result = yield (0, Utils_1.verifyPasswordChangeOTP)(newPhoneNumber, OTP);
+        let result = true;
+        if (!["TEST"].includes(process.env.ENVIRONMENT)) {
+            result = yield (0, Utils_1.verifyPasswordChangeOTP)(newPhoneNumber, OTP);
+        }
         if (result) {
-            let exist = yield Hospital_Model_1.default.exists({
+            // let exist = await hospitalModel.exists({
+            //   contactNumber: newPhoneNumber,
+            // });
+            let exist = yield Doctors_Model_1.default.exists({
+                phoneNumber: newPhoneNumber,
+            });
+            let existHospital = Hospital_Model_1.default.exists({
                 contactNumber: newPhoneNumber,
             });
-            if (exist) {
+            let existSuvedha = Suvedha_Model_1.default.exists({ phoneNumber: newPhoneNumber });
+            let existPatient = Patient_Model_1.default.exists({ phoneNumber: newPhoneNumber });
+            let existResult = yield Promise.all([
+                exist,
+                existHospital,
+                existSuvedha,
+                existPatient,
+            ]);
+            // if (exist) {
+            if (existResult.includes(true)) {
                 throw new Error("Phone number already exist");
             }
             let data = yield Hospital_Model_1.default.findOne({ contactNumber: phoneNumber });
-            Hospital_Model_1.default.findOneAndUpdate({
+            console.log("DATAA", data);
+            Hospital_Model_1.default
+                .findOneAndUpdate({
                 _id: data._id,
             }, {
                 $set: {
                     contactNumber: newPhoneNumber,
                     phoneNumberUpdate: true,
                 },
+            })
+                .then((result) => {
+                console.log("result", result);
             });
             return (0, response_1.successResponse)({}, "Success", res);
         }

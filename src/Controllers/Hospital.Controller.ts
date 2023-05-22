@@ -31,6 +31,7 @@ import { request } from "http";
 import { getHospitalToken } from "../Services/Hospital/Hospital.Service";
 import { getAgeOfDoctor } from "../Services/Doctor/Doctor.Service";
 import {
+  digiMilesSMS,
   getAge,
   sendOTPForPasswordChange,
   verifyPasswordChangeOTP,
@@ -61,11 +62,13 @@ export const login = async (req: Request, res: Response) => {
         const OTP = Math.floor(100000 + Math.random() * 900000).toString();
 
         // Implement message service API
-        sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
-          .then(async (message) => {})
-          .catch((error) => {
-            throw error;
-          });
+        // sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
+        //   .then(async (message) => {})
+        //   .catch((error) => {
+        //     throw error;
+        //   });
+
+        digiMilesSMS.sendOTPToPhoneNumber(body.phoneNumber, OTP);
         const otpToken = jwt.sign(
           { otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 },
           OTP
@@ -105,6 +108,19 @@ export const login = async (req: Request, res: Response) => {
           );
           const { name, contactNumber, _id, numberOfBed, password } =
             profile.toJSON();
+          hospitalModel
+            .findOneAndUpdate(
+              {
+                contactNumber: body.phoneNumber,
+                deleted: false,
+              },
+              {
+                $set: {
+                  firebaseToken: body.firebaseToken,
+                },
+              }
+            )
+            .then((result) => console.log("result", result));
           return successResponse(
             { token, name, contactNumber, _id, numberOfBed, password },
             "Successfully logged in",
@@ -150,6 +166,21 @@ export const login = async (req: Request, res: Response) => {
             otpData.remove();
             const { name, contactNumber, _id, numberOfBed, password } =
               profile.toJSON();
+            console.log("body.phoneNumberbody.phoneNumber", body.phoneNumber);
+            hospitalModel
+              .findOneAndUpdate(
+                {
+                  contactNumber: body.phoneNumber,
+                  deleted: false,
+                },
+                {
+                  $set: {
+                    firebaseToken: body.firebaseToken,
+                  },
+                }
+              )
+              .then((result) => console.log("result", result));
+
             return successResponse(
               { token, name, contactNumber, _id, numberOfBed, password },
               "Successfully logged in",
@@ -1255,6 +1286,8 @@ export const getDoctorsOfflineAndOnlineAppointments = async (
 };
 
 import * as notificationService from "../Services/Notification/Notification.Service";
+import suvedhaModel from "../Models/Suvedha.Model";
+import patientModel from "../Models/Patient.Model";
 
 export const getHospitalsNotification = async (req: Request, res: Response) => {
   try {
@@ -1516,28 +1549,57 @@ export const verifyOTPToUpdateNumber = async (req: Request, res: Response) => {
     if (!newPhoneNumber) {
       throw new Error("Enter new phone number");
     }
-    let result = await verifyPasswordChangeOTP(newPhoneNumber, OTP);
+    let result = true;
+    if (!["TEST"].includes(process.env.ENVIRONMENT as string)) {
+      result = await verifyPasswordChangeOTP(newPhoneNumber, OTP);
+    }
     if (result) {
-      let exist = await hospitalModel.exists({
+      // let exist = await hospitalModel.exists({
+      //   contactNumber: newPhoneNumber,
+      // });
+
+      let exist = await doctorModel.exists({
+        phoneNumber: newPhoneNumber,
+      });
+
+      let existHospital = hospitalModel.exists({
         contactNumber: newPhoneNumber,
       });
-      if (exist) {
+
+      let existSuvedha = suvedhaModel.exists({ phoneNumber: newPhoneNumber });
+
+      let existPatient = patientModel.exists({ phoneNumber: newPhoneNumber });
+
+      let existResult = await Promise.all([
+        exist,
+        existHospital,
+        existSuvedha,
+        existPatient,
+      ]);
+
+      // if (exist) {
+      if (existResult.includes(true)) {
         throw new Error("Phone number already exist");
       }
 
       let data = await hospitalModel.findOne({ contactNumber: phoneNumber });
+      console.log("DATAA", data);
 
-      hospitalModel.findOneAndUpdate(
-        {
-          _id: data._id,
-        },
-        {
-          $set: {
-            contactNumber: newPhoneNumber,
-            phoneNumberUpdate: true,
+      hospitalModel
+        .findOneAndUpdate(
+          {
+            _id: data._id,
           },
-        }
-      );
+          {
+            $set: {
+              contactNumber: newPhoneNumber,
+              phoneNumberUpdate: true,
+            },
+          }
+        )
+        .then((result: any) => {
+          console.log("result", result);
+        });
       return successResponse({}, "Success", res);
     } else {
       throw new Error("Invalid OTP");

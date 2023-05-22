@@ -102,6 +102,15 @@ const doctorSchema = new Schema(
       type: Boolean,
       default: false,
     },
+
+    // In months
+    preBookingTime: {
+      type: Number,
+    },
+    firebaseToken: {
+      type: String,
+      // required: true,
+    },
   },
   {
     toJSON: { virtuals: true },

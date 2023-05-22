@@ -13,9 +13,9 @@ export const setFee = async (name: string, feeAmount: number) => {
   }
 };
 
-export const getAllFees = async () => {
+export const getAllFees = async (query = {}) => {
   try {
-    let feeData = await feeModel.find();
+    let feeData = await feeModel.find(query);
     return Promise.resolve(feeData);
   } catch (error: any) {
     return Promise.reject(error);

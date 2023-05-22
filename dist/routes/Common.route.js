@@ -100,4 +100,8 @@ commonRouter.get("/app/version/:app", (req, res) => __awaiter(void 0, void 0, vo
         return (0, response_1.errorResponse)(error, res);
     }
 }));
+commonRouter.post("/test/notification", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    (0, Utils_1.sendNotificationToDoctor)("", { body: "", title: "" });
+    return (0, response_1.errorResponse)({ error: "Error" }, res);
+}));
 exports.default = commonRouter;
