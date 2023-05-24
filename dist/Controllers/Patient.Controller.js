@@ -39,8 +39,6 @@ const Appointment_Model_1 = __importDefault(require("../Models/Appointment.Model
 const jwt = __importStar(require("jsonwebtoken"));
 const bcrypt = __importStar(require("bcrypt"));
 const response_1 = require("../Services/response");
-// import { sendMessage } from "../Services/message.service";
-const message_service_1 = require("../Services/message.service");
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const Doctor_Controller_1 = require("./Doctor.Controller");
 const WorkingHours_Model_1 = __importDefault(require("../Models/WorkingHours.Model"));
@@ -60,6 +58,7 @@ const Order_Model_1 = __importDefault(require("../Models/Order.Model"));
 const Doctor_Service_1 = require("../Services/Doctor/Doctor.Service");
 const Patient_Service_1 = require("../Services/Patient/Patient.Service");
 const patientService = __importStar(require("../Services/Patient/Patient.Service"));
+const Utils_1 = require("../Services/Utils");
 exports.excludePatientFields = {
     password: 0,
     verified: 0,
@@ -117,13 +116,14 @@ const patientLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             if (/^[0]?[6789]\d{9}$/.test(body.phoneNumber)) {
                 const OTP = Math.floor(100000 + Math.random() * 900000).toString();
                 // Implement message service API
-                (0, message_service_1.sendMessage)(`Your OTP is: ${OTP}`, body.phoneNumber)
-                    .then((message) => __awaiter(void 0, void 0, void 0, function* () { }))
-                    .catch((error) => {
-                    // throw error;
-                    console.log("error :", error);
-                    // return errorResponse(error, res);
-                });
+                // sendMessage(`Your OTP is: ${OTP}`, body.phoneNumber)
+                //   .then(async (message) => {})
+                //   .catch((error) => {
+                //     // throw error;
+                //     console.log("error :", error);
+                //     // return errorResponse(error, res);
+                //   });
+                Utils_1.digiMilesSMS.sendOTPToPhoneNumber(body.phoneNumber, OTP);
                 const otpToken = jwt.sign({ otp: OTP, expiresIn: Date.now() + 5 * 60 * 60 * 60 }, OTP);
                 // Add OTP and phone number to temporary collection
                 yield OTP_Model_1.default.findOneAndUpdate({ phoneNumber: body.phoneNumber }, { $set: { phoneNumber: body.phoneNumber, otp: otpToken } }, { upsert: true });
@@ -147,6 +147,16 @@ const patientLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                 if (profile) {
                     const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_PATIENT_KEY);
                     const { firstName, lastName, gender, phoneNumber, email, _id, DOB } = profile.toJSON();
+                    Patient_Model_1.default
+                        .findOneAndUpdate({
+                        phoneNumber: body.phoneNumber,
+                        deleted: false,
+                    }, {
+                        $set: {
+                            firebaseToken: body.firebaseToken,
+                        },
+                    })
+                        .then((result) => console.log);
                     return (0, response_1.successResponse)({
                         token,
                         firstName,
@@ -186,6 +196,16 @@ const patientLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                         const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_PATIENT_KEY);
                         otpData.remove();
                         const { firstName, lastName, gender, phoneNumber, email, _id, DOB, } = profile.toJSON();
+                        Patient_Model_1.default
+                            .findOneAndUpdate({
+                            phoneNumber: body.phoneNumber,
+                            deleted: false,
+                        }, {
+                            $set: {
+                                firebaseToken: body.firebaseToken,
+                            },
+                        })
+                            .then((result) => console.log);
                         return (0, response_1.successResponse)({
                             token,
                             firstName,

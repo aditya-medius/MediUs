@@ -10,6 +10,11 @@ const otpSchema = new Schema({
     type: String,
     required: true,
   },
+  for: {
+    type: String,
+    enum: ["PASSWORD_CHANGE"],
+    default: "",
+  },
 });
 
 const otpModel = model(OTP, otpSchema);

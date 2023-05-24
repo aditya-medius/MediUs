@@ -11,6 +11,11 @@ const otpSchema = new mongoose_1.Schema({
         type: String,
         required: true,
     },
+    for: {
+        type: String,
+        enum: ["PASSWORD_CHANGE"],
+        default: "",
+    },
 });
 const otpModel = (0, mongoose_1.model)(schemaNames_1.OTP, otpSchema);
 exports.default = otpModel;

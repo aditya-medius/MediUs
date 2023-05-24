@@ -119,6 +119,13 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
     verified: {
         type: Boolean,
         default: false,
+    }, 
+    // In months
+    preBookingTime: {
+        type: Number,
+    }, firebaseToken: {
+        type: String,
+        // required: true,
     } }), {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
@@ -252,22 +259,24 @@ doctorSchema.pre("findOneAndUpdate", function (next) {
                 "panCard" in updateQuery ||
                 "adhaarCard" in updateQuery)) {
             const query = this.getQuery();
-            const profileExist = yield this.model.findOne({
-                _id: { $ne: query._id },
-                $or: [
-                    {
-                        email: updateQuery.email,
-                    },
-                    { phoneNumber: updateQuery.phoneNumber },
-                    { panCard: updateQuery.panCard },
-                    { adhaarCard: updateQuery.panCard },
-                ],
-            });
-            if (profileExist) {
-                throw new Error("Profile alredy exist. Select a different phone number and email");
-            }
-            else {
-                return next();
+            if (!updateQuery.phoneNumberUpdate) {
+                const profileExist = yield this.model.findOne({
+                    _id: { $ne: query._id },
+                    $or: [
+                        {
+                            email: updateQuery.email,
+                        },
+                        { phoneNumber: updateQuery.phoneNumber },
+                        { panCard: updateQuery.panCard },
+                        { adhaarCard: updateQuery.panCard },
+                    ],
+                });
+                if (profileExist) {
+                    throw new Error("Profile alredy exist. Select a different phone number and email");
+                }
+                else {
+                    return next();
+                }
             }
         }
         return next();

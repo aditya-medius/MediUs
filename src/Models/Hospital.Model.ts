@@ -140,6 +140,11 @@ const hospitalSchema = new Schema({
     IFSC: String,
     PAN: String,
   },
+
+  firebaseToken: {
+    type: String,
+    // required: true,
+  },
 });
 
 hospitalSchema.pre("save", async function (next) {
@@ -192,17 +197,22 @@ hospitalSchema.pre("findOneAndUpdate", async function (next) {
   if ("contactNumber" in UpdateQuery) {
     UpdateQuery = UpdateQuery["$set"];
     const query = this.getQuery();
-    const hospitalExist = await this.model.findOne({
-      _id: { $ne: query._id },
-      $or: [{ contactNumber: UpdateQuery.contactNumber }],
-    });
-    if (hospitalExist) {
-      throw new Error(
-        "Hospital alredy exist. Select a different contact number"
-      );
-    } else {
-      return next();
+
+    if (!UpdateQuery.phoneNumberUpdate) {
+      const hospitalExist = await this.model.findOne({
+        _id: { $ne: query._id },
+        $or: [{ contactNumber: UpdateQuery.contactNumber }],
+      });
+      if (hospitalExist) {
+        throw new Error(
+          "Hospital alredy exist. Select a different contact number"
+        );
+      } else {
+        return next();
+      }
     }
+
+    return next();
   } else {
     return next();
   }

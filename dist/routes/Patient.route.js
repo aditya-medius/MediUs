@@ -51,7 +51,13 @@ patientRouter.post("/getPatientById/:id", (0, middlewareHelper_1.oneOf)(Patient_
 patientRouter.post("/updateProfile", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.updatePatientProfile);
 patientRouter.post("/deleteProfile", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.deleteProfile);
 const prescriptionValidtiyService = __importStar(require("../Controllers/Prescription-Validity.Controller"));
+const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
 const Suvedha_auth_1 = require("../authentication/Suvedha.auth");
+const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
+const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
+const Utils_1 = require("../Services/Utils");
+const moment_1 = __importDefault(require("moment"));
+const SubPatient_Model_1 = __importDefault(require("../Models/SubPatient.Model"));
 patientRouter.post("/BookAppointment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let doctorId = req.body.doctors, patientId = req.body.patient, hospitalId = req.body.hospital, subPatientId = req.body.subPatient;
@@ -71,7 +77,7 @@ patientRouter.post("/getDoctorByDay", (0, middlewareHelper_1.oneOf)(Patient_auth
 patientRouter.post("/generateOrderId", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital, Suvedha_auth_1.authenticateSuvedha), paymentController.generateOrderId);
 patientRouter.post("/verifyPayment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Suvedha_auth_1.authenticateSuvedha), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let doctorId = req.body.doctors, patientId = req.body.patient, hospitalId = req.body.hospital, subPatientId = req.body.subPatient;
+        let doctorId = req.body.appointment.doctors, patientId = req.body.appointment.patient, hospitalId = req.body.appointment.hospital, subPatientId = req.body.appointment.subPatient;
         let valid = yield prescriptionValidtiyService.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod({ doctorId, patientId, hospitalId, subPatientId });
         req.body["appointmentType"] = valid ? "Follow up" : "Fresh";
         if (req.currentPatient) {
@@ -81,6 +87,37 @@ patientRouter.post("/verifyPayment", (0, middlewareHelper_1.oneOf)(Patient_auth_
             req.body.appointment["appointmentBookedBy"] = "Suvedha";
         }
         next();
+        const body = "You have a new appoitment";
+        const title = "New appointment";
+        const notification = { body, title };
+        const doctorData = Doctors_Model_1.default.findOne({ _id: doctorId });
+        const hospitalData = Hospital_Model_1.default.findOne({ _id: hospitalId });
+        let patientData;
+        if (subPatientId) {
+            patientData = SubPatient_Model_1.default.findOne({ _id: subPatientId });
+        }
+        else {
+            patientData = Patient_Model_1.default.findOne({ _id: patientId });
+        }
+        Promise.all([doctorData, hospitalData, patientData]).then((result) => {
+            const [D, H, P] = result;
+            // const { firebaseToken: doctorFirebaseToken } = D,
+            //   { firebaseToken: hospitalFirebaseToken } = H;
+            const doctorFirebaseToken = D.firebaseToken, hospitalFirebaseToken = H.firebaseToken, patientFirebaseToken = P.firebaseToken;
+            (0, Utils_1.sendNotificationToDoctor)(doctorFirebaseToken, {
+                title: "New appointment",
+                body: `${P.firstName} ${P.lastName} has booked an appointment at ${H.name} and ${(0, moment_1.default)(req.body.appointment.time.date).format("DD-MM-YYYY")} ${req.body.appointment.time.from.time}:${req.body.appointment.time.from.division} -${req.body.appointment.time.till.time}:${req.body.appointment.time.till.division} `,
+            });
+            (0, Utils_1.sendNotificationToHospital)(hospitalFirebaseToken, {
+                title: "New appointment",
+                body: `${P.firstName} ${P.lastName} has booked an appointment with ${D.firstName} ${D.lastName} and ${(0, moment_1.default)(req.body.appointment.time.date).format("DD-MM-YYYY")} ${req.body.appointment.time.from.time}:${req.body.appointment.time.from.division} -${req.body.appointment.time.till.time}:${req.body.appointment.time.till.division} `,
+            });
+            (0, Utils_1.sendNotificationToPatient)(patientFirebaseToken, {
+                title: "New appointment",
+                body: `${P.firstName} ${P.lastName} has booked an appointment for ${D.firstName} ${D.lastName} at ${H.name} and ${(0, moment_1.default)(req.body.appointment.time.date).format("DD-MM-YYYY")} ${req.body.appointment.time.from.time}:${req.body.appointment.time.from.division} -${req.body.appointment.time.till.time}:${req.body.appointment.time.till.division} `,
+            });
+            Utils_1.digiMilesSMS.sendAppointmentConfirmationNotification(P.phoneNumber, `${P.firstName} ${P.lastName}`, `${D.firstName} ${D.lastName}`, H.name, (0, moment_1.default)(req.body.appointment.time.date).format("DD-MM-YYYY"), `${req.body.appointment.time.from.time}:${req.body.appointment.time.from.division} -${req.body.appointment.time.till.time}:${req.body.appointment.time.till.division}`);
+        });
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);
@@ -109,7 +146,7 @@ patientRouter.put("/checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod"
 patientRouter.get("/getPatientsNotification", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.getPatientsNotification);
 patientRouter.get("/getFees", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let data = yield feeService.getAllFees();
+        let data = yield feeService.getAllFees({ name: "Convenience Fee" });
         return (0, response_1.successResponse)(data, "Success", res);
     }
     catch (error) {

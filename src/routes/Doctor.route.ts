@@ -446,4 +446,27 @@ doctorRouter.get(
   doctorController.getSpecializationByCity
 );
 
+doctorRouter.post(
+  "/updateNumber",
+  oneOf(authenticateDoctor),
+  doctorController.sendOTPToUpdateNumber
+);
+
+doctorRouter.put(
+  "/verify/updateNumber",
+  oneOf(authenticateDoctor),
+  doctorController.verifyOTPToUpdateNumber
+);
+
+doctorRouter.post(
+  "/qualification",
+  oneOf(authenticateDoctor),
+  doctorController.deleteDoctorQualification
+);
+
+doctorRouter.get(
+  "/qualification/list",
+  oneOf(authenticateDoctor),
+  doctorController.getDoctorQualificationList
+);
 export default doctorRouter;

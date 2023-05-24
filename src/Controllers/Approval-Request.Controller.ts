@@ -3,6 +3,11 @@ import * as approvalService from "../Services/Approval-Request/Approval-Request.
 import { errorResponse, successResponse } from "../Services/response";
 import * as notificationService from "../Services/Notification/Notification.Service";
 import doctorModel from "../Models/Doctors.Model";
+import {
+  sendNotificationToDoctor,
+  sendNotificationToHospital,
+} from "../Services/Utils";
+import hospitalModel from "../Models/Hospital.Model";
 
 export const requestApprovalFromDoctor = async (
   req: Request,
@@ -24,6 +29,14 @@ export const requestApprovalFromDoctor = async (
       hospitalId,
       doctorId
     );
+
+    doctorModel.findOne({ _id: doctorId }).then((result) => {
+      let { firebaseToken } = result;
+      sendNotificationToDoctor(firebaseToken, {
+        body: "New approval request",
+        title: "You have a new approval request",
+      });
+    });
     return successResponse(response, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
@@ -102,6 +115,16 @@ export const requestApprovalFromHospital = async (
       hospitalId
     );
 
+    console.log("hdshdskhdsjhbdskdskbhhdsjdsdsdsdsdsds", hospitalId);
+
+    hospitalModel.findOne({ _id: hospitalId }).then((result) => {
+      let { firebaseToken } = result;
+
+      sendNotificationToHospital(firebaseToken, {
+        body: "New Approval request",
+        title: "You have a new approval request",
+      });
+    });
     return successResponse(response, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);

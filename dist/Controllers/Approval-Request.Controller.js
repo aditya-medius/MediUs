@@ -27,17 +27,30 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.denyDoctorRequest = exports.approveDoctorRequest = exports.requestApprovalFromHospital = exports.denyHospitalRequest = exports.approveHospitalRequest = exports.requestApprovalFromDoctor = void 0;
 const approvalService = __importStar(require("../Services/Approval-Request/Approval-Request.Service"));
 const response_1 = require("../Services/response");
 const notificationService = __importStar(require("../Services/Notification/Notification.Service"));
+const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
+const Utils_1 = require("../Services/Utils");
+const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
 const requestApprovalFromDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { doctorId, hospitalId } = req.body;
         let exist = yield approvalService.doctorKLiyeHospitalKiRequestExistKrtiHai(doctorId, hospitalId);
         let response = yield approvalService.requestApprovalFromDoctor(doctorId, hospitalId);
         notificationService.sendApprovalRequestNotificationToDoctor_FromHospital(hospitalId, doctorId);
+        Doctors_Model_1.default.findOne({ _id: doctorId }).then((result) => {
+            let { firebaseToken } = result;
+            (0, Utils_1.sendNotificationToDoctor)(firebaseToken, {
+                body: "New approval request",
+                title: "You have a new approval request",
+            });
+        });
         return (0, response_1.successResponse)(response, "Success", res);
     }
     catch (error) {
@@ -89,6 +102,14 @@ const requestApprovalFromHospital = (req, res) => __awaiter(void 0, void 0, void
         let exist = yield approvalService.hospitalKLiyeDoctorKiRequestExistKrtiHai(doctorId, hospitalId);
         let response = yield approvalService.requestApprovalFromHospital(doctorId, hospitalId);
         notificationService.sendApprovalRequestNotificationToHospital_FromDoctor(doctorId, hospitalId);
+        console.log("hdshdskhdsjhbdskdskbhhdsjdsdsdsdsdsds", hospitalId);
+        Hospital_Model_1.default.findOne({ _id: hospitalId }).then((result) => {
+            let { firebaseToken } = result;
+            (0, Utils_1.sendNotificationToHospital)(firebaseToken, {
+                body: "New Approval request",
+                title: "You have a new approval request",
+            });
+        });
         return (0, response_1.successResponse)(response, "Success", res);
     }
     catch (error) {

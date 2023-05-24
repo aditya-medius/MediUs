@@ -18,6 +18,7 @@ import { errorResponse, successResponse } from "../Services/response";
 import * as feeService from "../Module/Payment/Service/Fee.Service";
 import { authenticateSuvedha } from "../authentication/Suvedha.auth";
 import { checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod } from "../Controllers/Prescription-Validity.Controller";
+import { authenticateAdmin } from "../authentication/Admin.auth";
 const hospitalRouter = express.Router();
 
 hospitalRouter.get(
@@ -110,7 +111,8 @@ hospitalRouter.put(
     authenticatePatient,
     authenticateDoctor,
     authenticateHospital,
-    authenticateSuvedha
+    authenticateSuvedha,
+    authenticateAdmin
   ),
   hospitalController.getHospitalById
 );
@@ -274,4 +276,17 @@ hospitalRouter.get(
   oneOf(authenticateHospital),
   hospitalController.getHospitalDetails
 );
+
+hospitalRouter.post(
+  "/updateNumber",
+  oneOf(authenticateHospital),
+  hospitalController.sendOTPToUpdateNumber
+);
+
+hospitalRouter.put(
+  "/verify/updateNumber",
+  oneOf(authenticateHospital),
+  hospitalController.verifyOTPToUpdateNumber
+);
+
 export default hospitalRouter;
