@@ -92,17 +92,15 @@ patientRouter.post("/verifyPayment", (0, middlewareHelper_1.oneOf)(Patient_auth_
         const notification = { body, title };
         const doctorData = Doctors_Model_1.default.findOne({ _id: doctorId });
         const hospitalData = Hospital_Model_1.default.findOne({ _id: hospitalId });
-        let patientData;
+        const patientData = Patient_Model_1.default.findOne({ _id: patientId });
+        let arr = [doctorData, hospitalData, patientData];
+        let subpatientData;
         if (subPatientId) {
-            patientData = SubPatient_Model_1.default.findOne({ _id: subPatientId });
+            subpatientData = SubPatient_Model_1.default.findOne({ _id: subPatientId });
         }
-        else {
-            patientData = Patient_Model_1.default.findOne({ _id: patientId });
-        }
-        Promise.all([doctorData, hospitalData, patientData]).then((result) => {
-            const [D, H, P] = result;
-            // const { firebaseToken: doctorFirebaseToken } = D,
-            //   { firebaseToken: hospitalFirebaseToken } = H;
+        subPatientId && arr.push(subpatientData);
+        Promise.all(arr).then((result) => {
+            const [D, H, P, SP] = result;
             const doctorFirebaseToken = D.firebaseToken, hospitalFirebaseToken = H.firebaseToken, patientFirebaseToken = P.firebaseToken;
             (0, Utils_1.sendNotificationToDoctor)(doctorFirebaseToken, {
                 title: "New appointment",
@@ -116,7 +114,11 @@ patientRouter.post("/verifyPayment", (0, middlewareHelper_1.oneOf)(Patient_auth_
                 title: "New appointment",
                 body: `${P.firstName} ${P.lastName} has booked an appointment for ${D.firstName} ${D.lastName} at ${H.name} and ${(0, moment_1.default)(req.body.appointment.time.date).format("DD-MM-YYYY")} ${req.body.appointment.time.from.time}:${req.body.appointment.time.from.division} -${req.body.appointment.time.till.time}:${req.body.appointment.time.till.division} `,
             });
-            Utils_1.digiMilesSMS.sendAppointmentConfirmationNotification(P.phoneNumber, `${P.firstName} ${P.lastName}`, `${D.firstName} ${D.lastName}`, H.name, (0, moment_1.default)(req.body.appointment.time.date).format("DD-MM-YYYY"), `${req.body.appointment.time.from.time}:${req.body.appointment.time.from.division} -${req.body.appointment.time.till.time}:${req.body.appointment.time.till.division}`);
+            let name = `${P.firstName} ${P.lastName}`;
+            if (SP) {
+                name = `${SP.firstName} ${SP.lastName}`;
+            }
+            Utils_1.digiMilesSMS.sendAppointmentConfirmationNotification(P.phoneNumber, name, `${D.firstName} ${D.lastName}`, H.name, (0, moment_1.default)(req.body.appointment.time.date).format("DD-MM-YYYY"), `${req.body.appointment.time.from.time}:${req.body.appointment.time.from.division} -${req.body.appointment.time.till.time}:${req.body.appointment.time.till.division}`);
         });
     }
     catch (error) {

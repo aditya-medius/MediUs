@@ -158,7 +158,7 @@ const BookAppointment = (body, isHospital = false) => __awaiter(void 0, void 0, 
         let appointmentId = (0, Appointment_Service_1.generateAppointmentId)();
         body["appointmentToken"] = appointmentTokenNumber;
         body["appointmentId"] = appointmentId;
-        let appointmentBook = yield new Appointment_Model_1.default(body).save();
+        let appointmentBook = yield new Appointment_Model_1.default(Object.assign(Object.assign({}, body), { createdAt: new Date() })).save();
         yield appointmentBook.populate({
             path: "subPatient",
             select: {

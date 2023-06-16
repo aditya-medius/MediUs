@@ -1088,10 +1088,6 @@ export const viewAppointmentsByDate = async (req: Request, res: Response) => {
     appointments = appointments.map((e: any) => {
       let time = e?.time;
       let subpatient = e?.subPatient;
-      console.log(
-        "subpatient?.firstNamesubpatient?.firstName",
-        subpatient?.firstName
-      );
       return {
         _id: e?.patient?._id,
         name: `${e?.patient?.firstName} ${e?.patient?.lastName}`,

@@ -149,7 +149,7 @@ export const BookAppointment = async (body: any, isHospital = false) => {
 
     body["appointmentToken"] = appointmentTokenNumber;
     body["appointmentId"] = appointmentId;
-    let appointmentBook = await new appointmentModel(body).save();
+    let appointmentBook = await new appointmentModel({...body, createdAt: new Date()}).save();
     await appointmentBook.populate({
       path: "subPatient",
       select: {

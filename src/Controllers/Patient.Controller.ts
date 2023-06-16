@@ -42,6 +42,8 @@ import { checkIfDoctorIsAvailableOnTheDay } from "../Services/Doctor/Doctor.Serv
 import { calculateAge } from "../Services/Patient/Patient.Service";
 import * as patientService from "../Services/Patient/Patient.Service";
 import { digiMilesSMS } from "../Services/Utils";
+import feeModel from "../Module/Payment/Model/Fee.Model";
+import { convenienceFee } from "../Services/Admin/Admin.Service";
 export const excludePatientFields = {
   password: 0,
   verified: 0,
@@ -504,12 +506,7 @@ export const BookAppointment = async (req: Request, res: Response) => {
     }
 
     /* Appointment ka token Number */
-    console.log(":Ljh njkhb ddsd", (await getTokenNumber(body)) + 1);
     let appointmentTokenNumber = (await getTokenNumber(body)) + 1;
-    console.log(
-      "appointmentTokenNumberappointmentTokenNumber",
-      appointmentTokenNumber
-    );
 
     /* Appointment ki Id */
     let appointmentId = generateAppointmentId();
@@ -732,60 +729,15 @@ export const ViewAppointment = async (req: Request, res: Response) => {
     let limit: any = req.query.limit;
     limit = limit ? parseInt(limit) : 10;
 
-    const appointmentData: Array<object> = await appointmentModel
-      .find({
-        patient: req.currentPatient,
-        cancelled: false,
-        // "time.date": { $gt: Date() },
-      })
-      .populate({
-        path: "hospital",
-        select: {
-          ...excludeHospitalFields,
-          type: 0,
-          deleted: 0,
-          contactNumber: 0,
-        },
-      })
-      .populate({
-        path: "doctors",
-        select: {
-          ...excludeDoctorFields,
-          hospitalDetails: 0,
-          // specialization: 0,
-          // qualification: 0,
-          email: 0,
-          active: 0,
-          deleted: 0,
-          overallExperience: 0,
-          gender: 0,
-          image: 0,
-        },
-        populate: {
-          path: "specialization qualification",
-        },
-      })
-      .populate({
-        path: "subPatient",
-        select: {
-          parentPatient: 0,
-        },
-      })
-      .sort({ "time.date": -1 })
-      .skip(page > 1 ? (page - 1) * 2 : 0)
-      .limit(limit);
-
-    const page2 = appointmentData.length / 2;
-
-    // const older_apppointmentData: Array<object> = await appointmentModel
-    //   .find(
-    //     {
-    //       patient: req.currentPatient,
-    //       cancelled: false,
-    //       "time.date": { $lte: Date() },
-    //     },
-    //     "-patient"
-    //   )
+    // let appointmentData: Array<object> = await appointmentModel
+    //   .find({
+    //     patient: req.currentPatient,
+    //     cancelled: false,
+    //     // "time.date": { $gt: Date() },
+    //   })
+    //   .populate({
+    //     path: "patient",
+    //   })
     //   .populate({
     //     path: "hospital",
     //     select: {
@@ -800,14 +752,17 @@ export const ViewAppointment = async (req: Request, res: Response) => {
     //     select: {
     //       ...excludeDoctorFields,
     //       hospitalDetails: 0,
-    //       specialization: 0,
-    //       qualification: 0,
+    //       // specialization: 0,
+    //       // qualification: 0,
     //       email: 0,
     //       active: 0,
     //       deleted: 0,
     //       overallExperience: 0,
     //       gender: 0,
     //       image: 0,
+    //     },
+    //     populate: {
+    //       path: "specialization qualification",
     //     },
     //   })
     //   .populate({
@@ -816,21 +771,176 @@ export const ViewAppointment = async (req: Request, res: Response) => {
     //       parentPatient: 0,
     //     },
     //   })
-    //   .sort({ "time.date": 1 })
-    //   .skip(page > page2 ? (page2 - 1) * 2 : 0)
-    //   .limit(2);
+    //   .sort({ "time.date": -1 })
+    //   .skip(page > 1 ? (page - 1) * 2 : 0)
+    //   .limit(limit);
 
-    // const allAppointment = appointmentData.concat(older_apppointmentData);
-    const allAppointment = appointmentData;
+    let appointmentData = await appointmentModel.aggregate([
+      {
+        $match: {
+          patient: new mongoose.Types.ObjectId(req.currentPatient),
+          cancelled: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "patients",
+          localField: "patient",
+          foreignField: "_id",
+          as: "patient",
+        },
+      },
+      {
+        $lookup: {
+          from: "hospitals",
+          localField: "hospital",
+          foreignField: "_id",
+          as: "hospital",
+        },
+      },
+      {
+        $lookup: {
+          from: "doctors",
+          localField: "doctors",
+          foreignField: "_id",
+          as: "doctors",
+        },
+      },
+      {
+        $lookup: {
+          from: "subpatients",
+          localField: "subPatient",
+          foreignField: "_id",
+          as: "subPatient",
+        },
+      },
+      {
+        $lookup: {
+          from: "appointmentpayments",
+          localField: "_id",
+          foreignField: "appointmentId",
+          as: "appointmentpayments",
+        },
+      },
+      {
+        $lookup: {
+          from: "orders",
+          localField: "appointmentpayments.orderId",
+          foreignField: "_id",
+          as: "orders",
+        },
+      },
+      {
+        $lookup: {
+          from: "specializations",
+          localField: "doctors.specialization",
+          foreignField: "_id",
+          as: "specials",
+        },
+      },
+      {
+        $addFields: {
+          "doctors.specialization": "$specials",
+        },
+      },
+      {
+        $unwind: "$patient",
+      },
+      {
+        $unwind: "$hospital",
+      },
+      {
+        $unwind: "$doctors",
+      },
+      {
+        $unwind: { path: "$subPatient", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $unwind: "$appointmentpayments",
+      },
+      {
+        $unwind: "$orders",
+      },
+      {
+        $sort: {
+          "time.date": -1,
+        },
+      },
+      {
+        $skip: page > 1 ? (page - 1) * 2 : 0,
+      },
+      {
+        $limit: limit,
+      },
+    ]);
+    const page2 = appointmentData.length / 2;
 
-    if (allAppointment.length > 0)
+    let allAppointment = appointmentData;
+
+    if (allAppointment.length > 0) {
+      const ConvenienceFee = await feeModel.findOne({
+        name: "Convenience Fee",
+      });
+      const paymentGateWayFee = await feeModel.findOne({
+        name: "Payment Gateway Fee",
+      });
+
+      const tax = await feeModel.findOne({ name: "Taxes" });
+
+      allAppointment = allAppointment.map((e: any) => {
+        const consult_fee = e.doctors.hospitalDetails.find(
+          (hospital: any) =>
+            hospital.hospital.toString() === e.hospital._id.toString()
+        ).consultationFee.max;
+
+        let subpatient = e?.subPatient;
+
+        return {
+          booking_id: e.appointmentId,
+          pat_name: e.patient
+            ? `${e?.patient.firstName} ${e.patient.lastName}`
+            : "",
+          age: `${
+            new Date().getFullYear() - e.patient.DOB.getFullYear()
+          } years`,
+          booking_date: e.createdAt,
+          appoinment_date: e.time.date,
+          token: e.appointmentToken,
+          dr_name: e.doctors
+            ? `${e.doctors.firstName} ${e.doctors.lastName}`
+            : "",
+          specilization: e.doctors
+            ? e?.doctors?.specialization.length &&
+              e?.doctors?.specialization
+                .map((elem: any) => {
+                  return elem.specialityName;
+                })
+                .join("")
+            : "",
+          time_slot: `${e.time.from.time}:${e.time.from.division} to ${e.time.till.time}:${e.time.till.division}`,
+          booking_type: e.appointmentType,
+          clinicname: e.hospital && e.hospital.name,
+          consult_fee,
+          conv_fee: ConvenienceFee.feeAmount,
+          payement_gate_fee: paymentGateWayFee.feeAmount,
+          taxes: tax.feeAmount,
+          ...(subpatient?.firstName && {
+            sub_pat_name:
+              subpatient?.firstName &&
+              `${subpatient?.firstName} ${subpatient?.lastName}`,
+            sub_pat_age: calculateAge(subpatient?.DOB),
+            sub_pat_gender: subpatient?.gender,
+          }),
+          parent_gender: e.patient.gender,
+        };
+      });
       return successResponse(
         // { past: older_apppointmentData, upcoming: allAppointment },
         { allAppointment },
         "Appointments has been found",
         res
       );
-    else {
+    } else {
       let error = new Error("No appointments is found");
       return errorResponse(error, res, 404);
     }
@@ -946,7 +1056,6 @@ export const getSpecialityBodyPartAndDisease = async (
       res
     );
   } catch (error: any) {
-    console.log("dhdfdfdfd,", error);
     return errorResponse(error, res);
   }
 };
