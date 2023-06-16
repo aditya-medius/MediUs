@@ -134,18 +134,19 @@ patientRouter.post(
 
       const doctorData = doctorModel.findOne({ _id: doctorId });
       const hospitalData = hospitalModel.findOne({ _id: hospitalId });
+      const patientData = patientModel.findOne({ _id: patientId });
 
-      let patientData;
+      let arr = [doctorData, hospitalData, patientData];
+
+      let subpatientData: any;
       if (subPatientId) {
-        patientData = subPatientModel.findOne({ _id: subPatientId });
-      } else {
-        patientData = patientModel.findOne({ _id: patientId });
+        subpatientData = subPatientModel.findOne({ _id: subPatientId });
       }
 
-      Promise.all([doctorData, hospitalData, patientData]).then((result) => {
-        const [D, H, P] = result;
-        // const { firebaseToken: doctorFirebaseToken } = D,
-        //   { firebaseToken: hospitalFirebaseToken } = H;
+      subPatientId && arr.push(subpatientData);
+
+      Promise.all(arr).then((result) => {
+        const [D, H, P, SP] = result;
 
         const doctorFirebaseToken = D.firebaseToken,
           hospitalFirebaseToken = H.firebaseToken,
@@ -189,9 +190,15 @@ patientRouter.post(
           } `,
         });
 
+        let name = `${P.firstName} ${P.lastName}`;
+
+        if (SP) {
+          name = `${SP.firstName} ${SP.lastName}`;
+        }
+
         digiMilesSMS.sendAppointmentConfirmationNotification(
           P.phoneNumber,
-          `${P.firstName} ${P.lastName}`,
+          name,
           `${D.firstName} ${D.lastName}`,
           H.name,
           moment(req.body.appointment.time.date).format("DD-MM-YYYY"),

@@ -965,7 +965,6 @@ const viewAppointmentsByDate = (req, res) => __awaiter(void 0, void 0, void 0, f
             var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
             let time = e === null || e === void 0 ? void 0 : e.time;
             let subpatient = e === null || e === void 0 ? void 0 : e.subPatient;
-            console.log("subpatient?.firstNamesubpatient?.firstName", subpatient === null || subpatient === void 0 ? void 0 : subpatient.firstName);
             return {
                 _id: (_a = e === null || e === void 0 ? void 0 : e.patient) === null || _a === void 0 ? void 0 : _a._id,
                 name: `${(_b = e === null || e === void 0 ? void 0 : e.patient) === null || _b === void 0 ? void 0 : _b.firstName} ${(_c = e === null || e === void 0 ? void 0 : e.patient) === null || _c === void 0 ? void 0 : _c.lastName}`,

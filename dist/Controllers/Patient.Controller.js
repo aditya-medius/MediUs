@@ -49,6 +49,7 @@ const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Prescription_Model_1 = __importDefault(require("../Models/Prescription.Model"));
 const doctorController = __importStar(require("../Controllers/Doctor.Controller"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const notificationService = __importStar(require("../Services/Notification/Notification.Service"));
 const Validation_Service_1 = require("../Services/Validation.Service");
 const Appointment_Service_1 = require("../Services/Appointment/Appointment.Service");
@@ -59,6 +60,7 @@ const Doctor_Service_1 = require("../Services/Doctor/Doctor.Service");
 const Patient_Service_1 = require("../Services/Patient/Patient.Service");
 const patientService = __importStar(require("../Services/Patient/Patient.Service"));
 const Utils_1 = require("../Services/Utils");
+const Fee_Model_1 = __importDefault(require("../Module/Payment/Model/Fee.Model"));
 exports.excludePatientFields = {
     password: 0,
     verified: 0,
@@ -443,9 +445,7 @@ const BookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
             body["Type"] = "Online";
         }
         /* Appointment ka token Number */
-        console.log(":Ljh njkhb ddsd", (yield (0, Appointment_Service_1.getTokenNumber)(body)) + 1);
         let appointmentTokenNumber = (yield (0, Appointment_Service_1.getTokenNumber)(body)) + 1;
-        console.log("appointmentTokenNumberappointmentTokenNumber", appointmentTokenNumber);
         /* Appointment ki Id */
         let appointmentId = (0, Appointment_Service_1.generateAppointmentId)();
         body["appointmentToken"] = appointmentTokenNumber;
@@ -649,45 +649,15 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
         const page = parseInt(req.params.page);
         let limit = req.query.limit;
         limit = limit ? parseInt(limit) : 10;
-        const appointmentData = yield Appointment_Model_1.default
-            .find({
-            patient: req.currentPatient,
-            cancelled: false,
-            // "time.date": { $gt: Date() },
-        })
-            .populate({
-            path: "hospital",
-            select: Object.assign(Object.assign({}, exports.excludeHospitalFields), { type: 0, deleted: 0, contactNumber: 0 }),
-        })
-            .populate({
-            path: "doctors",
-            select: Object.assign(Object.assign({}, Doctor_Controller_1.excludeDoctorFields), { hospitalDetails: 0, 
-                // specialization: 0,
-                // qualification: 0,
-                email: 0, active: 0, deleted: 0, overallExperience: 0, gender: 0, image: 0 }),
-            populate: {
-                path: "specialization qualification",
-            },
-        })
-            .populate({
-            path: "subPatient",
-            select: {
-                parentPatient: 0,
-            },
-        })
-            .sort({ "time.date": -1 })
-            .skip(page > 1 ? (page - 1) * 2 : 0)
-            .limit(limit);
-        const page2 = appointmentData.length / 2;
-        // const older_apppointmentData: Array<object> = await appointmentModel
-        //   .find(
-        //     {
-        //       patient: req.currentPatient,
-        //       cancelled: false,
-        //       "time.date": { $lte: Date() },
-        //     },
-        //     "-patient"
-        //   )
+        // let appointmentData: Array<object> = await appointmentModel
+        //   .find({
+        //     patient: req.currentPatient,
+        //     cancelled: false,
+        //     // "time.date": { $gt: Date() },
+        //   })
+        //   .populate({
+        //     path: "patient",
+        //   })
         //   .populate({
         //     path: "hospital",
         //     select: {
@@ -702,14 +672,17 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
         //     select: {
         //       ...excludeDoctorFields,
         //       hospitalDetails: 0,
-        //       specialization: 0,
-        //       qualification: 0,
+        //       // specialization: 0,
+        //       // qualification: 0,
         //       email: 0,
         //       active: 0,
         //       deleted: 0,
         //       overallExperience: 0,
         //       gender: 0,
         //       image: 0,
+        //     },
+        //     populate: {
+        //       path: "specialization qualification",
         //     },
         //   })
         //   .populate({
@@ -718,15 +691,141 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
         //       parentPatient: 0,
         //     },
         //   })
-        //   .sort({ "time.date": 1 })
-        //   .skip(page > page2 ? (page2 - 1) * 2 : 0)
-        //   .limit(2);
-        // const allAppointment = appointmentData.concat(older_apppointmentData);
-        const allAppointment = appointmentData;
-        if (allAppointment.length > 0)
+        //   .sort({ "time.date": -1 })
+        //   .skip(page > 1 ? (page - 1) * 2 : 0)
+        //   .limit(limit);
+        let appointmentData = yield Appointment_Model_1.default.aggregate([
+            {
+                $match: {
+                    patient: new mongoose_1.default.Types.ObjectId(req.currentPatient),
+                    cancelled: false,
+                },
+            },
+            {
+                $lookup: {
+                    from: "patients",
+                    localField: "patient",
+                    foreignField: "_id",
+                    as: "patient",
+                },
+            },
+            {
+                $lookup: {
+                    from: "hospitals",
+                    localField: "hospital",
+                    foreignField: "_id",
+                    as: "hospital",
+                },
+            },
+            {
+                $lookup: {
+                    from: "doctors",
+                    localField: "doctors",
+                    foreignField: "_id",
+                    as: "doctors",
+                },
+            },
+            {
+                $lookup: {
+                    from: "subpatients",
+                    localField: "subPatient",
+                    foreignField: "_id",
+                    as: "subPatient",
+                },
+            },
+            {
+                $lookup: {
+                    from: "appointmentpayments",
+                    localField: "_id",
+                    foreignField: "appointmentId",
+                    as: "appointmentpayments",
+                },
+            },
+            {
+                $lookup: {
+                    from: "orders",
+                    localField: "appointmentpayments.orderId",
+                    foreignField: "_id",
+                    as: "orders",
+                },
+            },
+            {
+                $lookup: {
+                    from: "specializations",
+                    localField: "doctors.specialization",
+                    foreignField: "_id",
+                    as: "specials",
+                },
+            },
+            {
+                $addFields: {
+                    "doctors.specialization": "$specials",
+                },
+            },
+            {
+                $unwind: "$patient",
+            },
+            {
+                $unwind: "$hospital",
+            },
+            {
+                $unwind: "$doctors",
+            },
+            {
+                $unwind: { path: "$subPatient", preserveNullAndEmptyArrays: true },
+            },
+            {
+                $unwind: "$appointmentpayments",
+            },
+            {
+                $unwind: "$orders",
+            },
+            {
+                $sort: {
+                    "time.date": -1,
+                },
+            },
+            {
+                $skip: page > 1 ? (page - 1) * 2 : 0,
+            },
+            {
+                $limit: limit,
+            },
+        ]);
+        const page2 = appointmentData.length / 2;
+        let allAppointment = appointmentData;
+        if (allAppointment.length > 0) {
+            const ConvenienceFee = yield Fee_Model_1.default.findOne({
+                name: "Convenience Fee",
+            });
+            const paymentGateWayFee = yield Fee_Model_1.default.findOne({
+                name: "Payment Gateway Fee",
+            });
+            const tax = yield Fee_Model_1.default.findOne({ name: "Taxes" });
+            allAppointment = allAppointment.map((e) => {
+                var _a, _b;
+                const consult_fee = e.doctors.hospitalDetails.find((hospital) => hospital.hospital.toString() === e.hospital._id.toString()).consultationFee.max;
+                let subpatient = e === null || e === void 0 ? void 0 : e.subPatient;
+                return Object.assign(Object.assign({ booking_id: e.appointmentId, pat_name: e.patient
+                        ? `${e === null || e === void 0 ? void 0 : e.patient.firstName} ${e.patient.lastName}`
+                        : "", age: `${new Date().getFullYear() - e.patient.DOB.getFullYear()} years`, booking_date: e.createdAt, appoinment_date: e.time.date, token: e.appointmentToken, dr_name: e.doctors
+                        ? `${e.doctors.firstName} ${e.doctors.lastName}`
+                        : "", specilization: e.doctors
+                        ? ((_a = e === null || e === void 0 ? void 0 : e.doctors) === null || _a === void 0 ? void 0 : _a.specialization.length) &&
+                            ((_b = e === null || e === void 0 ? void 0 : e.doctors) === null || _b === void 0 ? void 0 : _b.specialization.map((elem) => {
+                                return elem.specialityName;
+                            }).join(""))
+                        : "", time_slot: `${e.time.from.time}:${e.time.from.division} to ${e.time.till.time}:${e.time.till.division}`, booking_type: e.appointmentType, clinicname: e.hospital && e.hospital.name, consult_fee, conv_fee: ConvenienceFee.feeAmount, payement_gate_fee: paymentGateWayFee.feeAmount, taxes: tax.feeAmount }, ((subpatient === null || subpatient === void 0 ? void 0 : subpatient.firstName) && {
+                    sub_pat_name: (subpatient === null || subpatient === void 0 ? void 0 : subpatient.firstName) &&
+                        `${subpatient === null || subpatient === void 0 ? void 0 : subpatient.firstName} ${subpatient === null || subpatient === void 0 ? void 0 : subpatient.lastName}`,
+                    sub_pat_age: (0, Patient_Service_1.calculateAge)(subpatient === null || subpatient === void 0 ? void 0 : subpatient.DOB),
+                    sub_pat_gender: subpatient === null || subpatient === void 0 ? void 0 : subpatient.gender,
+                })), { parent_gender: e.patient.gender });
+            });
             return (0, response_1.successResponse)(
             // { past: older_apppointmentData, upcoming: allAppointment },
             { allAppointment }, "Appointments has been found", res);
+        }
         else {
             let error = new Error("No appointments is found");
             return (0, response_1.errorResponse)(error, res, 404);
@@ -840,7 +939,6 @@ const getSpecialityBodyPartAndDisease = (_req, res) => __awaiter(void 0, void 0,
         }, "Success", res);
     }
     catch (error) {
-        console.log("dhdfdfdfd,", error);
         return (0, response_1.errorResponse)(error, res);
     }
 });
