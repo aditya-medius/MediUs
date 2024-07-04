@@ -123,9 +123,9 @@ doctorSchema.pre("save", async function (next) {
     $and: [
       {
         $or: [
-          {
-            email: this.email,
-          },
+          // {
+          //   email: this.email,
+          // },
           { phoneNumber: this.phoneNumber },
         ],
       },
@@ -147,9 +147,9 @@ doctorSchema.pre("save", async function (next) {
     $and: [
       {
         $or: [
-          {
-            email: this.email,
-          },
+          // {
+          //   email: this.email,
+          // },
           { phoneNumber: this.phoneNumber },
         ],
       },
@@ -165,11 +165,11 @@ doctorSchema.pre("save", async function (next) {
     } else if (profileExist && !profileExist.verified) {
       throw new Error("Your profile is under verification process");
     } 
-    // else {
-    //   throw new Error(
-    //     "Profile alredy exist. Select a different phone number and email"
-    //   );
-    // }
+    else {
+      throw new Error(
+        "Profile alredy exist. Select a different phone number and email"
+      );
+    }
   } else {
     throw new Error("Invalid phone number");
   }
