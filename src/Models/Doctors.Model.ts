@@ -164,11 +164,12 @@ doctorSchema.pre("save", async function (next) {
       return next();
     } else if (profileExist && !profileExist.verified) {
       throw new Error("Your profile is under verification process");
-    } else {
-      throw new Error(
-        "Profile alredy exist. Select a different phone number and email"
-      );
-    }
+    } 
+    // else {
+    //   throw new Error(
+    //     "Profile alredy exist. Select a different phone number and email"
+    //   );
+    // }
   } else {
     throw new Error("Invalid phone number");
   }

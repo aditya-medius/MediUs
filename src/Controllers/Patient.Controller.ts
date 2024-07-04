@@ -477,7 +477,7 @@ export const BookAppointment = async (req: Request, res: Response) => {
       if (
         new Date(e.time.date).getDate() == new Date(requestDate).getDate() &&
         new Date(e.time.date).getFullYear() ==
-          new Date(requestDate).getFullYear() &&
+        new Date(requestDate).getFullYear() &&
         new Date(e.time.date).getMonth() == new Date(requestDate).getMonth()
       ) {
         appCount++;
@@ -488,9 +488,8 @@ export const BookAppointment = async (req: Request, res: Response) => {
 
     if (!(appCount < capacity.capacity)) {
       if (req.currentHospital) {
-        message = `Doctor's appointment have exceeded doctor's capacity for the day by ${
-          appCount - capacity.capacity + 1
-        }`;
+        message = `Doctor's appointment have exceeded doctor's capacity for the day by ${appCount - capacity.capacity + 1
+          }`;
       } else {
         return errorResponse(
           new Error("Doctor cannot take any more appointments"),
@@ -591,7 +590,7 @@ export const rescheduleAppointment = async (req: Request, res: Response) => {
       if (
         new Date(e.time.date).getDate() == new Date(requestDate).getDate() &&
         new Date(e.time.date).getFullYear() ==
-          new Date(requestDate).getFullYear() &&
+        new Date(requestDate).getFullYear() &&
         new Date(e.time.date).getMonth() == new Date(requestDate).getMonth()
       ) {
         appCount++;
@@ -900,9 +899,8 @@ export const ViewAppointment = async (req: Request, res: Response) => {
           pat_name: e.patient
             ? `${e?.patient.firstName} ${e.patient.lastName}`
             : "",
-          age: `${
-            new Date().getFullYear() - e.patient.DOB.getFullYear()
-          } years`,
+          age: `${new Date().getFullYear() - e.patient.DOB.getFullYear()
+            } years`,
           booking_date: e.createdAt,
           appoinment_date: e.time.date,
           token: e.appointmentToken,
@@ -911,11 +909,11 @@ export const ViewAppointment = async (req: Request, res: Response) => {
             : "",
           specilization: e.doctors
             ? e?.doctors?.specialization.length &&
-              e?.doctors?.specialization
-                .map((elem: any) => {
-                  return elem.specialityName;
-                })
-                .join("")
+            e?.doctors?.specialization
+              .map((elem: any) => {
+                return elem.specialityName;
+              })
+              .join("")
             : "",
           time_slot: `${e.time.from.time}:${e.time.from.division} to ${e.time.till.time}:${e.time.till.division}`,
           booking_type: e.appointmentType,
