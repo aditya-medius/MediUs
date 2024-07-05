@@ -110,6 +110,8 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
     }, overallExperience: {
         type: mongoose_1.default.Schema.Types.Mixed,
         // required: true,
+    }, totalExperience: {
+        type: Number
     }, image: {
         type: String,
         default: "static/user/default.png",

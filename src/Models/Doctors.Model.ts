@@ -91,6 +91,11 @@ const doctorSchema = new Schema(
       type: mongoose.Schema.Types.Mixed,
       // required: true,
     },
+
+    totalExperience: {
+      type: Number
+    },
+
     image: {
       type: String,
       default: "static/user/default.png",
@@ -164,7 +169,7 @@ doctorSchema.pre("save", async function (next) {
       return next();
     } else if (profileExist && !profileExist.verified) {
       throw new Error("Your profile is under verification process");
-    } 
+    }
     else {
       throw new Error(
         "Profile alredy exist. Select a different phone number and email"
