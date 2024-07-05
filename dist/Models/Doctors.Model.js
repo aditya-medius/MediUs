@@ -118,7 +118,7 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
     // // Admin is field edit karega aur koi nhi
     verified: {
         type: Boolean,
-        default: false,
+        default: true,
     }, 
     // In months
     preBookingTime: {

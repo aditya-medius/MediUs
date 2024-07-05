@@ -100,7 +100,7 @@ const doctorSchema = new Schema(
     // // Admin is field edit karega aur koi nhi
     verified: {
       type: Boolean,
-      default: false,
+      default: true,
     },
 
     // In months

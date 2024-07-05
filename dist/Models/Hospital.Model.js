@@ -133,7 +133,7 @@ const hospitalSchema = new mongoose_1.Schema({
     // Admin is field edit karega aur koi nhi
     verified: {
         type: Boolean,
-        default: false,
+        default: true,
     },
     modeOfAppointments: [
         {
@@ -157,6 +157,12 @@ const hospitalSchema = new mongoose_1.Schema({
         type: String,
         // required: true,
     },
+    lat: {
+        type: Number
+    },
+    lng: {
+        type: Number
+    }
 });
 hospitalSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {

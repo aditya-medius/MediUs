@@ -117,7 +117,7 @@ const hospitalSchema = new Schema({
   // Admin is field edit karega aur koi nhi
   verified: {
     type: Boolean,
-    default: false,
+    default: true,
   },
 
   modeOfAppointments: [
@@ -145,6 +145,14 @@ const hospitalSchema = new Schema({
     type: String,
     // required: true,
   },
+  lat: {
+    type: Number
+
+  },
+  lng: {
+    type: Number
+  }
+
 });
 
 hospitalSchema.pre("save", async function (next) {
