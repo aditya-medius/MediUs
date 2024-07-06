@@ -96,6 +96,9 @@ hospitalRouter.post(
   hospitalController.removeDoctor
 );
 
+// ADD DOCTOR TO THE HOSPITAL
+hospitalRouter.post("/add/doctor", oneOf(authenticateHospital), hospitalController.addDoctor)
+
 //View Appointments
 
 hospitalRouter.get(

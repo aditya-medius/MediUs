@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkIfHospitalAlreadyExistInDoctor = exports.updateNotificationReadStatus = exports.getNotificationFromRequestId = exports.getRequestIdFromNotificationId = exports.checkIfNotificationExist = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.doctorKLiyeHospitalKiRequestExistKrtiHai = exports.hospitalKLiyeDoctorKiRequestExistKrtiHai = exports.canThisHospitalApproveThisRequest = exports.canThisDoctorApproveThisRequest = exports.checkHospitalsApprovalStatus = exports.checkDoctorsApprovalStatus = exports.denyDoctorRequest = exports.approveDoctorRequest = exports.requestApprovalFromHospital = exports.denyHospitalRequest = exports.approveHospitalRequest = exports.requestApprovalFromDoctor = void 0;
+exports.checkIfHospitalAlreadyExistInDoctor = exports.updateNotificationReadStatus = exports.getNotificationFromRequestId = exports.getRequestIdFromNotificationId = exports.checkIfNotificationExist = exports.addDoctorAndHospitalToEachOthersProfile = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.doctorKLiyeHospitalKiRequestExistKrtiHai = exports.hospitalKLiyeDoctorKiRequestExistKrtiHai = exports.canThisHospitalApproveThisRequest = exports.canThisDoctorApproveThisRequest = exports.checkHospitalsApprovalStatus = exports.checkDoctorsApprovalStatus = exports.denyDoctorRequest = exports.approveDoctorRequest = exports.requestApprovalFromHospital = exports.denyHospitalRequest = exports.approveHospitalRequest = exports.requestApprovalFromDoctor = void 0;
 const Doctor_Controller_1 = require("../../Controllers/Doctor.Controller");
 const Approval_Request_Model_1 = __importDefault(require("../../Models/Approval-Request.Model"));
 const Doctors_Model_1 = __importDefault(require("../../Models/Doctors.Model"));
@@ -41,7 +41,7 @@ const approveHospitalRequest = (requestId) => __awaiter(void 0, void 0, void 0, 
     try {
         yield changeRequestStatus(requestId, "Approved");
         let request = yield Approval_Request_Model_1.default.findOne({ _id: requestId }, "requestFrom requestTo");
-        yield addDoctorAndHospitalToEachOthersProfile(request.requestTo, request.requestFrom);
+        yield (0, exports.addDoctorAndHospitalToEachOthersProfile)(request.requestTo, request.requestFrom);
         // return Promise.resolve(await changeRequestStatus(requestId, "Approved"));
         return Promise.resolve("Success");
     }
@@ -82,7 +82,7 @@ const approveDoctorRequest = (requestId) => __awaiter(void 0, void 0, void 0, fu
         let request = yield Approval_Request_Model_1.default
             .findOne({ _id: requestId }, "requestFrom requestTo")
             .lean();
-        yield addDoctorAndHospitalToEachOthersProfile(request.requestFrom, request.requestTo);
+        yield (0, exports.addDoctorAndHospitalToEachOthersProfile)(request.requestFrom, request.requestTo);
         return Promise.resolve(request);
         // return Promise.resolve(await changeRequestStatus(requestId, "Approved"));
     }
@@ -352,12 +352,12 @@ const addDoctorAndHospitalToEachOthersProfile = (doctorId, hospitalId) => __awai
         else {
             return Promise.resolve(true);
         }
-        return Promise.resolve(response);
     }
     catch (error) {
         return Promise.reject(error);
     }
 });
+exports.addDoctorAndHospitalToEachOthersProfile = addDoctorAndHospitalToEachOthersProfile;
 const checkIfNotificationExist = (notificationId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         return Promise.resolve(yield Notification_Model_1.default.exists({ _id: notificationId }));

@@ -380,7 +380,7 @@ const addDoctorToHospitalProfile = async (
   }
 };
 
-const addDoctorAndHospitalToEachOthersProfile = async (
+export const addDoctorAndHospitalToEachOthersProfile = async (
   doctorId: string,
   hospitalId: string
 ) => {
@@ -394,7 +394,6 @@ const addDoctorAndHospitalToEachOthersProfile = async (
     } else {
       return Promise.resolve(true);
     }
-    return Promise.resolve(response);
   } catch (error: any) {
     return Promise.reject(error);
   }

@@ -120,7 +120,7 @@ export const login = async (req: Request, res: Response) => {
                 },
               }
             )
-            .then((result) => console.log("result", result));
+            .then((result: any) => console.log("result", result));
           return successResponse(
             { token, name, contactNumber, _id, numberOfBed, password },
             "Successfully logged in",
@@ -179,7 +179,7 @@ export const login = async (req: Request, res: Response) => {
                   },
                 }
               )
-              .then((result) => console.log("result", result));
+              .then((result: any) => console.log("result", result));
 
             return successResponse(
               { token, name, contactNumber, _id, numberOfBed, password },
@@ -1131,11 +1131,9 @@ export const getHospitalById = async (req: Request, res: Response) => {
           (elem: any) => elem.hospital.toString() === hospitalId
         )?.consultationFee.max,
         workinghour: e?.workingHours.map((elem: any) => {
-          return `${elem[WEEK_DAYS[day]]?.from.time}:${
-            elem[WEEK_DAYS[day]]?.from.division
-          } to ${elem[WEEK_DAYS[day]]?.till.time}:${
-            elem[WEEK_DAYS[day]]?.till.division
-          }`;
+          return `${elem[WEEK_DAYS[day]]?.from.time}:${elem[WEEK_DAYS[day]]?.from.division
+            } to ${elem[WEEK_DAYS[day]]?.till.time}:${elem[WEEK_DAYS[day]]?.till.division
+            }`;
         }),
         capacityAndToken: e?.workingHours.map((elem: any) => {
           return {
@@ -1478,11 +1476,9 @@ export const doctorsInHospitalWithTimings = async (
           (elem: any) => elem.hospital.toString() === hospitalId
         )?.consultationFee.max,
         workinghour: e?.workingHours.map((elem: any) => {
-          return `${elem[WEEK_DAYS[day]]?.from.time}:${
-            elem[WEEK_DAYS[day]]?.from.division
-          } to ${elem[WEEK_DAYS[day]]?.till.time}:${
-            elem[WEEK_DAYS[day]]?.till.division
-          }`;
+          return `${elem[WEEK_DAYS[day]]?.from.time}:${elem[WEEK_DAYS[day]]?.from.division
+            } to ${elem[WEEK_DAYS[day]]?.till.time}:${elem[WEEK_DAYS[day]]?.till.division
+            }`;
         }),
         capacityAndToken: e?.workingHours.map((elem: any) => {
           return {
@@ -1608,3 +1604,18 @@ export const verifyOTPToUpdateNumber = async (req: Request, res: Response) => {
     return errorResponse(error, res);
   }
 };
+
+export const addDoctor = async (req: Request, res: Response) => {
+  try {
+    const doctorId = req.body.doctorId;
+    const hospitalId = req.currentHospital
+    await approvalService.addDoctorAndHospitalToEachOthersProfile(
+      doctorId, hospitalId
+    );
+
+    return successResponse({}, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res)
+  }
+}
+

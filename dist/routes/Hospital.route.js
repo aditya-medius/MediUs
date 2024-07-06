@@ -90,6 +90,8 @@ hospitalRouter.get("/getServices", hospitalController.getServices);
 hospitalRouter.get("/findHospitalBySpecialityOrBodyPart/:term", hospitalController.searchHospital);
 //ADD DOCTOR TO THE HOSPITAL
 hospitalRouter.post("/removeDoctor", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.removeDoctor);
+// ADD DOCTOR TO THE HOSPITAL
+hospitalRouter.post("/add/doctor", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.addDoctor);
 //View Appointments
 hospitalRouter.get("/viewAppointment/:page", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.viewAppointment);
 // Get hospital by id
