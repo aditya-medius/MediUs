@@ -1276,20 +1276,22 @@ const searchDoctorByPhoneNumberOrEmail = (req, res) => __awaiter(void 0, void 0,
             error.name = "Invalid Term";
             return (0, response_1.errorResponse)(error, res);
         }
+        const selectedFields = {
+            firstName: 1,
+            lastName: 1,
+            gender: 1,
+            DOB: 1,
+            KYCDetails: 0,
+            specialization: 1,
+            qualification: 1,
+            totalExperience: 1,
+        };
         let doctorObj;
         if (phone) {
             doctorObj = yield Doctors_Model_1.default
                 .findOne({
                 phoneNumber: term,
-            }, {
-                firstName: 1,
-                lastName: 1,
-                gender: 1,
-                DOB: 1,
-                KYCDetails: 0,
-                specialization: 1,
-                qualification: 1,
-            })
+            }, selectedFields)
                 .populate("specialization qualification")
                 .lean();
         }
@@ -1297,15 +1299,7 @@ const searchDoctorByPhoneNumberOrEmail = (req, res) => __awaiter(void 0, void 0,
             doctorObj = yield Doctors_Model_1.default
                 .findOne({
                 email: term,
-            }, {
-                firstName: 1,
-                lastName: 1,
-                gender: 1,
-                DOB: 1,
-                KYCDetails: 0,
-                specialization: 1,
-                qualification: 1,
-            })
+            }, selectedFields)
                 .populate("qualification specialization")
                 .lean();
         }

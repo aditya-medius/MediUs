@@ -774,7 +774,7 @@ export const searchDoctor = async (req: Request, res: Response) => {
               return (
                 e?._id?.toString() === elements?.doctorId?.toString() &&
                 elem?.hospital?._id.toString() ===
-                  elements?.hospitalId?.toString()
+                elements?.hospitalId?.toString()
               );
             })[0];
             d_in = Object.assign({}, elem);
@@ -1362,11 +1362,9 @@ export const getDoctorWorkingInHospitals = async (
         fee: e?.consultationFee?.min,
         prescription_validity: e?.prescription?.validateTill,
         time: e?.workingHours?.map((elem: any) => {
-          return `${elem[WEEK_DAYS[day]]?.from.time}:${
-            elem[WEEK_DAYS[day]]?.from.division
-          } to ${elem[WEEK_DAYS[day]]?.till.time}:${
-            elem[WEEK_DAYS[day]]?.till.division
-          }`;
+          return `${elem[WEEK_DAYS[day]]?.from.time}:${elem[WEEK_DAYS[day]]?.from.division
+            } to ${elem[WEEK_DAYS[day]]?.till.time}:${elem[WEEK_DAYS[day]]?.till.division
+            }`;
         }),
 
         capacityAndToken: e?.workingHours.map((elem: any) => {
@@ -1444,6 +1442,17 @@ export const searchDoctorByPhoneNumberOrEmail = async (
       return errorResponse(error, res);
     }
 
+    const selectedFields = {
+      firstName: 1,
+      lastName: 1,
+      gender: 1,
+      DOB: 1,
+      KYCDetails: 0,
+      specialization: 1,
+      qualification: 1,
+      totalExperience: 1,
+    }
+
     let doctorObj;
     if (phone) {
       doctorObj = await doctorModel
@@ -1451,15 +1460,7 @@ export const searchDoctorByPhoneNumberOrEmail = async (
           {
             phoneNumber: term,
           },
-          {
-            firstName: 1,
-            lastName: 1,
-            gender: 1,
-            DOB: 1,
-            KYCDetails: 0,
-            specialization: 1,
-            qualification: 1,
-          }
+          selectedFields
         )
         .populate("specialization qualification")
         .lean();
@@ -1469,15 +1470,7 @@ export const searchDoctorByPhoneNumberOrEmail = async (
           {
             email: term,
           },
-          {
-            firstName: 1,
-            lastName: 1,
-            gender: 1,
-            DOB: 1,
-            KYCDetails: 0,
-            specialization: 1,
-            qualification: 1,
-          }
+          selectedFields
         )
         .populate("qualification specialization")
         .lean();
@@ -1682,7 +1675,7 @@ export const checkDoctorAvailability = async (
     if (
       new Date(e.time.date).getDate() == new Date(requestDate).getDate() &&
       new Date(e.time.date).getFullYear() ==
-        new Date(requestDate).getFullYear() &&
+      new Date(requestDate).getFullYear() &&
       new Date(e.time.date).getMonth() == new Date(requestDate).getMonth()
     ) {
       appCount++;
