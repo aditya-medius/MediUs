@@ -61,6 +61,7 @@ const Patient_Service_1 = require("../Services/Patient/Patient.Service");
 const patientService = __importStar(require("../Services/Patient/Patient.Service"));
 const Utils_1 = require("../Services/Utils");
 const Fee_Model_1 = __importDefault(require("../Module/Payment/Model/Fee.Model"));
+const moment_1 = __importDefault(require("moment"));
 exports.excludePatientFields = {
     password: 0,
     verified: 0,
@@ -319,8 +320,15 @@ exports.deleteProfile = deleteProfile;
 //Book an apponitment
 const BookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let body = req.body;
+        let body = req.body, doctorId = req.body.doctors;
         const rd = new Date(body.time.date);
+        const doctorDetails = yield Doctors_Model_1.default.findOne({ _id: doctorId }, "advancedBookingPeriod");
+        const advancedBookingPeriod = doctorDetails === null || doctorDetails === void 0 ? void 0 : doctorDetails.advancedBookingPeriod;
+        if (!patientService.isAdvancedBookingValid((0, moment_1.default)(rd), advancedBookingPeriod)) {
+            const error = new Error("Cannot book appointment for this day");
+            error.name = "Not available";
+            return (0, response_1.errorResponse)(error, res);
+        }
         const d = rd.getDay();
         let b = req.body;
         let query = {};

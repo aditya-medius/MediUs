@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getHospitalsInACity = exports.canDoctorTakeAppointment = exports.calculateAge = exports.BookAppointment = void 0;
+exports.isAdvancedBookingValid = exports.getHospitalsInACity = exports.canDoctorTakeAppointment = exports.calculateAge = exports.BookAppointment = void 0;
 const WorkingHours_Model_1 = __importDefault(require("../../Models/WorkingHours.Model"));
 const Appointment_Model_1 = __importDefault(require("../../Models/Appointment.Model"));
 const moment_1 = __importDefault(require("moment"));
@@ -328,3 +328,9 @@ const getHospitalsInACity = (cityId) => __awaiter(void 0, void 0, void 0, functi
     return hospitalsInThatCity;
 });
 exports.getHospitalsInACity = getHospitalsInACity;
+const isAdvancedBookingValid = (bookingDate, advancedBookingPeriod) => {
+    const currentDate = (0, moment_1.default)();
+    const dateDifference = currentDate.diff((0, moment_1.default)(bookingDate), "days") + 1;
+    return dateDifference > -1 && dateDifference <= advancedBookingPeriod;
+};
+exports.isAdvancedBookingValid = isAdvancedBookingValid;

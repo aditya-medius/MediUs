@@ -44,6 +44,7 @@ import * as patientService from "../Services/Patient/Patient.Service";
 import { digiMilesSMS } from "../Services/Utils";
 import feeModel from "../Module/Payment/Model/Fee.Model";
 import { convenienceFee } from "../Services/Admin/Admin.Service";
+import moment from "moment";
 export const excludePatientFields = {
   password: 0,
   verified: 0,
@@ -376,8 +377,19 @@ export const deleteProfile = async (req: Request, res: Response) => {
 //Book an apponitment
 export const BookAppointment = async (req: Request, res: Response) => {
   try {
-    let body = req.body;
+    let body = req.body, doctorId = req.body.doctors;
+
     const rd: Date = new Date(body.time.date);
+
+    const doctorDetails = await doctorModel.findOne({ _id: doctorId }, "advancedBookingPeriod")
+    const advancedBookingPeriod = doctorDetails?.advancedBookingPeriod;
+
+    if (!patientService.isAdvancedBookingValid(moment(rd), advancedBookingPeriod)) {
+      const error: Error = new Error("Cannot book appointment for this day");
+      error.name = "Not available";
+      return errorResponse(error, res);
+    }
+
     const d = rd.getDay();
     let b = req.body;
     let query: any = {};

@@ -120,7 +120,7 @@ export const BookAppointment = async (body: any, isHospital = false) => {
       if (
         new Date(e.time.date).getDate() == new Date(requestDate).getDate() &&
         new Date(e.time.date).getFullYear() ==
-          new Date(requestDate).getFullYear() &&
+        new Date(requestDate).getFullYear() &&
         new Date(e.time.date).getMonth() == new Date(requestDate).getMonth()
       ) {
         appCount++;
@@ -135,9 +135,8 @@ export const BookAppointment = async (body: any, isHospital = false) => {
       //     res
       //   );
       if (isHospital) {
-        message = `Doctor's appointment have exceeded doctor's capacity for the day by ${
-          appCount - capacity.capacity + 1
-        }`;
+        message = `Doctor's appointment have exceeded doctor's capacity for the day by ${appCount - capacity.capacity + 1
+          }`;
       } else {
         return Promise.reject(
           new Error("Doctor cannot take any more appointments")
@@ -149,7 +148,7 @@ export const BookAppointment = async (body: any, isHospital = false) => {
 
     body["appointmentToken"] = appointmentTokenNumber;
     body["appointmentId"] = appointmentId;
-    let appointmentBook = await new appointmentModel({...body, createdAt: new Date()}).save();
+    let appointmentBook = await new appointmentModel({ ...body, createdAt: new Date() }).save();
     await appointmentBook.populate({
       path: "subPatient",
       select: {
@@ -278,7 +277,7 @@ export const canDoctorTakeAppointment = async (body: any) => {
     if (
       new Date(e.time.date).getDate() == new Date(requestDate).getDate() &&
       new Date(e.time.date).getFullYear() ==
-        new Date(requestDate).getFullYear() &&
+      new Date(requestDate).getFullYear() &&
       new Date(e.time.date).getMonth() == new Date(requestDate).getMonth()
     ) {
       appCount++;
@@ -324,3 +323,9 @@ export const getHospitalsInACity = async (
 
   return hospitalsInThatCity;
 };
+
+export const isAdvancedBookingValid = (bookingDate: moment.Moment, advancedBookingPeriod: number): boolean => {
+  const currentDate = moment()
+  const dateDifference: number = currentDate.diff(moment(bookingDate), "days") + 1;
+  return dateDifference > -1 && dateDifference <= advancedBookingPeriod
+}

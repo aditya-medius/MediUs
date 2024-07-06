@@ -60,9 +60,15 @@ const moment_1 = __importDefault(require("moment"));
 const SubPatient_Model_1 = __importDefault(require("../Models/SubPatient.Model"));
 patientRouter.post("/BookAppointment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let doctorId = req.body.doctors, patientId = req.body.patient, hospitalId = req.body.hospital, subPatientId = req.body.subPatient;
-        let valid = yield prescriptionValidtiyService.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod({ doctorId, patientId, hospitalId, subPatientId });
-        req.body["appointmentType"] = valid ? "Follow up" : "Fresh";
+        // let doctorId = req.body.doctors,
+        //   patientId = req.body.patient,
+        //   hospitalId = req.body.hospital,
+        //   subPatientId = req.body.subPatient;
+        // let valid =
+        //   await prescriptionValidtiyService.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod(
+        //     { doctorId, patientId, hospitalId, subPatientId }
+        //   );
+        // req.body["appointmentType"] = valid ? "Follow up" : "Fresh";
         next();
     }
     catch (error) {

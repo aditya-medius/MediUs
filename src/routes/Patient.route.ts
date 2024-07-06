@@ -59,15 +59,15 @@ patientRouter.post(
   oneOf(authenticatePatient, authenticateHospital),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      let doctorId = req.body.doctors,
-        patientId = req.body.patient,
-        hospitalId = req.body.hospital,
-        subPatientId = req.body.subPatient;
-      let valid =
-        await prescriptionValidtiyService.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod(
-          { doctorId, patientId, hospitalId, subPatientId }
-        );
-      req.body["appointmentType"] = valid ? "Follow up" : "Fresh";
+      // let doctorId = req.body.doctors,
+      //   patientId = req.body.patient,
+      //   hospitalId = req.body.hospital,
+      //   subPatientId = req.body.subPatient;
+      // let valid =
+      //   await prescriptionValidtiyService.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod(
+      //     { doctorId, patientId, hospitalId, subPatientId }
+      //   );
+      // req.body["appointmentType"] = valid ? "Follow up" : "Fresh";
       next();
     } catch (error: any) {
       return errorResponse(error, res);
@@ -154,40 +154,31 @@ patientRouter.post(
 
         sendNotificationToDoctor(doctorFirebaseToken, {
           title: "New appointment",
-          body: `${P.firstName} ${P.lastName} has booked an appointment at ${
-            H.name
-          } and ${moment(req.body.appointment.time.date).format(
-            "DD-MM-YYYY"
-          )} ${req.body.appointment.time.from.time}:${
-            req.body.appointment.time.from.division
-          } -${req.body.appointment.time.till.time}:${
-            req.body.appointment.time.till.division
-          } `,
+          body: `${P.firstName} ${P.lastName} has booked an appointment at ${H.name
+            } and ${moment(req.body.appointment.time.date).format(
+              "DD-MM-YYYY"
+            )} ${req.body.appointment.time.from.time}:${req.body.appointment.time.from.division
+            } -${req.body.appointment.time.till.time}:${req.body.appointment.time.till.division
+            } `,
         });
         sendNotificationToHospital(hospitalFirebaseToken, {
           title: "New appointment",
-          body: `${P.firstName} ${P.lastName} has booked an appointment with ${
-            D.firstName
-          } ${D.lastName} and ${moment(req.body.appointment.time.date).format(
-            "DD-MM-YYYY"
-          )} ${req.body.appointment.time.from.time}:${
-            req.body.appointment.time.from.division
-          } -${req.body.appointment.time.till.time}:${
-            req.body.appointment.time.till.division
-          } `,
+          body: `${P.firstName} ${P.lastName} has booked an appointment with ${D.firstName
+            } ${D.lastName} and ${moment(req.body.appointment.time.date).format(
+              "DD-MM-YYYY"
+            )} ${req.body.appointment.time.from.time}:${req.body.appointment.time.from.division
+            } -${req.body.appointment.time.till.time}:${req.body.appointment.time.till.division
+            } `,
         });
 
         sendNotificationToPatient(patientFirebaseToken, {
           title: "New appointment",
-          body: `${P.firstName} ${P.lastName} has booked an appointment for ${
-            D.firstName
-          } ${D.lastName} at ${H.name} and ${moment(
-            req.body.appointment.time.date
-          ).format("DD-MM-YYYY")} ${req.body.appointment.time.from.time}:${
-            req.body.appointment.time.from.division
-          } -${req.body.appointment.time.till.time}:${
-            req.body.appointment.time.till.division
-          } `,
+          body: `${P.firstName} ${P.lastName} has booked an appointment for ${D.firstName
+            } ${D.lastName} at ${H.name} and ${moment(
+              req.body.appointment.time.date
+            ).format("DD-MM-YYYY")} ${req.body.appointment.time.from.time}:${req.body.appointment.time.from.division
+            } -${req.body.appointment.time.till.time}:${req.body.appointment.time.till.division
+            } `,
         });
 
         let name = `${P.firstName} ${P.lastName}`;
