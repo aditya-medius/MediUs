@@ -1327,7 +1327,7 @@ const searchDoctorByPhoneNumberOrEmail = (req, res) => __awaiter(void 0, void 0,
             }
             return (0, response_1.successResponse)(doctorObj, "Success", res);
         }
-        return (0, response_1.successResponse)({}, "No data found", res);
+        return (0, response_1.successResponse)({}, "No data found", res, 201);
     }
     catch (error) {
         if (typeof error == "string") {

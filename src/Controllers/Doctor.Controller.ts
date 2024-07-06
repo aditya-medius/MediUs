@@ -1502,7 +1502,7 @@ export const searchDoctorByPhoneNumberOrEmail = async (
       }
       return successResponse(doctorObj, "Success", res);
     }
-    return successResponse({}, "No data found", res);
+    return successResponse({}, "No data found", res, 201);
   } catch (error: any) {
     if (typeof error == "string") {
       error = new Error(error);
