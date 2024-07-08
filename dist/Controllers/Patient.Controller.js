@@ -320,6 +320,7 @@ exports.deleteProfile = deleteProfile;
 //Book an apponitment
 const BookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        console.log("bjhbfjnfnjkdffd", req.body);
         let body = req.body, doctorId = req.body.doctors;
         const rd = new Date(body.time.date);
         const doctorDetails = yield Doctors_Model_1.default.findOne({ _id: doctorId }, "advancedBookingPeriod");

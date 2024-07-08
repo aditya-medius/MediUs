@@ -54,6 +54,7 @@ import {
 } from "../Services/Utils";
 import moment from "moment";
 import subPatientModel from "../Models/SubPatient.Model";
+import { AppointmentType } from "../Services/Patient";
 patientRouter.post(
   "/BookAppointment",
   oneOf(authenticatePatient, authenticateHospital),
@@ -68,6 +69,27 @@ patientRouter.post(
       //     { doctorId, patientId, hospitalId, subPatientId }
       //   );
       // req.body["appointmentType"] = valid ? "Follow up" : "Fresh";
+      let appointmentType;
+      switch (req.body?.appointmentType) {
+        case AppointmentType.FRESH: {
+          appointmentType = AppointmentType.FRESH
+          break;
+        }
+
+        case AppointmentType.FOLLOW_UP: {
+          appointmentType = AppointmentType.FOLLOW_UP
+          break
+        }
+
+        default: {
+          const error = new Error("error")
+          error.message = "Invalid appointmentType value";
+          throw error
+        }
+      }
+
+
+      req.body["appointmentType"] = appointmentType
       next();
     } catch (error: any) {
       return errorResponse(error, res);

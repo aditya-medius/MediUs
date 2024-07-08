@@ -377,6 +377,7 @@ export const deleteProfile = async (req: Request, res: Response) => {
 //Book an apponitment
 export const BookAppointment = async (req: Request, res: Response) => {
   try {
+    console.log("bjhbfjnfnjkdffd", req.body)
     let body = req.body, doctorId = req.body.doctors;
 
     const rd: Date = new Date(body.time.date);

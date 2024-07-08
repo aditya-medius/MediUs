@@ -58,7 +58,9 @@ const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
 const Utils_1 = require("../Services/Utils");
 const moment_1 = __importDefault(require("moment"));
 const SubPatient_Model_1 = __importDefault(require("../Models/SubPatient.Model"));
+const Patient_1 = require("../Services/Patient");
 patientRouter.post("/BookAppointment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
         // let doctorId = req.body.doctors,
         //   patientId = req.body.patient,
@@ -69,6 +71,23 @@ patientRouter.post("/BookAppointment", (0, middlewareHelper_1.oneOf)(Patient_aut
         //     { doctorId, patientId, hospitalId, subPatientId }
         //   );
         // req.body["appointmentType"] = valid ? "Follow up" : "Fresh";
+        let appointmentType;
+        switch ((_a = req.body) === null || _a === void 0 ? void 0 : _a.appointmentType) {
+            case Patient_1.AppointmentType.FRESH: {
+                appointmentType = Patient_1.AppointmentType.FRESH;
+                break;
+            }
+            case Patient_1.AppointmentType.FOLLOW_UP: {
+                appointmentType = Patient_1.AppointmentType.FOLLOW_UP;
+                break;
+            }
+            default: {
+                const error = new Error("error");
+                error.message = "Invalid appointmentType value";
+                throw error;
+            }
+        }
+        req.body["appointmentType"] = appointmentType;
         next();
     }
     catch (error) {
