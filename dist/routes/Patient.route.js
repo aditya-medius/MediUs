@@ -59,6 +59,7 @@ const Utils_1 = require("../Services/Utils");
 const moment_1 = __importDefault(require("moment"));
 const SubPatient_Model_1 = __importDefault(require("../Models/SubPatient.Model"));
 const Patient_1 = require("../Services/Patient");
+// Deprecated - View hospital/verifyPayment
 patientRouter.post("/BookAppointment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
