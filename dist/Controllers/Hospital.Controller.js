@@ -834,10 +834,11 @@ const getAppointmentByDate = (req, res) => __awaiter(void 0, void 0, void 0, fun
             .lean();
         // appointmenObj = appointmenObj.toObject();
         appointmenObj.forEach((e) => {
+            var _a, _b, _c, _d;
             e.patient["age"] = (0, Utils_1.getAge)(e.patient.DOB);
             // e.doctors["age"] = getAge(e.doctors.DOB);
-            e.patient["name"] = `${e.patient.firstName} ${e.patient.lastName}`;
-            e.doctors["name"] = `${e.doctors.firstName} ${e.doctors.lastName}`;
+            e.patient["name"] = `${(_a = e.patient) === null || _a === void 0 ? void 0 : _a.firstName} ${(_b = e.patient) === null || _b === void 0 ? void 0 : _b.lastName}`;
+            e.doctors["name"] = `${(_c = e.doctors) === null || _c === void 0 ? void 0 : _c.firstName} ${(_d = e.doctors) === null || _d === void 0 ? void 0 : _d.lastName}`;
             if (e.subPatient) {
                 e.subPatient["age"] = (0, Utils_1.getAge)(e.subPatient.DOB);
             }

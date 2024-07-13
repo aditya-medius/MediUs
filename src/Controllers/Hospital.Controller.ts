@@ -960,8 +960,8 @@ export const getAppointmentByDate = async (req: Request, res: Response) => {
     appointmenObj.forEach((e: any) => {
       e.patient["age"] = getAge(e.patient.DOB);
       // e.doctors["age"] = getAge(e.doctors.DOB);
-      e.patient["name"] = `${e.patient.firstName} ${e.patient.lastName}`
-      e.doctors["name"] = `${e.doctors.firstName} ${e.doctors.lastName}`
+      e.patient["name"] = `${e.patient?.firstName} ${e.patient?.lastName}`
+      e.doctors["name"] = `${e.doctors?.firstName} ${e.doctors?.lastName}`
       if (e.subPatient) {
         e.subPatient["age"] = getAge(e.subPatient.DOB);
       }
