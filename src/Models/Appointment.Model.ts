@@ -8,6 +8,7 @@ import {
 } from "../Services/schemaNames";
 import { formatWorkingHourDayForAppointment } from "../Services/Utils";
 import workingHourModel from "./WorkingHours.Model";
+import { AppointmentType } from "../Services/Patient";
 // import schemaOptions from "../Services/schemaOptions";
 const appointmentSchema = new Schema({
   patient: {
@@ -98,7 +99,7 @@ const appointmentSchema = new Schema({
   },
   appointmentType: {
     type: String,
-    enum: ["Fresh", "Follow up"],
+    enum: [AppointmentType.FRESH, AppointmentType.FOLLOW_UP],
   },
 
   // Kisne appointments book ki hai. User, hospital or suvedha

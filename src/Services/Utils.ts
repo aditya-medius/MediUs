@@ -134,7 +134,7 @@ export const formatWorkingHourDayForAppointment = (body: any) => {
   return query;
 };
 
-export const updateWorkingHour = (query: any, cb: Function) => {};
+export const updateWorkingHour = (query: any, cb: Function) => { };
 
 export const initUpload = (filepath: string) => {
   const storage = multer.diskStorage({
@@ -319,3 +319,10 @@ export const digiMilesSMS = {
     );
   },
 };
+
+export const addDays = (date: any, days: any) => {
+  const newDate = new Date(date);
+  newDate.setDate(date.getDate() + days);
+  return newDate;
+
+}

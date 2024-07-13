@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.digiMilesSMS = exports.sendNotificationToPatient = exports.sendNotificationToHospital = exports.sendNotificationToDoctor = exports.firebaseAxiosPatient = exports.firebaseAxiosHospital = exports.firebaseAxiosDoctor = exports.verifyPasswordChangeOTP = exports.sendOTPForPasswordChange = exports.getRangeOfDates = exports.groupBy = exports.initUpload = exports.updateWorkingHour = exports.formatWorkingHourDayForAppointment = exports.setFormatForWorkingHours = exports.getDayFromWorkingHours = exports.getAge = exports.generateOTPtoken = exports.generateOTP = exports.encryptPassword = exports.phoneNumberRegex = void 0;
+exports.addDays = exports.digiMilesSMS = exports.sendNotificationToPatient = exports.sendNotificationToHospital = exports.sendNotificationToDoctor = exports.firebaseAxiosPatient = exports.firebaseAxiosHospital = exports.firebaseAxiosDoctor = exports.verifyPasswordChangeOTP = exports.sendOTPForPasswordChange = exports.getRangeOfDates = exports.groupBy = exports.initUpload = exports.updateWorkingHour = exports.formatWorkingHourDayForAppointment = exports.setFormatForWorkingHours = exports.getDayFromWorkingHours = exports.getAge = exports.generateOTPtoken = exports.generateOTP = exports.encryptPassword = exports.phoneNumberRegex = void 0;
 const bcrypt = __importStar(require("bcrypt"));
 const jwt = __importStar(require("jsonwebtoken"));
 const moment_1 = __importDefault(require("moment"));
@@ -295,3 +295,9 @@ exports.digiMilesSMS = {
         return axios_1.default.get(`http://route.digimiles.in/bulksms/bulksms?username=DG35-medius&password=digimile&type=0&dlr=1&destination=${phoneNumber}&source=MEDUST&message=${otp} is the OTP to validate your account with Medius. OTP is valid only for 60 seconds. Team Medius.&entityid=1501583880000052401&tempid=1507166324007499032`);
     },
 };
+const addDays = (date, days) => {
+    const newDate = new Date(date);
+    newDate.setDate(date.getDate() + days);
+    return newDate;
+};
+exports.addDays = addDays;

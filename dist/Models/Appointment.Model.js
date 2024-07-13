@@ -35,6 +35,7 @@ const mongoose_1 = __importStar(require("mongoose"));
 const schemaNames_1 = require("../Services/schemaNames");
 const Utils_1 = require("../Services/Utils");
 const WorkingHours_Model_1 = __importDefault(require("./WorkingHours.Model"));
+const Patient_1 = require("../Services/Patient");
 // import schemaOptions from "../Services/schemaOptions";
 const appointmentSchema = new mongoose_1.Schema({
     patient: {
@@ -125,7 +126,7 @@ const appointmentSchema = new mongoose_1.Schema({
     },
     appointmentType: {
         type: String,
-        enum: ["Fresh", "Follow up"],
+        enum: [Patient_1.AppointmentType.FRESH, Patient_1.AppointmentType.FOLLOW_UP],
     },
     // Kisne appointments book ki hai. User, hospital or suvedha
     appointmentBookedBy: {

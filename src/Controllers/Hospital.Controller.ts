@@ -31,6 +31,7 @@ import { request } from "http";
 import { getHospitalToken } from "../Services/Hospital/Hospital.Service";
 import { getAgeOfDoctor } from "../Services/Doctor/Doctor.Service";
 import {
+  addDays,
   digiMilesSMS,
   getAge,
   sendOTPForPasswordChange,
@@ -904,12 +905,18 @@ export const getAppointmentByDate = async (req: Request, res: Response) => {
     // ltDate.setDate(gtDate.getDate() - 1);
     // ltDate.setUTCHours(24, 0, 0, 0);
 
-    gtDate.setDate(gtDate.getDate() + 1);
-    gtDate.setUTCHours(0, 0, 0, 0);
+    gtDate = addDays(gtDate, 1)
+    // gtDate.setDate(gtDate.getDate() + 1);
+    // gtDate.setUTCHours(0, 0, 0, 0);
     let appointmenObj = await appointmentModel
       .find({
         hospital: req.currentHospital,
         "time.date": { $gte: ltDate, $lte: gtDate },
+      }, {
+        hospital: 0,
+        done: 0,
+        cancelled: 0,
+        rescheduled: 0
       })
       .populate({
         path: "doctors",
@@ -923,23 +930,38 @@ export const getAppointmentByDate = async (req: Request, res: Response) => {
           specialization: 0,
           qualification: 0,
           overallExperience: 0,
+          DOB: 0,
+          email: 0,
+          active: 0,
+          deleted: 0,
+          image: 0,
+          age: 0,
+          totalExperience: 0,
+          advancedBookingPeriod: 0,
         },
       })
       .populate({
         path: "patient",
-        select: { password: 0, verified: 0, services: 0 },
+        select: {
+          password: 0, verified: 0, services: 0, email: 0,
+          active: 0,
+          deleted: 0,
+          location: 0,
+        },
       })
-      .populate({
-        path: "hospital",
-        select: excludeHospitalFields,
-      })
+      // .populate({
+      //   path: "hospital",
+      //   select: excludeHospitalFields,
+      // })
       .populate({ path: "subPatient", select: { parentPatient: 0 } })
       .lean();
 
     // appointmenObj = appointmenObj.toObject();
     appointmenObj.forEach((e: any) => {
       e.patient["age"] = getAge(e.patient.DOB);
-      e.doctors["age"] = getAge(e.doctors.DOB);
+      // e.doctors["age"] = getAge(e.doctors.DOB);
+      e.patient["name"] = `${e.patient.firstName} ${e.patient.lastName}`
+      e.doctors["name"] = `${e.doctors.firstName} ${e.doctors.lastName}`
       if (e.subPatient) {
         e.subPatient["age"] = getAge(e.subPatient.DOB);
       }
@@ -1286,6 +1308,7 @@ export const getDoctorsOfflineAndOnlineAppointments = async (
 import * as notificationService from "../Services/Notification/Notification.Service";
 import suvedhaModel from "../Models/Suvedha.Model";
 import patientModel from "../Models/Patient.Model";
+import { getDefaultSettings } from "http2";
 
 export const getHospitalsNotification = async (req: Request, res: Response) => {
   try {
@@ -1474,7 +1497,7 @@ export const doctorsInHospitalWithTimings = async (
         Exeperience: e?.overallExperience,
         Fee: e?.hospitalDetails.find(
           (elem: any) => elem.hospital.toString() === hospitalId
-        )?.consultationFee.max,
+        )?.consultationFee?.max,
         workinghour: e?.workingHours.map((elem: any) => {
           return `${elem[WEEK_DAYS[day]]?.from.time}:${elem[WEEK_DAYS[day]]?.from.division
             } to ${elem[WEEK_DAYS[day]]?.till.time}:${elem[WEEK_DAYS[day]]?.till.division

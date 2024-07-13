@@ -782,12 +782,18 @@ const getAppointmentByDate = (req, res) => __awaiter(void 0, void 0, void 0, fun
         let ltDate = new Date(gtDate);
         // ltDate.setDate(gtDate.getDate() - 1);
         // ltDate.setUTCHours(24, 0, 0, 0);
-        gtDate.setDate(gtDate.getDate() + 1);
-        gtDate.setUTCHours(0, 0, 0, 0);
+        gtDate = (0, Utils_1.addDays)(gtDate, 1);
+        // gtDate.setDate(gtDate.getDate() + 1);
+        // gtDate.setUTCHours(0, 0, 0, 0);
         let appointmenObj = yield Appointment_Model_1.default
             .find({
             hospital: req.currentHospital,
             "time.date": { $gte: ltDate, $lte: gtDate },
+        }, {
+            hospital: 0,
+            done: 0,
+            cancelled: 0,
+            rescheduled: 0
         })
             .populate({
             path: "doctors",
@@ -801,22 +807,37 @@ const getAppointmentByDate = (req, res) => __awaiter(void 0, void 0, void 0, fun
                 specialization: 0,
                 qualification: 0,
                 overallExperience: 0,
+                DOB: 0,
+                email: 0,
+                active: 0,
+                deleted: 0,
+                image: 0,
+                age: 0,
+                totalExperience: 0,
+                advancedBookingPeriod: 0,
             },
         })
             .populate({
             path: "patient",
-            select: { password: 0, verified: 0, services: 0 },
+            select: {
+                password: 0, verified: 0, services: 0, email: 0,
+                active: 0,
+                deleted: 0,
+                location: 0,
+            },
         })
-            .populate({
-            path: "hospital",
-            select: Patient_Controller_1.excludeHospitalFields,
-        })
+            // .populate({
+            //   path: "hospital",
+            //   select: excludeHospitalFields,
+            // })
             .populate({ path: "subPatient", select: { parentPatient: 0 } })
             .lean();
         // appointmenObj = appointmenObj.toObject();
         appointmenObj.forEach((e) => {
             e.patient["age"] = (0, Utils_1.getAge)(e.patient.DOB);
-            e.doctors["age"] = (0, Utils_1.getAge)(e.doctors.DOB);
+            // e.doctors["age"] = getAge(e.doctors.DOB);
+            e.patient["name"] = `${e.patient.firstName} ${e.patient.lastName}`;
+            e.doctors["name"] = `${e.doctors.firstName} ${e.doctors.lastName}`;
             if (e.subPatient) {
                 e.subPatient["age"] = (0, Utils_1.getAge)(e.subPatient.DOB);
             }
@@ -1245,14 +1266,14 @@ const doctorsInHospitalWithTimings = (req, res) => __awaiter(void 0, void 0, voi
             "saturday",
         ];
         doctors = doctors.map((e) => {
-            var _a, _b, _c, _d;
+            var _a, _b, _c, _d, _e;
             return {
                 _id: e === null || e === void 0 ? void 0 : e._id,
                 name: `${e.firstName} ${e.lastName}`,
                 specilization: (_a = e === null || e === void 0 ? void 0 : e.specialization[0]) === null || _a === void 0 ? void 0 : _a.specialityName,
                 Qualification: (_c = (_b = e === null || e === void 0 ? void 0 : e.qualification[0]) === null || _b === void 0 ? void 0 : _b.qualificationName) === null || _c === void 0 ? void 0 : _c.abbreviation,
                 Exeperience: e === null || e === void 0 ? void 0 : e.overallExperience,
-                Fee: (_d = e === null || e === void 0 ? void 0 : e.hospitalDetails.find((elem) => elem.hospital.toString() === hospitalId)) === null || _d === void 0 ? void 0 : _d.consultationFee.max,
+                Fee: (_e = (_d = e === null || e === void 0 ? void 0 : e.hospitalDetails.find((elem) => elem.hospital.toString() === hospitalId)) === null || _d === void 0 ? void 0 : _d.consultationFee) === null || _e === void 0 ? void 0 : _e.max,
                 workinghour: e === null || e === void 0 ? void 0 : e.workingHours.map((elem) => {
                     var _a, _b, _c, _d;
                     return `${(_a = elem[WEEK_DAYS[day]]) === null || _a === void 0 ? void 0 : _a.from.time}:${(_b = elem[WEEK_DAYS[day]]) === null || _b === void 0 ? void 0 : _b.from.division} to ${(_c = elem[WEEK_DAYS[day]]) === null || _c === void 0 ? void 0 : _c.till.time}:${(_d = elem[WEEK_DAYS[day]]) === null || _d === void 0 ? void 0 : _d.till.division}`;
