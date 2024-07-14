@@ -129,6 +129,11 @@ const appointmentSchema = new mongoose_1.Schema({
         enum: [Patient_1.AppointmentType.FRESH, Patient_1.AppointmentType.FOLLOW_UP],
         default: Patient_1.AppointmentType.FRESH
     },
+    appointmentStatus: {
+        type: String,
+        enum: [Patient_1.AppointmentStatus.SCHEDULED, Patient_1.AppointmentStatus.PRESENT, Patient_1.AppointmentStatus.CONSULTED, Patient_1.AppointmentStatus.ABSENT],
+        default: Patient_1.AppointmentStatus.SCHEDULED
+    },
     // Kisne appointments book ki hai. User, hospital or suvedha
     appointmentBookedBy: {
         type: String,

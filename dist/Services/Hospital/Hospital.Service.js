@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCitiesWhereHospitalsExist = exports.getHospitalById = exports.hospitalsInDoctor = exports.getHospitalsPrescriptionValidityInDoctor = exports.getHospitalsWorkingHourInDoctor = exports.getHolidayTimigsOfHospitalsInDoctor = exports.doctorsInHospital = exports.getDoctorsPrescriptionValidityInHospital = exports.getDoctorsWorkingHourInHospital = exports.getHolidayTimigsOfDoctorsInHospital = exports.doesHospitalExist = exports.generateOrderId = exports.verifyPayment = exports.getPatientsAppointmentsInThisHospital = exports.getPatientFromPhoneNumber = exports.getHospitalsOfflineAndOnlineAppointments = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.getHospitalToken = void 0;
+exports.changeAppointmentStatus = exports.getCitiesWhereHospitalsExist = exports.getHospitalById = exports.hospitalsInDoctor = exports.getHospitalsPrescriptionValidityInDoctor = exports.getHospitalsWorkingHourInDoctor = exports.getHolidayTimigsOfHospitalsInDoctor = exports.doctorsInHospital = exports.getDoctorsPrescriptionValidityInHospital = exports.getDoctorsWorkingHourInHospital = exports.getHolidayTimigsOfDoctorsInHospital = exports.doesHospitalExist = exports.generateOrderId = exports.verifyPayment = exports.getPatientsAppointmentsInThisHospital = exports.getPatientFromPhoneNumber = exports.getHospitalsOfflineAndOnlineAppointments = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.getHospitalToken = void 0;
 const jwt = __importStar(require("jsonwebtoken"));
 const dotenv = __importStar(require("dotenv"));
 const Hospital_Model_1 = __importDefault(require("../../Models/Hospital.Model"));
@@ -49,6 +49,7 @@ const Holiday_Calendar_Model_1 = __importDefault(require("../../Models/Holiday-C
 const WorkingHours_Model_1 = __importDefault(require("../../Models/WorkingHours.Model"));
 const Prescription_Model_1 = __importDefault(require("../../Models/Prescription.Model"));
 const Doctors_Model_1 = __importDefault(require("../../Models/Doctors.Model"));
+const Patient_1 = require("../Patient");
 dotenv.config();
 const getHospitalToken = (body) => __awaiter(void 0, void 0, void 0, function* () {
     const token = yield jwt.sign(body, process.env.SECRET_HOSPITAL_KEY);
@@ -1016,3 +1017,17 @@ const getCitiesWhereHospitalsExist = () => __awaiter(void 0, void 0, void 0, fun
     }
 });
 exports.getCitiesWhereHospitalsExist = getCitiesWhereHospitalsExist;
+const changeAppointmentStatus = (id, status) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        if (!Object.values(Patient_1.AppointmentStatus).includes(status)) {
+            const error = new Error("Invalid status value");
+            return Promise.reject(error);
+        }
+        yield Appointment_Model_1.default.findOneAndUpdate({ _id: id, }, { $set: { appointmentStatus: status } });
+        return true;
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.changeAppointmentStatus = changeAppointmentStatus;

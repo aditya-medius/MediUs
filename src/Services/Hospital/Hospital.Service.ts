@@ -28,6 +28,7 @@ import workingHourModel from "../../Models/WorkingHours.Model";
 import { getPreEmitDiagnostics } from "typescript";
 import prescriptionModel from "../../Models/Prescription.Model";
 import doctorModel from "../../Models/Doctors.Model";
+import { AppointmentStatus } from "../Patient";
 dotenv.config();
 
 export const getHospitalToken = async (body: any) => {
@@ -1147,3 +1148,17 @@ export const getCitiesWhereHospitalsExist = async () => {
     return Promise.reject(error);
   }
 };
+
+export const changeAppointmentStatus = async (id: string, status: AppointmentStatus) => {
+  try {
+    if(!Object.values(AppointmentStatus).includes(status))
+    {
+      const error = new Error("Invalid status value")
+      return Promise.reject(error)
+    }
+    await appointmentModel.findOneAndUpdate({ _id: id, }, { $set: { appointmentStatus: status } })
+    return true;
+  } catch (error: any) {
+    return Promise.reject(error)
+  }
+}

@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addDoctor = exports.verifyOTPToUpdateNumber = exports.sendOTPToUpdateNumber = exports.getHospitalDetails = exports.doctorsInHospitalWithTimings = exports.verifyPayment = exports.generateOrderId = exports.getPatientsAppointmentsInThisHospital = exports.searchHospitalByPhoneNumber = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.updateHospitalAddress = exports.getHospitalsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.checkVerificationStatus = exports.getDoctorsInHospital = exports.getHospitalById = exports.getAppointmentByDate = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.deleteAnemities = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
+exports.changeAppointmentStatus = exports.addDoctor = exports.verifyOTPToUpdateNumber = exports.sendOTPToUpdateNumber = exports.getHospitalDetails = exports.doctorsInHospitalWithTimings = exports.verifyPayment = exports.generateOrderId = exports.getPatientsAppointmentsInThisHospital = exports.searchHospitalByPhoneNumber = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.updateHospitalAddress = exports.getHospitalsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.checkVerificationStatus = exports.getDoctorsInHospital = exports.getHospitalById = exports.getAppointmentByDate = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.deleteAnemities = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Anemities_Model_1 = __importDefault(require("../Models/Anemities.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
@@ -1405,3 +1405,14 @@ const addDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.addDoctor = addDoctor;
+const changeAppointmentStatus = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { id, status } = req.body;
+        yield hospitalService.changeAppointmentStatus(id, status);
+        return (0, response_1.successResponse)({}, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.changeAppointmentStatus = changeAppointmentStatus;

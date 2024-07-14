@@ -292,4 +292,9 @@ hospitalRouter.put(
   hospitalController.verifyOTPToUpdateNumber
 );
 
+hospitalRouter.put(
+  "/update/status",
+  // oneOf(authenticateHospital),
+  hospitalController.changeAppointmentStatus)
+
 export default hospitalRouter;

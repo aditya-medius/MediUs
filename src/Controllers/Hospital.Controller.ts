@@ -1309,6 +1309,7 @@ import * as notificationService from "../Services/Notification/Notification.Serv
 import suvedhaModel from "../Models/Suvedha.Model";
 import patientModel from "../Models/Patient.Model";
 import { getDefaultSettings } from "http2";
+import { AppointmentStatus } from "../Services/Patient";
 
 export const getHospitalsNotification = async (req: Request, res: Response) => {
   try {
@@ -1642,3 +1643,12 @@ export const addDoctor = async (req: Request, res: Response) => {
   }
 }
 
+export const changeAppointmentStatus = async (req: Request, res: Response) => {
+  try {
+    const { id, status } = req.body
+    await hospitalService.changeAppointmentStatus(id, status)
+    return successResponse({}, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res)
+  }
+}
