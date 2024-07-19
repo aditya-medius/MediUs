@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AppointmentStatus = exports.AppointmentType = void 0;
+exports.AppointStatusOrder = exports.AppointmentStatus = exports.AppointmentType = void 0;
 var AppointmentType;
 (function (AppointmentType) {
     AppointmentType["FRESH"] = "Fresh";
@@ -13,3 +13,4 @@ var AppointmentStatus;
     AppointmentStatus["CONSULTED"] = "Consulted";
     AppointmentStatus["ABSENT"] = "Absent";
 })(AppointmentStatus = exports.AppointmentStatus || (exports.AppointmentStatus = {}));
+exports.AppointStatusOrder = ["Present", "Scheduled", "Consulted", "Absent",];

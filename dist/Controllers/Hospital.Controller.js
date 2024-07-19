@@ -843,6 +843,7 @@ const getAppointmentByDate = (req, res) => __awaiter(void 0, void 0, void 0, fun
                 e.subPatient["age"] = (0, Utils_1.getAge)(e.subPatient.DOB);
             }
         });
+        appointmenObj = underscore_1.default.sortBy(appointmenObj, item => underscore_1.default.indexOf(Patient_1.AppointStatusOrder, item === null || item === void 0 ? void 0 : item.appointmentStatus));
         return (0, response_1.successResponse)(appointmenObj, "Success", res);
     }
     catch (error) {
@@ -1129,6 +1130,7 @@ exports.getDoctorsOfflineAndOnlineAppointments = getDoctorsOfflineAndOnlineAppoi
 const notificationService = __importStar(require("../Services/Notification/Notification.Service"));
 const Suvedha_Model_1 = __importDefault(require("../Models/Suvedha.Model"));
 const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
+const Patient_1 = require("../Services/Patient");
 const getHospitalsNotification = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         /* Notification jaha pe sender hospital hai */

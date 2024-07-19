@@ -896,6 +896,7 @@ export const viewAppointment = async (req: Request, res: Response) => {
 
 export const getAppointmentByDate = async (req: Request, res: Response) => {
   try {
+
     const body = req.body;
     const date: Date = req.body.date;
     let d = new Date(date);
@@ -966,6 +967,8 @@ export const getAppointmentByDate = async (req: Request, res: Response) => {
         e.subPatient["age"] = getAge(e.subPatient.DOB);
       }
     });
+    appointmenObj =  _.sortBy(appointmenObj, item => _.indexOf(AppointStatusOrder, item?.appointmentStatus))
+
     return successResponse(appointmenObj, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);
@@ -1309,7 +1312,7 @@ import * as notificationService from "../Services/Notification/Notification.Serv
 import suvedhaModel from "../Models/Suvedha.Model";
 import patientModel from "../Models/Patient.Model";
 import { getDefaultSettings } from "http2";
-import { AppointmentStatus } from "../Services/Patient";
+import { AppointmentStatus, AppointStatusOrder } from "../Services/Patient";
 
 export const getHospitalsNotification = async (req: Request, res: Response) => {
   try {

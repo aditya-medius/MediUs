@@ -9,3 +9,5 @@ export enum AppointmentStatus {
     CONSULTED = "Consulted",
     ABSENT = "Absent"
 }
+
+export const AppointStatusOrder = ["Present", "Scheduled", "Consulted", "Absent",]
