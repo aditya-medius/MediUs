@@ -27,6 +27,7 @@ const patientController = __importStar(require("../Controllers/Patient.Controlle
 const Utils_1 = require("../Services/Utils");
 const qualificationController = __importStar(require("../Controllers/Qualification.Controller"));
 const hospitalController = __importStar(require("../Controllers/Hospital.Controller"));
+const Hospital_auth_1 = require("../authentication/Hospital.auth");
 const adminRouter = (0, express_1.Router)();
 const upload = (0, Utils_1.initUpload)("admin");
 adminRouter.post("/addSpeciality", adminController.addSpeciality);
@@ -96,4 +97,6 @@ adminRouter.post("/editSpeciality", (0, middlewareHelper_1.oneOf)(Admin_auth_1.a
 adminRouter.post("/editFee", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), adminController.editFee);
 adminRouter.get("/get/hospital/:id", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), adminController.getHospitalById);
 adminRouter.get("/get/doctor/:id", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), adminController.getDoctorById);
+adminRouter.post("/helplineNumber", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), adminController.addHelplineNumber);
+adminRouter.get("/helplineNumber", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin, Hospital_auth_1.authenticateHospital), adminController.getHelplineNumber);
 exports.default = adminRouter;

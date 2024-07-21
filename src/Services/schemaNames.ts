@@ -48,3 +48,4 @@ export const holidayCalendar: string = "holidaycalendars";
 export const fee: string = "fees";
 export const ownership: string = "ownerships";
 export const suvedha: string = "suvedhas"
+export const helplineNumber: string = "helplineNumber";

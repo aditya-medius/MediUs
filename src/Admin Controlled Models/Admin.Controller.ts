@@ -298,7 +298,7 @@ export const getPayments = async (req: Request, res: Response) => {
     let body = req.body;
     let paymentObj = await paymentModel.find({});
     return successResponse(paymentObj, "Success", res);
-  } catch (error: any) {}
+  } catch (error: any) { }
 };
 
 // Get cities, states, locality and country
@@ -798,6 +798,8 @@ import ownershipModel from "../Models/Ownership.Model";
 import { city } from "../Services/schemaNames";
 import suvedhaModel from "../Models/Suvedha.Model";
 import feeModel from "../Module/Payment/Model/Fee.Model";
+import helpLineNumberModel from "../Models/HelplineNumber.Model";
+import { HelplineNumber } from "../Services/Patient";
 
 export const setCountryMap = async (req: Request, res: Response) => {
   try {
@@ -1079,3 +1081,22 @@ export const getDoctorById = async (req: Request, res: Response) => {
     return errorResponse(error, res);
   }
 };
+
+export const addHelplineNumber = async (req: Request, res: Response) => {
+  try {
+    const body: HelplineNumber = req.body
+    const data = await helpLineNumberModel.findOneAndUpdate({ number: body.number }, body, { upsert: true, new: true })
+    return successResponse(data, "Successfully created data", res);
+  } catch (error: any) {
+    return errorResponse(error, res)
+  }
+}
+
+export const getHelplineNumber = async (req: Request, res: Response) => {
+  try {
+    const data = await helpLineNumberModel.find().lean()
+    return successResponse(data, "Successfully created data", res);
+  } catch (error: any) {
+    return errorResponse(error, res)
+  }
+}

@@ -32,6 +32,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getDoctorById = exports.getHospitalById = exports.editFee = exports.editSpeciality = exports.deleteOwnership = exports.getOwnership = exports.addOwnership = exports.getFees = exports.createFee = exports.getAllAppointments = exports.addQualificationn = exports.uploadCSV_locality = exports.uploadCSV_city = exports.uploadCSV_state = exports.getLocalityByCity = exports.getCityByState = exports.getStateByCountry = exports.setCityMap = exports.setStateMap = exports.setCountryMap = exports.getAllHospitalList = exports.getAllSuvedhaList = exports.getAllAgentList = exports.getAllPatientList = exports.verifyAgents = exports.getAllDoctorsList = exports.verifyHospitals = exports.verifyDoctors = exports.getUnverifiedDoctors = exports.deleteHospitalService = exports.addHospitalService = exports.create = exports.login = exports.getCityStateLocalityCountry = exports.getPayments = exports.addPayment = exports.addCountry = exports.addLocality = exports.addState = exports.addCity = exports.addToSpecialityDoctorType = exports.addSpecialityDoctorType = exports.addDoctorType = exports.addToSpecialityDisease = exports.addSpecialityDisease = exports.addDisease = exports.addToSpecialityBody = exports.addSpecialityBody = exports.addBodyPart = exports.addSpeciality = void 0;
+exports.getHelplineNumber = exports.addHelplineNumber = void 0;
 const BodyPart_Model_1 = __importDefault(require("./BodyPart.Model"));
 const SpecialityBody_Model_1 = __importDefault(require("./SpecialityBody.Model"));
 const SpecialityDisease_Model_1 = __importDefault(require("./SpecialityDisease.Model"));
@@ -789,6 +790,7 @@ const City_Map_Model_1 = __importDefault(require("../Admin Controlled Models/Cit
 const QualificationName_Model_1 = __importDefault(require("./QualificationName.Model"));
 const Suvedha_Model_1 = __importDefault(require("../Models/Suvedha.Model"));
 const Fee_Model_1 = __importDefault(require("../Module/Payment/Model/Fee.Model"));
+const HelplineNumber_Model_1 = __importDefault(require("../Models/HelplineNumber.Model"));
 const setCountryMap = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let body = req.body;
@@ -1060,3 +1062,24 @@ const getDoctorById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.getDoctorById = getDoctorById;
+const addHelplineNumber = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const body = req.body;
+        const data = yield HelplineNumber_Model_1.default.findOneAndUpdate({ number: body.number }, body, { upsert: true, new: true });
+        return (0, response_1.successResponse)(data, "Successfully created data", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.addHelplineNumber = addHelplineNumber;
+const getHelplineNumber = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const data = yield HelplineNumber_Model_1.default.find().lean();
+        return (0, response_1.successResponse)(data, "Successfully created data", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getHelplineNumber = getHelplineNumber;

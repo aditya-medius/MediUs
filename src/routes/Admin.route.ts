@@ -6,6 +6,7 @@ import * as patientController from "../Controllers/Patient.Controller";
 import { initUpload } from "../Services/Utils";
 import * as qualificationController from "../Controllers/Qualification.Controller";
 import * as hospitalController from "../Controllers/Hospital.Controller";
+import { authenticateHospital } from "../authentication/Hospital.auth";
 const adminRouter = Router();
 
 const upload = initUpload("admin");
@@ -189,4 +190,9 @@ adminRouter.get(
   oneOf(authenticateAdmin),
   adminController.getDoctorById
 );
+
+adminRouter.post("/helplineNumber", oneOf(authenticateAdmin), adminController.addHelplineNumber)
+
+adminRouter.get("/helplineNumber", oneOf(authenticateAdmin, authenticateHospital), adminController.getHelplineNumber)
+
 export default adminRouter;
