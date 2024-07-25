@@ -1095,7 +1095,7 @@ export const addHelplineNumber = async (req: Request, res: Response) => {
 export const getHelplineNumber = async (req: Request, res: Response) => {
   try {
     const data = await helpLineNumberModel.find().lean()
-    return successResponse(data, "Successfully created data", res);
+    return successResponse(data, "Successfully fetched data", res);
   } catch (error: any) {
     return errorResponse(error, res)
   }

@@ -770,6 +770,9 @@ export const searchHospital = async (req: Request, res: Response) => {
             _id: e?._id,
             name: e?.name,
             Address: e?.address?.locality?.name,
+            contactNumber: e?.contactNumber,
+            lat: e?.lat,
+            lng: e?.lng
           };
         });
 

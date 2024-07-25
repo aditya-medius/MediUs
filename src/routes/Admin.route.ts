@@ -190,9 +190,9 @@ adminRouter.get(
   oneOf(authenticateAdmin),
   adminController.getDoctorById
 );
+adminRouter.get("/helplineNumber", oneOf(authenticateAdmin, authenticateHospital), adminController.getHelplineNumber)
 
 adminRouter.post("/helplineNumber", oneOf(authenticateAdmin), adminController.addHelplineNumber)
 
-adminRouter.get("/helplineNumber", oneOf(authenticateAdmin, authenticateHospital), adminController.getHelplineNumber)
 
 export default adminRouter;

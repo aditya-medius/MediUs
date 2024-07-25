@@ -1076,7 +1076,7 @@ exports.addHelplineNumber = addHelplineNumber;
 const getHelplineNumber = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const data = yield HelplineNumber_Model_1.default.find().lean();
-        return (0, response_1.successResponse)(data, "Successfully created data", res);
+        return (0, response_1.successResponse)(data, "Successfully fetched data", res);
     }
     catch (error) {
         return (0, response_1.errorResponse)(error, res);

@@ -97,6 +97,6 @@ adminRouter.post("/editSpeciality", (0, middlewareHelper_1.oneOf)(Admin_auth_1.a
 adminRouter.post("/editFee", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), adminController.editFee);
 adminRouter.get("/get/hospital/:id", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), adminController.getHospitalById);
 adminRouter.get("/get/doctor/:id", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), adminController.getDoctorById);
-adminRouter.post("/helplineNumber", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), adminController.addHelplineNumber);
 adminRouter.get("/helplineNumber", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin, Hospital_auth_1.authenticateHospital), adminController.getHelplineNumber);
+adminRouter.post("/helplineNumber", (0, middlewareHelper_1.oneOf)(Admin_auth_1.authenticateAdmin), adminController.addHelplineNumber);
 exports.default = adminRouter;
