@@ -162,7 +162,12 @@ const hospitalSchema = new mongoose_1.Schema({
     },
     lng: {
         type: Number
-    }
+    },
+    holiday: [
+        {
+            type: Date
+        }
+    ]
 });
 hospitalSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {

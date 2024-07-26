@@ -331,7 +331,6 @@ exports.getHospitalsInACity = getHospitalsInACity;
 const isAdvancedBookingValid = (bookingDate, advancedBookingPeriod) => {
     const currentDate = (0, moment_1.default)();
     const dateDifference = bookingDate.diff((0, moment_1.default)(currentDate), "days") + 1;
-    console.log("dshbsdsd|, curr", currentDate, bookingDate, advancedBookingPeriod, dateDifference);
     return dateDifference > -1 && dateDifference <= advancedBookingPeriod;
 };
 exports.isAdvancedBookingValid = isAdvancedBookingValid;

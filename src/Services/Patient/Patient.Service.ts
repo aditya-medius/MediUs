@@ -327,6 +327,5 @@ export const getHospitalsInACity = async (
 export const isAdvancedBookingValid = (bookingDate: moment.Moment, advancedBookingPeriod: number): boolean => {
   const currentDate = moment()
   const dateDifference: number = bookingDate.diff(moment(currentDate), "days") + 1;
-  console.log("dshbsdsd|, curr", currentDate, bookingDate, advancedBookingPeriod, dateDifference)
   return dateDifference > -1 && dateDifference <= advancedBookingPeriod
 }

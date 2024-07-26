@@ -156,7 +156,7 @@ hospitalController.doctorsInHospitalWithTimings);
 hospitalRouter.get("/getHospitalDetails/:id", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getHospitalDetails);
 hospitalRouter.post("/updateNumber", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.sendOTPToUpdateNumber);
 hospitalRouter.put("/verify/updateNumber", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.verifyOTPToUpdateNumber);
-hospitalRouter.put("/update/status", 
-// oneOf(authenticateHospital),
-hospitalController.changeAppointmentStatus);
+hospitalRouter.put("/update/status", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.changeAppointmentStatus);
+hospitalRouter.put("/holiday", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.addHolidayForHospital);
+hospitalRouter.get("/holiday", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getHospitalsHoliday);
 exports.default = hospitalRouter;

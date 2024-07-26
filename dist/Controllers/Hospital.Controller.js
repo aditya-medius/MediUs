@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.changeAppointmentStatus = exports.addDoctor = exports.verifyOTPToUpdateNumber = exports.sendOTPToUpdateNumber = exports.getHospitalDetails = exports.doctorsInHospitalWithTimings = exports.verifyPayment = exports.generateOrderId = exports.getPatientsAppointmentsInThisHospital = exports.searchHospitalByPhoneNumber = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.updateHospitalAddress = exports.getHospitalsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.checkVerificationStatus = exports.getDoctorsInHospital = exports.getHospitalById = exports.getAppointmentByDate = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.deleteAnemities = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
+exports.getHospitalsHoliday = exports.addHolidayForHospital = exports.changeAppointmentStatus = exports.addDoctor = exports.verifyOTPToUpdateNumber = exports.sendOTPToUpdateNumber = exports.getHospitalDetails = exports.doctorsInHospitalWithTimings = exports.verifyPayment = exports.generateOrderId = exports.getPatientsAppointmentsInThisHospital = exports.searchHospitalByPhoneNumber = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.updateHospitalAddress = exports.getHospitalsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.checkVerificationStatus = exports.getDoctorsInHospital = exports.getHospitalById = exports.getAppointmentByDate = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.deleteAnemities = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Anemities_Model_1 = __importDefault(require("../Models/Anemities.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
@@ -1374,7 +1374,6 @@ const verifyOTPToUpdateNumber = (req, res) => __awaiter(void 0, void 0, void 0, 
                 throw new Error("Phone number already exist");
             }
             let data = yield Hospital_Model_1.default.findOne({ contactNumber: phoneNumber });
-            console.log("DATAA", data);
             Hospital_Model_1.default
                 .findOneAndUpdate({
                 _id: data._id,
@@ -1421,3 +1420,26 @@ const changeAppointmentStatus = (req, res) => __awaiter(void 0, void 0, void 0, 
     }
 });
 exports.changeAppointmentStatus = changeAppointmentStatus;
+const addHolidayForHospital = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _m;
+    try {
+        let dates = (_m = req.body) === null || _m === void 0 ? void 0 : _m.dates;
+        const formatedDate = dates.map((date) => new Date(date)).filter((date) => date > new Date());
+        const data = yield hospitalService.addHolidayForHospital(req.currentHospital, formatedDate);
+        return (0, response_1.successResponse)(data, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.addHolidayForHospital = addHolidayForHospital;
+const getHospitalsHoliday = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const data = yield hospitalService.getHolidayForHospital(req.currentHospital);
+        return (0, response_1.successResponse)(data, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getHospitalsHoliday = getHospitalsHoliday;

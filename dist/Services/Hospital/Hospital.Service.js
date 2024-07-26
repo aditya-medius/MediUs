@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.changeAppointmentStatus = exports.getCitiesWhereHospitalsExist = exports.getHospitalById = exports.hospitalsInDoctor = exports.getHospitalsPrescriptionValidityInDoctor = exports.getHospitalsWorkingHourInDoctor = exports.getHolidayTimigsOfHospitalsInDoctor = exports.doctorsInHospital = exports.getDoctorsPrescriptionValidityInHospital = exports.getDoctorsWorkingHourInHospital = exports.getHolidayTimigsOfDoctorsInHospital = exports.doesHospitalExist = exports.generateOrderId = exports.verifyPayment = exports.getPatientsAppointmentsInThisHospital = exports.getPatientFromPhoneNumber = exports.getHospitalsOfflineAndOnlineAppointments = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.getHospitalToken = void 0;
+exports.getHolidayForHospital = exports.addHolidayForHospital = exports.changeAppointmentStatus = exports.getCitiesWhereHospitalsExist = exports.getHospitalById = exports.hospitalsInDoctor = exports.getHospitalsPrescriptionValidityInDoctor = exports.getHospitalsWorkingHourInDoctor = exports.getHolidayTimigsOfHospitalsInDoctor = exports.doctorsInHospital = exports.getDoctorsPrescriptionValidityInHospital = exports.getDoctorsWorkingHourInHospital = exports.getHolidayTimigsOfDoctorsInHospital = exports.doesHospitalExist = exports.generateOrderId = exports.verifyPayment = exports.getPatientsAppointmentsInThisHospital = exports.getPatientFromPhoneNumber = exports.getHospitalsOfflineAndOnlineAppointments = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.getHospitalToken = void 0;
 const jwt = __importStar(require("jsonwebtoken"));
 const dotenv = __importStar(require("dotenv"));
 const Hospital_Model_1 = __importDefault(require("../../Models/Hospital.Model"));
@@ -1031,3 +1031,25 @@ const changeAppointmentStatus = (id, status) => __awaiter(void 0, void 0, void 0
     }
 });
 exports.changeAppointmentStatus = changeAppointmentStatus;
+const addHolidayForHospital = (id, date) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const updatedRecord = yield Hospital_Model_1.default.findOneAndUpdate({ _id: id }, { $push: { holiday: date } }, { upsert: true, new: true });
+        return updatedRecord;
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.addHolidayForHospital = addHolidayForHospital;
+const getHolidayForHospital = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const record = yield Hospital_Model_1.default.findOne({ _id: id }, "holiday").lean();
+        const holidays = record === null || record === void 0 ? void 0 : record.holiday;
+        const isCloseTomorrow = holidays.some((date) => (0, Utils_1.getDateDifferenceFromCurrentDate)(date) === 1);
+        return Object.assign(Object.assign({}, record), { isCloseTomorrow });
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.getHolidayForHospital = getHolidayForHospital;

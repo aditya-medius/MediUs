@@ -970,7 +970,7 @@ export const getAppointmentByDate = async (req: Request, res: Response) => {
         e.subPatient["age"] = getAge(e.subPatient.DOB);
       }
     });
-    appointmenObj =  _.sortBy(appointmenObj, item => _.indexOf(AppointStatusOrder, item?.appointmentStatus))
+    appointmenObj = _.sortBy(appointmenObj, item => _.indexOf(AppointStatusOrder, item?.appointmentStatus))
 
     return successResponse(appointmenObj, "Success", res);
   } catch (error: any) {
@@ -1609,7 +1609,6 @@ export const verifyOTPToUpdateNumber = async (req: Request, res: Response) => {
       }
 
       let data = await hospitalModel.findOne({ contactNumber: phoneNumber });
-      console.log("DATAA", data);
 
       hospitalModel
         .findOneAndUpdate(
@@ -1654,6 +1653,26 @@ export const changeAppointmentStatus = async (req: Request, res: Response) => {
     const { id, status } = req.body
     await hospitalService.changeAppointmentStatus(id, status)
     return successResponse({}, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res)
+  }
+}
+
+export const addHolidayForHospital = async (req: Request, res: Response) => {
+  try {
+    let dates: Array<string> = req.body?.dates
+    const formatedDate: Array<Date> = dates.map((date: string) => new Date(date)).filter((date: Date) => date > new Date())
+    const data = await hospitalService.addHolidayForHospital(req.currentHospital, formatedDate)
+    return successResponse(data, "Success", res);
+  } catch (error: any) {
+    return errorResponse(error, res)
+  }
+}
+
+export const getHospitalsHoliday = async (req: Request, res: Response) => {
+  try {
+    const data = await hospitalService.getHolidayForHospital(req.currentHospital)
+    return successResponse(data, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res)
   }

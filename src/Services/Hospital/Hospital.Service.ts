@@ -15,7 +15,7 @@ import {
 } from "../schemaNames";
 import approvalModel from "../../Models/Approval-Request.Model";
 import appointmentModel from "../../Models/Appointment.Model";
-import { getAge, getRangeOfDates } from "../Utils";
+import { getAge, getDateDifference, getDateDifferenceFromCurrentDate, getRangeOfDates } from "../Utils";
 import patientModel from "../../Models/Patient.Model";
 import { phoneNumberValidation } from "../Validation.Service";
 import moment from "moment";
@@ -28,7 +28,7 @@ import workingHourModel from "../../Models/WorkingHours.Model";
 import { getPreEmitDiagnostics } from "typescript";
 import prescriptionModel from "../../Models/Prescription.Model";
 import doctorModel from "../../Models/Doctors.Model";
-import { AppointmentStatus } from "../Patient";
+import { AppointmentStatus, Holiday } from "../Patient";
 dotenv.config();
 
 export const getHospitalToken = async (body: any) => {
@@ -1151,13 +1151,32 @@ export const getCitiesWhereHospitalsExist = async () => {
 
 export const changeAppointmentStatus = async (id: string, status: AppointmentStatus) => {
   try {
-    if(!Object.values(AppointmentStatus).includes(status))
-    {
+    if (!Object.values(AppointmentStatus).includes(status)) {
       const error = new Error("Invalid status value")
       return Promise.reject(error)
     }
     await appointmentModel.findOneAndUpdate({ _id: id, }, { $set: { appointmentStatus: status } })
     return true;
+  } catch (error: any) {
+    return Promise.reject(error)
+  }
+}
+
+export const addHolidayForHospital = async (id: string, date: Array<Date>) => {
+  try {
+    const updatedRecord = await hospitalModel.findOneAndUpdate({ _id: id }, { $push: { holiday: date } }, { upsert: true, new: true })
+    return updatedRecord;
+  } catch (error: any) {
+    return Promise.reject(error)
+  }
+}
+
+export const getHolidayForHospital = async (id: string) => {
+  try {
+    const record = await hospitalModel.findOne({ _id: id }, "holiday").lean()
+    const holidays: Array<Date> = record?.holiday
+    const isCloseTomorrow = holidays.some((date: Date) => getDateDifferenceFromCurrentDate(date) === 1)
+    return { ...record, isCloseTomorrow };
   } catch (error: any) {
     return Promise.reject(error)
   }

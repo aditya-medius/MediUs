@@ -151,7 +151,13 @@ const hospitalSchema = new Schema({
   },
   lng: {
     type: Number
-  }
+  },
+
+  holiday: [
+    {
+      type: Date
+    }
+  ]
 
 });
 

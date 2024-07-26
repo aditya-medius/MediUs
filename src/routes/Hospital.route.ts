@@ -294,7 +294,11 @@ hospitalRouter.put(
 
 hospitalRouter.put(
   "/update/status",
-  // oneOf(authenticateHospital),
+  oneOf(authenticateHospital),
   hospitalController.changeAppointmentStatus)
+
+hospitalRouter.put("/holiday", oneOf(authenticateHospital), hospitalController.addHolidayForHospital)
+
+hospitalRouter.get("/holiday", oneOf(authenticateHospital), hospitalController.getHospitalsHoliday)
 
 export default hospitalRouter;

@@ -1,6 +1,6 @@
 import * as bcrypt from "bcrypt";
 import * as jwt from "jsonwebtoken";
-import moment from "moment";
+import moment, { Moment } from "moment";
 import multer from "multer";
 import * as path from "path";
 import otpModel from "../Models/OTP.Model";
@@ -326,3 +326,14 @@ export const addDays = (date: any, days: any) => {
   return newDate;
 
 }
+
+export const getDateDifference = (date1: Date | Moment, date2: Date | Moment) => {
+  date2 = moment(date2)
+  date1 = moment(date1)
+  const difference = date2.diff(date1, "days")
+  return difference
+}
+
+export const getDateDifferenceFromCurrentDate = (date: Date) => {
+  return getDateDifference(new Date(), date)
+} 
