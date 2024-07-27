@@ -739,7 +739,6 @@ export const searchHospital = async (req: Request, res: Response) => {
               type: 0,
               payment: 0,
               deleted: 0,
-              contactNumber: 0,
               numberOfBed: 0,
             }
           )

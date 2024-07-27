@@ -665,7 +665,6 @@ const searchHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 type: 0,
                 payment: 0,
                 deleted: 0,
-                contactNumber: 0,
                 numberOfBed: 0,
             })
                 .sort({ name: 1 })
