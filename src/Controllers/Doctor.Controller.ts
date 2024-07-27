@@ -2332,7 +2332,7 @@ export const getDoctorsAllHolidayList = async (req: Request, res: Response) => {
 
 
     let workingDaysPromise = workingHourModel.find({ doctorDetails: doctorId, hospitalDetails: hospitalId }).lean()
-    let holidaysPromise = holidayModel.find({ doctorId, hospitalId, date: { $gte: startDate, $lt: endDate } }).lean()
+    let holidaysPromise = holidayModel.find({ doctorId, hospitalId, date: { $gte: startDate, $lte: endDate } }).lean()
 
     let [workingDaysArray, holidays] = await Promise.all([workingDaysPromise, holidaysPromise]);
 
