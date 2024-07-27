@@ -7,6 +7,8 @@ import { initUpload } from "../Services/Utils";
 import * as qualificationController from "../Controllers/Qualification.Controller";
 import * as hospitalController from "../Controllers/Hospital.Controller";
 import { authenticateHospital } from "../authentication/Hospital.auth";
+import { authenticatePatient } from "../authentication/Patient.auth";
+import { authenticateDoctor } from "../authentication/Doctor.auth";
 const adminRouter = Router();
 
 const upload = initUpload("admin");
@@ -190,7 +192,7 @@ adminRouter.get(
   oneOf(authenticateAdmin),
   adminController.getDoctorById
 );
-adminRouter.get("/helplineNumber", oneOf(authenticateAdmin, authenticateHospital), adminController.getHelplineNumber)
+adminRouter.get("/helplineNumber", oneOf(authenticateAdmin, authenticateHospital, authenticatePatient, authenticateDoctor), adminController.getHelplineNumber)
 
 adminRouter.post("/helplineNumber", oneOf(authenticateAdmin), adminController.addHelplineNumber)
 
