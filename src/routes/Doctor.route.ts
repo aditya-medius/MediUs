@@ -469,4 +469,7 @@ doctorRouter.get(
   oneOf(authenticateDoctor),
   doctorController.getDoctorQualificationList
 );
+
+doctorRouter.put("/absence/", oneOf(authenticateDoctor, authenticateHospital, authenticatePatient), doctorController.getDoctorsAllHolidayList)
+
 export default doctorRouter;

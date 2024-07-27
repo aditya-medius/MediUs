@@ -9,12 +9,14 @@ import specialityBodyModel from "../Admin Controlled Models/SpecialityBody.Model
 import specialityModel from "../Admin Controlled Models/Specialization.Model";
 import bodyPartModel from "../Admin Controlled Models/BodyPart.Model";
 import _ from "underscore";
+import * as lodash from "lodash";
 import specialityDiseaseModel from "../Admin Controlled Models/SpecialityDisease.Model";
 import {
   appointment,
   disease,
   doctor,
   doctorType,
+  holidayCalendar,
   hospital,
   specialization,
   suvedha,
@@ -32,7 +34,6 @@ import {
 } from "../Services/Validation.Service";
 import { formatWorkingHour } from "../Services/WorkingHour.helper";
 import orderModel from "../Models/Order.Model";
-
 import appointmentPaymentModel from "../Models/AppointmentPayment.Model";
 import * as doctorService from "../Services/Doctor/Doctor.Service";
 import withdrawModel from "../Models/Withdrawal.Model";
@@ -40,7 +41,7 @@ import qualificationModel from "../Models/Qualification.Model";
 import {
   calculateAge,
   getHospitalsInACity,
-} from "../Services/Patient/Patient.Service";
+} from "../Services/Helpers/Patient.Service";
 import * as approvalService from "../Services/Approval-Request/Approval-Request.Service";
 import * as holidayService from "../Services/Holiday-Calendar/Holiday-Calendar.Service";
 import * as hospitalService from "../Services/Hospital/Hospital.Service";
@@ -1943,11 +1944,14 @@ import prescriptionModel from "../Models/Prescription.Model";
 import addressModel from "../Models/Address.Model";
 import {
   digiMilesSMS,
+  getRangeOfDates,
   sendOTPForPasswordChange,
   verifyPasswordChangeOTP,
 } from "../Services/Utils";
 import suvedhaModel from "../Models/Suvedha.Model";
 import patientModel from "../Models/Patient.Model";
+import holidayModel from "../Models/Holiday-Calendar.Model";
+import { Weekdays } from "../Services/Helpers";
 
 export const getDoctorsNotification = async (req: Request, res: Response) => {
   try {
@@ -2317,3 +2321,28 @@ export const getDoctorQualificationList = async (
     return errorResponse(error, res);
   }
 };
+
+
+export const getDoctorsAllHolidayList = async (req: Request, res: Response) => {
+  try {
+    const doctorId = req.body.doctorId;
+    const hospitalId = req.body.hospitalId;
+
+    let [startDate, endDate] = [req.body.startDate, req.body.endDate]
+
+
+    let workingDaysPromise = workingHourModel.find({ doctorDetails: doctorId, hospitalDetails: hospitalId }).lean()
+    let holidaysPromise = holidayModel.find({ doctorId, hospitalId, date: { $gte: startDate, $lt: endDate } }).lean()
+
+    let [workingDaysArray, holidays] = await Promise.all([workingDaysPromise, holidaysPromise]);
+
+    let offDays: Array<string> = [], holidayDates: Array<string> = []
+
+    offDays = doctorService.getDoctorsOffDays(workingDaysArray)
+    holidayDates = holidays.map((e: any) => e?.date)
+
+    return successResponse({ offDays, holidayDates }, "Success", res)
+  } catch (error: any) {
+    return errorResponse(error, res)
+  }
+}

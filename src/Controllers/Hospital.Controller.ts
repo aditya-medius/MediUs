@@ -1314,7 +1314,7 @@ import * as notificationService from "../Services/Notification/Notification.Serv
 import suvedhaModel from "../Models/Suvedha.Model";
 import patientModel from "../Models/Patient.Model";
 import { getDefaultSettings } from "http2";
-import { AppointmentStatus, AppointStatusOrder } from "../Services/Patient";
+import { AppointmentStatus, AppointStatusOrder } from "../Services/Helpers";
 
 export const getHospitalsNotification = async (req: Request, res: Response) => {
   try {

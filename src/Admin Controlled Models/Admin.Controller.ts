@@ -799,7 +799,7 @@ import { city } from "../Services/schemaNames";
 import suvedhaModel from "../Models/Suvedha.Model";
 import feeModel from "../Module/Payment/Model/Fee.Model";
 import helpLineNumberModel from "../Models/HelplineNumber.Model";
-import { HelplineNumber } from "../Services/Patient";
+import { HelplineNumber } from "../Services/Helpers";
 
 export const setCountryMap = async (req: Request, res: Response) => {
   try {

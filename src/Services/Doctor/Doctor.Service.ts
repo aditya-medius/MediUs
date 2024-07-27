@@ -30,6 +30,7 @@ import {
 } from "../schemaNames";
 import holidayModel from "../../Models/Holiday-Calendar.Model";
 import likeModel from "../../Models/Likes.Model";
+import * as _ from "lodash"
 
 import * as likeService from "../../Services/Like/Like.service";
 import {
@@ -42,6 +43,7 @@ import { getCityIdFromName, getSpecialization } from "../Admin/Admin.Service";
 import workingHourModel from "../../Models/WorkingHours.Model";
 import specialityModel from "../../Admin Controlled Models/Specialization.Model";
 import hospitalModel from "../../Models/Hospital.Model";
+import { Weekdays } from "../Helpers";
 dotenv.config();
 
 export const WEEKDAYS = [
@@ -1063,3 +1065,19 @@ export const getDoctorsInHospitalByQuery = async (
 
   return doctors;
 };
+
+export const getDoctorsOffDays = (workingDays: any) => {
+  let workingDaysForADoctorInHospital: Array<string> = []
+  workingDays.forEach((data: any) => {
+    let workingDaysForOneRecord = Weekdays.filter((weekday: string) => {
+      if (data.hasOwnProperty(weekday)) {
+        return weekday
+      }
+    })
+    workingDaysForADoctorInHospital.push(...workingDaysForOneRecord)
+  })
+
+  const offDays = _.difference(Weekdays, workingDaysForADoctorInHospital)
+  return offDays
+
+}

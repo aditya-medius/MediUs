@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDoctorsInHospitalByQuery = exports.setSpecializationActiveStatus = exports.getDoctorsHolidayByQuery = exports.getDoctorInfo = exports.canDoctorTakeMoreAppointments = exports.isDateHolidayForDoctor = exports.getDoctorWorkingDays = exports.getDoctorById_ForSuvedha = exports.getDoctorsWithAdvancedFilters = exports.getMyLikes = exports.unlikeDoctor = exports.likeDoctor = exports.checkIfDoctorIsAvailableOnTheDay = exports.getDoctorFeeInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = exports.WEEKDAYS = void 0;
+exports.getDoctorsOffDays = exports.getDoctorsInHospitalByQuery = exports.setSpecializationActiveStatus = exports.getDoctorsHolidayByQuery = exports.getDoctorInfo = exports.canDoctorTakeMoreAppointments = exports.isDateHolidayForDoctor = exports.getDoctorWorkingDays = exports.getDoctorById_ForSuvedha = exports.getDoctorsWithAdvancedFilters = exports.getMyLikes = exports.unlikeDoctor = exports.likeDoctor = exports.checkIfDoctorIsAvailableOnTheDay = exports.getDoctorFeeInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = exports.WEEKDAYS = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const AppointmentPayment_Model_1 = __importDefault(require("../../Models/AppointmentPayment.Model"));
 const CreditAmount_Model_1 = __importDefault(require("../../Models/CreditAmount.Model"));
@@ -46,12 +46,14 @@ const Doctor_Controller_1 = require("../../Controllers/Doctor.Controller");
 const schemaNames_1 = require("../schemaNames");
 const Holiday_Calendar_Model_1 = __importDefault(require("../../Models/Holiday-Calendar.Model"));
 const Likes_Model_1 = __importDefault(require("../../Models/Likes.Model"));
+const _ = __importStar(require("lodash"));
 const likeService = __importStar(require("../../Services/Like/Like.service"));
 const Suvedha_Service_1 = require("../Suvedha/Suvedha.Service");
 const Admin_Service_1 = require("../Admin/Admin.Service");
 const WorkingHours_Model_1 = __importDefault(require("../../Models/WorkingHours.Model"));
 const Specialization_Model_1 = __importDefault(require("../../Admin Controlled Models/Specialization.Model"));
 const Hospital_Model_1 = __importDefault(require("../../Models/Hospital.Model"));
+const Helpers_1 = require("../Helpers");
 dotenv.config();
 exports.WEEKDAYS = [
     "monday",
@@ -988,3 +990,17 @@ const getDoctorsInHospitalByQuery = (query = {}, select = {}) => __awaiter(void 
     return doctors;
 });
 exports.getDoctorsInHospitalByQuery = getDoctorsInHospitalByQuery;
+const getDoctorsOffDays = (workingDays) => {
+    let workingDaysForADoctorInHospital = [];
+    workingDays.forEach((data) => {
+        let workingDaysForOneRecord = Helpers_1.Weekdays.filter((weekday) => {
+            if (data.hasOwnProperty(weekday)) {
+                return weekday;
+            }
+        });
+        workingDaysForADoctorInHospital.push(...workingDaysForOneRecord);
+    });
+    const offDays = _.difference(Helpers_1.Weekdays, workingDaysForADoctorInHospital);
+    return offDays;
+};
+exports.getDoctorsOffDays = getDoctorsOffDays;

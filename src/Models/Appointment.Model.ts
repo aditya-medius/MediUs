@@ -8,7 +8,7 @@ import {
 } from "../Services/schemaNames";
 import { formatWorkingHourDayForAppointment } from "../Services/Utils";
 import workingHourModel from "./WorkingHours.Model";
-import { AppointmentStatus, AppointmentType } from "../Services/Patient";
+import { AppointmentStatus, AppointmentType } from "../Services/Helpers";
 // import schemaOptions from "../Services/schemaOptions";
 const appointmentSchema = new Schema({
   patient: {

@@ -38,7 +38,7 @@ const AppointmentPayment_Model_1 = __importDefault(require("../Models/Appointmen
 const orderController = __importStar(require("./Order.Controller"));
 const crypto_1 = __importDefault(require("crypto"));
 const CreditAmount_Model_1 = __importDefault(require("../Models/CreditAmount.Model"));
-const Patient_Service_1 = require("../Services/Patient/Patient.Service");
+const Patient_Service_1 = require("../Services/Helpers/Patient.Service");
 const generateOrderId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const body = req.body;

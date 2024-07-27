@@ -58,7 +58,7 @@ const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
 const Utils_1 = require("../Services/Utils");
 const moment_1 = __importDefault(require("moment"));
 const SubPatient_Model_1 = __importDefault(require("../Models/SubPatient.Model"));
-const Patient_1 = require("../Services/Patient");
+const Helpers_1 = require("../Services/Helpers");
 // Deprecated - View hospital/verifyPayment
 patientRouter.post("/BookAppointment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
@@ -74,12 +74,12 @@ patientRouter.post("/BookAppointment", (0, middlewareHelper_1.oneOf)(Patient_aut
         // req.body["appointmentType"] = valid ? "Follow up" : "Fresh";
         let appointmentType;
         switch ((_a = req.body) === null || _a === void 0 ? void 0 : _a.appointmentType) {
-            case Patient_1.AppointmentType.FRESH: {
-                appointmentType = Patient_1.AppointmentType.FRESH;
+            case Helpers_1.AppointmentType.FRESH: {
+                appointmentType = Helpers_1.AppointmentType.FRESH;
                 break;
             }
-            case Patient_1.AppointmentType.FOLLOW_UP: {
-                appointmentType = Patient_1.AppointmentType.FOLLOW_UP;
+            case Helpers_1.AppointmentType.FOLLOW_UP: {
+                appointmentType = Helpers_1.AppointmentType.FOLLOW_UP;
                 break;
             }
             default: {

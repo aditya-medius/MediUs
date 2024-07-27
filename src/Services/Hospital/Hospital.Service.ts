@@ -19,7 +19,7 @@ import { getAge, getDateDifference, getDateDifferenceFromCurrentDate, getRangeOf
 import patientModel from "../../Models/Patient.Model";
 import { phoneNumberValidation } from "../Validation.Service";
 import moment from "moment";
-import { BookAppointment } from "../Patient/Patient.Service";
+import { BookAppointment } from "../Helpers/Patient.Service";
 import creditAmountModel from "../../Models/CreditAmount.Model";
 import appointmentPaymentModel from "../../Models/AppointmentPayment.Model";
 import * as orderController from "../../Controllers/Order.Controller";
@@ -28,7 +28,7 @@ import workingHourModel from "../../Models/WorkingHours.Model";
 import { getPreEmitDiagnostics } from "typescript";
 import prescriptionModel from "../../Models/Prescription.Model";
 import doctorModel from "../../Models/Doctors.Model";
-import { AppointmentStatus, Holiday } from "../Patient";
+import { AppointmentStatus, Holiday } from "../Helpers";
 dotenv.config();
 
 export const getHospitalToken = async (body: any) => {

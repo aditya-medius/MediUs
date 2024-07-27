@@ -41,7 +41,7 @@ const Appointment_Model_1 = __importDefault(require("../../Models/Appointment.Mo
 const Utils_1 = require("../Utils");
 const Patient_Model_1 = __importDefault(require("../../Models/Patient.Model"));
 const Validation_Service_1 = require("../Validation.Service");
-const Patient_Service_1 = require("../Patient/Patient.Service");
+const Patient_Service_1 = require("../Helpers/Patient.Service");
 const CreditAmount_Model_1 = __importDefault(require("../../Models/CreditAmount.Model"));
 const AppointmentPayment_Model_1 = __importDefault(require("../../Models/AppointmentPayment.Model"));
 const orderController = __importStar(require("../../Controllers/Order.Controller"));
@@ -49,7 +49,7 @@ const Holiday_Calendar_Model_1 = __importDefault(require("../../Models/Holiday-C
 const WorkingHours_Model_1 = __importDefault(require("../../Models/WorkingHours.Model"));
 const Prescription_Model_1 = __importDefault(require("../../Models/Prescription.Model"));
 const Doctors_Model_1 = __importDefault(require("../../Models/Doctors.Model"));
-const Patient_1 = require("../Patient");
+const Helpers_1 = require("../Helpers");
 dotenv.config();
 const getHospitalToken = (body) => __awaiter(void 0, void 0, void 0, function* () {
     const token = yield jwt.sign(body, process.env.SECRET_HOSPITAL_KEY);
@@ -1019,7 +1019,7 @@ const getCitiesWhereHospitalsExist = () => __awaiter(void 0, void 0, void 0, fun
 exports.getCitiesWhereHospitalsExist = getCitiesWhereHospitalsExist;
 const changeAppointmentStatus = (id, status) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        if (!Object.values(Patient_1.AppointmentStatus).includes(status)) {
+        if (!Object.values(Helpers_1.AppointmentStatus).includes(status)) {
             const error = new Error("Invalid status value");
             return Promise.reject(error);
         }

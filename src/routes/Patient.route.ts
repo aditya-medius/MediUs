@@ -54,7 +54,7 @@ import {
 } from "../Services/Utils";
 import moment from "moment";
 import subPatientModel from "../Models/SubPatient.Model";
-import { AppointmentType } from "../Services/Patient";
+import { AppointmentType } from "../Services/Helpers";
 
 
 // Deprecated - View hospital/verifyPayment
