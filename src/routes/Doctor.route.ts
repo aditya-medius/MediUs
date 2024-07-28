@@ -470,6 +470,27 @@ doctorRouter.get(
   doctorController.getDoctorQualificationList
 );
 
-doctorRouter.put("/absence/", oneOf(authenticateDoctor, authenticateHospital, authenticatePatient), doctorController.getDoctorsAllHolidayList)
+doctorRouter.put(
+  "/absence",
+  oneOf(authenticateDoctor, authenticateHospital, authenticatePatient),
+  doctorController.getDoctorsAllHolidayList)
 
+doctorRouter.post(
+  "/overthecounterpayment",
+  oneOf(authenticateDoctor, authenticateHospital),
+  doctorController.setThatDoctorTakesOverTheCounterPayments
+)
+
+doctorRouter.delete(
+  "/overthecounterpayment",
+  oneOf(authenticateDoctor, authenticateHospital),
+  doctorController.deleteThatDoctorTakesOverTheCounterPayments
+)
+
+doctorRouter.get(
+  "/overthecounterpayment",
+  oneOf(authenticateDoctor, authenticateHospital),
+  doctorController.checkIfDoctorTakesOverTheCounterPaymentsForAHospital
+)
 export default doctorRouter;
+

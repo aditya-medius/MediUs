@@ -211,5 +211,8 @@ doctorRouter.post("/updateNumber", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.a
 doctorRouter.put("/verify/updateNumber", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.verifyOTPToUpdateNumber);
 doctorRouter.post("/qualification", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.deleteDoctorQualification);
 doctorRouter.get("/qualification/list", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.getDoctorQualificationList);
-doctorRouter.put("/absence/", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital, Patient_auth_1.authenticatePatient), doctorController.getDoctorsAllHolidayList);
+doctorRouter.put("/absence", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital, Patient_auth_1.authenticatePatient), doctorController.getDoctorsAllHolidayList);
+doctorRouter.post("/overthecounterpayment", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), doctorController.setThatDoctorTakesOverTheCounterPayments);
+doctorRouter.delete("/overthecounterpayment", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), doctorController.deleteThatDoctorTakesOverTheCounterPayments);
+doctorRouter.get("/overthecounterpayment", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), doctorController.checkIfDoctorTakesOverTheCounterPaymentsForAHospital);
 exports.default = doctorRouter;

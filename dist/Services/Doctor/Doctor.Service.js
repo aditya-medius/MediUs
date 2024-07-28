@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDoctorsOffDays = exports.getDoctorsOffDaysForADateRange = exports.getDoctorsInHospitalByQuery = exports.setSpecializationActiveStatus = exports.getDoctorsHolidayByQuery = exports.getDoctorInfo = exports.canDoctorTakeMoreAppointments = exports.isDateHolidayForDoctor = exports.getDoctorWorkingDays = exports.getDoctorById_ForSuvedha = exports.getDoctorsWithAdvancedFilters = exports.getMyLikes = exports.unlikeDoctor = exports.likeDoctor = exports.checkIfDoctorIsAvailableOnTheDay = exports.getDoctorFeeInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = exports.WEEKDAYS = void 0;
+exports.checkIfDoctorTakesOverTheCounterPaymentsForAHospital = exports.deleteThatDoctorTakesOverTheCounterPayments = exports.setThatDoctorTakesOverTheCounterPayments = exports.getDoctorsOffDays = exports.getDoctorsOffDaysForADateRange = exports.getDoctorsInHospitalByQuery = exports.setSpecializationActiveStatus = exports.getDoctorsHolidayByQuery = exports.getDoctorInfo = exports.canDoctorTakeMoreAppointments = exports.isDateHolidayForDoctor = exports.getDoctorWorkingDays = exports.getDoctorById_ForSuvedha = exports.getDoctorsWithAdvancedFilters = exports.getMyLikes = exports.unlikeDoctor = exports.likeDoctor = exports.checkIfDoctorIsAvailableOnTheDay = exports.getDoctorFeeInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = exports.WEEKDAYS = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const AppointmentPayment_Model_1 = __importDefault(require("../../Models/AppointmentPayment.Model"));
 const CreditAmount_Model_1 = __importDefault(require("../../Models/CreditAmount.Model"));
@@ -54,6 +54,7 @@ const WorkingHours_Model_1 = __importDefault(require("../../Models/WorkingHours.
 const Specialization_Model_1 = __importDefault(require("../../Admin Controlled Models/Specialization.Model"));
 const Hospital_Model_1 = __importDefault(require("../../Models/Hospital.Model"));
 const Helpers_1 = require("../Helpers");
+const OverTheCounterPayment_1 = __importDefault(require("../../Models/OverTheCounterPayment"));
 dotenv.config();
 exports.WEEKDAYS = [
     "monday",
@@ -1022,3 +1023,43 @@ const getDoctorsOffDays = (workingDays) => {
     return offDays;
 };
 exports.getDoctorsOffDays = getDoctorsOffDays;
+const setThatDoctorTakesOverTheCounterPayments = (doctorId, hospitalId, createdBy) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const exist = yield OverTheCounterPayment_1.default.exists({ doctorId, hospitalId });
+        if (exist) {
+            const error = new Error("Record already exist");
+            throw error;
+        }
+        yield new OverTheCounterPayment_1.default({ doctorId, hospitalId, createdBy }).save();
+        return Promise.resolve(true);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.setThatDoctorTakesOverTheCounterPayments = setThatDoctorTakesOverTheCounterPayments;
+const deleteThatDoctorTakesOverTheCounterPayments = (doctorId, hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const exist = yield OverTheCounterPayment_1.default.exists({ doctorId, hospitalId });
+        if (!exist) {
+            const error = new Error("Record does not exist");
+            throw error;
+        }
+        yield OverTheCounterPayment_1.default.findOneAndDelete({ doctorId, hospitalId });
+        return Promise.resolve(true);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.deleteThatDoctorTakesOverTheCounterPayments = deleteThatDoctorTakesOverTheCounterPayments;
+const checkIfDoctorTakesOverTheCounterPaymentsForAHospital = (doctorId, hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const exist = yield OverTheCounterPayment_1.default.exists({ doctorId, hospitalId });
+        return Promise.resolve(exist);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.checkIfDoctorTakesOverTheCounterPaymentsForAHospital = checkIfDoctorTakesOverTheCounterPaymentsForAHospital;

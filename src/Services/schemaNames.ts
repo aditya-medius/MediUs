@@ -49,3 +49,4 @@ export const fee: string = "fees";
 export const ownership: string = "ownerships";
 export const suvedha: string = "suvedhas"
 export const helplineNumber: string = "helplineNumber";
+export const overTheCounterPayment: string = "overthecounterpayments"

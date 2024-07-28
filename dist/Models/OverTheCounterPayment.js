@@ -21,15 +21,22 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const schemaNames_1 = require("../Services/schemaNames");
-const cityMapSchema = new mongoose_1.Schema({
-    city: {
-        type: mongoose_1.default.Schema.Types.ObjectId,
-        ref: schemaNames_1.city,
+const Helpers_1 = require("../Services/Helpers");
+const overTheCounterPaymentSchema = new mongoose_1.Schema({
+    doctorId: {
+        type: mongoose_1.default.Schema.Types.ObjectId
     },
-    locality: {
-        type: mongoose_1.default.Schema.Types.ObjectId,
-        ref: schemaNames_1.locality,
+    hospitalId: {
+        type: mongoose_1.default.Schema.Types.ObjectId
+    },
+    createdBy: {
+        type: String,
+        enum: [Helpers_1.UserType.HOSPITAL, Helpers_1.UserType.DOCTOR]
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now(),
     },
 });
-const cityMapModel = (0, mongoose_1.model)(schemaNames_1.cityMap, cityMapSchema);
-exports.default = cityMapModel;
+const overTheCounterModel = (0, mongoose_1.model)(schemaNames_1.overTheCounterPayment, overTheCounterPaymentSchema);
+exports.default = overTheCounterModel;

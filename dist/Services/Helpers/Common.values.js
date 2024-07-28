@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Weekdays = void 0;
+exports.UserType = exports.Weekdays = void 0;
 exports.Weekdays = [
     "sunday",
     "monday",
@@ -10,3 +10,9 @@ exports.Weekdays = [
     "friday",
     "saturday",
 ];
+var UserType;
+(function (UserType) {
+    UserType["HOSPITAL"] = "hospital";
+    UserType["DOCTOR"] = "doctor";
+    UserType["PATIENT"] = "patient";
+})(UserType = exports.UserType || (exports.UserType = {}));

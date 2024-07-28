@@ -42,7 +42,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDoctorsAllHolidayList = exports.getDoctorQualificationList = exports.deleteDoctorQualification = exports.verifyOTPToUpdateNumber = exports.sendOTPToUpdateNumber = exports.getSpecializationByCity = exports.getMyLikes = exports.unlikeDoctor = exports.likeADoctor = exports.getPrescriptionValidityAndFeesOfDoctorInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getHospitalsOfflineAndOnlineAppointments = exports.deleteHolidayCalendar = exports.getDoctorsHolidayList = exports.setHolidayCalendar = exports.getDoctorsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.setConsultationFeeForDoctor = exports.addHospitalInDoctorProfile = exports.checkVerificationStatus = exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
+exports.deleteThatDoctorTakesOverTheCounterPayments = exports.setThatDoctorTakesOverTheCounterPayments = exports.getDoctorsAllHolidayList = exports.getDoctorQualificationList = exports.deleteDoctorQualification = exports.verifyOTPToUpdateNumber = exports.sendOTPToUpdateNumber = exports.getSpecializationByCity = exports.getMyLikes = exports.unlikeDoctor = exports.likeADoctor = exports.getPrescriptionValidityAndFeesOfDoctorInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getHospitalsOfflineAndOnlineAppointments = exports.deleteHolidayCalendar = exports.getDoctorsHolidayList = exports.setHolidayCalendar = exports.getDoctorsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.setConsultationFeeForDoctor = exports.addHospitalInDoctorProfile = exports.checkVerificationStatus = exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
+exports.checkIfDoctorTakesOverTheCounterPaymentsForAHospital = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -1687,6 +1688,7 @@ const Utils_1 = require("../Services/Utils");
 const Suvedha_Model_1 = __importDefault(require("../Models/Suvedha.Model"));
 const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
 const Holiday_Calendar_Model_1 = __importDefault(require("../Models/Holiday-Calendar.Model"));
+const Helpers_1 = require("../Services/Helpers");
 const getDoctorsNotification = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         /* Notification jaha pe sender hospital hai */
@@ -2006,3 +2008,49 @@ const getDoctorsAllHolidayList = (req, res) => __awaiter(void 0, void 0, void 0,
     }
 });
 exports.getDoctorsAllHolidayList = getDoctorsAllHolidayList;
+const setThatDoctorTakesOverTheCounterPayments = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { doctorId, hospitalId } = req.body;
+        if (!(doctorId && hospitalId)) {
+            const error = new Error("Invalid doctor or hospital");
+            throw error;
+        }
+        const createdBy = req.currentDoctor ? Helpers_1.UserType.DOCTOR : Helpers_1.UserType.HOSPITAL;
+        yield doctorService.setThatDoctorTakesOverTheCounterPayments(doctorId, hospitalId, createdBy);
+        return (0, response_1.successResponse)({}, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.setThatDoctorTakesOverTheCounterPayments = setThatDoctorTakesOverTheCounterPayments;
+const deleteThatDoctorTakesOverTheCounterPayments = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { doctorId, hospitalId } = req.query;
+        if (!(doctorId && hospitalId)) {
+            const error = new Error("Invalid doctor or hospital");
+            throw error;
+        }
+        yield doctorService.deleteThatDoctorTakesOverTheCounterPayments(doctorId, hospitalId);
+        return (0, response_1.successResponse)({}, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.deleteThatDoctorTakesOverTheCounterPayments = deleteThatDoctorTakesOverTheCounterPayments;
+const checkIfDoctorTakesOverTheCounterPaymentsForAHospital = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { doctorId, hospitalId } = req.query;
+        if (!(doctorId && hospitalId)) {
+            const error = new Error("Invalid doctor or hospital");
+            throw error;
+        }
+        const exist = yield doctorService.checkIfDoctorTakesOverTheCounterPaymentsForAHospital(doctorId, hospitalId);
+        return (0, response_1.successResponse)(exist, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.checkIfDoctorTakesOverTheCounterPaymentsForAHospital = checkIfDoctorTakesOverTheCounterPaymentsForAHospital;

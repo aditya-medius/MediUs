@@ -12,7 +12,13 @@ export const Weekdays = [
     "saturday",
 ];
 
-export interface offDatesAndDays{
+export interface offDatesAndDays {
     offDays: Array<string>, // Days
     offDates: Array<string> // Dates
+}
+
+export enum UserType {
+    HOSPITAL = "hospital",
+    DOCTOR = "doctor",
+    PATIENT = "patient"
 }

@@ -43,7 +43,8 @@ import { getCityIdFromName, getSpecialization } from "../Admin/Admin.Service";
 import workingHourModel from "../../Models/WorkingHours.Model";
 import specialityModel from "../../Admin Controlled Models/Specialization.Model";
 import hospitalModel from "../../Models/Hospital.Model";
-import { offDatesAndDays, Weekdays } from "../Helpers";
+import { offDatesAndDays, UserType, Weekdays } from "../Helpers";
+import overTheCounterModel from "../../Models/OverTheCounterPayment";
 dotenv.config();
 
 export const WEEKDAYS = [
@@ -1100,4 +1101,44 @@ export const getDoctorsOffDays = (workingDays: any): Array<string> => {
 
   const offDays = _.difference(Weekdays, workingDaysForADoctorInHospital)
   return offDays
+}
+
+export const setThatDoctorTakesOverTheCounterPayments = async (doctorId: string, hospitalId: string, createdBy: UserType) => {
+  try {
+
+    const exist = await overTheCounterModel.exists({ doctorId, hospitalId })
+    if (exist) {
+      const error = new Error("Record already exist")
+      throw error
+    }
+
+    await new overTheCounterModel({ doctorId, hospitalId, createdBy }).save()
+    return Promise.resolve(true)
+  } catch (error: any) {
+    return Promise.reject(error)
+  }
+}
+
+export const deleteThatDoctorTakesOverTheCounterPayments = async (doctorId: string, hospitalId: string) => {
+  try {
+    const exist = await overTheCounterModel.exists({ doctorId, hospitalId })
+    if (!exist) {
+      const error = new Error("Record does not exist")
+      throw error
+    }
+
+    await overTheCounterModel.findOneAndDelete({ doctorId, hospitalId })
+    return Promise.resolve(true)
+  } catch (error: any) {
+    return Promise.reject(error)
+  }
+}
+
+export const checkIfDoctorTakesOverTheCounterPaymentsForAHospital = async (doctorId: string, hospitalId: string) => {
+  try {
+    const exist = await overTheCounterModel.exists({ doctorId, hospitalId })
+    return Promise.resolve(exist)
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }

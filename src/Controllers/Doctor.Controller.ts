@@ -1951,7 +1951,7 @@ import {
 import suvedhaModel from "../Models/Suvedha.Model";
 import patientModel from "../Models/Patient.Model";
 import holidayModel from "../Models/Holiday-Calendar.Model";
-import { offDatesAndDays, Weekdays } from "../Services/Helpers";
+import { offDatesAndDays, UserType, Weekdays } from "../Services/Helpers";
 
 export const getDoctorsNotification = async (req: Request, res: Response) => {
   try {
@@ -2346,3 +2346,50 @@ export const getDoctorsAllHolidayList = async (req: Request, res: Response) => {
     return errorResponse(error, res)
   }
 }
+
+export const setThatDoctorTakesOverTheCounterPayments = async (req: Request, res: Response) => {
+  try {
+    const { doctorId, hospitalId } = req.body
+    if (!(doctorId && hospitalId)) {
+      const error = new Error("Invalid doctor or hospital")
+      throw error
+    }
+    const createdBy = req.currentDoctor ? UserType.DOCTOR : UserType.HOSPITAL;
+
+    await doctorService.setThatDoctorTakesOverTheCounterPayments(doctorId, hospitalId, createdBy)
+    return successResponse({}, "Success", res)
+  } catch (error: any) {
+    return errorResponse(error, res)
+  }
+}
+
+export const deleteThatDoctorTakesOverTheCounterPayments = async (req: Request, res: Response) => {
+  try {
+    const { doctorId, hospitalId } = req.query
+    if (!(doctorId && hospitalId)) {
+      const error = new Error("Invalid doctor or hospital")
+      throw error
+    }
+    
+    await doctorService.deleteThatDoctorTakesOverTheCounterPayments(doctorId as string, hospitalId as string)
+    return successResponse({}, "Success", res)
+  } catch (error: any) {
+    return errorResponse(error, res)
+  }
+}
+
+export const checkIfDoctorTakesOverTheCounterPaymentsForAHospital = async (req: Request, res: Response) => {
+  try {
+    const { doctorId, hospitalId } = req.query
+    if (!(doctorId && hospitalId)) {
+      const error = new Error("Invalid doctor or hospital")
+      throw error
+    }
+
+    const exist = await doctorService.checkIfDoctorTakesOverTheCounterPaymentsForAHospital(doctorId as string, hospitalId as string)
+    return successResponse(exist, "Success", res)
+  } catch (error: any) {
+    return errorResponse(error, res)
+  }
+}
+
