@@ -1081,7 +1081,7 @@ function getDatesMatchingDays(startDate: string, endDate: string, daysOfWeek: Ar
   return matchingDates;
 }
 
-export const getDoctoOffDaysForADateRange = (workingDays: any, startDate: string, endDate: string): offDatesAndDays => {
+export const getDoctorsOffDaysForADateRange = (workingDays: any, startDate: string, endDate: string): offDatesAndDays => {
   const offDays: Array<string> = getDoctorsOffDays(workingDays)
   const offDates: Array<string> = getDatesMatchingDays(startDate, endDate, offDays)
   return { offDays, offDates }

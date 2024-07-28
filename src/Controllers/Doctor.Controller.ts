@@ -2338,7 +2338,7 @@ export const getDoctorsAllHolidayList = async (req: Request, res: Response) => {
 
     let offDays: offDatesAndDays, holidayDates: Array<string> = []
 
-    offDays = doctorService.getDoctoOffDaysForADateRange(workingDaysArray, startDate, endDate)
+    offDays = doctorService.getDoctorsOffDaysForADateRange(workingDaysArray, startDate, endDate)
     holidayDates = holidays.map((e: any) => e?.date)
 
     return successResponse({ ...offDays, holidayDates }, "Success", res)
