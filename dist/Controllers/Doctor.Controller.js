@@ -1997,7 +1997,7 @@ const getDoctorsAllHolidayList = (req, res) => __awaiter(void 0, void 0, void 0,
         let holidaysPromise = Holiday_Calendar_Model_1.default.find({ doctorId, hospitalId, date: { $gte: startDate, $lte: endDate } }).lean();
         let [workingDaysArray, holidays] = yield Promise.all([workingDaysPromise, holidaysPromise]);
         let offDays, holidayDates = [];
-        offDays = doctorService.getDoctoOffDaysForADateRange(workingDaysArray, startDate, endDate);
+        offDays = doctorService.getDoctorsOffDaysForADateRange(workingDaysArray, startDate, endDate);
         holidayDates = holidays.map((e) => e === null || e === void 0 ? void 0 : e.date);
         return (0, response_1.successResponse)(Object.assign(Object.assign({}, offDays), { holidayDates }), "Success", res);
     }

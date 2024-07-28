@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDoctorsOffDays = exports.getDoctoOffDaysForADateRange = exports.getDoctorsInHospitalByQuery = exports.setSpecializationActiveStatus = exports.getDoctorsHolidayByQuery = exports.getDoctorInfo = exports.canDoctorTakeMoreAppointments = exports.isDateHolidayForDoctor = exports.getDoctorWorkingDays = exports.getDoctorById_ForSuvedha = exports.getDoctorsWithAdvancedFilters = exports.getMyLikes = exports.unlikeDoctor = exports.likeDoctor = exports.checkIfDoctorIsAvailableOnTheDay = exports.getDoctorFeeInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = exports.WEEKDAYS = void 0;
+exports.getDoctorsOffDays = exports.getDoctorsOffDaysForADateRange = exports.getDoctorsInHospitalByQuery = exports.setSpecializationActiveStatus = exports.getDoctorsHolidayByQuery = exports.getDoctorInfo = exports.canDoctorTakeMoreAppointments = exports.isDateHolidayForDoctor = exports.getDoctorWorkingDays = exports.getDoctorById_ForSuvedha = exports.getDoctorsWithAdvancedFilters = exports.getMyLikes = exports.unlikeDoctor = exports.likeDoctor = exports.checkIfDoctorIsAvailableOnTheDay = exports.getDoctorFeeInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = exports.WEEKDAYS = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const AppointmentPayment_Model_1 = __importDefault(require("../../Models/AppointmentPayment.Model"));
 const CreditAmount_Model_1 = __importDefault(require("../../Models/CreditAmount.Model"));
@@ -1002,12 +1002,12 @@ function getDatesMatchingDays(startDate, endDate, daysOfWeek) {
     }
     return matchingDates;
 }
-const getDoctoOffDaysForADateRange = (workingDays, startDate, endDate) => {
+const getDoctorsOffDaysForADateRange = (workingDays, startDate, endDate) => {
     const offDays = (0, exports.getDoctorsOffDays)(workingDays);
     const offDates = getDatesMatchingDays(startDate, endDate, offDays);
     return { offDays, offDates };
 };
-exports.getDoctoOffDaysForADateRange = getDoctoOffDaysForADateRange;
+exports.getDoctorsOffDaysForADateRange = getDoctorsOffDaysForADateRange;
 const getDoctorsOffDays = (workingDays) => {
     let workingDaysForADoctorInHospital = [];
     workingDays.forEach((data) => {
