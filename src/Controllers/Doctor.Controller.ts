@@ -1951,7 +1951,7 @@ import {
 import suvedhaModel from "../Models/Suvedha.Model";
 import patientModel from "../Models/Patient.Model";
 import holidayModel from "../Models/Holiday-Calendar.Model";
-import { Weekdays } from "../Services/Helpers";
+import { offDatesAndDays, Weekdays } from "../Services/Helpers";
 
 export const getDoctorsNotification = async (req: Request, res: Response) => {
   try {
@@ -2336,12 +2336,12 @@ export const getDoctorsAllHolidayList = async (req: Request, res: Response) => {
 
     let [workingDaysArray, holidays] = await Promise.all([workingDaysPromise, holidaysPromise]);
 
-    let offDays: Array<string> = [], holidayDates: Array<string> = []
+    let offDays: offDatesAndDays, holidayDates: Array<string> = []
 
-    offDays = doctorService.getDoctorsOffDays(workingDaysArray)
+    offDays = doctorService.getDoctoOffDaysForADateRange(workingDaysArray, startDate, endDate)
     holidayDates = holidays.map((e: any) => e?.date)
 
-    return successResponse({ offDays, holidayDates }, "Success", res)
+    return successResponse({ ...offDays, holidayDates }, "Success", res)
   } catch (error: any) {
     return errorResponse(error, res)
   }

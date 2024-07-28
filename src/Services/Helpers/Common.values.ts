@@ -11,3 +11,8 @@ export const Weekdays = [
     "friday",
     "saturday",
 ];
+
+export interface offDatesAndDays{
+    offDays: Array<string>, // Days
+    offDates: Array<string> // Dates
+}

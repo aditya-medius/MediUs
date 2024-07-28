@@ -43,7 +43,7 @@ import { getCityIdFromName, getSpecialization } from "../Admin/Admin.Service";
 import workingHourModel from "../../Models/WorkingHours.Model";
 import specialityModel from "../../Admin Controlled Models/Specialization.Model";
 import hospitalModel from "../../Models/Hospital.Model";
-import { Weekdays } from "../Helpers";
+import { offDatesAndDays, Weekdays } from "../Helpers";
 dotenv.config();
 
 export const WEEKDAYS = [
@@ -1066,7 +1066,28 @@ export const getDoctorsInHospitalByQuery = async (
   return doctors;
 };
 
-export const getDoctorsOffDays = (workingDays: any) => {
+function getDatesMatchingDays(startDate: string, endDate: string, daysOfWeek: Array<string>) {
+  let matchingDates: Array<string> = [];
+  let currentDate = new Date(startDate);
+
+  while (currentDate <= new Date(endDate)) {
+    const dayName = currentDate.toLocaleString('en-us', { weekday: 'long' }).toLowerCase();
+    if (_.includes(daysOfWeek, dayName)) {
+      matchingDates.push(currentDate.toISOString()); // Format date as YYYY-MM-DD
+    }
+    currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+  }
+
+  return matchingDates;
+}
+
+export const getDoctoOffDaysForADateRange = (workingDays: any, startDate: string, endDate: string): offDatesAndDays => {
+  const offDays: Array<string> = getDoctorsOffDays(workingDays)
+  const offDates: Array<string> = getDatesMatchingDays(startDate, endDate, offDays)
+  return { offDays, offDates }
+}
+
+export const getDoctorsOffDays = (workingDays: any): Array<string> => {
   let workingDaysForADoctorInHospital: Array<string> = []
   workingDays.forEach((data: any) => {
     let workingDaysForOneRecord = Weekdays.filter((weekday: string) => {
@@ -1079,5 +1100,4 @@ export const getDoctorsOffDays = (workingDays: any) => {
 
   const offDays = _.difference(Weekdays, workingDaysForADoctorInHospital)
   return offDays
-
 }
