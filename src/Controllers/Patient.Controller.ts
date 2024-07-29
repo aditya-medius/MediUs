@@ -381,15 +381,6 @@ export const BookAppointment = async (req: Request, res: Response) => {
 
     const rd: Date = new Date(body.time.date);
 
-    const doctorDetails = await doctorModel.findOne({ _id: doctorId }, "advancedBookingPeriod")
-    const advancedBookingPeriod = doctorDetails?.advancedBookingPeriod;
-
-    if (!patientService.isAdvancedBookingValid(moment(rd), advancedBookingPeriod)) {
-      const error: Error = new Error("Cannot book appointment for this day");
-      error.name = "Not available";
-      return errorResponse(error, res);
-    }
-
     const d = rd.getDay();
     let b = req.body;
     let query: any = {};

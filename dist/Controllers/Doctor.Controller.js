@@ -43,7 +43,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteThatDoctorTakesOverTheCounterPayments = exports.setThatDoctorTakesOverTheCounterPayments = exports.getDoctorsAllHolidayList = exports.getDoctorQualificationList = exports.deleteDoctorQualification = exports.verifyOTPToUpdateNumber = exports.sendOTPToUpdateNumber = exports.getSpecializationByCity = exports.getMyLikes = exports.unlikeDoctor = exports.likeADoctor = exports.getPrescriptionValidityAndFeesOfDoctorInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getHospitalsOfflineAndOnlineAppointments = exports.deleteHolidayCalendar = exports.getDoctorsHolidayList = exports.setHolidayCalendar = exports.getDoctorsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByDoctor = exports.getListOfRequestedApprovals_OfDoctor = exports.setConsultationFeeForDoctor = exports.addHospitalInDoctorProfile = exports.checkVerificationStatus = exports.updateQualification = exports.deleteHospitalFromDoctor = exports.deleteSpecializationAndQualification = exports.getAppointmentSummary = exports.withdraw = exports.getPendingAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.checkDoctorAvailability = exports.getHospitalListByDoctorId = exports.searchDoctorByPhoneNumberOrEmail = exports.getDoctorWorkingInHospitals = exports.cancelAppointments = exports.viewAppointmentsByDate = exports.viewAppointments = exports.setSchedule = exports.searchDoctor = exports.deleteProfile = exports.updateDoctorProfile = exports.getDoctorByHospitalId = exports.getDoctorById = exports.doctorLogin = exports.createDoctor = exports.getAllDoctorsList = exports.excludeDoctorFields = void 0;
-exports.checkIfDoctorTakesOverTheCounterPaymentsForAHospital = void 0;
+exports.getDoctorsAdvancedBookingPeriod = exports.deleteDoctorsAdvancedBookingPeriod = exports.setDoctorsAdvancedBookingPeriod = exports.checkIfDoctorTakesOverTheCounterPaymentsForAHospital = void 0;
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
 const jwt = __importStar(require("jsonwebtoken"));
@@ -2054,3 +2054,48 @@ const checkIfDoctorTakesOverTheCounterPaymentsForAHospital = (req, res) => __awa
     }
 });
 exports.checkIfDoctorTakesOverTheCounterPaymentsForAHospital = checkIfDoctorTakesOverTheCounterPaymentsForAHospital;
+const setDoctorsAdvancedBookingPeriod = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { doctorId, hospitalId, bookingPeriod } = req.body;
+        if (!(doctorId && hospitalId)) {
+            const error = new Error("Invalid doctor or hospital");
+            throw error;
+        }
+        yield doctorService.setDoctorsAdvancedBookingPeriod(doctorId, hospitalId, bookingPeriod);
+        return (0, response_1.successResponse)({}, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.setDoctorsAdvancedBookingPeriod = setDoctorsAdvancedBookingPeriod;
+const deleteDoctorsAdvancedBookingPeriod = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { doctorId, hospitalId } = req.query;
+        if (!(doctorId && hospitalId)) {
+            const error = new Error("Invalid doctor or hospital");
+            throw error;
+        }
+        yield doctorService.deleteDoctorsAdvancedBookingPeriod(doctorId, hospitalId);
+        return (0, response_1.successResponse)({}, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.deleteDoctorsAdvancedBookingPeriod = deleteDoctorsAdvancedBookingPeriod;
+const getDoctorsAdvancedBookingPeriod = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { doctorId, hospitalId } = req.query;
+        if (!(doctorId && hospitalId)) {
+            const error = new Error("Invalid doctor or hospital");
+            throw error;
+        }
+        const exist = yield doctorService.getDoctorsAdvancedBookingPeriod(doctorId, hospitalId);
+        return (0, response_1.successResponse)(exist, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getDoctorsAdvancedBookingPeriod = getDoctorsAdvancedBookingPeriod;

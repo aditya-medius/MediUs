@@ -2370,7 +2370,7 @@ export const deleteThatDoctorTakesOverTheCounterPayments = async (req: Request, 
       const error = new Error("Invalid doctor or hospital")
       throw error
     }
-    
+
     await doctorService.deleteThatDoctorTakesOverTheCounterPayments(doctorId as string, hospitalId as string)
     return successResponse({}, "Success", res)
   } catch (error: any) {
@@ -2393,3 +2393,47 @@ export const checkIfDoctorTakesOverTheCounterPaymentsForAHospital = async (req: 
   }
 }
 
+export const setDoctorsAdvancedBookingPeriod = async (req: Request, res: Response) => {
+  try {
+    const { doctorId, hospitalId, bookingPeriod } = req.body
+    if (!(doctorId && hospitalId)) {
+      const error = new Error("Invalid doctor or hospital")
+      throw error
+    }
+
+    await doctorService.setDoctorsAdvancedBookingPeriod(doctorId, hospitalId, bookingPeriod)
+    return successResponse({}, "Success", res)
+  } catch (error: any) {
+    return errorResponse(error, res)
+  }
+}
+
+export const deleteDoctorsAdvancedBookingPeriod = async (req: Request, res: Response) => {
+  try {
+    const { doctorId, hospitalId } = req.query
+    if (!(doctorId && hospitalId)) {
+      const error = new Error("Invalid doctor or hospital")
+      throw error
+    }
+
+    await doctorService.deleteDoctorsAdvancedBookingPeriod(doctorId as string, hospitalId as string)
+    return successResponse({}, "Success", res)
+  } catch (error: any) {
+    return errorResponse(error, res)
+  }
+}
+
+export const getDoctorsAdvancedBookingPeriod = async (req: Request, res: Response) => {
+  try {
+    const { doctorId, hospitalId } = req.query
+    if (!(doctorId && hospitalId)) {
+      const error = new Error("Invalid doctor or hospital")
+      throw error
+    }
+
+    const exist = await doctorService.getDoctorsAdvancedBookingPeriod(doctorId as string, hospitalId as string)
+    return successResponse(exist, "Success", res)
+  } catch (error: any) {
+    return errorResponse(error, res)
+  }
+}

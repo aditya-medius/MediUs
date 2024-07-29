@@ -492,5 +492,25 @@ doctorRouter.get(
   oneOf(authenticateDoctor, authenticateHospital),
   doctorController.checkIfDoctorTakesOverTheCounterPaymentsForAHospital
 )
+
+doctorRouter.post(
+  "/bookingperiod", 
+  oneOf(authenticateDoctor, authenticateHospital),
+  doctorController.setDoctorsAdvancedBookingPeriod
+)
+
+doctorRouter.delete(
+  "/bookingperiod", 
+  oneOf(authenticateDoctor, authenticateHospital),
+  doctorController.deleteDoctorsAdvancedBookingPeriod
+)
+
+doctorRouter.get(
+  "/bookingperiod", 
+  oneOf(authenticateDoctor, authenticateHospital),
+  doctorController.getDoctorsAdvancedBookingPeriod
+)
+
+
 export default doctorRouter;
 

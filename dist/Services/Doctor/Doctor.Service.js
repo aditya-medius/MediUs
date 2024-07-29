@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkIfDoctorTakesOverTheCounterPaymentsForAHospital = exports.deleteThatDoctorTakesOverTheCounterPayments = exports.setThatDoctorTakesOverTheCounterPayments = exports.getDoctorsOffDays = exports.getDoctorsOffDaysForADateRange = exports.getDoctorsInHospitalByQuery = exports.setSpecializationActiveStatus = exports.getDoctorsHolidayByQuery = exports.getDoctorInfo = exports.canDoctorTakeMoreAppointments = exports.isDateHolidayForDoctor = exports.getDoctorWorkingDays = exports.getDoctorById_ForSuvedha = exports.getDoctorsWithAdvancedFilters = exports.getMyLikes = exports.unlikeDoctor = exports.likeDoctor = exports.checkIfDoctorIsAvailableOnTheDay = exports.getDoctorFeeInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = exports.WEEKDAYS = void 0;
+exports.getDoctorsAdvancedBookingPeriod = exports.deleteDoctorsAdvancedBookingPeriod = exports.setDoctorsAdvancedBookingPeriod = exports.checkIfDoctorTakesOverTheCounterPaymentsForAHospital = exports.deleteThatDoctorTakesOverTheCounterPayments = exports.setThatDoctorTakesOverTheCounterPayments = exports.getDoctorsOffDays = exports.getDoctorsOffDaysForADateRange = exports.getDoctorsInHospitalByQuery = exports.setSpecializationActiveStatus = exports.getDoctorsHolidayByQuery = exports.getDoctorInfo = exports.canDoctorTakeMoreAppointments = exports.isDateHolidayForDoctor = exports.getDoctorWorkingDays = exports.getDoctorById_ForSuvedha = exports.getDoctorsWithAdvancedFilters = exports.getMyLikes = exports.unlikeDoctor = exports.likeDoctor = exports.checkIfDoctorIsAvailableOnTheDay = exports.getDoctorFeeInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = exports.WEEKDAYS = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const AppointmentPayment_Model_1 = __importDefault(require("../../Models/AppointmentPayment.Model"));
 const CreditAmount_Model_1 = __importDefault(require("../../Models/CreditAmount.Model"));
@@ -55,6 +55,7 @@ const Specialization_Model_1 = __importDefault(require("../../Admin Controlled M
 const Hospital_Model_1 = __importDefault(require("../../Models/Hospital.Model"));
 const Helpers_1 = require("../Helpers");
 const OverTheCounterPayment_1 = __importDefault(require("../../Models/OverTheCounterPayment"));
+const AdvancedBookingPeriod_1 = __importDefault(require("../../Models/AdvancedBookingPeriod"));
 dotenv.config();
 exports.WEEKDAYS = [
     "monday",
@@ -1063,3 +1064,45 @@ const checkIfDoctorTakesOverTheCounterPaymentsForAHospital = (doctorId, hospital
     }
 });
 exports.checkIfDoctorTakesOverTheCounterPaymentsForAHospital = checkIfDoctorTakesOverTheCounterPaymentsForAHospital;
+const setDoctorsAdvancedBookingPeriod = (doctorId, hospitalId, bookingPeriod) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        yield AdvancedBookingPeriod_1.default.findOneAndUpdate({ doctorId, hospitalId }, {
+            $set: {
+                bookingPeriod,
+            },
+        }, {
+            upsert: true,
+            new: true
+        });
+        return Promise.resolve(true);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.setDoctorsAdvancedBookingPeriod = setDoctorsAdvancedBookingPeriod;
+const deleteDoctorsAdvancedBookingPeriod = (doctorId, hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const exist = yield AdvancedBookingPeriod_1.default.exists({ doctorId, hospitalId });
+        if (!exist) {
+            const error = new Error("Record does not exist");
+            throw error;
+        }
+        yield AdvancedBookingPeriod_1.default.findOneAndDelete({ doctorId, hospitalId });
+        return Promise.resolve(true);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.deleteDoctorsAdvancedBookingPeriod = deleteDoctorsAdvancedBookingPeriod;
+const getDoctorsAdvancedBookingPeriod = (doctorId, hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const bookingPeriodRecord = yield AdvancedBookingPeriod_1.default.findOne({ doctorId, hospitalId }).lean();
+        return Promise.resolve(bookingPeriodRecord ? bookingPeriodRecord === null || bookingPeriodRecord === void 0 ? void 0 : bookingPeriodRecord.bookingPeriod : 100);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+});
+exports.getDoctorsAdvancedBookingPeriod = getDoctorsAdvancedBookingPeriod;

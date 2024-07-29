@@ -45,6 +45,7 @@ import specialityModel from "../../Admin Controlled Models/Specialization.Model"
 import hospitalModel from "../../Models/Hospital.Model";
 import { offDatesAndDays, UserType, Weekdays } from "../Helpers";
 import overTheCounterModel from "../../Models/OverTheCounterPayment";
+import advancedBookingPeriodModel from "../../Models/AdvancedBookingPeriod";
 dotenv.config();
 
 export const WEEKDAYS = [
@@ -1138,6 +1139,51 @@ export const checkIfDoctorTakesOverTheCounterPaymentsForAHospital = async (docto
   try {
     const exist = await overTheCounterModel.exists({ doctorId, hospitalId })
     return Promise.resolve(exist)
+  } catch (error) {
+    return Promise.reject(error)
+  }
+}
+
+export const setDoctorsAdvancedBookingPeriod = async (doctorId: string, hospitalId: string, bookingPeriod: number) => {
+  try {
+
+    await advancedBookingPeriodModel.findOneAndUpdate(
+      { doctorId, hospitalId },
+      {
+        $set: {
+          bookingPeriod,
+        },
+      },
+      {
+        upsert: true,
+        new: true
+      }
+    )
+    return Promise.resolve(true)
+  } catch (error: any) {
+    return Promise.reject(error)
+  }
+}
+
+export const deleteDoctorsAdvancedBookingPeriod = async (doctorId: string, hospitalId: string) => {
+  try {
+    const exist = await advancedBookingPeriodModel.exists({ doctorId, hospitalId })
+    if (!exist) {
+      const error = new Error("Record does not exist")
+      throw error
+    }
+
+    await advancedBookingPeriodModel.findOneAndDelete({ doctorId, hospitalId })
+    return Promise.resolve(true)
+  } catch (error: any) {
+    return Promise.reject(error)
+  }
+}
+
+export const getDoctorsAdvancedBookingPeriod = async (doctorId: string, hospitalId: string) => {
+  try {
+    const bookingPeriodRecord = await advancedBookingPeriodModel.findOne({ doctorId, hospitalId }).lean()
+    return Promise.resolve(bookingPeriodRecord ? bookingPeriodRecord?.bookingPeriod : 100)
   } catch (error) {
     return Promise.reject(error)
   }

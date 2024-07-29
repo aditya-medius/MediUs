@@ -116,10 +116,6 @@ const doctorSchema = new Schema(
       type: String,
       // required: true,
     },
-
-    advancedBookingPeriod: {
-      type: Number
-    }
   },
   {
     toJSON: { virtuals: true },
