@@ -7,10 +7,20 @@ import {
 } from "../Appointment/Appointment.Service";
 import addressModel from "../../Models/Address.Model";
 import hospitalModel from "../../Models/Hospital.Model";
+import advancedBookingPeriodModel from "../../Models/AdvancedBookingPeriod";
 
 export const BookAppointment = async (body: any, isHospital = false) => {
   try {
     const rd: Date = new Date(body.time.date);
+    const bookingPeriod = await advancedBookingPeriodModel.findOne({ doctorId: body.doctors, hospitalId: body.hospital }, "bookingPeriod")
+    const advancedBookingPeriod = bookingPeriod?.bookingPeriod;
+
+    if (!isAdvancedBookingValid(moment(rd), advancedBookingPeriod)) {
+      const error: Error = new Error("Cannot book appointment for this day");
+      error.name = "Not available";
+      throw error
+    }
+
     const d = rd.getDay();
     let b = body;
     let query: any = {};

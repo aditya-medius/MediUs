@@ -1099,7 +1099,7 @@ exports.deleteDoctorsAdvancedBookingPeriod = deleteDoctorsAdvancedBookingPeriod;
 const getDoctorsAdvancedBookingPeriod = (doctorId, hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const bookingPeriodRecord = yield AdvancedBookingPeriod_1.default.findOne({ doctorId, hospitalId }).lean();
-        return Promise.resolve(bookingPeriodRecord ? bookingPeriodRecord === null || bookingPeriodRecord === void 0 ? void 0 : bookingPeriodRecord.bookingPeriod : 100);
+        return Promise.resolve(bookingPeriodRecord ? bookingPeriodRecord === null || bookingPeriodRecord === void 0 ? void 0 : bookingPeriodRecord.bookingPeriod : 30);
     }
     catch (error) {
         return Promise.reject(error);

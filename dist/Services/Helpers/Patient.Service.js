@@ -19,9 +19,17 @@ const moment_1 = __importDefault(require("moment"));
 const Appointment_Service_1 = require("../Appointment/Appointment.Service");
 const Address_Model_1 = __importDefault(require("../../Models/Address.Model"));
 const Hospital_Model_1 = __importDefault(require("../../Models/Hospital.Model"));
+const AdvancedBookingPeriod_1 = __importDefault(require("../../Models/AdvancedBookingPeriod"));
 const BookAppointment = (body, isHospital = false) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const rd = new Date(body.time.date);
+        const bookingPeriod = yield AdvancedBookingPeriod_1.default.findOne({ doctorId: body.doctors, hospitalId: body.hospital }, "bookingPeriod");
+        const advancedBookingPeriod = bookingPeriod === null || bookingPeriod === void 0 ? void 0 : bookingPeriod.bookingPeriod;
+        if (!(0, exports.isAdvancedBookingValid)((0, moment_1.default)(rd), advancedBookingPeriod)) {
+            const error = new Error("Cannot book appointment for this day");
+            error.name = "Not available";
+            throw error;
+        }
         const d = rd.getDay();
         let b = body;
         let query = {};

@@ -1183,7 +1183,7 @@ export const deleteDoctorsAdvancedBookingPeriod = async (doctorId: string, hospi
 export const getDoctorsAdvancedBookingPeriod = async (doctorId: string, hospitalId: string) => {
   try {
     const bookingPeriodRecord = await advancedBookingPeriodModel.findOne({ doctorId, hospitalId }).lean()
-    return Promise.resolve(bookingPeriodRecord ? bookingPeriodRecord?.bookingPeriod : 100)
+    return Promise.resolve(bookingPeriodRecord ? bookingPeriodRecord?.bookingPeriod : 30)
   } catch (error) {
     return Promise.reject(error)
   }
