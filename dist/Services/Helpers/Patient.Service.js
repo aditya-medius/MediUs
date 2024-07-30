@@ -23,13 +23,6 @@ const AdvancedBookingPeriod_1 = __importDefault(require("../../Models/AdvancedBo
 const BookAppointment = (body, isHospital = false) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const rd = new Date(body.time.date);
-        const bookingPeriod = yield AdvancedBookingPeriod_1.default.findOne({ doctorId: body.doctors, hospitalId: body.hospital }, "bookingPeriod");
-        const advancedBookingPeriod = bookingPeriod === null || bookingPeriod === void 0 ? void 0 : bookingPeriod.bookingPeriod;
-        if (!(0, exports.isAdvancedBookingValid)((0, moment_1.default)(rd), advancedBookingPeriod)) {
-            const error = new Error("Cannot book appointment for this day");
-            error.name = "Not available";
-            throw error;
-        }
         const d = rd.getDay();
         let b = body;
         let query = {};
@@ -196,6 +189,13 @@ const calculateAge = (DOB) => {
 exports.calculateAge = calculateAge;
 const canDoctorTakeAppointment = (body) => __awaiter(void 0, void 0, void 0, function* () {
     const time = new Date(body.time.date);
+    const bookingPeriod = yield AdvancedBookingPeriod_1.default.findOne({ doctorId: body.doctors, hospitalId: body.hospital }, "bookingPeriod");
+    const advancedBookingPeriod = bookingPeriod === null || bookingPeriod === void 0 ? void 0 : bookingPeriod.bookingPeriod;
+    if (!(0, exports.isAdvancedBookingValid)((0, moment_1.default)(time), advancedBookingPeriod)) {
+        const error = new Error("Cannot book appointment for this day");
+        error.name = "Not available";
+        throw error;
+    }
     let d = time.getDay();
     let query = {
         doctorDetails: body.doctors,

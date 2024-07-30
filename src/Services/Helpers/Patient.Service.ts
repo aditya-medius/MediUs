@@ -12,15 +12,6 @@ import advancedBookingPeriodModel from "../../Models/AdvancedBookingPeriod";
 export const BookAppointment = async (body: any, isHospital = false) => {
   try {
     const rd: Date = new Date(body.time.date);
-    const bookingPeriod = await advancedBookingPeriodModel.findOne({ doctorId: body.doctors, hospitalId: body.hospital }, "bookingPeriod")
-    const advancedBookingPeriod = bookingPeriod?.bookingPeriod;
-
-    if (!isAdvancedBookingValid(moment(rd), advancedBookingPeriod)) {
-      const error: Error = new Error("Cannot book appointment for this day");
-      error.name = "Not available";
-      throw error
-    }
-
     const d = rd.getDay();
     let b = body;
     let query: any = {};
@@ -190,6 +181,16 @@ export const calculateAge = (DOB: Date) => {
 
 export const canDoctorTakeAppointment = async (body: any) => {
   const time = new Date(body.time.date);
+
+  const bookingPeriod = await advancedBookingPeriodModel.findOne({ doctorId: body.doctors, hospitalId: body.hospital }, "bookingPeriod")
+  const advancedBookingPeriod = bookingPeriod?.bookingPeriod;
+
+  if (!isAdvancedBookingValid(moment(time), advancedBookingPeriod)) {
+    const error: Error = new Error("Cannot book appointment for this day");
+    error.name = "Not available";
+    throw error
+  }
+
 
   let d: any = time.getDay();
   let query: any = {
