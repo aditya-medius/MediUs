@@ -196,7 +196,7 @@ const canDoctorTakeAppointment = (body) => __awaiter(void 0, void 0, void 0, fun
     console.log("SDsdsddsd", bookingPeriod);
     const advancedBookingPeriod = bookingPeriod === null || bookingPeriod === void 0 ? void 0 : bookingPeriod.bookingPeriod;
     console.log("advancedBookingPeriod", advancedBookingPeriod);
-    if (!(0, exports.isAdvancedBookingValid)((0, moment_1.default)(time), advancedBookingPeriod)) {
+    if (bookingPeriod && !(0, exports.isAdvancedBookingValid)((0, moment_1.default)(time), advancedBookingPeriod)) {
         const error = new Error("Cannot book appointment for this day");
         error.name = "Not available";
         throw error;

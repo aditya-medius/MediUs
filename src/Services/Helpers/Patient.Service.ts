@@ -192,7 +192,7 @@ export const canDoctorTakeAppointment = async (body: any) => {
   const advancedBookingPeriod = bookingPeriod?.bookingPeriod;
   console.log("advancedBookingPeriod", advancedBookingPeriod)
 
-  if (!isAdvancedBookingValid(moment(time), advancedBookingPeriod)) {
+  if (bookingPeriod && !isAdvancedBookingValid(moment(time), advancedBookingPeriod)) {
     const error: Error = new Error("Cannot book appointment for this day");
     error.name = "Not available";
     throw error
