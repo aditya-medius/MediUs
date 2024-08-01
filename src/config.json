@@ -1,0 +1,30 @@
+{
+    "common": {
+        "UserStatus": {
+            "inactive": "inactive",
+            "active": "active",
+            "onhold": "onhold"
+        },
+        "Gender": {
+            "Male": "Male",
+            "Female": "Female"
+        },
+        "UserType": {
+            "hospital": "hospital",
+            "doctor": "doctor",
+            "patient": "patient"
+        }
+    },
+    "Appointment": {
+        "Type": {
+            "Fresh": "Fresh",
+            "Follow_Up": "Follow Up"
+        },
+        "Status": {
+            "Scheduled": "Scheduled",
+            "Present": "Present",
+            "Consulted": "Consulted",
+            "Absent": "Absent"
+        }
+    }
+}

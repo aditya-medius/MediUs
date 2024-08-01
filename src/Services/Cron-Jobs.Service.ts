@@ -3,6 +3,9 @@ import doctorModel from "../Models/Doctors.Model";
 import moment from "moment";
 import patientModel from "../Models/Patient.Model";
 import hospitalModel from "../Models/Hospital.Model";
+import { checkIfHospitalHasLoggedInInThePastMonth, checkIfHospitalHasLoggedInThePastWeek, markHospitalsAccountAsInactive, markHospitalsAccountAsOnHold } from "./Hospital/Hospital.Service";
+import { Hospital, UserStatus, UserType } from "./Helpers";
+import { formatHospitals } from "./Hospital/Hospital.Util";
 
 export const deleteDoctorSchedule = async () => {
   // Cron job har 10 min me chal rhi hai
@@ -62,16 +65,33 @@ export const deleteHospital = async () => {
   });
 };
 
-export const checkHospitalsLastLogin = async () => {
-  cron.schedule("*/10 * * * * *", async () => {
-    // console.log("SDdsddsdsdsd")
-    const hospitals = await hospitalModel.find()
-    hospitals
+export const markHospitalAsOnHoldIfItHasNotLoggedInInAWeek = () => {
+  const onHoldPeriod = process.env.ONHOLDJOBPERIOD as string
+  cron.schedule(onHoldPeriod, async () => {
+    const hospialData = await hospitalModel.find({ status: { $nin: [UserStatus.ONHOLD, UserStatus.INACTIVE] } })
+    if (hospialData.length > 0) {
+      const hospital: Array<Hospital> = formatHospitals(hospialData)
+      const hospitalsThatHaveNotLoggedInAWeek: Array<Hospital> = checkIfHospitalHasLoggedInThePastWeek(hospital)
+      markHospitalsAccountAsOnHold(hospitalsThatHaveNotLoggedInAWeek)
+    }
+  })
+}
+
+export const markHospitalAsInactiveIfItHasBeenOnHoldForAMonth = () => {
+  const inActivePeriod = process.env.INACTIVEJOBPERIOD as string
+  cron.schedule(inActivePeriod, async () => {
+    const hospialData = await hospitalModel.find({ status: { $ne: UserStatus.INACTIVE } })
+    if (hospialData.length > 0) {
+      const hospital: Array<Hospital> = formatHospitals(hospialData)
+      const hospitalsThatHaveNotLoggedInAMonth: Array<Hospital> = checkIfHospitalHasLoggedInInThePastMonth(hospital)
+      markHospitalsAccountAsInactive(hospitalsThatHaveNotLoggedInAMonth)
+    }
   })
 }
 
 export const cronFunctions = [
-  checkHospitalsLastLogin
+  markHospitalAsOnHoldIfItHasNotLoggedInInAWeek,
+  markHospitalAsInactiveIfItHasBeenOnHoldForAMonth
 ]
 
 // export const cronFunctions = [

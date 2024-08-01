@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateHospitalsLastLogin = exports.getHolidayForHospital = exports.addHolidayForHospital = exports.changeAppointmentStatus = exports.getCitiesWhereHospitalsExist = exports.getHospitalById = exports.hospitalsInDoctor = exports.getHospitalsPrescriptionValidityInDoctor = exports.getHospitalsWorkingHourInDoctor = exports.getHolidayTimigsOfHospitalsInDoctor = exports.doctorsInHospital = exports.getDoctorsPrescriptionValidityInHospital = exports.getDoctorsWorkingHourInHospital = exports.getHolidayTimigsOfDoctorsInHospital = exports.doesHospitalExist = exports.generateOrderId = exports.verifyPayment = exports.getPatientsAppointmentsInThisHospital = exports.getPatientFromPhoneNumber = exports.getHospitalsOfflineAndOnlineAppointments = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.getHospitalToken = void 0;
+exports.markHospitalsAccountAsInactive = exports.markHospitalsAccountAsOnHold = exports.checkIfHospitalHasLoggedInInThePastMonth = exports.checkIfHospitalHasLoggedInThePastWeek = exports.updateHospitalsLastLogin = exports.getHolidayForHospital = exports.addHolidayForHospital = exports.changeAppointmentStatus = exports.getCitiesWhereHospitalsExist = exports.getHospitalById = exports.hospitalsInDoctor = exports.getHospitalsPrescriptionValidityInDoctor = exports.getHospitalsWorkingHourInDoctor = exports.getHolidayTimigsOfHospitalsInDoctor = exports.doctorsInHospital = exports.getDoctorsPrescriptionValidityInHospital = exports.getDoctorsWorkingHourInHospital = exports.getHolidayTimigsOfDoctorsInHospital = exports.doesHospitalExist = exports.generateOrderId = exports.verifyPayment = exports.getPatientsAppointmentsInThisHospital = exports.getPatientFromPhoneNumber = exports.getHospitalsOfflineAndOnlineAppointments = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.getHospitalToken = void 0;
 const jwt = __importStar(require("jsonwebtoken"));
 const dotenv = __importStar(require("dotenv"));
 const Hospital_Model_1 = __importDefault(require("../../Models/Hospital.Model"));
@@ -1054,10 +1054,31 @@ const getHolidayForHospital = (id) => __awaiter(void 0, void 0, void 0, function
 });
 exports.getHolidayForHospital = getHolidayForHospital;
 const updateHospitalsLastLogin = (hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
-    const hospital = yield Hospital_Model_1.default.findOne({ _id: hospitalId });
-    if (hospital) {
-        hospital.lastLogin = new Date();
-        hospital.save();
-    }
+    yield Hospital_Model_1.default.findOneAndUpdate({ _id: hospitalId }, { $set: { lastLogin: new Date(), status: Helpers_1.UserStatus.ACTIVE } });
 });
 exports.updateHospitalsLastLogin = updateHospitalsLastLogin;
+const checkIfDoctorHasLoggedInInThePastGivenDays = (hospitals, numberOfDays) => {
+    const hospitalsThatHaveNotLoggedInThePastWeek = hospitals.filter((hospital) => {
+        const dateDifference = (0, Utils_1.getDateDifferenceFromCurrentDate)(hospital.lastLogin);
+        if (dateDifference < numberOfDays) {
+            return true;
+        }
+    });
+    return hospitalsThatHaveNotLoggedInThePastWeek;
+};
+const checkIfHospitalHasLoggedInThePastWeek = (hospitals) => {
+    return checkIfDoctorHasLoggedInInThePastGivenDays(hospitals, -7);
+};
+exports.checkIfHospitalHasLoggedInThePastWeek = checkIfHospitalHasLoggedInThePastWeek;
+const checkIfHospitalHasLoggedInInThePastMonth = (hospitals) => {
+    return checkIfDoctorHasLoggedInInThePastGivenDays(hospitals, -37);
+};
+exports.checkIfHospitalHasLoggedInInThePastMonth = checkIfHospitalHasLoggedInInThePastMonth;
+const markHospitalsAccountAsOnHold = (hospitals) => __awaiter(void 0, void 0, void 0, function* () {
+    yield Hospital_Model_1.default.updateMany({ _id: { $in: hospitals.map((hospital) => hospital.id) } }, { $set: { status: Helpers_1.UserStatus.ONHOLD } });
+});
+exports.markHospitalsAccountAsOnHold = markHospitalsAccountAsOnHold;
+const markHospitalsAccountAsInactive = (hospitals) => __awaiter(void 0, void 0, void 0, function* () {
+    yield Hospital_Model_1.default.updateMany({ _id: { $in: hospitals.map((hospital) => hospital.id) } }, { $set: { status: Helpers_1.UserStatus.INACTIVE } });
+});
+exports.markHospitalsAccountAsInactive = markHospitalsAccountAsInactive;

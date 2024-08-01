@@ -189,13 +189,8 @@ const calculateAge = (DOB) => {
 exports.calculateAge = calculateAge;
 const canDoctorTakeAppointment = (body) => __awaiter(void 0, void 0, void 0, function* () {
     const time = new Date(body.time.date);
-    console.log("body.doctors", body.doctors);
-    console.log("body.hospital", body.hospital);
-    console.log("sdddssd", yield AdvancedBookingPeriod_1.default.findOne({ doctorId: body.doctors, hospitalId: body.hospital }));
     const bookingPeriod = yield AdvancedBookingPeriod_1.default.findOne({ doctorId: body.doctors, hospitalId: body.hospital }, "bookingPeriod");
-    console.log("SDsdsddsd", bookingPeriod);
     const advancedBookingPeriod = bookingPeriod === null || bookingPeriod === void 0 ? void 0 : bookingPeriod.bookingPeriod;
-    console.log("advancedBookingPeriod", advancedBookingPeriod);
     if (bookingPeriod && !(0, exports.isAdvancedBookingValid)((0, moment_1.default)(time), advancedBookingPeriod)) {
         const error = new Error("Cannot book appointment for this day");
         error.name = "Not available";
@@ -344,9 +339,6 @@ exports.getHospitalsInACity = getHospitalsInACity;
 const isAdvancedBookingValid = (bookingDate, advancedBookingPeriod) => {
     const currentDate = (0, moment_1.default)();
     const dateDifference = bookingDate.diff((0, moment_1.default)(currentDate), "days") + 1;
-    console.log("bookingDate", bookingDate);
-    console.log("curree", currentDate);
-    console.log("dateDifference", dateDifference);
     return dateDifference > -1 && dateDifference <= advancedBookingPeriod;
 };
 exports.isAdvancedBookingValid = isAdvancedBookingValid;

@@ -121,7 +121,7 @@ export const login = async (req: Request, res: Response) => {
                 },
               }
             )
-            .then((result: any) => console.log("result", result));
+            .then((result: any) => { hospitalService.updateHospitalsLastLogin(result?.id) });
           return successResponse(
             { token, name, contactNumber, _id, numberOfBed, password },
             "Successfully logged in",
@@ -179,7 +179,7 @@ export const login = async (req: Request, res: Response) => {
                   },
                 }
               )
-              .then((result: any) => { });
+              .then((result: any) => { hospitalService.updateHospitalsLastLogin(result?.id) });
 
             return successResponse(
               { token, name, contactNumber, _id, numberOfBed, password },

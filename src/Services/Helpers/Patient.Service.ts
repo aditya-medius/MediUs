@@ -181,16 +181,9 @@ export const calculateAge = (DOB: Date) => {
 
 export const canDoctorTakeAppointment = async (body: any) => {
   const time = new Date(body.time.date);
-  console.log("body.doctors", body.doctors)
-  console.log("body.hospital", body.hospital)
-  console.log("sdddssd",
 
-    await advancedBookingPeriodModel.findOne({ doctorId: body.doctors, hospitalId: body.hospital })
-  )
   const bookingPeriod = await advancedBookingPeriodModel.findOne({ doctorId: body.doctors, hospitalId: body.hospital }, "bookingPeriod")
-  console.log("SDsdsddsd", bookingPeriod)
   const advancedBookingPeriod = bookingPeriod?.bookingPeriod;
-  console.log("advancedBookingPeriod", advancedBookingPeriod)
 
   if (bookingPeriod && !isAdvancedBookingValid(moment(time), advancedBookingPeriod)) {
     const error: Error = new Error("Cannot book appointment for this day");
@@ -345,8 +338,5 @@ export const getHospitalsInACity = async (
 export const isAdvancedBookingValid = (bookingDate: moment.Moment, advancedBookingPeriod: number): boolean => {
   const currentDate = moment()
   const dateDifference: number = bookingDate.diff(moment(currentDate), "days") + 1;
-  console.log("bookingDate", bookingDate)
-  console.log("curree", currentDate)
-  console.log("dateDifference", dateDifference)
   return dateDifference > -1 && dateDifference <= advancedBookingPeriod
 }

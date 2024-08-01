@@ -28,7 +28,7 @@ import workingHourModel from "../../Models/WorkingHours.Model";
 import { getPreEmitDiagnostics } from "typescript";
 import prescriptionModel from "../../Models/Prescription.Model";
 import doctorModel from "../../Models/Doctors.Model";
-import { AppointmentStatus, Holiday } from "../Helpers";
+import { AppointmentStatus, Holiday, Hospital, UserStatus } from "../Helpers";
 dotenv.config();
 
 export const getHospitalToken = async (body: any) => {
@@ -1183,9 +1183,32 @@ export const getHolidayForHospital = async (id: string) => {
 }
 
 export const updateHospitalsLastLogin = async (hospitalId: string) => {
-  const hospital = await hospitalModel.findOne({ _id: hospitalId })
-  if (hospital) {
-    hospital.lastLogin = new Date()
-    hospital.save()
-  }
+  await hospitalModel.findOneAndUpdate({ _id: hospitalId }, { $set: { lastLogin: new Date(), status: UserStatus.ACTIVE } })
+}
+
+const checkIfDoctorHasLoggedInInThePastGivenDays = (hospitals: Array<Hospital>, numberOfDays: number) => {
+
+  const hospitalsThatHaveNotLoggedInThePastWeek = hospitals.filter((hospital: Hospital) => {
+    const dateDifference = getDateDifferenceFromCurrentDate(hospital.lastLogin)
+    if (dateDifference < numberOfDays) {
+      return true
+    }
+  })
+  return hospitalsThatHaveNotLoggedInThePastWeek
+}
+
+export const checkIfHospitalHasLoggedInThePastWeek = (hospitals: Array<Hospital>) => {
+  return checkIfDoctorHasLoggedInInThePastGivenDays(hospitals, -7)
+}
+
+export const checkIfHospitalHasLoggedInInThePastMonth = (hospitals: Array<Hospital>) => {
+  return checkIfDoctorHasLoggedInInThePastGivenDays(hospitals, -37)
+}
+
+export const markHospitalsAccountAsOnHold = async (hospitals: Array<Hospital>) => {
+  await hospitalModel.updateMany({ _id: { $in: hospitals.map((hospital: Hospital) => hospital.id) } }, { $set: { status: UserStatus.ONHOLD } })
+}
+
+export const markHospitalsAccountAsInactive = async (hospitals: Array<Hospital>) => {
+  await hospitalModel.updateMany({ _id: { $in: hospitals.map((hospital: Hospital) => hospital.id) } }, { $set: { status: UserStatus.INACTIVE } })
 }

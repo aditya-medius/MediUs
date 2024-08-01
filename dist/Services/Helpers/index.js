@@ -13,3 +13,5 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./patient.values"), exports);
 __exportStar(require("./admin.values"), exports);
 __exportStar(require("./Common.values"), exports);
+__exportStar(require("./Hospital.values"), exports);
+__exportStar(require("./Doctor.values"), exports);
