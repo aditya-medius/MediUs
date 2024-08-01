@@ -189,6 +189,9 @@ const calculateAge = (DOB) => {
 exports.calculateAge = calculateAge;
 const canDoctorTakeAppointment = (body) => __awaiter(void 0, void 0, void 0, function* () {
     const time = new Date(body.time.date);
+    console.log("body.doctors", body.doctors);
+    console.log("body.hospital", body.hospital);
+    console.log("sdddssd", yield AdvancedBookingPeriod_1.default.findOne({ doctorId: body.doctors, hospitalId: body.hospital }));
     const bookingPeriod = yield AdvancedBookingPeriod_1.default.findOne({ doctorId: body.doctors, hospitalId: body.hospital }, "bookingPeriod");
     console.log("SDsdsddsd", bookingPeriod);
     const advancedBookingPeriod = bookingPeriod === null || bookingPeriod === void 0 ? void 0 : bookingPeriod.bookingPeriod;

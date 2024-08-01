@@ -181,7 +181,12 @@ export const calculateAge = (DOB: Date) => {
 
 export const canDoctorTakeAppointment = async (body: any) => {
   const time = new Date(body.time.date);
+  console.log("body.doctors", body.doctors)
+  console.log("body.hospital", body.hospital)
+  console.log("sdddssd",
 
+    await advancedBookingPeriodModel.findOne({ doctorId: body.doctors, hospitalId: body.hospital })
+  )
   const bookingPeriod = await advancedBookingPeriodModel.findOne({ doctorId: body.doctors, hospitalId: body.hospital }, "bookingPeriod")
   console.log("SDsdsddsd", bookingPeriod)
   const advancedBookingPeriod = bookingPeriod?.bookingPeriod;
