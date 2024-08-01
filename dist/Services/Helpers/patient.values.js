@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppointStatusOrder = exports.AppointmentStatus = exports.AppointmentType = void 0;
-const config = require("../../config.json");
+const config = require("../../../config.json");
 var AppointmentType;
 (function (AppointmentType) {
     AppointmentType[AppointmentType["FRESH"] = config.Appointment.Type.Fresh] = "FRESH";

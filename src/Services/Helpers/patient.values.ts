@@ -1,4 +1,4 @@
-const config = require("../../config.json")
+const config = require("../../../config.json")
 export enum AppointmentType {
     FRESH = config.Appointment.Type.Fresh,
     FOLLOW_UP = config.Appointment.Type.Follow_Up

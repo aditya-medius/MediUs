@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Gender = exports.UserStatus = exports.UserType = exports.Weekdays = void 0;
-const config = require("../../config.json");
+const config = require("../../../config.json");
 exports.Weekdays = [
     "sunday",
     "monday",
