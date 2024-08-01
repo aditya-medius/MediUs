@@ -22,3 +22,9 @@ export enum UserType {
     DOCTOR = "doctor",
     PATIENT = "patient"
 }
+
+export enum UserStatus{
+    ACTIVE = "active",
+    ONHOLD = "onhold",
+    INACTIVE = "inactive"
+}

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.cronFunctions = exports.deleteHospital = exports.deletePaitent = exports.deleteDoctorSchedule = void 0;
+exports.cronFunctions = exports.checkHospitalsLastLogin = exports.deleteHospital = exports.deletePaitent = exports.deleteDoctorSchedule = void 0;
 const node_cron_1 = __importDefault(require("node-cron"));
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const moment_1 = __importDefault(require("moment"));
@@ -79,8 +79,19 @@ const deleteHospital = () => __awaiter(void 0, void 0, void 0, function* () {
     }));
 });
 exports.deleteHospital = deleteHospital;
+const checkHospitalsLastLogin = () => __awaiter(void 0, void 0, void 0, function* () {
+    node_cron_1.default.schedule("*/10 * * * * *", () => __awaiter(void 0, void 0, void 0, function* () {
+        // console.log("SDdsddsdsdsd")
+        const hospitals = yield Hospital_Model_1.default.find();
+        hospitals;
+    }));
+});
+exports.checkHospitalsLastLogin = checkHospitalsLastLogin;
 exports.cronFunctions = [
-    exports.deleteDoctorSchedule,
-    exports.deleteHospital,
-    exports.deletePaitent,
+    exports.checkHospitalsLastLogin
 ];
+// export const cronFunctions = [
+//   deleteDoctorSchedule,
+//   deleteHospital,
+//   deletePaitent,
+// ];

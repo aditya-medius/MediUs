@@ -167,7 +167,6 @@ export const login = async (req: Request, res: Response) => {
             otpData.remove();
             const { name, contactNumber, _id, numberOfBed, password } =
               profile.toJSON();
-            console.log("body.phoneNumberbody.phoneNumber", body.phoneNumber);
             hospitalModel
               .findOneAndUpdate(
                 {
@@ -180,7 +179,7 @@ export const login = async (req: Request, res: Response) => {
                   },
                 }
               )
-              .then((result: any) => console.log("result", result));
+              .then((result: any) => { });
 
             return successResponse(
               { token, name, contactNumber, _id, numberOfBed, password },

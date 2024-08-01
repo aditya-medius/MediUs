@@ -25,9 +25,9 @@ import * as swaggerDoc from "../swagger.json";
 import suvedhaRouter from "./routes/Suvedha.route";
 import { setSpecializationActiveStatus } from "./Services/Doctor/Doctor.Service";
 // Cron Jobs
-// cronJobService.cronFunctions.forEach((e: Function) => {
-//   e();
-// });
+cronJobService.cronFunctions.forEach((e: Function) => {
+  e();
+});
 dotenv.config();
 
 const port = process.env.PORT;

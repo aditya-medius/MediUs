@@ -35,6 +35,7 @@ const mongoose_1 = __importStar(require("mongoose"));
 const schemaNames_1 = require("../Services/schemaNames");
 const Doctors_Model_1 = __importDefault(require("./Doctors.Model"));
 const Patient_Model_1 = __importDefault(require("./Patient.Model"));
+const Helpers_1 = require("../Services/Helpers");
 const hospitalSchema = new mongoose_1.Schema({
     name: {
         type: String,
@@ -167,7 +168,15 @@ const hospitalSchema = new mongoose_1.Schema({
         {
             type: Date
         }
-    ]
+    ],
+    status: {
+        type: String,
+        enum: [Helpers_1.UserStatus.ACTIVE, Helpers_1.UserStatus.INACTIVE, Helpers_1.UserStatus.ONHOLD],
+        default: Helpers_1.UserStatus.ACTIVE
+    },
+    lastLogin: {
+        type: Date
+    }
 });
 hospitalSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {

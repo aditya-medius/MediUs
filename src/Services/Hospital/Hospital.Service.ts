@@ -1181,3 +1181,11 @@ export const getHolidayForHospital = async (id: string) => {
     return Promise.reject(error)
   }
 }
+
+export const updateHospitalsLastLogin = async (hospitalId: string) => {
+  const hospital = await hospitalModel.findOne({ _id: hospitalId })
+  if (hospital) {
+    hospital.lastLogin = new Date()
+    hospital.save()
+  }
+}

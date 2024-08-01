@@ -155,7 +155,6 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                         const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_HOSPITAL_KEY);
                         otpData.remove();
                         const { name, contactNumber, _id, numberOfBed, password } = profile.toJSON();
-                        console.log("body.phoneNumberbody.phoneNumber", body.phoneNumber);
                         Hospital_Model_1.default
                             .findOneAndUpdate({
                             contactNumber: body.phoneNumber,
@@ -165,7 +164,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                                 firebaseToken: body.firebaseToken,
                             },
                         })
-                            .then((result) => console.log("result", result));
+                            .then((result) => { });
                         return (0, response_1.successResponse)({ token, name, contactNumber, _id, numberOfBed, password }, "Successfully logged in", res);
                     }
                     else {

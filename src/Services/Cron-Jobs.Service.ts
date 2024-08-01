@@ -62,8 +62,20 @@ export const deleteHospital = async () => {
   });
 };
 
+export const checkHospitalsLastLogin = async () => {
+  cron.schedule("*/10 * * * * *", async () => {
+    // console.log("SDdsddsdsdsd")
+    const hospitals = await hospitalModel.find()
+    hospitals
+  })
+}
+
 export const cronFunctions = [
-  deleteDoctorSchedule,
-  deleteHospital,
-  deletePaitent,
-];
+  checkHospitalsLastLogin
+]
+
+// export const cronFunctions = [
+//   deleteDoctorSchedule,
+//   deleteHospital,
+//   deletePaitent,
+// ];

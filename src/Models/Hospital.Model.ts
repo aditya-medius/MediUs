@@ -17,6 +17,7 @@ import { errorResponse, successResponse } from "../Services/response";
 import { query } from "express";
 import doctorModel from "./Doctors.Model";
 import patientModel from "./Patient.Model";
+import { UserStatus } from "../Services/Helpers";
 const hospitalSchema = new Schema({
   name: {
     type: String,
@@ -157,7 +158,18 @@ const hospitalSchema = new Schema({
     {
       type: Date
     }
-  ]
+  ],
+
+  status: {
+    type: String,
+    enum: [UserStatus.ACTIVE, UserStatus.INACTIVE, UserStatus.ONHOLD],
+    default: UserStatus.ACTIVE
+  },
+
+  lastLogin: {
+    type: Date
+
+  }
 
 });
 
