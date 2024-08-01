@@ -489,7 +489,7 @@ doctorRouter.delete(
 
 doctorRouter.get(
   "/overthecounterpayment",
-  oneOf(authenticateDoctor, authenticateHospital),
+  oneOf(authenticateDoctor, authenticateHospital, authenticatePatient),
   doctorController.checkIfDoctorTakesOverTheCounterPaymentsForAHospital
 )
 
