@@ -967,6 +967,7 @@ const getHospitalsByCity = (req, res) => __awaiter(void 0, void 0, void 0, funct
             return {
                 _id: e === null || e === void 0 ? void 0 : e._id,
                 name: e === null || e === void 0 ? void 0 : e.name,
+                status: e === null || e === void 0 ? void 0 : e.status
             };
         });
         // const Conn = mongoose.createConnection();

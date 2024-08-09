@@ -1220,7 +1220,8 @@ export const getDoctorWorkingInHospitals = async (
         scheduleAvailable: e?.scheduleAvailable,
         lat: data?.lat,
         lng: data?.lng,
-        contactNumber: data?.contactNumber
+        contactNumber: data?.contactNumber,
+        status: data?.status
       };
     });
 

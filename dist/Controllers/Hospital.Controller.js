@@ -696,7 +696,8 @@ const searchHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
                     Address: (_b = (_a = e === null || e === void 0 ? void 0 : e.address) === null || _a === void 0 ? void 0 : _a.locality) === null || _b === void 0 ? void 0 : _b.name,
                     contactNumber: e === null || e === void 0 ? void 0 : e.contactNumber,
                     lat: e === null || e === void 0 ? void 0 : e.lat,
-                    lng: e === null || e === void 0 ? void 0 : e.lng
+                    lng: e === null || e === void 0 ? void 0 : e.lng,
+                    status: e === null || e === void 0 ? void 0 : e.status
                 };
             });
             // return successResponse(hospitalArray, "Success", res);

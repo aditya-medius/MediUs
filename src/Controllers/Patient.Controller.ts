@@ -1090,6 +1090,7 @@ export const getHospitalsByCity = async (req: Request, res: Response) => {
       return {
         _id: e?._id,
         name: e?.name,
+        status: e?.status
       };
     });
 
