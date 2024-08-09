@@ -116,6 +116,9 @@ const doctorSchema = new Schema(
       type: String,
       // required: true,
     },
+    profileImage: {
+      type: String
+    }
   },
   {
     toJSON: { virtuals: true },

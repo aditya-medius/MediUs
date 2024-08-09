@@ -128,6 +128,8 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
     }, firebaseToken: {
         type: String,
         // required: true,
+    }, profileImage: {
+        type: String
     } }), {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
