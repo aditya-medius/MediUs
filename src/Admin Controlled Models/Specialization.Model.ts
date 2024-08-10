@@ -14,6 +14,9 @@ const specialitySchema = new Schema(
     image: {
       type: String,
     },
+    specialityNameh: {
+      type: String
+    }
   },
   { timestamps: true }
 );

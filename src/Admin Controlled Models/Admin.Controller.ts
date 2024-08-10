@@ -1008,7 +1008,7 @@ export const editSpeciality = async (req: Request, res: Response) => {
     if (!exist) {
       return errorResponse(new Error("Speciality doesn't exist"), res);
     }
-    let { image, name } = req.body;
+    let { image, name, specialityNameh } = req.body;
 
     let data = await specialityModel.findOneAndUpdate(
       { _id: specialityId },
@@ -1016,6 +1016,7 @@ export const editSpeciality = async (req: Request, res: Response) => {
         $set: {
           ...(image && { image }),
           ...(name && { specialityName: name }),
+          ...(specialityNameh && { specialityNameh })
         },
       }
     );

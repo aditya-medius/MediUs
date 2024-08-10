@@ -14,6 +14,9 @@ const specialitySchema = new mongoose_1.Schema({
     image: {
         type: String,
     },
+    specialityNameh: {
+        type: String
+    }
 }, { timestamps: true });
 const specialityModel = (0, mongoose_1.model)(schemaNames_1.specialization, specialitySchema);
 exports.default = specialityModel;

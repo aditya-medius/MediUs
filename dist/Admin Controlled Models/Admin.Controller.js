@@ -1002,9 +1002,9 @@ const editSpeciality = (req, res) => __awaiter(void 0, void 0, void 0, function*
         if (!exist) {
             return (0, response_1.errorResponse)(new Error("Speciality doesn't exist"), res);
         }
-        let { image, name } = req.body;
+        let { image, name, specialityNameh } = req.body;
         let data = yield Specialization_Model_1.default.findOneAndUpdate({ _id: specialityId }, {
-            $set: Object.assign(Object.assign({}, (image && { image })), (name && { specialityName: name })),
+            $set: Object.assign(Object.assign(Object.assign({}, (image && { image })), (name && { specialityName: name })), (specialityNameh && { specialityNameh })),
         });
         return (0, response_1.successResponse)({ success: true }, "Success", res);
     }
