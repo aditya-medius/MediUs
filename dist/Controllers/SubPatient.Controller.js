@@ -30,10 +30,15 @@ const addSubPatient = (req, res) => __awaiter(void 0, void 0, void 0, function* 
 exports.addSubPatient = addSubPatient;
 const getSubPatientList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const subPatientList = yield SubPatient_Model_1.default
+        // const subPatientList: Array<any> = await subPatientModel
+        //   .find({
+        //     parentPatient: req.currentPatient,
+        //     deleted: false,
+        //   })
+        //   .lean();
+        const subPatientList = yield Patient_Model_1.default
             .find({
-            parentPatient: req.currentPatient,
-            deleted: false,
+            parentPatient: req.currentPatient
         })
             .lean();
         let query = req.query;

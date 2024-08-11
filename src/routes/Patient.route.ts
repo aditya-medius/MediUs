@@ -264,7 +264,8 @@ patientRouter.post(
 patientRouter.post(
   "/addSubPatient",
   oneOf(authenticatePatient),
-  subPatientController.addSubPatient
+  // subPatientController.addSubPatient
+  patientController.createPatient
 );
 
 patientRouter.get(
@@ -276,19 +277,22 @@ patientRouter.get(
 patientRouter.put(
   "/deleteSubPatient/:id",
   oneOf(authenticatePatient),
-  subPatientController.deleteSubPatient
+  // subPatientController.deleteSubPatient
+  patientController.deleteProfile
 );
 
 patientRouter.get(
   "/getSubPatientById/:id",
   oneOf(authenticatePatient),
-  subPatientController.getSubPatientById
+  // subPatientController.getSubPatientById
+  patientController.getPatientById
 );
 
 patientRouter.put(
   "/updateSubPatient/:id",
   oneOf(authenticatePatient),
-  subPatientController.updateSubPatient
+  // subPatientController.updateSubPatient
+  patientController.updatePatientProfile
 );
 
 // Check kro k doctor available hai uss din

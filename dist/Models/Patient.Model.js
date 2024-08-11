@@ -52,6 +52,9 @@ const patientSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, sche
     }, firebaseToken: {
         type: String,
         // required: true,
+    }, parentPatient: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        ref: schemaNames_1.patient
     } }));
 patientSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {

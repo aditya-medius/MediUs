@@ -16,10 +16,16 @@ export const addSubPatient = async (req: Request, res: Response) => {
 
 export const getSubPatientList = async (req: Request, res: Response) => {
   try {
-    const subPatientList: Array<any> = await subPatientModel
+    // const subPatientList: Array<any> = await subPatientModel
+    //   .find({
+    //     parentPatient: req.currentPatient,
+    //     deleted: false,
+    //   })
+    //   .lean();
+
+    const subPatientList: Array<any> = await patientModel
       .find({
-        parentPatient: req.currentPatient,
-        deleted: false,
+        parentPatient: req.currentPatient
       })
       .lean();
 
