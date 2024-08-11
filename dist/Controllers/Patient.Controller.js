@@ -967,7 +967,7 @@ const getHospitalsByCity = (req, res) => __awaiter(void 0, void 0, void 0, funct
             return {
                 _id: e === null || e === void 0 ? void 0 : e._id,
                 name: e === null || e === void 0 ? void 0 : e.name,
-                status: e === null || e === void 0 ? void 0 : e.status
+                status: e === null || e === void 0 ? void 0 : e.status,
             };
         });
         // const Conn = mongoose.createConnection();
@@ -981,6 +981,7 @@ const getHospitalsByCity = (req, res) => __awaiter(void 0, void 0, void 0, funct
             _id: e === null || e === void 0 ? void 0 : e._id,
             name: e === null || e === void 0 ? void 0 : e.specialityName,
             img: e === null || e === void 0 ? void 0 : e.img,
+            specialityNameh: e === null || e === void 0 ? void 0 : e.specialityNameh
         }));
         // return successResponse(hospitalsInThatCity, "Success", res);
         return (0, response_1.successResponse)({ hospitals, specilization: S }, "Success", res);
@@ -1053,6 +1054,7 @@ const getDoctorsByCity = (req, res) => __awaiter(void 0, void 0, void 0, functio
             _id: e === null || e === void 0 ? void 0 : e._id,
             name: e === null || e === void 0 ? void 0 : e.specialityName,
             img: e === null || e === void 0 ? void 0 : e.img,
+            specialityNameh: e === null || e === void 0 ? void 0 : e.specialityNameh
         }));
         return (0, response_1.successResponse)({ doctors, specilization: S }, "Success", res);
         // return successResponse(doctorsInThatCity, "Success", res);

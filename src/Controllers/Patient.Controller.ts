@@ -1090,7 +1090,7 @@ export const getHospitalsByCity = async (req: Request, res: Response) => {
       return {
         _id: e?._id,
         name: e?.name,
-        status: e?.status
+        status: e?.status,
       };
     });
 
@@ -1106,6 +1106,7 @@ export const getHospitalsByCity = async (req: Request, res: Response) => {
       _id: e?._id,
       name: e?.specialityName,
       img: e?.img,
+      specialityNameh: e?.specialityNameh
     }));
 
     // return successResponse(hospitalsInThatCity, "Success", res);
@@ -1198,6 +1199,7 @@ export const getDoctorsByCity = async (req: Request, res: Response) => {
       _id: e?._id,
       name: e?.specialityName,
       img: e?.img,
+      specialityNameh: e?.specialityNameh
     }));
     return successResponse({ doctors, specilization: S }, "Success", res);
     // return successResponse(doctorsInThatCity, "Success", res);
