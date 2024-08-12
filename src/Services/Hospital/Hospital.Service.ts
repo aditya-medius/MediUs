@@ -928,6 +928,7 @@ export const getHolidayTimigsOfHospitalsInDoctor = async (
     let startDate = new Date(year, month, currentDate);
     let endDate = new Date(year, month, currentDate + 1);
 
+    console.log("start datae", { $gte: startDate, $lte: endDate })
     let holidays: any = await holidayModel
       .find({
         doctorId,
