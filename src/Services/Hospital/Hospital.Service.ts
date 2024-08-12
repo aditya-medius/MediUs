@@ -1070,6 +1070,10 @@ export const hospitalsInDoctor = async (doctorId: string, timings: string) => {
         scheduleAvailable: true,
       };
 
+      console.log("exisy", exist)
+      console.log("WH", WH)
+
+
       if (exist) {
         obj = {
           ...e,

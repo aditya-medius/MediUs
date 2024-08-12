@@ -949,6 +949,8 @@ const hospitalsInDoctor = (doctorId, timings) => __awaiter(void 0, void 0, void 
             let WH = workingHours.filter((elem) => { var _a; return elem.hospitalDetails.toString() === ((_a = e === null || e === void 0 ? void 0 : e.hospital) === null || _a === void 0 ? void 0 : _a._id.toString()); });
             let PRES = prescriptions.find((elem) => { var _a; return elem.hospitalId.toString() === ((_a = e === null || e === void 0 ? void 0 : e.hospital) === null || _a === void 0 ? void 0 : _a._id.toString()); });
             let obj = Object.assign(Object.assign({}, e), { workingHours: WH, prescription: PRES, available: true, scheduleAvailable: true });
+            console.log("exisy", exist);
+            console.log("WH", WH);
             if (exist) {
                 obj = Object.assign(Object.assign({}, e), { available: false, workingHours: WH, prescription: PRES, scheduleAvailable: true });
             }
