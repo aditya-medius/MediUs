@@ -854,12 +854,12 @@ const getHolidayTimigsOfHospitalsInDoctor = (doctorId, hospitalId, timings) => _
         let year = time.getFullYear(), month = time.getMonth(), currentDate = time.getDate();
         let startDate = new Date(year, month, currentDate);
         let endDate = new Date(year, month, currentDate + 1);
-        console.log("start datae", { $gte: startDate, $lte: endDate });
+        console.log("start datae", { $gte: startDate, $lt: endDate });
         let holidays = yield Holiday_Calendar_Model_1.default
             .find({
             doctorId,
             hospitalId: { $in: hospitalId },
-            date: { $gte: startDate, $lte: endDate },
+            date: { $gte: startDate, $lt: endDate },
             "delData.deleted": false,
         })
             .lean();

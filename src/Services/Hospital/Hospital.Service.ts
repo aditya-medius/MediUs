@@ -928,12 +928,12 @@ export const getHolidayTimigsOfHospitalsInDoctor = async (
     let startDate = new Date(year, month, currentDate);
     let endDate = new Date(year, month, currentDate + 1);
 
-    console.log("start datae", { $gte: startDate, $lte: endDate })
+    console.log("start datae", { $gte: startDate, $lt: endDate })
     let holidays: any = await holidayModel
       .find({
         doctorId,
         hospitalId: { $in: hospitalId },
-        date: { $gte: startDate, $lte: endDate },
+        date: { $gte: startDate, $lt: endDate },
         "delData.deleted": false,
       })
       .lean();
