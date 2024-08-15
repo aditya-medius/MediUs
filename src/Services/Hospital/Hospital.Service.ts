@@ -19,7 +19,7 @@ import { getAge, getDateDifference, getDateDifferenceFromCurrentDate, getRangeOf
 import patientModel from "../../Models/Patient.Model";
 import { phoneNumberValidation } from "../Validation.Service";
 import moment from "moment";
-import { BookAppointment } from "../Helpers/Patient.Service";
+import { BookAppointment } from "../Patient/Patient.Service";
 import creditAmountModel from "../../Models/CreditAmount.Model";
 import appointmentPaymentModel from "../../Models/AppointmentPayment.Model";
 import * as orderController from "../../Controllers/Order.Controller";
@@ -928,7 +928,6 @@ export const getHolidayTimigsOfHospitalsInDoctor = async (
     let startDate = new Date(year, month, currentDate);
     let endDate = new Date(year, month, currentDate + 1);
 
-    console.log("start datae", { $gte: startDate, $lt: endDate })
     let holidays: any = await holidayModel
       .find({
         doctorId,
@@ -937,8 +936,6 @@ export const getHolidayTimigsOfHospitalsInDoctor = async (
         "delData.deleted": false,
       })
       .lean();
-
-    console.log("ljhgfcghvdssds", holidays);
 
     return holidays;
   } catch (error: any) {
@@ -1191,7 +1188,7 @@ export const updateHospitalsLastLogin = async (hospitalId: string) => {
   await hospitalModel.findOneAndUpdate({ _id: hospitalId }, { $set: { lastLogin: new Date(), status: UserStatus.ACTIVE } })
 }
 
-const checkIfDoctorHasLoggedInInThePastGivenDays = (hospitals: Array<Hospital>, numberOfDays: number) => {
+const checkIfHospitalHasLoggedInInThePastGivenDays = (hospitals: Array<Hospital>, numberOfDays: number) => {
 
   const hospitalsThatHaveNotLoggedInThePastWeek = hospitals.filter((hospital: Hospital) => {
     const dateDifference = getDateDifferenceFromCurrentDate(hospital.lastLogin)
@@ -1203,11 +1200,11 @@ const checkIfDoctorHasLoggedInInThePastGivenDays = (hospitals: Array<Hospital>, 
 }
 
 export const checkIfHospitalHasLoggedInThePastWeek = (hospitals: Array<Hospital>) => {
-  return checkIfDoctorHasLoggedInInThePastGivenDays(hospitals, -7)
+  return checkIfHospitalHasLoggedInInThePastGivenDays(hospitals, -7)
 }
 
 export const checkIfHospitalHasLoggedInInThePastMonth = (hospitals: Array<Hospital>) => {
-  return checkIfDoctorHasLoggedInInThePastGivenDays(hospitals, -37)
+  return checkIfHospitalHasLoggedInInThePastGivenDays(hospitals, -37)
 }
 
 export const markHospitalsAccountAsOnHold = async (hospitals: Array<Hospital>) => {
@@ -1216,4 +1213,28 @@ export const markHospitalsAccountAsOnHold = async (hospitals: Array<Hospital>) =
 
 export const markHospitalsAccountAsInactive = async (hospitals: Array<Hospital>) => {
   await hospitalModel.updateMany({ _id: { $in: hospitals.map((hospital: Hospital) => hospital.id) } }, { $set: { status: UserStatus.INACTIVE } })
+}
+
+export const markHospitalNumberAsNotverified = async (hospital: Array<Hospital>) => {
+  await hospitalModel.updateMany({ _id: { $in: hospital.map((hospital: Hospital) => hospital.id) } }, { $set: { phoneNumberVerified: false } })
+}
+
+export const checkIfHospitalHasVerifiedPhoneNumberInThePastGivenDays = (hospital: Array<Hospital>, numberOfDays: number) => {
+  const hospitalsThatHaveNotLoggedInThePastWeek = hospital.filter((hospital: Hospital) => {
+    const dateDifference = getDateDifferenceFromCurrentDate(hospital.lastTimePhoneNumberVerified)
+    if (dateDifference < numberOfDays) {
+      return true
+    }
+  })
+  return hospitalsThatHaveNotLoggedInThePastWeek
+}
+
+export const checkIfHospitalHasVerifiedPhoneNumberInThe2Days = (hospital: Array<Hospital>) => {
+  return checkIfHospitalHasVerifiedPhoneNumberInThePastGivenDays(hospital, -2)
+}
+
+export const checkIfHospitalHasVerifiedPhoneNumberInThe5Days = (hospital: Array<Hospital>) => {
+  // -7 because -5 + (-2 from above function)
+  return checkIfHospitalHasVerifiedPhoneNumberInThePastGivenDays(hospital, -7)
+
 }

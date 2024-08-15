@@ -10,4 +10,6 @@ export interface Hospital {
     verified: boolean,
     contactNumber: string,
     type: string,
+    phoneNumberVerified: boolean,
+    lastTimePhoneNumberVerified: Date,
 }

@@ -28,7 +28,14 @@ const patientSchema = new Schema({
   },
   parentPatient: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: patient 
+    ref: patient
+  },
+  phoneNumberVerified: {
+    type: Boolean,
+    default: true
+  },
+  lastTimePhoneNumberVerified: {
+    type: Date
   }
 });
 

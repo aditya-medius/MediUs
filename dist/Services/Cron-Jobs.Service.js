@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.cronFunctions = exports.markHospitalAsInactiveIfItHasBeenOnHoldForAMonth = exports.markHospitalAsOnHoldIfItHasNotLoggedInInAWeek = exports.deleteHospital = exports.deletePaitent = exports.deleteDoctorSchedule = void 0;
+exports.cronFunctions = exports.markHospitalAsOnHoldIfItHasNotLoggedInInAWeek = exports.deleteHospital = exports.deletePaitent = exports.deleteDoctorSchedule = void 0;
 const node_cron_1 = __importDefault(require("node-cron"));
 const Doctors_Model_1 = __importDefault(require("../Models/Doctors.Model"));
 const moment_1 = __importDefault(require("moment"));
@@ -21,6 +21,11 @@ const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
 const Hospital_Service_1 = require("./Hospital/Hospital.Service");
 const Helpers_1 = require("./Helpers");
 const Hospital_Util_1 = require("./Hospital/Hospital.Util");
+const Doctor_Util_1 = require("./Doctor/Doctor.Util");
+const Doctor_Service_1 = require("./Doctor/Doctor.Service");
+const Patient_Service_1 = require("./Patient/Patient.Service");
+const Hospital_Service_2 = require("./Hospital/Hospital.Service");
+const Patient_Util_1 = require("./Patient/Patient.Util");
 const deleteDoctorSchedule = () => __awaiter(void 0, void 0, void 0, function* () {
     // Cron job har 10 min me chal rhi hai
     node_cron_1.default.schedule("0/10 * * * * *", () => __awaiter(void 0, void 0, void 0, function* () {
@@ -105,10 +110,64 @@ const markHospitalAsInactiveIfItHasBeenOnHoldForAMonth = () => {
         }
     }));
 };
-exports.markHospitalAsInactiveIfItHasBeenOnHoldForAMonth = markHospitalAsInactiveIfItHasBeenOnHoldForAMonth;
+const markDoctorsPhoneNumberAsNotVerified = () => {
+    const numberVerifyingPeriod = process.env.NUMBERVERIFYINGPERIOD;
+    node_cron_1.default.schedule(numberVerifyingPeriod, () => __awaiter(void 0, void 0, void 0, function* () {
+        const doctorData = yield Doctors_Model_1.default.find({ $or: [{ phoneNumberVerified: { $exists: false } }, { phoneNumberVerified: true }] });
+        if (doctorData.length > 0) {
+            const doctor = (0, Doctor_Util_1.formatDoctors)(doctorData);
+            (0, Doctor_Service_1.markDoctorsPhoneNumberAsNotVerified)(doctor);
+        }
+    }));
+};
+const markPatientsPhoneNumberAsNotVerified = () => {
+    const numberVerifyingPeriod = process.env.NUMBERVERIFYINGPERIOD;
+    node_cron_1.default.schedule(numberVerifyingPeriod, () => __awaiter(void 0, void 0, void 0, function* () {
+        const patientData = yield Patient_Model_1.default.find({ $or: [{ phoneNumberVerified: { $exists: false } }, { phoneNumberVerified: true }] });
+        if (patientData.length > 0) {
+            const patient = (0, Patient_Util_1.formatPatients)(patientData);
+            (0, Patient_Service_1.markPatientsPhoneNumberAsNotVerified)(patient);
+        }
+    }));
+};
+const markHospitalNumberAsNotverified = () => {
+    const numberVerifyingPeriod = process.env.NUMBERVERIFYINGPERIOD;
+    node_cron_1.default.schedule(numberVerifyingPeriod, () => __awaiter(void 0, void 0, void 0, function* () {
+        const hospitalData = yield Hospital_Model_1.default.find({ $or: [{ phoneNumberVerified: { $exists: false } }, { phoneNumberVerified: true }] });
+        if (hospitalData.length > 0) {
+            const hospital = (0, Hospital_Util_1.formatHospitals)(hospitalData);
+            (0, Hospital_Service_2.markHospitalNumberAsNotverified)(hospital);
+        }
+    }));
+};
+const markHospitalAsOnHoldIfItHasNotVerifiedPhoneNumber = () => {
+    const onHoldPeriod = process.env.ONHOLDNUMBERJOBPERIOD;
+    node_cron_1.default.schedule(onHoldPeriod, () => __awaiter(void 0, void 0, void 0, function* () {
+        const hospialData = yield Hospital_Model_1.default.find({ status: { $nin: [Helpers_1.UserStatus.ONHOLD, Helpers_1.UserStatus.INACTIVE] } });
+        if (hospialData.length > 0) {
+            const hospital = (0, Hospital_Util_1.formatHospitals)(hospialData);
+            const hospitalsThatHaveNotLoggedInAWeek = (0, Hospital_Service_1.checkIfHospitalHasLoggedInThePastWeek)(hospital);
+            (0, Hospital_Service_1.markHospitalsAccountAsOnHold)(hospitalsThatHaveNotLoggedInAWeek);
+        }
+    }));
+};
+const markHospitalAsInactiveIfItHasNotVerifiedPhoneNumber = () => {
+    const inActivePeriod = process.env.INACTIVENUMBERJOBPERIOD;
+    node_cron_1.default.schedule(inActivePeriod, () => __awaiter(void 0, void 0, void 0, function* () {
+        const hospialData = yield Hospital_Model_1.default.find({ status: { $ne: Helpers_1.UserStatus.INACTIVE } });
+        if (hospialData.length > 0) {
+            const hospital = (0, Hospital_Util_1.formatHospitals)(hospialData);
+            const hospitalsThatHaveNotLoggedInAMonth = (0, Hospital_Service_1.checkIfHospitalHasLoggedInInThePastMonth)(hospital);
+            (0, Hospital_Service_1.markHospitalsAccountAsInactive)(hospitalsThatHaveNotLoggedInAMonth);
+        }
+    }));
+};
 exports.cronFunctions = [
     exports.markHospitalAsOnHoldIfItHasNotLoggedInInAWeek,
-    exports.markHospitalAsInactiveIfItHasBeenOnHoldForAMonth
+    markHospitalAsInactiveIfItHasBeenOnHoldForAMonth,
+    markDoctorsPhoneNumberAsNotVerified,
+    markPatientsPhoneNumberAsNotVerified,
+    markHospitalNumberAsNotverified
 ];
 // export const cronFunctions = [
 //   deleteDoctorSchedule,

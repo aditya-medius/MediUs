@@ -41,7 +41,7 @@ import qualificationModel from "../Models/Qualification.Model";
 import {
   calculateAge,
   getHospitalsInACity,
-} from "../Services/Helpers/Patient.Service";
+} from "../Services/Patient/Patient.Service";
 import * as approvalService from "../Services/Approval-Request/Approval-Request.Service";
 import * as holidayService from "../Services/Holiday-Calendar/Holiday-Calendar.Service";
 import * as hospitalService from "../Services/Hospital/Hospital.Service";
@@ -193,6 +193,7 @@ export const doctorLogin = async (req: Request, res: Response) => {
             _id,
             qualification,
             preBookingTime,
+            phoneNumberVerified
           } = profile.toJSON();
           qualification = qualification[0];
           return successResponse(
@@ -206,6 +207,7 @@ export const doctorLogin = async (req: Request, res: Response) => {
               _id,
               qualification,
               preBookingTime,
+              phoneNumberVerified
             },
             "Successfully logged in",
             res
@@ -283,6 +285,7 @@ export const doctorLogin = async (req: Request, res: Response) => {
               qualification,
               verified,
               preBookingTime,
+              phoneNumberVerified
             } = profile;
             doctorModel
               .findOneAndUpdate(
@@ -309,6 +312,7 @@ export const doctorLogin = async (req: Request, res: Response) => {
                 qualification,
                 verified,
                 preBookingTime,
+                phoneNumberVerified
               },
               "Successfully logged in",
               res

@@ -16,6 +16,8 @@ const formatHospital = (hospital) => {
         verified: hospital === null || hospital === void 0 ? void 0 : hospital.verified,
         contactNumber: hospital === null || hospital === void 0 ? void 0 : hospital.contactNumber,
         type: hospital === null || hospital === void 0 ? void 0 : hospital.type,
+        phoneNumberVerified: hospital === null || hospital === void 0 ? void 0 : hospital.phoneNumberVerified,
+        lastTimePhoneNumberVerified: hospital === null || hospital === void 0 ? void 0 : hospital.lastTimePhoneNumberVerified,
     };
 };
 exports.formatHospital = formatHospital;

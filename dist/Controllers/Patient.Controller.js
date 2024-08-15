@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.canDoctorTakeAppointment = exports.getDoctorsIHaveLikes = exports.checkIfDoctorIsOnHoliday = exports.getPatientsNotification = exports.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod = exports.searchPatientByPhoneNumberOrEmail = exports.checkDoctorAvailability = exports.uploadPrescription = exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.viewAppointById = exports.CancelAppointment = exports.doneAppointment = exports.rescheduleAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = exports.excludeHospitalFields = exports.excludePatientFields = void 0;
+exports.verifyPatientPhoneNumber = exports.canDoctorTakeAppointment = exports.getDoctorsIHaveLikes = exports.checkIfDoctorIsOnHoliday = exports.getPatientsNotification = exports.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod = exports.searchPatientByPhoneNumberOrEmail = exports.checkDoctorAvailability = exports.uploadPrescription = exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.viewAppointById = exports.CancelAppointment = exports.doneAppointment = exports.rescheduleAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = exports.excludeHospitalFields = exports.excludePatientFields = void 0;
 const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
 // import { excludePatientFields } from "./Patient.Controller";
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
@@ -57,8 +57,8 @@ const likeService = __importStar(require("../Services/Like/Like.service"));
 const prescriptionValidityController = __importStar(require("../Controllers/Prescription-Validity.Controller"));
 const Order_Model_1 = __importDefault(require("../Models/Order.Model"));
 const Doctor_Service_1 = require("../Services/Doctor/Doctor.Service");
-const Patient_Service_1 = require("../Services/Helpers/Patient.Service");
-const patientService = __importStar(require("../Services/Helpers/Patient.Service"));
+const Patient_Service_1 = require("../Services/Patient/Patient.Service");
+const patientService = __importStar(require("../Services/Patient/Patient.Service"));
 const Utils_1 = require("../Services/Utils");
 const Fee_Model_1 = __importDefault(require("../Module/Payment/Model/Fee.Model"));
 exports.excludePatientFields = {
@@ -1189,3 +1189,13 @@ const canDoctorTakeAppointment = (req, res) => __awaiter(void 0, void 0, void 0,
     }
 });
 exports.canDoctorTakeAppointment = canDoctorTakeAppointment;
+const verifyPatientPhoneNumber = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        yield (0, Utils_1.verifyPhoneNumber)(req.currentPatient, "patient");
+        return (0, response_1.successResponse)({}, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.verifyPatientPhoneNumber = verifyPatientPhoneNumber;

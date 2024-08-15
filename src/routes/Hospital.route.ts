@@ -301,4 +301,6 @@ hospitalRouter.put("/holiday", oneOf(authenticateHospital), hospitalController.a
 
 hospitalRouter.get("/holiday", oneOf(authenticateHospital), hospitalController.getHospitalsHoliday)
 
+hospitalRouter.put("/verify/number", oneOf(authenticateHospital), hospitalController.verifyHospitalPhoneNumber)
+
 export default hospitalRouter;

@@ -8,7 +8,7 @@ import * as dotenv from "dotenv";
 import moment from "moment";
 import doctorModel from "../../Models/Doctors.Model";
 import appointmentModel from "../../Models/Appointment.Model";
-import { getRangeOfDates } from "../Utils";
+import { getDateDifferenceFromCurrentDate, getRangeOfDates } from "../Utils";
 import {
   excludeHospitalFields,
   excludePatientFields,
@@ -43,7 +43,7 @@ import { getCityIdFromName, getSpecialization } from "../Admin/Admin.Service";
 import workingHourModel from "../../Models/WorkingHours.Model";
 import specialityModel from "../../Admin Controlled Models/Specialization.Model";
 import hospitalModel from "../../Models/Hospital.Model";
-import { offDatesAndDays, UserType, Weekdays } from "../Helpers";
+import { Doctor, offDatesAndDays, UserType, Weekdays } from "../Helpers";
 import overTheCounterModel from "../../Models/OverTheCounterPayment";
 import advancedBookingPeriodModel from "../../Models/AdvancedBookingPeriod";
 dotenv.config();
@@ -1187,4 +1187,29 @@ export const getDoctorsAdvancedBookingPeriod = async (doctorId: string, hospital
   } catch (error) {
     return Promise.reject(error)
   }
+}
+
+const checkIfDoctorHasVerifiedPhoneNumberInThePastGivenDays = (doctors: Array<Doctor>, numberOfDays: number) => {
+  const doctorsThatHaveNotVerifiedTheirPhoneNumber = doctors.filter((doctor: Doctor) => {
+    if (!doctor?.lastTimePhoneNumberVerified) {
+      return true
+    }
+    const dateDifference = getDateDifferenceFromCurrentDate(doctor?.lastTimePhoneNumberVerified)
+    if (dateDifference < numberOfDays) {
+      return true
+    }
+  })
+  return doctorsThatHaveNotVerifiedTheirPhoneNumber
+}
+
+export const checkIfDoctorHasVerifiedPhoneNumberInThePast2Days = (doctor: Array<Doctor>) => {
+  return checkIfDoctorHasVerifiedPhoneNumberInThePastGivenDays(doctor, -2)
+}
+
+export const markDoctorsPhoneNumberAsNotVerified = async (doctors: Array<Doctor>) => {
+  await doctorModel.updateMany({ _id: { $in: doctors.map((doctor: Doctor) => doctor.id) } }, { $set: { phoneNumberVerified: false } })
+}
+
+export const markDoctorPhoneNumberAsVerified = async (doctor: Doctor) => {
+  await doctorModel.findOneAndUpdate({ _id: doctor.id }, { $set: { phoneNumberVerified: true } })
 }

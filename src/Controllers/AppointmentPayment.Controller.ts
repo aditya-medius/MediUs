@@ -5,7 +5,7 @@ import appointmentPaymentModel from "../Models/AppointmentPayment.Model";
 import * as orderController from "./Order.Controller";
 import crypto from "crypto";
 import creditAmountModel from "../Models/CreditAmount.Model";
-import { BookAppointment } from "../Services/Helpers/Patient.Service";
+import { BookAppointment } from "../Services/Patient/Patient.Service";
 export const generateOrderId = async (req: Request, res: Response) => {
   try {
     const body = req.body;

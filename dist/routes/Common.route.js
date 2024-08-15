@@ -104,4 +104,9 @@ commonRouter.post("/test/notification", (req, res) => __awaiter(void 0, void 0, 
     (0, Utils_1.sendNotificationToDoctor)("", { body: "", title: "" });
     return (0, response_1.errorResponse)({ error: "Error" }, res);
 }));
+commonRouter.get("/otp/number", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    let { phoneNumber } = req.query;
+    (0, Utils_1.sendOTPToPhoneNumber)(phoneNumber);
+    return (0, response_1.successResponse)({}, "Success", res);
+}));
 exports.default = commonRouter;

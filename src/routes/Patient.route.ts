@@ -357,4 +357,6 @@ patientRouter.get(
   patientController.getDoctorsIHaveLikes
 );
 
+patientRouter.put("/verify/number", oneOf(authenticatePatient), patientController.verifyPatientPhoneNumber)
+
 export default patientRouter;

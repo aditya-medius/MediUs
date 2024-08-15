@@ -159,4 +159,5 @@ hospitalRouter.put("/verify/updateNumber", (0, middlewareHelper_1.oneOf)(Hospita
 hospitalRouter.put("/update/status", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.changeAppointmentStatus);
 hospitalRouter.put("/holiday", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.addHolidayForHospital);
 hospitalRouter.get("/holiday", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getHospitalsHoliday);
+hospitalRouter.put("/verify/number", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.verifyHospitalPhoneNumber);
 exports.default = hospitalRouter;

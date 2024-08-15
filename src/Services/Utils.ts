@@ -7,6 +7,9 @@ import otpModel from "../Models/OTP.Model";
 import { sendMessage } from "./message.service";
 import * as http from "http";
 import axios from "axios";
+import hospitalModel from "../Models/Hospital.Model";
+import patientModel from "../Models/Patient.Model";
+import doctorModel from "../Models/Doctors.Model";
 
 export const phoneNumberRegex: RegExp = /^[0]?[6789]\d{9}$/;
 
@@ -336,4 +339,39 @@ export const getDateDifference = (date1: Date | Moment, date2: Date | Moment) =>
 
 export const getDateDifferenceFromCurrentDate = (date: Date) => {
   return getDateDifference(new Date(), date)
-} 
+}
+
+export const sendOTPToPhoneNumber = async (phoneNumber: string) => {
+  let OTP = await generateOTP(phoneNumber);
+  let otpToken = generateOTPtoken(OTP);
+
+  await otpModel.findOneAndUpdate(
+    { phoneNumber: phoneNumber },
+    {
+      $set: { phoneNumber: phoneNumber, otp: otpToken },
+    },
+    { upsert: true }
+  );
+
+  digiMilesSMS.sendOTPToPhoneNumber(phoneNumber, OTP);
+}
+
+export const verifyPhoneNumber = async (id: string, idOf: string) => {
+  let userModel = null
+  switch (idOf) {
+    case "doctor": {
+      userModel = doctorModel;
+      break
+    }
+    case "patient": {
+      userModel = patientModel;
+      break
+    }
+    case "hospital": {
+      userModel = hospitalModel;
+      break
+    }
+  }
+  await userModel?.findOneAndUpdate({ _id: id }, { $set: { phoneNumberVerified: true, lastTimePhoneNumberVerified: new Date() } })
+  return
+}

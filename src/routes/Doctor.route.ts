@@ -511,6 +511,5 @@ doctorRouter.get(
   doctorController.getDoctorsAdvancedBookingPeriod
 )
 
-
 export default doctorRouter;
 

@@ -39,9 +39,9 @@ import * as likeService from "../Services/Like/Like.service";
 import * as prescriptionValidityController from "../Controllers/Prescription-Validity.Controller";
 import orderModel from "../Models/Order.Model";
 import { checkIfDoctorIsAvailableOnTheDay } from "../Services/Doctor/Doctor.Service";
-import { calculateAge } from "../Services/Helpers/Patient.Service";
-import * as patientService from "../Services/Helpers/Patient.Service";
-import { digiMilesSMS } from "../Services/Utils";
+import { calculateAge } from "../Services/Patient/Patient.Service";
+import * as patientService from "../Services/Patient/Patient.Service";
+import { digiMilesSMS, verifyPhoneNumber } from "../Services/Utils";
 import feeModel from "../Module/Payment/Model/Fee.Model";
 import { convenienceFee } from "../Services/Admin/Admin.Service";
 import moment from "moment";
@@ -175,7 +175,7 @@ export const patientLogin = async (req: Request, res: Response) => {
                 },
               }
             )
-            .then((result) => console.log);
+            .then((result: any) => console.log);
 
           return successResponse(
             {
@@ -251,7 +251,7 @@ export const patientLogin = async (req: Request, res: Response) => {
                   },
                 }
               )
-              .then((result) => console.log);
+              .then((result: any) => console.log);
 
             return successResponse(
               {
@@ -1356,3 +1356,13 @@ export const canDoctorTakeAppointment = async (req: Request, res: Response) => {
     return errorResponse(error, res);
   }
 };
+
+export const verifyPatientPhoneNumber = async (req: Request, res: Response) => {
+  try {
+    await verifyPhoneNumber(req.currentPatient, "patient")
+
+    return successResponse({}, "Success", res)
+  } catch (error: any) {
+    return errorResponse(error, res)
+  }
+}

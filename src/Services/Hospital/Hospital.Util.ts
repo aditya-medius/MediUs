@@ -5,7 +5,7 @@ export const formatHospitals = (hospitals: Array<any>): Array<Hospital> => {
     return hospital
 }
 
-export const formatHospital = (hospital: any) => {
+export const formatHospital = (hospital: any): Hospital => {
     return {
         id: hospital?.id,
         name: hospital?.name,
@@ -15,6 +15,7 @@ export const formatHospital = (hospital: any) => {
         verified: hospital?.verified,
         contactNumber: hospital?.contactNumber,
         type: hospital?.type,
-
+        phoneNumberVerified: hospital?.phoneNumberVerified,
+        lastTimePhoneNumberVerified: hospital?.lastTimePhoneNumberVerified,
     }
 }

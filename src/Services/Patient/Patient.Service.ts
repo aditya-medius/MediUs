@@ -8,6 +8,10 @@ import {
 import addressModel from "../../Models/Address.Model";
 import hospitalModel from "../../Models/Hospital.Model";
 import advancedBookingPeriodModel from "../../Models/AdvancedBookingPeriod";
+import { Patient } from "./patient.values";
+import { patient } from "../schemaNames";
+import { PairValue } from "underscore";
+import patientModel from "../../Models/Patient.Model";
 
 export const BookAppointment = async (body: any, isHospital = false) => {
   try {
@@ -339,4 +343,8 @@ export const isAdvancedBookingValid = (bookingDate: moment.Moment, advancedBooki
   const currentDate = moment()
   const dateDifference: number = bookingDate.diff(moment(currentDate), "days") + 1;
   return dateDifference > -1 && dateDifference <= advancedBookingPeriod
+}
+
+export const markPatientsPhoneNumberAsNotVerified = async (patient: Array<Patient>) => {
+  await patientModel.updateMany({ _id: { $in: patient.map((patient: Patient) => patient.id) } }, { $set: { phoneNumberVerified: false } })
 }

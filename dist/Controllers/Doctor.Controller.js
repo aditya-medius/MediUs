@@ -63,7 +63,7 @@ const Validation_Service_1 = require("../Services/Validation.Service");
 const doctorService = __importStar(require("../Services/Doctor/Doctor.Service"));
 const Withdrawal_Model_1 = __importDefault(require("../Models/Withdrawal.Model"));
 const Qualification_Model_1 = __importDefault(require("../Models/Qualification.Model"));
-const Patient_Service_1 = require("../Services/Helpers/Patient.Service");
+const Patient_Service_1 = require("../Services/Patient/Patient.Service");
 const approvalService = __importStar(require("../Services/Approval-Request/Approval-Request.Service"));
 const holidayService = __importStar(require("../Services/Holiday-Calendar/Holiday-Calendar.Service"));
 const hospitalService = __importStar(require("../Services/Hospital/Hospital.Service"));
@@ -167,7 +167,7 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                     .populate("qualification");
                 if (profile) {
                     const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_DOCTOR_KEY);
-                    let { firstName, lastName, gender, phoneNumber, email, _id, qualification, preBookingTime, } = profile.toJSON();
+                    let { firstName, lastName, gender, phoneNumber, email, _id, qualification, preBookingTime, phoneNumberVerified } = profile.toJSON();
                     qualification = qualification[0];
                     return (0, response_1.successResponse)({
                         token,
@@ -179,6 +179,7 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                         _id,
                         qualification,
                         preBookingTime,
+                        phoneNumberVerified
                     }, "Successfully logged in", res);
                 }
                 else {
@@ -224,7 +225,7 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                         yield profile.populate("qualification");
                         profile = profile.toObject();
                         profile.qualification = profile.qualification[0];
-                        const { firstName, lastName, gender, phoneNumber, email, _id, qualification, verified, preBookingTime, } = profile;
+                        const { firstName, lastName, gender, phoneNumber, email, _id, qualification, verified, preBookingTime, phoneNumberVerified } = profile;
                         Doctors_Model_1.default
                             .findOneAndUpdate({
                             phoneNumber: body.phoneNumber,
@@ -246,6 +247,7 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                             qualification,
                             verified,
                             preBookingTime,
+                            phoneNumberVerified
                         }, "Successfully logged in", res);
                     }
                     else {

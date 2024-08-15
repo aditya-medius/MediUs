@@ -176,6 +176,13 @@ const hospitalSchema = new mongoose_1.Schema({
     },
     lastLogin: {
         type: Date
+    },
+    phoneNumberVerified: {
+        type: Boolean,
+        default: true
+    },
+    lastTimePhoneNumberVerified: {
+        type: Date
     }
 });
 hospitalSchema.pre("save", function (next) {

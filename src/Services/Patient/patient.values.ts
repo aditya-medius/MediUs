@@ -1,3 +1,5 @@
+import { Gender } from "../Helpers"
+
 const config = require("../../../config.json")
 export enum AppointmentType {
     FRESH = config.Appointment.Type.Fresh,
@@ -17,3 +19,17 @@ export const AppointStatusOrder = [
     config.Appointment.Status.Consulted,
     config.Appointment.Status.Absent
 ]
+
+export interface Patient {
+    id: string,
+    name: string,
+    image: string,
+    verified: boolean,
+    gender: Gender,
+    DOB: Date,
+    email: string,
+    deleted: boolean,
+    overallExperience: number,
+    phoneNumberVerified: boolean,
+    lastTimePhoneNumberVerified: Date
+}

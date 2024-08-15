@@ -130,6 +130,11 @@ const doctorSchema = new mongoose_1.Schema(Object.assign(Object.assign({}, schem
         // required: true,
     }, profileImage: {
         type: String
+    }, phoneNumberVerified: {
+        type: Boolean,
+        default: true
+    }, lastTimePhoneNumberVerified: {
+        type: Date
     } }), {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },

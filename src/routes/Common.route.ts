@@ -6,9 +6,10 @@ import { authenticateHospital } from "../authentication/Hospital.auth";
 import { authenticateAdmin } from "../authentication/Admin.auth";
 import { authenticateSuvedha } from "../authentication/Suvedha.auth";
 import { oneOf } from "../Services/middlewareHelper";
-import { initUpload, sendNotificationToDoctor } from "../Services/Utils";
+import { digiMilesSMS, initUpload, sendNotificationToDoctor, sendOTPToPhoneNumber } from "../Services/Utils";
 import { errorResponse, successResponse } from "../Services/response";
 import * as hospitalService from "../Services/Hospital/Hospital.Service";
+import { sendOTP } from "../Services/Agent/Agent.Service";
 
 const commonRouter = express.Router();
 
@@ -111,5 +112,11 @@ commonRouter.post("/test/notification", async (req: Request, res: Response) => {
   sendNotificationToDoctor("", { body: "", title: "" });
   return errorResponse({ error: "Error" }, res);
 });
+
+commonRouter.get("/otp/number", async (req: Request, res: Response) => {
+  let { phoneNumber } = req.query
+  sendOTPToPhoneNumber(phoneNumber as string)
+  return successResponse({}, "Success", res)
+})
 
 export default commonRouter;

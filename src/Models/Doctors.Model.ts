@@ -118,6 +118,13 @@ const doctorSchema = new Schema(
     },
     profileImage: {
       type: String
+    },
+    phoneNumberVerified: {
+      type: Boolean,
+      default: true
+    },
+    lastTimePhoneNumberVerified: {
+      type: Date
     }
   },
   {

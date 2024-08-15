@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDoctorsAdvancedBookingPeriod = exports.deleteDoctorsAdvancedBookingPeriod = exports.setDoctorsAdvancedBookingPeriod = exports.checkIfDoctorTakesOverTheCounterPaymentsForAHospital = exports.deleteThatDoctorTakesOverTheCounterPayments = exports.setThatDoctorTakesOverTheCounterPayments = exports.getDoctorsOffDays = exports.getDoctorsOffDaysForADateRange = exports.getDoctorsInHospitalByQuery = exports.setSpecializationActiveStatus = exports.getDoctorsHolidayByQuery = exports.getDoctorInfo = exports.canDoctorTakeMoreAppointments = exports.isDateHolidayForDoctor = exports.getDoctorWorkingDays = exports.getDoctorById_ForSuvedha = exports.getDoctorsWithAdvancedFilters = exports.getMyLikes = exports.unlikeDoctor = exports.likeDoctor = exports.checkIfDoctorIsAvailableOnTheDay = exports.getDoctorFeeInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = exports.WEEKDAYS = void 0;
+exports.markDoctorPhoneNumberAsVerified = exports.markDoctorsPhoneNumberAsNotVerified = exports.checkIfDoctorHasVerifiedPhoneNumberInThePast2Days = exports.getDoctorsAdvancedBookingPeriod = exports.deleteDoctorsAdvancedBookingPeriod = exports.setDoctorsAdvancedBookingPeriod = exports.checkIfDoctorTakesOverTheCounterPaymentsForAHospital = exports.deleteThatDoctorTakesOverTheCounterPayments = exports.setThatDoctorTakesOverTheCounterPayments = exports.getDoctorsOffDays = exports.getDoctorsOffDaysForADateRange = exports.getDoctorsInHospitalByQuery = exports.setSpecializationActiveStatus = exports.getDoctorsHolidayByQuery = exports.getDoctorInfo = exports.canDoctorTakeMoreAppointments = exports.isDateHolidayForDoctor = exports.getDoctorWorkingDays = exports.getDoctorById_ForSuvedha = exports.getDoctorsWithAdvancedFilters = exports.getMyLikes = exports.unlikeDoctor = exports.likeDoctor = exports.checkIfDoctorIsAvailableOnTheDay = exports.getDoctorFeeInHospital = exports.getAppointmentFeeFromAppointmentId = exports.getListOfAllAppointments = exports.getDoctorsOfflineAndOnlineAppointments = exports.setConsultationFeeForDoctor = exports.getAgeOfDoctor = exports.getDoctorToken = exports.getPendingAmount = exports.getWithdrawanAmount = exports.getAvailableAmount = exports.getTotalEarnings = exports.getUser = exports.WEEKDAYS = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const AppointmentPayment_Model_1 = __importDefault(require("../../Models/AppointmentPayment.Model"));
 const CreditAmount_Model_1 = __importDefault(require("../../Models/CreditAmount.Model"));
@@ -1106,3 +1106,27 @@ const getDoctorsAdvancedBookingPeriod = (doctorId, hospitalId) => __awaiter(void
     }
 });
 exports.getDoctorsAdvancedBookingPeriod = getDoctorsAdvancedBookingPeriod;
+const checkIfDoctorHasVerifiedPhoneNumberInThePastGivenDays = (doctors, numberOfDays) => {
+    const doctorsThatHaveNotVerifiedTheirPhoneNumber = doctors.filter((doctor) => {
+        if (!(doctor === null || doctor === void 0 ? void 0 : doctor.lastTimePhoneNumberVerified)) {
+            return true;
+        }
+        const dateDifference = (0, Utils_1.getDateDifferenceFromCurrentDate)(doctor === null || doctor === void 0 ? void 0 : doctor.lastTimePhoneNumberVerified);
+        if (dateDifference < numberOfDays) {
+            return true;
+        }
+    });
+    return doctorsThatHaveNotVerifiedTheirPhoneNumber;
+};
+const checkIfDoctorHasVerifiedPhoneNumberInThePast2Days = (doctor) => {
+    return checkIfDoctorHasVerifiedPhoneNumberInThePastGivenDays(doctor, -2);
+};
+exports.checkIfDoctorHasVerifiedPhoneNumberInThePast2Days = checkIfDoctorHasVerifiedPhoneNumberInThePast2Days;
+const markDoctorsPhoneNumberAsNotVerified = (doctors) => __awaiter(void 0, void 0, void 0, function* () {
+    yield Doctors_Model_1.default.updateMany({ _id: { $in: doctors.map((doctor) => doctor.id) } }, { $set: { phoneNumberVerified: false } });
+});
+exports.markDoctorsPhoneNumberAsNotVerified = markDoctorsPhoneNumberAsNotVerified;
+const markDoctorPhoneNumberAsVerified = (doctor) => __awaiter(void 0, void 0, void 0, function* () {
+    yield Doctors_Model_1.default.findOneAndUpdate({ _id: doctor.id }, { $set: { phoneNumberVerified: true } });
+});
+exports.markDoctorPhoneNumberAsVerified = markDoctorPhoneNumberAsVerified;

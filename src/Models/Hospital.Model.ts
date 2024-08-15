@@ -169,8 +169,16 @@ const hospitalSchema = new Schema({
   lastLogin: {
     type: Date
 
-  }
+  },
 
+  phoneNumberVerified: {
+    type: Boolean,
+    default: true
+  },
+  
+  lastTimePhoneNumberVerified: {
+    type: Date
+  }
 });
 
 hospitalSchema.pre("save", async function (next) {

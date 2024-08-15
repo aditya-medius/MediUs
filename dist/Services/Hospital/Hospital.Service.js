@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.markHospitalsAccountAsInactive = exports.markHospitalsAccountAsOnHold = exports.checkIfHospitalHasLoggedInInThePastMonth = exports.checkIfHospitalHasLoggedInThePastWeek = exports.updateHospitalsLastLogin = exports.getHolidayForHospital = exports.addHolidayForHospital = exports.changeAppointmentStatus = exports.getCitiesWhereHospitalsExist = exports.getHospitalById = exports.hospitalsInDoctor = exports.getHospitalsPrescriptionValidityInDoctor = exports.getHospitalsWorkingHourInDoctor = exports.getHolidayTimigsOfHospitalsInDoctor = exports.doctorsInHospital = exports.getDoctorsPrescriptionValidityInHospital = exports.getDoctorsWorkingHourInHospital = exports.getHolidayTimigsOfDoctorsInHospital = exports.doesHospitalExist = exports.generateOrderId = exports.verifyPayment = exports.getPatientsAppointmentsInThisHospital = exports.getPatientFromPhoneNumber = exports.getHospitalsOfflineAndOnlineAppointments = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.getHospitalToken = void 0;
+exports.checkIfHospitalHasVerifiedPhoneNumberInThe5Days = exports.checkIfHospitalHasVerifiedPhoneNumberInThe2Days = exports.checkIfHospitalHasVerifiedPhoneNumberInThePastGivenDays = exports.markHospitalNumberAsNotverified = exports.markHospitalsAccountAsInactive = exports.markHospitalsAccountAsOnHold = exports.checkIfHospitalHasLoggedInInThePastMonth = exports.checkIfHospitalHasLoggedInThePastWeek = exports.updateHospitalsLastLogin = exports.getHolidayForHospital = exports.addHolidayForHospital = exports.changeAppointmentStatus = exports.getCitiesWhereHospitalsExist = exports.getHospitalById = exports.hospitalsInDoctor = exports.getHospitalsPrescriptionValidityInDoctor = exports.getHospitalsWorkingHourInDoctor = exports.getHolidayTimigsOfHospitalsInDoctor = exports.doctorsInHospital = exports.getDoctorsPrescriptionValidityInHospital = exports.getDoctorsWorkingHourInHospital = exports.getHolidayTimigsOfDoctorsInHospital = exports.doesHospitalExist = exports.generateOrderId = exports.verifyPayment = exports.getPatientsAppointmentsInThisHospital = exports.getPatientFromPhoneNumber = exports.getHospitalsOfflineAndOnlineAppointments = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.getHospitalToken = void 0;
 const jwt = __importStar(require("jsonwebtoken"));
 const dotenv = __importStar(require("dotenv"));
 const Hospital_Model_1 = __importDefault(require("../../Models/Hospital.Model"));
@@ -41,7 +41,7 @@ const Appointment_Model_1 = __importDefault(require("../../Models/Appointment.Mo
 const Utils_1 = require("../Utils");
 const Patient_Model_1 = __importDefault(require("../../Models/Patient.Model"));
 const Validation_Service_1 = require("../Validation.Service");
-const Patient_Service_1 = require("../Helpers/Patient.Service");
+const Patient_Service_1 = require("../Patient/Patient.Service");
 const CreditAmount_Model_1 = __importDefault(require("../../Models/CreditAmount.Model"));
 const AppointmentPayment_Model_1 = __importDefault(require("../../Models/AppointmentPayment.Model"));
 const orderController = __importStar(require("../../Controllers/Order.Controller"));
@@ -854,7 +854,6 @@ const getHolidayTimigsOfHospitalsInDoctor = (doctorId, hospitalId, timings) => _
         let year = time.getFullYear(), month = time.getMonth(), currentDate = time.getDate();
         let startDate = new Date(year, month, currentDate);
         let endDate = new Date(year, month, currentDate + 1);
-        console.log("start datae", { $gte: startDate, $lt: endDate });
         let holidays = yield Holiday_Calendar_Model_1.default
             .find({
             doctorId,
@@ -863,7 +862,6 @@ const getHolidayTimigsOfHospitalsInDoctor = (doctorId, hospitalId, timings) => _
             "delData.deleted": false,
         })
             .lean();
-        console.log("ljhgfcghvdssds", holidays);
         return holidays;
     }
     catch (error) {
@@ -1060,7 +1058,7 @@ const updateHospitalsLastLogin = (hospitalId) => __awaiter(void 0, void 0, void 
     yield Hospital_Model_1.default.findOneAndUpdate({ _id: hospitalId }, { $set: { lastLogin: new Date(), status: Helpers_1.UserStatus.ACTIVE } });
 });
 exports.updateHospitalsLastLogin = updateHospitalsLastLogin;
-const checkIfDoctorHasLoggedInInThePastGivenDays = (hospitals, numberOfDays) => {
+const checkIfHospitalHasLoggedInInThePastGivenDays = (hospitals, numberOfDays) => {
     const hospitalsThatHaveNotLoggedInThePastWeek = hospitals.filter((hospital) => {
         const dateDifference = (0, Utils_1.getDateDifferenceFromCurrentDate)(hospital.lastLogin);
         if (dateDifference < numberOfDays) {
@@ -1070,11 +1068,11 @@ const checkIfDoctorHasLoggedInInThePastGivenDays = (hospitals, numberOfDays) => 
     return hospitalsThatHaveNotLoggedInThePastWeek;
 };
 const checkIfHospitalHasLoggedInThePastWeek = (hospitals) => {
-    return checkIfDoctorHasLoggedInInThePastGivenDays(hospitals, -7);
+    return checkIfHospitalHasLoggedInInThePastGivenDays(hospitals, -7);
 };
 exports.checkIfHospitalHasLoggedInThePastWeek = checkIfHospitalHasLoggedInThePastWeek;
 const checkIfHospitalHasLoggedInInThePastMonth = (hospitals) => {
-    return checkIfDoctorHasLoggedInInThePastGivenDays(hospitals, -37);
+    return checkIfHospitalHasLoggedInInThePastGivenDays(hospitals, -37);
 };
 exports.checkIfHospitalHasLoggedInInThePastMonth = checkIfHospitalHasLoggedInInThePastMonth;
 const markHospitalsAccountAsOnHold = (hospitals) => __awaiter(void 0, void 0, void 0, function* () {
@@ -1085,3 +1083,26 @@ const markHospitalsAccountAsInactive = (hospitals) => __awaiter(void 0, void 0, 
     yield Hospital_Model_1.default.updateMany({ _id: { $in: hospitals.map((hospital) => hospital.id) } }, { $set: { status: Helpers_1.UserStatus.INACTIVE } });
 });
 exports.markHospitalsAccountAsInactive = markHospitalsAccountAsInactive;
+const markHospitalNumberAsNotverified = (hospital) => __awaiter(void 0, void 0, void 0, function* () {
+    yield Hospital_Model_1.default.updateMany({ _id: { $in: hospital.map((hospital) => hospital.id) } }, { $set: { phoneNumberVerified: false } });
+});
+exports.markHospitalNumberAsNotverified = markHospitalNumberAsNotverified;
+const checkIfHospitalHasVerifiedPhoneNumberInThePastGivenDays = (hospital, numberOfDays) => {
+    const hospitalsThatHaveNotLoggedInThePastWeek = hospital.filter((hospital) => {
+        const dateDifference = (0, Utils_1.getDateDifferenceFromCurrentDate)(hospital.lastTimePhoneNumberVerified);
+        if (dateDifference < numberOfDays) {
+            return true;
+        }
+    });
+    return hospitalsThatHaveNotLoggedInThePastWeek;
+};
+exports.checkIfHospitalHasVerifiedPhoneNumberInThePastGivenDays = checkIfHospitalHasVerifiedPhoneNumberInThePastGivenDays;
+const checkIfHospitalHasVerifiedPhoneNumberInThe2Days = (hospital) => {
+    return (0, exports.checkIfHospitalHasVerifiedPhoneNumberInThePastGivenDays)(hospital, -2);
+};
+exports.checkIfHospitalHasVerifiedPhoneNumberInThe2Days = checkIfHospitalHasVerifiedPhoneNumberInThe2Days;
+const checkIfHospitalHasVerifiedPhoneNumberInThe5Days = (hospital) => {
+    // -7 because -5 + (-2 from above function)
+    return (0, exports.checkIfHospitalHasVerifiedPhoneNumberInThePastGivenDays)(hospital, -7);
+};
+exports.checkIfHospitalHasVerifiedPhoneNumberInThe5Days = checkIfHospitalHasVerifiedPhoneNumberInThe5Days;

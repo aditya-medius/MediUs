@@ -13,5 +13,5 @@ export interface Doctor {
     deleted: boolean,
     totalExperience: number,
     overallExperience: number,
-    advancedBookingPeriod: number
+    lastTimePhoneNumberVerified: Date
 }
