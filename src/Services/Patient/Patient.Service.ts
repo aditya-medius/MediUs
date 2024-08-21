@@ -12,6 +12,8 @@ import { Patient } from "./patient.values";
 import { patient } from "../schemaNames";
 import { PairValue } from "underscore";
 import patientModel from "../../Models/Patient.Model";
+import { digiMilesSMS } from "../Utils";
+import doctorModel from "../../Models/Doctors.Model";
 
 export const BookAppointment = async (body: any, isHospital = false) => {
   try {
@@ -161,6 +163,22 @@ export const BookAppointment = async (body: any, isHospital = false) => {
       },
     });
 
+    const doctorData = doctorModel.findOne({ _id: appointmentBook.doctors });
+    const hospitalData = hospitalModel.findOne({ _id: appointmentBook.hospital });
+    const patientData = patientModel.findOne({ _id: appointmentBook.patient });
+
+    let arr = [doctorData, hospitalData, patientData];
+    Promise.all(arr).then((result: any) => {
+      const [doctor, hospital, patient] = result
+      digiMilesSMS.sendAppointmentConfirmationNotification(
+        patient.phoneNumber,
+        `${patient.firstName} ${patient.lastName}`,
+        `${doctor.firstName} ${doctor.lastname}`,
+        hospital.hospitalName,
+        moment(appointmentBook.time.date).format("DD-MM-YYYY"),
+        `${appointmentBook.time.from.time}:${appointmentBook.time.from.division} -${appointmentBook.time.till.time}:${appointmentBook.time.till.division}`
+      )
+    })
     return Promise.resolve(appointmentBook);
   } catch (error: any) {
     return Promise.reject(error);
