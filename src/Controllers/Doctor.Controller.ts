@@ -797,6 +797,7 @@ export const searchDoctor = async (req: Request, res: Response) => {
             specilization: e?.specialization[0]?.specialityName,
             Qualification: e?.qualification[0]?.qualificationName?.abbreviation,
             experience: e?.overallExperience ?? null,
+            profileImage: e?.profileImage
           };
         });
 
