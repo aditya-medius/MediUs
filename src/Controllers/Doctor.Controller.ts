@@ -746,6 +746,8 @@ export const searchDoctor = async (req: Request, res: Response) => {
           })
           .lean();
 
+          console.log("doctorArray", doctorArray)
+
         if (city) {
           doctorArray = doctorArray.filter((e: any) => {
             let data = e.hospitalDetails.filter((elem: any) => {
