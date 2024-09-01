@@ -746,8 +746,6 @@ export const searchDoctor = async (req: Request, res: Response) => {
           })
           .lean();
 
-          console.log("doctorArray", doctorArray)
-
         if (city) {
           doctorArray = doctorArray.filter((e: any) => {
             let data = e.hospitalDetails.filter((elem: any) => {
@@ -799,7 +797,7 @@ export const searchDoctor = async (req: Request, res: Response) => {
             specilization: e?.specialization[0]?.specialityName,
             Qualification: e?.qualification[0]?.qualificationName?.abbreviation,
             experience: e?.overallExperience ?? null,
-            profileImage: e?.profileImage
+            profileImage: e?.image
           };
         });
 
