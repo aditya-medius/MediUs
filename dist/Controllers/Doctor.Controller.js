@@ -644,6 +644,7 @@ const searchDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                 },
             })
                 .lean();
+            console.log("doctorArray", doctorArray);
             if (city) {
                 doctorArray = doctorArray.filter((e) => {
                     let data = e.hospitalDetails.filter((elem) => {
