@@ -21,6 +21,8 @@ const Address_Model_1 = __importDefault(require("../../Models/Address.Model"));
 const Hospital_Model_1 = __importDefault(require("../../Models/Hospital.Model"));
 const AdvancedBookingPeriod_1 = __importDefault(require("../../Models/AdvancedBookingPeriod"));
 const Patient_Model_1 = __importDefault(require("../../Models/Patient.Model"));
+const Utils_1 = require("../Utils");
+const Doctors_Model_1 = __importDefault(require("../../Models/Doctors.Model"));
 const BookAppointment = (body, isHospital = false) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const rd = new Date(body.time.date);
@@ -166,6 +168,14 @@ const BookAppointment = (body, isHospital = false) => __awaiter(void 0, void 0, 
             select: {
                 parentPatient: 0,
             },
+        });
+        const doctorData = Doctors_Model_1.default.findOne({ _id: appointmentBook.doctors });
+        const hospitalData = Hospital_Model_1.default.findOne({ _id: appointmentBook.hospital });
+        const patientData = Patient_Model_1.default.findOne({ _id: appointmentBook.patient });
+        let arr = [doctorData, hospitalData, patientData];
+        Promise.all(arr).then((result) => {
+            const [doctor, hospital, patient] = result;
+            Utils_1.digiMilesSMS.sendAppointmentConfirmationNotification(patient.phoneNumber, `${patient.firstName} ${patient.lastName}`, `${doctor.firstName} ${doctor.lastname}`, hospital.hospitalName, (0, moment_1.default)(appointmentBook.time.date).format("DD-MM-YYYY"), `${appointmentBook.time.from.time}:${appointmentBook.time.from.division} -${appointmentBook.time.till.time}:${appointmentBook.time.till.division}`);
         });
         return Promise.resolve(appointmentBook);
     }
