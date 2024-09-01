@@ -644,7 +644,6 @@ const searchDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                 },
             })
                 .lean();
-            console.log("doctorArray", doctorArray);
             if (city) {
                 doctorArray = doctorArray.filter((e) => {
                     let data = e.hospitalDetails.filter((elem) => {
@@ -693,7 +692,7 @@ const searchDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                     specilization: (_a = e === null || e === void 0 ? void 0 : e.specialization[0]) === null || _a === void 0 ? void 0 : _a.specialityName,
                     Qualification: (_c = (_b = e === null || e === void 0 ? void 0 : e.qualification[0]) === null || _b === void 0 ? void 0 : _b.qualificationName) === null || _c === void 0 ? void 0 : _c.abbreviation,
                     experience: (_d = e === null || e === void 0 ? void 0 : e.overallExperience) !== null && _d !== void 0 ? _d : null,
-                    profileImage: e === null || e === void 0 ? void 0 : e.profileImage
+                    profileImage: e === null || e === void 0 ? void 0 : e.image
                 };
             });
             // return successResponse(doctorArray, "Success", res);

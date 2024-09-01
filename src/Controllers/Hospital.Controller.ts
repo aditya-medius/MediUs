@@ -1151,7 +1151,7 @@ export const getHospitalById = async (req: Request, res: Response) => {
     doctors = doctors.map((e: any) => {
       return {
         _id: e?._id,
-        profileImage: e?.profileImage,
+        profileImage: e?.image,
         name: `${e.firstName} ${e.lastName}`,
         specilization: e?.specialization[0]?.specialityName,
         Qualification: e?.qualification[0]?.qualificationName?.abbreviation,
@@ -1499,7 +1499,7 @@ export const doctorsInHospitalWithTimings = async (
     doctors = doctors.map((e: any) => {
       return {
         _id: e?._id,
-        profileImage: e?.profileImage,
+        profileImage: e?.image,
         name: `${e.firstName} ${e.lastName}`,
         specilization: e?.specialization[0]?.specialityName,
         Qualification: e?.qualification[0]?.qualificationName?.abbreviation,
