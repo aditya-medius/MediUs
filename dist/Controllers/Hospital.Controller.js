@@ -114,7 +114,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 });
                 if (profile) {
                     const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_HOSPITAL_KEY);
-                    const { name, contactNumber, _id, numberOfBed, password } = profile.toJSON();
+                    const { name, contactNumber, _id, numberOfBed, password, profileImage } = profile.toJSON();
                     Hospital_Model_1.default
                         .findOneAndUpdate({
                         contactNumber: body.phoneNumber,
@@ -125,7 +125,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                         },
                     })
                         .then((result) => { hospitalService.updateHospitalsLastLogin(result === null || result === void 0 ? void 0 : result.id); });
-                    return (0, response_1.successResponse)({ token, name, contactNumber, _id, numberOfBed, password }, "Successfully logged in", res);
+                    return (0, response_1.successResponse)({ token, name, contactNumber, _id, numberOfBed, password, profileImage }, "Successfully logged in", res);
                 }
                 else {
                     return (0, response_1.successResponse)({ message: "No Data found" }, "Create a new Hospital", res, 201);
@@ -154,7 +154,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                     if (profile) {
                         const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_HOSPITAL_KEY);
                         otpData.remove();
-                        const { name, contactNumber, _id, numberOfBed, password } = profile.toJSON();
+                        const { name, contactNumber, _id, numberOfBed, password, profileImage } = profile.toJSON();
                         Hospital_Model_1.default
                             .findOneAndUpdate({
                             contactNumber: body.phoneNumber,
@@ -165,7 +165,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                             },
                         })
                             .then((result) => { hospitalService.updateHospitalsLastLogin(result === null || result === void 0 ? void 0 : result.id); });
-                        return (0, response_1.successResponse)({ token, name, contactNumber, _id, numberOfBed, password }, "Successfully logged in", res);
+                        return (0, response_1.successResponse)({ token, name, contactNumber, _id, numberOfBed, password, profileImage }, "Successfully logged in", res);
                     }
                     else {
                         otpData.remove();
@@ -697,7 +697,8 @@ const searchHospital = (req, res) => __awaiter(void 0, void 0, void 0, function*
                     contactNumber: e === null || e === void 0 ? void 0 : e.contactNumber,
                     lat: e === null || e === void 0 ? void 0 : e.lat,
                     lng: e === null || e === void 0 ? void 0 : e.lng,
-                    status: e === null || e === void 0 ? void 0 : e.status
+                    status: e === null || e === void 0 ? void 0 : e.status,
+                    profileImage: e === null || e === void 0 ? void 0 : e.profileImage
                 };
             });
             // return successResponse(hospitalArray, "Success", res);

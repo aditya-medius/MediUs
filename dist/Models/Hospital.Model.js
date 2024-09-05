@@ -183,7 +183,12 @@ const hospitalSchema = new mongoose_1.Schema({
     },
     lastTimePhoneNumberVerified: {
         type: Date
-    }
+    },
+    profileImage: {
+        type: String,
+        default: "static/user/default.png",
+        // ref: media,
+    },
 });
 hospitalSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {

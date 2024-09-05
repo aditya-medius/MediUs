@@ -428,7 +428,7 @@ export const updateDoctorProfile = async (req: Request, res: Response) => {
     let { hospitalDetails, specialization, qualification, ...body } = req.body;
     const updateQuery = {
       $set: body,
-      $addToSet: { hospitalDetails, specialization, qualification },
+      // $addToSet: { hospitalDetails, specialization, qualification },
     };
     const updatedDoctorObj = await doctorModel.findOneAndUpdate(
       {
