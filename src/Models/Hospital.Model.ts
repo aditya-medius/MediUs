@@ -175,10 +175,16 @@ const hospitalSchema = new Schema({
     type: Boolean,
     default: true
   },
-  
+
   lastTimePhoneNumberVerified: {
     type: Date
-  }
+  },
+  
+  profileImage: {
+    type: String,
+    default: "static/user/default.png",
+    // ref: media,
+  },
 });
 
 hospitalSchema.pre("save", async function (next) {

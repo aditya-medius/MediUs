@@ -108,7 +108,7 @@ export const login = async (req: Request, res: Response) => {
             profile.toJSON(),
             process.env.SECRET_HOSPITAL_KEY as string
           );
-          const { name, contactNumber, _id, numberOfBed, password } =
+          const { name, contactNumber, _id, numberOfBed, password, profileImage } =
             profile.toJSON();
           hospitalModel
             .findOneAndUpdate(
@@ -124,7 +124,7 @@ export const login = async (req: Request, res: Response) => {
             )
             .then((result: any) => { hospitalService.updateHospitalsLastLogin(result?.id) });
           return successResponse(
-            { token, name, contactNumber, _id, numberOfBed, password },
+            { token, name, contactNumber, _id, numberOfBed, password, profileImage },
             "Successfully logged in",
             res
           );
@@ -166,7 +166,7 @@ export const login = async (req: Request, res: Response) => {
               process.env.SECRET_HOSPITAL_KEY as string
             );
             otpData.remove();
-            const { name, contactNumber, _id, numberOfBed, password } =
+            const { name, contactNumber, _id, numberOfBed, password, profileImage } =
               profile.toJSON();
             hospitalModel
               .findOneAndUpdate(
@@ -183,7 +183,7 @@ export const login = async (req: Request, res: Response) => {
               .then((result: any) => { hospitalService.updateHospitalsLastLogin(result?.id) });
 
             return successResponse(
-              { token, name, contactNumber, _id, numberOfBed, password },
+              { token, name, contactNumber, _id, numberOfBed, password, profileImage },
               "Successfully logged in",
               res
             );
@@ -772,7 +772,8 @@ export const searchHospital = async (req: Request, res: Response) => {
             contactNumber: e?.contactNumber,
             lat: e?.lat,
             lng: e?.lng,
-            status: e?.status
+            status: e?.status,
+            profileImage: e?.profileImage
           };
         });
 

@@ -351,7 +351,7 @@ const updateDoctorProfile = (req, res) => __awaiter(void 0, void 0, void 0, func
         let _a = req.body, { hospitalDetails, specialization, qualification } = _a, body = __rest(_a, ["hospitalDetails", "specialization", "qualification"]);
         const updateQuery = {
             $set: body,
-            $addToSet: { hospitalDetails, specialization, qualification },
+            // $addToSet: { hospitalDetails, specialization, qualification },
         };
         const updatedDoctorObj = yield Doctors_Model_1.default.findOneAndUpdate({
             _id: req.currentDoctor,
