@@ -215,6 +215,7 @@ const canDoctorTakeAppointment = (body) => __awaiter(void 0, void 0, void 0, fun
         doctorDetails: body.doctors,
         hospitalDetails: body.hospital,
     };
+    console.log("body", body);
     if (d == 0) {
         d = "sunday";
         query["sunday.working"] = true;

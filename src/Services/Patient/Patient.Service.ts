@@ -223,6 +223,8 @@ export const canDoctorTakeAppointment = async (body: any) => {
     doctorDetails: body.doctors,
     hospitalDetails: body.hospital,
   };
+
+  console.log("body", body)
   if (d == 0) {
     d = "sunday";
     query["sunday.working"] = true;
