@@ -345,6 +345,7 @@ const verifyPhoneNumber = (id, idOf) => __awaiter(void 0, void 0, void 0, functi
 });
 exports.verifyPhoneNumber = verifyPhoneNumber;
 const formatTimings = (time) => {
+    return time;
     if (typeof time === "string") {
         return time;
     }

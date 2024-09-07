@@ -381,6 +381,7 @@ export const verifyPhoneNumber = async (id: string, idOf: string) => {
 type NumberOrString = number | string
 
 export const formatTimings = (time: NumberOrString): NumberOrString => {
+  return time
   if (typeof time === "string") {
     return time
   }
