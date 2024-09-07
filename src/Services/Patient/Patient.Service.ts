@@ -270,6 +270,8 @@ export const canDoctorTakeAppointment = async (body: any) => {
     query["saturday.till.division"] = body.time.till.division;
   }
 
+  console.log("query|", query)
+
   let capacity = await workingHourModel.findOne(query);
   if (!capacity) {
     let error: Error = new Error("Error");

@@ -266,6 +266,7 @@ const canDoctorTakeAppointment = (body) => __awaiter(void 0, void 0, void 0, fun
         query["saturday.till.time"] = body.time.till.time;
         query["saturday.till.division"] = body.time.till.division;
     }
+    console.log("query|", query);
     let capacity = yield WorkingHours_Model_1.default.findOne(query);
     if (!capacity) {
         let error = new Error("Error");
