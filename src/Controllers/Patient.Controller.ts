@@ -41,7 +41,7 @@ import orderModel from "../Models/Order.Model";
 import { checkIfDoctorIsAvailableOnTheDay } from "../Services/Doctor/Doctor.Service";
 import { calculateAge } from "../Services/Patient/Patient.Service";
 import * as patientService from "../Services/Patient/Patient.Service";
-import { digiMilesSMS, verifyPhoneNumber } from "../Services/Utils";
+import { digiMilesSMS, formatTimings, verifyPhoneNumber } from "../Services/Utils";
 import feeModel from "../Module/Payment/Model/Fee.Model";
 import { convenienceFee } from "../Services/Admin/Admin.Service";
 import moment from "moment";
@@ -918,7 +918,7 @@ export const ViewAppointment = async (req: Request, res: Response) => {
               })
               .join("")
             : "",
-          time_slot: `${e.time.from.time}:${e.time.from.division} to ${e.time.till.time}:${e.time.till.division}`,
+          time_slot: `${formatTimings(e.time.from.time)}:${formatTimings(e.time.from.division)} to ${formatTimings(e.time.till.time)}:${formatTimings(e.time.till.division)}`,
           booking_type: e.appointmentType,
           clinicname: e.hospital && e.hospital.name,
           consult_fee,

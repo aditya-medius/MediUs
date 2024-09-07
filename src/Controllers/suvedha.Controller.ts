@@ -17,6 +17,7 @@ export const createProfile = async (req: Request, res: Response) => {
   }
 };
 import moment, { weekdays } from "moment";
+import { formatTimings } from "../Services/Utils";
 
 export const getDoctors = async (req: Request, res: Response) => {
   try {
@@ -42,11 +43,11 @@ export const getDoctors = async (req: Request, res: Response) => {
         abbreviation:
           e?.qualification?.length > 0
             ? e.qualification
-                .filter((elem: any) =>
-                  elem.qualificationName?.[0]?.abbreviation ? true : false
-                )
-                .map((elem: any) => elem.qualificationName?.[0]?.abbreviation)
-                .flat()
+              .filter((elem: any) =>
+                elem.qualificationName?.[0]?.abbreviation ? true : false
+              )
+              .map((elem: any) => elem.qualificationName?.[0]?.abbreviation)
+              .flat()
             : [],
         overallExperience: e.overallExperience,
         _id: e._id,
@@ -134,7 +135,7 @@ export const getDoctorInformation = async (req: Request, res: Response) => {
             return [
               {
                 available: find ? false : true,
-                Time: `${from.time}:${from.division} to ${till.time}:${till.division}`,
+                Time: `${formatTimings(from.time)}:${formatTimings(from.division)} to ${formatTimings(till.time)}:${formatTimings(till.division)}`,
               },
             ];
           }

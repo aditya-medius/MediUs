@@ -1,6 +1,6 @@
 import * as bcrypt from "bcrypt";
 import * as jwt from "jsonwebtoken";
-import moment, { Moment } from "moment";
+import moment, { Moment, weekdays } from "moment";
 import multer from "multer";
 import * as path from "path";
 import otpModel from "../Models/OTP.Model";
@@ -10,6 +10,7 @@ import axios from "axios";
 import hospitalModel from "../Models/Hospital.Model";
 import patientModel from "../Models/Patient.Model";
 import doctorModel from "../Models/Doctors.Model";
+import { Weekdays } from "./Helpers";
 
 export const phoneNumberRegex: RegExp = /^[0]?[6789]\d{9}$/;
 
@@ -374,4 +375,18 @@ export const verifyPhoneNumber = async (id: string, idOf: string) => {
   }
   await userModel?.findOneAndUpdate({ _id: id }, { $set: { phoneNumberVerified: true, lastTimePhoneNumberVerified: new Date() } })
   return
+}
+
+
+type NumberOrString = number | string
+
+export const formatTimings = (time: NumberOrString): NumberOrString => {
+  if (typeof time === "string") {
+    return time
+  }
+
+  if (time < 10) {
+    return `0:${time}`
+  }
+  return time.toString();
 }

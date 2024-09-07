@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifyPhoneNumber = exports.sendOTPToPhoneNumber = exports.getDateDifferenceFromCurrentDate = exports.getDateDifference = exports.addDays = exports.digiMilesSMS = exports.sendNotificationToPatient = exports.sendNotificationToHospital = exports.sendNotificationToDoctor = exports.firebaseAxiosPatient = exports.firebaseAxiosHospital = exports.firebaseAxiosDoctor = exports.verifyPasswordChangeOTP = exports.sendOTPForPasswordChange = exports.getRangeOfDates = exports.groupBy = exports.initUpload = exports.updateWorkingHour = exports.formatWorkingHourDayForAppointment = exports.setFormatForWorkingHours = exports.getDayFromWorkingHours = exports.getAge = exports.generateOTPtoken = exports.generateOTP = exports.encryptPassword = exports.phoneNumberRegex = void 0;
+exports.formatTimings = exports.verifyPhoneNumber = exports.sendOTPToPhoneNumber = exports.getDateDifferenceFromCurrentDate = exports.getDateDifference = exports.addDays = exports.digiMilesSMS = exports.sendNotificationToPatient = exports.sendNotificationToHospital = exports.sendNotificationToDoctor = exports.firebaseAxiosPatient = exports.firebaseAxiosHospital = exports.firebaseAxiosDoctor = exports.verifyPasswordChangeOTP = exports.sendOTPForPasswordChange = exports.getRangeOfDates = exports.groupBy = exports.initUpload = exports.updateWorkingHour = exports.formatWorkingHourDayForAppointment = exports.setFormatForWorkingHours = exports.getDayFromWorkingHours = exports.getAge = exports.generateOTPtoken = exports.generateOTP = exports.encryptPassword = exports.phoneNumberRegex = void 0;
 const bcrypt = __importStar(require("bcrypt"));
 const jwt = __importStar(require("jsonwebtoken"));
 const moment_1 = __importDefault(require("moment"));
@@ -344,3 +344,13 @@ const verifyPhoneNumber = (id, idOf) => __awaiter(void 0, void 0, void 0, functi
     return;
 });
 exports.verifyPhoneNumber = verifyPhoneNumber;
+const formatTimings = (time) => {
+    if (typeof time === "string") {
+        return time;
+    }
+    if (time < 10) {
+        return `0:${time}`;
+    }
+    return time.toString();
+};
+exports.formatTimings = formatTimings;
