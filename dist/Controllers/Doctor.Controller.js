@@ -2046,6 +2046,7 @@ exports.deleteThatDoctorTakesOverTheCounterPayments = deleteThatDoctorTakesOverT
 const checkIfDoctorTakesOverTheCounterPaymentsForAHospital = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { doctorId, hospitalId } = req.query;
+        console.log("checkIfDoctorTakesOverTheCounterPaymentsForAHospital: ", req.query);
         if (!(doctorId && hospitalId)) {
             const error = new Error("Invalid doctor or hospital");
             throw error;
