@@ -1019,7 +1019,7 @@ const getHospitalById = (req, res) => __awaiter(void 0, void 0, void 0, function
                 Fee: (_d = e === null || e === void 0 ? void 0 : e.hospitalDetails.find((elem) => elem.hospital.toString() === hospitalId)) === null || _d === void 0 ? void 0 : _d.consultationFee.max,
                 workinghour: e === null || e === void 0 ? void 0 : e.workingHours.map((elem) => {
                     var _a, _b, _c, _d;
-                    return `${(_a = elem[WEEK_DAYS[day]]) === null || _a === void 0 ? void 0 : _a.from.time}:${(_b = elem[WEEK_DAYS[day]]) === null || _b === void 0 ? void 0 : _b.from.division} to ${(_c = elem[WEEK_DAYS[day]]) === null || _c === void 0 ? void 0 : _c.till.time}:${(_d = elem[WEEK_DAYS[day]]) === null || _d === void 0 ? void 0 : _d.till.division}`;
+                    return `${(0, Utils_1.formatTimings)((_a = elem[WEEK_DAYS[day]]) === null || _a === void 0 ? void 0 : _a.from.time)}:${(0, Utils_1.formatTimings)((_b = elem[WEEK_DAYS[day]]) === null || _b === void 0 ? void 0 : _b.from.division)} to ${(0, Utils_1.formatTimings)((_c = elem[WEEK_DAYS[day]]) === null || _c === void 0 ? void 0 : _c.till.time)}:${(0, Utils_1.formatTimings)((_d = elem[WEEK_DAYS[day]]) === null || _d === void 0 ? void 0 : _d.till.division)}`;
                 }),
                 capacityAndToken: e === null || e === void 0 ? void 0 : e.workingHours.map((elem) => {
                     return {

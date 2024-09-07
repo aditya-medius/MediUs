@@ -130,11 +130,11 @@ patientRouter.post("/verifyPayment", (0, middlewareHelper_1.oneOf)(Patient_auth_
             const doctorFirebaseToken = D.firebaseToken, hospitalFirebaseToken = H.firebaseToken, patientFirebaseToken = P.firebaseToken;
             (0, Utils_1.sendNotificationToDoctor)(doctorFirebaseToken, {
                 title: "New appointment",
-                body: `${P.firstName} ${P.lastName} has booked an appointment at ${H.name} and ${(0, moment_1.default)(req.body.appointment.time.date).format("DD-MM-YYYY")} ${req.body.appointment.time.from.time}:${req.body.appointment.time.from.division} -${req.body.appointment.time.till.time}:${req.body.appointment.time.till.division} `,
+                body: `${P.firstName} ${P.lastName} has booked an appointment at ${H.name} and ${(0, moment_1.default)(req.body.appointment.time.date).format("DD-MM-YYYY")} ${(0, Utils_1.formatTimings)(req.body.appointment.time.from.time)}:${(0, Utils_1.formatTimings)(req.body.appointment.time.from.division)} -${(0, Utils_1.formatTimings)(req.body.appointment.time.till.time)}:${(0, Utils_1.formatTimings)(req.body.appointment.time.till.division)} `,
             });
             (0, Utils_1.sendNotificationToHospital)(hospitalFirebaseToken, {
                 title: "New appointment",
-                body: `${P.firstName} ${P.lastName} has booked an appointment with ${D.firstName} ${D.lastName} and ${(0, moment_1.default)(req.body.appointment.time.date).format("DD-MM-YYYY")} ${req.body.appointment.time.from.time}:${req.body.appointment.time.from.division} -${req.body.appointment.time.till.time}:${req.body.appointment.time.till.division} `,
+                body: `${P.firstName} ${P.lastName} has booked an appointment with ${D.firstName} ${D.lastName} and ${(0, moment_1.default)(req.body.appointment.time.date).format("DD-MM-YYYY")} ${(0, Utils_1.formatTimings)(req.body.appointment.time.from.time)}:${(0, Utils_1.formatTimings)(req.body.appointment.time.from.division)} -${(0, Utils_1.formatTimings)(req.body.appointment.time.till.time)}:${(0, Utils_1.formatTimings)(req.body.appointment.time.till.division)} `,
             });
             (0, Utils_1.sendNotificationToPatient)(patientFirebaseToken, {
                 title: "New appointment",

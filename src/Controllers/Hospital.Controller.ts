@@ -33,6 +33,7 @@ import { getAgeOfDoctor } from "../Services/Doctor/Doctor.Service";
 import {
   addDays,
   digiMilesSMS,
+  formatTimings,
   getAge,
   sendOTPForPasswordChange,
   verifyPasswordChangeOTP,
@@ -1161,9 +1162,7 @@ export const getHospitalById = async (req: Request, res: Response) => {
           (elem: any) => elem.hospital.toString() === hospitalId
         )?.consultationFee.max,
         workinghour: e?.workingHours.map((elem: any) => {
-          return `${elem[WEEK_DAYS[day]]?.from.time}:${elem[WEEK_DAYS[day]]?.from.division
-            } to ${elem[WEEK_DAYS[day]]?.till.time}:${elem[WEEK_DAYS[day]]?.till.division
-            }`;
+          return `${formatTimings(elem[WEEK_DAYS[day]]?.from.time)}:${formatTimings(elem[WEEK_DAYS[day]]?.from.division)} to ${formatTimings(elem[WEEK_DAYS[day]]?.till.time)}:${formatTimings(elem[WEEK_DAYS[day]]?.till.division)}`;
         }),
         capacityAndToken: e?.workingHours.map((elem: any) => {
           return {

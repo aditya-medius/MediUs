@@ -48,6 +48,7 @@ import doctorModel from "../Models/Doctors.Model";
 import hospitalModel from "../Models/Hospital.Model";
 import {
   digiMilesSMS,
+  formatTimings,
   sendNotificationToDoctor,
   sendNotificationToHospital,
   sendNotificationToPatient,
@@ -182,8 +183,8 @@ patientRouter.post(
           body: `${P.firstName} ${P.lastName} has booked an appointment at ${H.name
             } and ${moment(req.body.appointment.time.date).format(
               "DD-MM-YYYY"
-            )} ${req.body.appointment.time.from.time}:${req.body.appointment.time.from.division
-            } -${req.body.appointment.time.till.time}:${req.body.appointment.time.till.division
+            )} ${formatTimings(req.body.appointment.time.from.time)}:${formatTimings(req.body.appointment.time.from.division)
+            } -${formatTimings(req.body.appointment.time.till.time)}:${formatTimings(req.body.appointment.time.till.division)
             } `,
         });
         sendNotificationToHospital(hospitalFirebaseToken, {
@@ -191,8 +192,8 @@ patientRouter.post(
           body: `${P.firstName} ${P.lastName} has booked an appointment with ${D.firstName
             } ${D.lastName} and ${moment(req.body.appointment.time.date).format(
               "DD-MM-YYYY"
-            )} ${req.body.appointment.time.from.time}:${req.body.appointment.time.from.division
-            } -${req.body.appointment.time.till.time}:${req.body.appointment.time.till.division
+            )} ${formatTimings(req.body.appointment.time.from.time)}:${formatTimings(req.body.appointment.time.from.division)
+            } -${formatTimings(req.body.appointment.time.till.time)}:${formatTimings(req.body.appointment.time.till.division)
             } `,
         });
 

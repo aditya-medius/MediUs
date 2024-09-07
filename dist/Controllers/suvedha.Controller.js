@@ -48,6 +48,7 @@ const createProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* 
 });
 exports.createProfile = createProfile;
 const moment_1 = __importDefault(require("moment"));
+const Utils_1 = require("../Services/Utils");
 const getDoctors = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let userId = "";
@@ -153,7 +154,7 @@ const getDoctorInformation = (req, res) => __awaiter(void 0, void 0, void 0, fun
                         return [
                             {
                                 available: find ? false : true,
-                                Time: `${from.time}:${from.division} to ${till.time}:${till.division}`,
+                                Time: `${(0, Utils_1.formatTimings)(from.time)}:${(0, Utils_1.formatTimings)(from.division)} to ${(0, Utils_1.formatTimings)(till.time)}:${(0, Utils_1.formatTimings)(till.division)}`,
                             },
                         ];
                     }
