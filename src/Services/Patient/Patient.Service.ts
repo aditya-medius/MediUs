@@ -207,6 +207,10 @@ export const canDoctorTakeAppointment = async (body: any) => {
   const bookingPeriod = await advancedBookingPeriodModel.findOne({ doctorId: body.doctors, hospitalId: body.hospital }, "bookingPeriod")
   const advancedBookingPeriod = bookingPeriod?.bookingPeriod;
 
+  console.log("bookingPeriod", bookingPeriod)
+  console.log("!isAdvancedBookingValid(moment(time), advancedBookingPeriod)", !isAdvancedBookingValid(moment(time), advancedBookingPeriod))
+  console.log("CONDITIOn", bookingPeriod && !isAdvancedBookingValid(moment(time), advancedBookingPeriod))
+
   if (bookingPeriod && !isAdvancedBookingValid(moment(time), advancedBookingPeriod)) {
     const error: Error = new Error("Cannot book appointment for this day");
     error.name = "Not available";
