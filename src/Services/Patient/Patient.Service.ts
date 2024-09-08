@@ -206,11 +206,7 @@ export const canDoctorTakeAppointment = async (body: any) => {
 
   const bookingPeriod = await advancedBookingPeriodModel.findOne({ doctorId: body.doctors, hospitalId: body.hospital }, "bookingPeriod")
   const advancedBookingPeriod = bookingPeriod?.bookingPeriod;
-
-  console.log("bookingPeriod", bookingPeriod)
-  console.log("!isAdvancedBookingValid(moment(time), advancedBookingPeriod)", !isAdvancedBookingValid(moment(time), advancedBookingPeriod))
-  console.log("CONDITIOn", bookingPeriod && !isAdvancedBookingValid(moment(time), advancedBookingPeriod))
-
+  
   if (bookingPeriod && !isAdvancedBookingValid(moment(time), advancedBookingPeriod)) {
     const error: Error = new Error("Cannot book appointment for this day");
     error.name = "Not available";
@@ -224,7 +220,6 @@ export const canDoctorTakeAppointment = async (body: any) => {
     hospitalDetails: body.hospital,
   };
 
-  console.log("body", body)
   if (d == 0) {
     d = "sunday";
     query["sunday.working"] = true;
@@ -269,8 +264,6 @@ export const canDoctorTakeAppointment = async (body: any) => {
     query["saturday.till.time"] = body.time.till.time;
     query["saturday.till.division"] = body.time.till.division;
   }
-
-  console.log("query|", query)
 
   let capacity = await workingHourModel.findOne(query);
   if (!capacity) {

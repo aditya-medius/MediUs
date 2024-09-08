@@ -202,9 +202,6 @@ const canDoctorTakeAppointment = (body) => __awaiter(void 0, void 0, void 0, fun
     const time = new Date(body.time.date);
     const bookingPeriod = yield AdvancedBookingPeriod_1.default.findOne({ doctorId: body.doctors, hospitalId: body.hospital }, "bookingPeriod");
     const advancedBookingPeriod = bookingPeriod === null || bookingPeriod === void 0 ? void 0 : bookingPeriod.bookingPeriod;
-    console.log("bookingPeriod", bookingPeriod);
-    console.log("!isAdvancedBookingValid(moment(time), advancedBookingPeriod)", !(0, exports.isAdvancedBookingValid)((0, moment_1.default)(time), advancedBookingPeriod));
-    console.log("CONDITIOn", bookingPeriod && !(0, exports.isAdvancedBookingValid)((0, moment_1.default)(time), advancedBookingPeriod));
     if (bookingPeriod && !(0, exports.isAdvancedBookingValid)((0, moment_1.default)(time), advancedBookingPeriod)) {
         const error = new Error("Cannot book appointment for this day");
         error.name = "Not available";
@@ -215,7 +212,6 @@ const canDoctorTakeAppointment = (body) => __awaiter(void 0, void 0, void 0, fun
         doctorDetails: body.doctors,
         hospitalDetails: body.hospital,
     };
-    console.log("body", body);
     if (d == 0) {
         d = "sunday";
         query["sunday.working"] = true;
@@ -266,7 +262,6 @@ const canDoctorTakeAppointment = (body) => __awaiter(void 0, void 0, void 0, fun
         query["saturday.till.time"] = body.time.till.time;
         query["saturday.till.division"] = body.time.till.division;
     }
-    console.log("query|", query);
     let capacity = yield WorkingHours_Model_1.default.findOne(query);
     if (!capacity) {
         let error = new Error("Error");
