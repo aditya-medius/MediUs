@@ -178,23 +178,25 @@ patientRouter.post(
           hospitalFirebaseToken = H.firebaseToken,
           patientFirebaseToken = P.firebaseToken;
 
+        const fromTime = formatTimings(req.body.appointment.time.from.time)
+        const fromDivision = formatTimings(req.body.appointment.time.from.division)
+
+        const tillTime = formatTimings(req.body.appointment.time.till.time)
+        const tillDivision = formatTimings(req.body.appointment.time.till.division)
+
         sendNotificationToDoctor(doctorFirebaseToken, {
           title: "New appointment",
           body: `${P.firstName} ${P.lastName} has booked an appointment at ${H.name
             } and ${moment(req.body.appointment.time.date).format(
               "DD-MM-YYYY"
-            )} ${formatTimings(req.body.appointment.time.from.time)}:${formatTimings(req.body.appointment.time.from.division)
-            } -${formatTimings(req.body.appointment.time.till.time)}:${formatTimings(req.body.appointment.time.till.division)
-            } `,
+            )} ${fromTime}:${fromDivision}-${tillTime}:${tillDivision} `,
         });
         sendNotificationToHospital(hospitalFirebaseToken, {
           title: "New appointment",
           body: `${P.firstName} ${P.lastName} has booked an appointment with ${D.firstName
             } ${D.lastName} and ${moment(req.body.appointment.time.date).format(
               "DD-MM-YYYY"
-            )} ${formatTimings(req.body.appointment.time.from.time)}:${formatTimings(req.body.appointment.time.from.division)
-            } -${formatTimings(req.body.appointment.time.till.time)}:${formatTimings(req.body.appointment.time.till.division)
-            } `,
+            )} ${fromTime}:${fromDivision}-${tillTime}:${tillDivision} `,
         });
 
         sendNotificationToPatient(patientFirebaseToken, {
@@ -202,9 +204,7 @@ patientRouter.post(
           body: `${P.firstName} ${P.lastName} has booked an appointment for ${D.firstName
             } ${D.lastName} at ${H.name} and ${moment(
               req.body.appointment.time.date
-            ).format("DD-MM-YYYY")} ${req.body.appointment.time.from.time}:${req.body.appointment.time.from.division
-            } -${req.body.appointment.time.till.time}:${req.body.appointment.time.till.division
-            } `,
+            ).format("DD-MM-YYYY")} ${fromTime}:${fromDivision}-${tillTime}:${tillDivision} `,
         });
 
         let name = `${P.firstName} ${P.lastName}`;
@@ -219,7 +219,7 @@ patientRouter.post(
           `${D.firstName} ${D.lastName}`,
           H.name,
           moment(req.body.appointment.time.date).format("DD-MM-YYYY"),
-          `${req.body.appointment.time.from.time}:${req.body.appointment.time.from.division} -${req.body.appointment.time.till.time}:${req.body.appointment.time.till.division}`
+          `${fromTime}:${fromDivision}-${tillTime}:${tillDivision}`
         );
       });
     } catch (error: any) {
