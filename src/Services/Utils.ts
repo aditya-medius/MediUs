@@ -381,15 +381,12 @@ export const verifyPhoneNumber = async (id: string, idOf: string) => {
 type NumberOrString = number | string
 
 export const formatTimings = (time: NumberOrString): NumberOrString => {
-  console.log("timeetimeetimeetimee", time)
-
-  return time
   if (typeof time === "string") {
     return time
   }
 
   if (time < 10) {
-    return `0:${time}`
+    return `0${time}`
   }
   return time.toString();
 }
