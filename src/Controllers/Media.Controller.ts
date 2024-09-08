@@ -23,27 +23,15 @@ export const uploadImage = async (
     } else if (req.currentAdmin) {
       user = body.user;
     }
-    body.userType = user;
-    body.user = req.body.userId;
-    body.image = req.file
-      ? `${process.env.MEDIA_DIR as string}/${paths}/${req.file.filename}`
-      : "";
-    let mediaObj = await new mediaModel(body).save();
+    const mediaBody = {
+      userType: user,
+      user: body.userId,
+      image: req.file
+        ? `${process.env.MEDIA_DIR as string}/${paths}/${req.file.filename}`
+        : ""
+    }
+    let mediaObj = await new mediaModel(mediaBody).save();
 
-    await doctorModel.findOneAndUpdate(
-      {
-        _id: body.user,
-      },
-      {
-        $set: {
-          image: body.image,
-        },
-      }
-    );
-    mediaObj = await mediaObj.populate({
-      path: "user",
-      select: excludeDoctorFields,
-    });
     return successResponse({ response: mediaObj }, "Success", res);
   } catch (error: any) {
     return errorResponse(error, res);

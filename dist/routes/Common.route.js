@@ -42,6 +42,7 @@ const middlewareHelper_1 = require("../Services/middlewareHelper");
 const Utils_1 = require("../Services/Utils");
 const response_1 = require("../Services/response");
 const hospitalService = __importStar(require("../Services/Hospital/Hospital.Service"));
+const Common_Controller_1 = require("../Controllers/Common.Controller");
 const commonRouter = express_1.default.Router();
 let paths = "admin";
 const upload = (0, Utils_1.initUpload)(paths);
@@ -109,4 +110,5 @@ commonRouter.get("/otp/number", (req, res) => __awaiter(void 0, void 0, void 0, 
     (0, Utils_1.sendOTPToPhoneNumber)(phoneNumber);
     return (0, response_1.successResponse)({}, "Success", res);
 }));
+commonRouter.put("/upate/profileImage", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital, Patient_auth_1.authenticatePatient), Common_Controller_1.SetProfileImage);
 exports.default = commonRouter;

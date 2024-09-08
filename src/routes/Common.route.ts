@@ -10,6 +10,7 @@ import { digiMilesSMS, initUpload, sendNotificationToDoctor, sendOTPToPhoneNumbe
 import { errorResponse, successResponse } from "../Services/response";
 import * as hospitalService from "../Services/Hospital/Hospital.Service";
 import { sendOTP } from "../Services/Agent/Agent.Service";
+import { SetProfileImage } from "../Controllers/Common.Controller";
 
 const commonRouter = express.Router();
 
@@ -118,5 +119,8 @@ commonRouter.get("/otp/number", async (req: Request, res: Response) => {
   sendOTPToPhoneNumber(phoneNumber as string)
   return successResponse({}, "Success", res)
 })
+
+
+commonRouter.put("/upate/profileImage", oneOf(authenticateDoctor, authenticateHospital, authenticatePatient), SetProfileImage)
 
 export default commonRouter;
