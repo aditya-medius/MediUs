@@ -685,14 +685,14 @@ const searchDoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                 return e;
             });
             let data = doctorArray.map((e) => {
-                var _a, _b, _c, _d;
+                var _a, _b, _c, _d, _e;
                 return {
                     _id: e._id,
                     name: `${e.firstName} ${e.lastName}`,
                     specilization: (_a = e === null || e === void 0 ? void 0 : e.specialization[0]) === null || _a === void 0 ? void 0 : _a.specialityName,
                     Qualification: (_c = (_b = e === null || e === void 0 ? void 0 : e.qualification[0]) === null || _b === void 0 ? void 0 : _b.qualificationName) === null || _c === void 0 ? void 0 : _c.abbreviation,
-                    experience: (_d = e === null || e === void 0 ? void 0 : e.overallExperience) !== null && _d !== void 0 ? _d : null,
-                    profileImage: e === null || e === void 0 ? void 0 : e.image
+                    experience: (_e = (_d = e === null || e === void 0 ? void 0 : e.totalExperience) !== null && _d !== void 0 ? _d : e === null || e === void 0 ? void 0 : e.overallExperience) !== null && _e !== void 0 ? _e : null,
+                    profileImage: e === null || e === void 0 ? void 0 : e.image,
                 };
             });
             // return successResponse(doctorArray, "Success", res);

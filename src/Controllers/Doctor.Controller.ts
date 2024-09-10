@@ -796,8 +796,8 @@ export const searchDoctor = async (req: Request, res: Response) => {
             name: `${e.firstName} ${e.lastName}`,
             specilization: e?.specialization[0]?.specialityName,
             Qualification: e?.qualification[0]?.qualificationName?.abbreviation,
-            experience: e?.overallExperience ?? null,
-            profileImage: e?.image
+            experience: e?.totalExperience ?? e?.overallExperience ?? null,
+            profileImage: e?.image,
           };
         });
 
