@@ -1080,7 +1080,8 @@ const getDoctorWorkingInHospitals = (req, res) => __awaiter(void 0, void 0, void
                 lat: data === null || data === void 0 ? void 0 : data.lat,
                 lng: data === null || data === void 0 ? void 0 : data.lng,
                 contactNumber: data === null || data === void 0 ? void 0 : data.contactNumber,
-                status: data === null || data === void 0 ? void 0 : data.status
+                status: data === null || data === void 0 ? void 0 : data.status,
+                profileImage: data === null || data === void 0 ? void 0 : data.profileImage
             };
         });
         return (0, response_1.successResponse)({ doctordetails, hospitaldetails }, "Successs", res);

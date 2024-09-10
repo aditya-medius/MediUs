@@ -1224,7 +1224,8 @@ export const getDoctorWorkingInHospitals = async (
         lat: data?.lat,
         lng: data?.lng,
         contactNumber: data?.contactNumber,
-        status: data?.status
+        status: data?.status,
+        profileImage: data?.profileImage
       };
     });
 
