@@ -9,7 +9,7 @@ export const setProfileImage = async (id: string, profileImageUrl: string, uploa
         switch (uploadfor) {
             case "doctor": {
                 userModel = doctorModel
-                upateQuery = { $set: { profileImage: profileImageUrl } }
+                upateQuery = { $set: { profileImage: profileImageUrl, image: profileImageUrl } }
                 break;
             }
             case "hospital": {
