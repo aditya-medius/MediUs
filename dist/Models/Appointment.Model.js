@@ -134,7 +134,7 @@ const appointmentSchema = new mongoose_1.Schema({
         enum: [Helpers_1.AppointmentStatus.SCHEDULED, Helpers_1.AppointmentStatus.PRESENT, Helpers_1.AppointmentStatus.CONSULTED, Helpers_1.AppointmentStatus.ABSENT],
         default: Helpers_1.AppointmentStatus.SCHEDULED
     },
-    // Kisne appointments book ki hai. User, hospital or suvedha
+    // Kisne appointments book ki hai. User, hospital
     appointmentBookedBy: {
         type: String,
     },

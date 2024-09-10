@@ -109,7 +109,7 @@ const appointmentSchema = new Schema({
     enum: [AppointmentStatus.SCHEDULED, AppointmentStatus.PRESENT, AppointmentStatus.CONSULTED, AppointmentStatus.ABSENT],
     default: AppointmentStatus.SCHEDULED
   },
-  // Kisne appointments book ki hai. User, hospital or suvedha
+  // Kisne appointments book ki hai. User, hospital
   appointmentBookedBy: {
     type: String,
   },
