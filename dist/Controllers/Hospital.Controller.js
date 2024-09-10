@@ -1008,15 +1008,15 @@ const getHospitalById = (req, res) => __awaiter(void 0, void 0, void 0, function
             "saturday",
         ];
         doctors = doctors.map((e) => {
-            var _a, _b, _c, _d;
+            var _a, _b, _c, _d, _e;
             return {
                 _id: e === null || e === void 0 ? void 0 : e._id,
                 profileImage: e === null || e === void 0 ? void 0 : e.image,
                 name: `${e.firstName} ${e.lastName}`,
                 specilization: (_a = e === null || e === void 0 ? void 0 : e.specialization[0]) === null || _a === void 0 ? void 0 : _a.specialityName,
                 Qualification: (_c = (_b = e === null || e === void 0 ? void 0 : e.qualification[0]) === null || _b === void 0 ? void 0 : _b.qualificationName) === null || _c === void 0 ? void 0 : _c.abbreviation,
-                Exeperience: e === null || e === void 0 ? void 0 : e.overallExperience,
-                Fee: (_d = e === null || e === void 0 ? void 0 : e.hospitalDetails.find((elem) => elem.hospital.toString() === hospitalId)) === null || _d === void 0 ? void 0 : _d.consultationFee.max,
+                Exeperience: (_d = e === null || e === void 0 ? void 0 : e.totalExperience) !== null && _d !== void 0 ? _d : e === null || e === void 0 ? void 0 : e.overallExperience,
+                Fee: (_e = e === null || e === void 0 ? void 0 : e.hospitalDetails.find((elem) => elem.hospital.toString() === hospitalId)) === null || _e === void 0 ? void 0 : _e.consultationFee.max,
                 workinghour: e === null || e === void 0 ? void 0 : e.workingHours.map((elem) => {
                     var _a, _b, _c, _d;
                     return `${(0, Utils_1.formatTimings)((_a = elem[WEEK_DAYS[day]]) === null || _a === void 0 ? void 0 : _a.from.time)}:${(0, Utils_1.formatTimings)((_b = elem[WEEK_DAYS[day]]) === null || _b === void 0 ? void 0 : _b.from.division)} to ${(0, Utils_1.formatTimings)((_c = elem[WEEK_DAYS[day]]) === null || _c === void 0 ? void 0 : _c.till.time)}:${(0, Utils_1.formatTimings)((_d = elem[WEEK_DAYS[day]]) === null || _d === void 0 ? void 0 : _d.till.division)}`;

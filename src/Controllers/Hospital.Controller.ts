@@ -1157,7 +1157,7 @@ export const getHospitalById = async (req: Request, res: Response) => {
         name: `${e.firstName} ${e.lastName}`,
         specilization: e?.specialization[0]?.specialityName,
         Qualification: e?.qualification[0]?.qualificationName?.abbreviation,
-        Exeperience: e?.overallExperience,
+        Exeperience: e?.totalExperience ?? e?.overallExperience,
         Fee: e?.hospitalDetails.find(
           (elem: any) => elem.hospital.toString() === hospitalId
         )?.consultationFee.max,
