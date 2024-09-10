@@ -22,7 +22,7 @@ const setProfileImage = (id, profileImageUrl, uploadfor) => __awaiter(void 0, vo
         switch (uploadfor) {
             case "doctor": {
                 userModel = Doctors_Model_1.default;
-                upateQuery = { $set: { profileImage: profileImageUrl } };
+                upateQuery = { $set: { profileImage: profileImageUrl, image: profileImageUrl } };
                 break;
             }
             case "hospital": {
