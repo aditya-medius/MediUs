@@ -167,7 +167,7 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                     .populate("qualification");
                 if (profile) {
                     const token = yield jwt.sign(profile.toJSON(), process.env.SECRET_DOCTOR_KEY);
-                    let { firstName, lastName, gender, phoneNumber, email, _id, qualification, preBookingTime, phoneNumberVerified } = profile.toJSON();
+                    let { firstName, lastName, gender, phoneNumber, email, _id, qualification, preBookingTime, phoneNumberVerified, image } = profile.toJSON();
                     qualification = qualification[0];
                     return (0, response_1.successResponse)({
                         token,
@@ -179,7 +179,8 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                         _id,
                         qualification,
                         preBookingTime,
-                        phoneNumberVerified
+                        phoneNumberVerified,
+                        profileImage: image
                     }, "Successfully logged in", res);
                 }
                 else {
@@ -225,7 +226,7 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                         yield profile.populate("qualification");
                         profile = profile.toObject();
                         profile.qualification = profile.qualification[0];
-                        const { firstName, lastName, gender, phoneNumber, email, _id, qualification, verified, preBookingTime, phoneNumberVerified } = profile;
+                        const { firstName, lastName, gender, phoneNumber, email, _id, qualification, verified, preBookingTime, phoneNumberVerified, image } = profile;
                         Doctors_Model_1.default
                             .findOneAndUpdate({
                             phoneNumber: body.phoneNumber,
@@ -247,7 +248,8 @@ const doctorLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                             qualification,
                             verified,
                             preBookingTime,
-                            phoneNumberVerified
+                            phoneNumberVerified,
+                            profileImage: image
                         }, "Successfully logged in", res);
                     }
                     else {

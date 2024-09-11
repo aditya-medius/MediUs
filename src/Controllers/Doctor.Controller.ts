@@ -193,7 +193,8 @@ export const doctorLogin = async (req: Request, res: Response) => {
             _id,
             qualification,
             preBookingTime,
-            phoneNumberVerified
+            phoneNumberVerified,
+            image
           } = profile.toJSON();
           qualification = qualification[0];
           return successResponse(
@@ -207,7 +208,8 @@ export const doctorLogin = async (req: Request, res: Response) => {
               _id,
               qualification,
               preBookingTime,
-              phoneNumberVerified
+              phoneNumberVerified,
+              profileImage: image
             },
             "Successfully logged in",
             res
@@ -285,7 +287,8 @@ export const doctorLogin = async (req: Request, res: Response) => {
               qualification,
               verified,
               preBookingTime,
-              phoneNumberVerified
+              phoneNumberVerified,
+              image
             } = profile;
             doctorModel
               .findOneAndUpdate(
@@ -312,7 +315,8 @@ export const doctorLogin = async (req: Request, res: Response) => {
                 qualification,
                 verified,
                 preBookingTime,
-                phoneNumberVerified
+                phoneNumberVerified,
+                profileImage: image
               },
               "Successfully logged in",
               res
