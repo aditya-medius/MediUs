@@ -143,6 +143,7 @@ hospitalRouter.post("/verifyPayment", (0, middlewareHelper_1.oneOf)(Hospital_aut
         if (req.currentHospital) {
             req.body.appointment["appointmentBookedBy"] = "Hospital";
         }
+        req.body.appointment["appointmentType"] = req.body["appointmentType"];
         next();
     }
     catch (error) {
