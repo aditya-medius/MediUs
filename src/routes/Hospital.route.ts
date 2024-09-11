@@ -254,6 +254,8 @@ hospitalRouter.post(
         req.body.appointment["appointmentBookedBy"] = "Hospital";
       }
 
+      req.body.appointment["appointmentType"] = req.body["appointmentType"]
+
       next();
     } catch (error: any) {
       return errorResponse(error, res);

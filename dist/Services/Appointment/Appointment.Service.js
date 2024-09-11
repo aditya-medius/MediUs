@@ -17,7 +17,7 @@ const Appointment_Model_1 = __importDefault(require("../../Models/Appointment.Mo
 const mongoose_1 = __importDefault(require("mongoose"));
 const getTokenNumber = (body) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let { patient, hospital, time, doctors } = body;
+        let { patient, hospital, time, doctors, appointmentType } = body;
         let appointment = yield Appointment_Model_1.default.aggregate([
             {
                 $match: {
@@ -26,6 +26,7 @@ const getTokenNumber = (body) => __awaiter(void 0, void 0, void 0, function* () 
                     hospital: new mongoose_1.default.Types.ObjectId(hospital),
                     "time.from.time": time.from.time,
                     "time.till.time": time.till.time,
+                    appointmentType
                 },
             },
         ]);
