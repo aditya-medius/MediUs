@@ -878,7 +878,7 @@ export const ViewAppointment = async (req: Request, res: Response) => {
           consult_fee,
           conv_fee: ConvenienceFee?.feeAmount,
           payement_gate_fee: paymentGateWayFee?.feeAmount,
-          taxes: tax.feeAmount,
+          taxes: tax?.feeAmount,
           ...(subpatient?.firstName && {
             sub_pat_name:
               subpatient?.firstName &&
