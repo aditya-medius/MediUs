@@ -649,51 +649,6 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
         const page = parseInt(req.params.page);
         let limit = req.query.limit;
         limit = limit ? parseInt(limit) : 10;
-        // let appointmentData: Array<object> = await appointmentModel
-        //   .find({
-        //     patient: req.currentPatient,
-        //     cancelled: false,
-        //     // "time.date": { $gt: Date() },
-        //   })
-        //   .populate({
-        //     path: "patient",
-        //   })
-        //   .populate({
-        //     path: "hospital",
-        //     select: {
-        //       ...excludeHospitalFields,
-        //       type: 0,
-        //       deleted: 0,
-        //       contactNumber: 0,
-        //     },
-        //   })
-        //   .populate({
-        //     path: "doctors",
-        //     select: {
-        //       ...excludeDoctorFields,
-        //       hospitalDetails: 0,
-        //       // specialization: 0,
-        //       // qualification: 0,
-        //       email: 0,
-        //       active: 0,
-        //       deleted: 0,
-        //       overallExperience: 0,
-        //       gender: 0,
-        //       image: 0,
-        //     },
-        //     populate: {
-        //       path: "specialization qualification",
-        //     },
-        //   })
-        //   .populate({
-        //     path: "subPatient",
-        //     select: {
-        //       parentPatient: 0,
-        //     },
-        //   })
-        //   .sort({ "time.date": -1 })
-        //   .skip(page > 1 ? (page - 1) * 2 : 0)
-        //   .limit(limit);
         let appointmentData = yield Appointment_Model_1.default.aggregate([
             {
                 $match: {
@@ -806,16 +761,16 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
                 var _a, _b;
                 const consult_fee = e.doctors.hospitalDetails.find((hospital) => hospital.hospital.toString() === e.hospital._id.toString()).consultationFee.max;
                 let subpatient = e === null || e === void 0 ? void 0 : e.subPatient;
-                return Object.assign(Object.assign({ booking_id: e.appointmentId, pat_name: e.patient
+                return Object.assign(Object.assign({ booking_id: e === null || e === void 0 ? void 0 : e.appointmentId, pat_name: (e === null || e === void 0 ? void 0 : e.patient)
                         ? `${e === null || e === void 0 ? void 0 : e.patient.firstName} ${e.patient.lastName}`
-                        : "", age: `${new Date().getFullYear() - e.patient.DOB.getFullYear()} years`, booking_date: e.createdAt, appoinment_date: e.time.date, token: e.appointmentToken, dr_name: e.doctors
+                        : "", age: `${new Date().getFullYear() - e.patient.DOB.getFullYear()} years`, booking_date: e === null || e === void 0 ? void 0 : e.createdAt, appoinment_date: e === null || e === void 0 ? void 0 : e.time.date, token: e === null || e === void 0 ? void 0 : e.appointmentToken, dr_name: (e === null || e === void 0 ? void 0 : e.doctors)
                         ? `${e.doctors.firstName} ${e.doctors.lastName}`
-                        : "", specilization: e.doctors
+                        : "", specilization: (e === null || e === void 0 ? void 0 : e.doctors)
                         ? ((_a = e === null || e === void 0 ? void 0 : e.doctors) === null || _a === void 0 ? void 0 : _a.specialization.length) &&
                             ((_b = e === null || e === void 0 ? void 0 : e.doctors) === null || _b === void 0 ? void 0 : _b.specialization.map((elem) => {
                                 return elem.specialityName;
                             }).join(""))
-                        : "", time_slot: `${(0, Utils_1.formatTimings)(e.time.from.time)}:${(0, Utils_1.formatTimings)(e.time.from.division)} to ${(0, Utils_1.formatTimings)(e.time.till.time)}:${(0, Utils_1.formatTimings)(e.time.till.division)}`, booking_type: e.appointmentType, clinicname: e.hospital && e.hospital.name, consult_fee, conv_fee: ConvenienceFee.feeAmount, payement_gate_fee: paymentGateWayFee.feeAmount, taxes: tax.feeAmount }, ((subpatient === null || subpatient === void 0 ? void 0 : subpatient.firstName) && {
+                        : "", time_slot: `${(0, Utils_1.formatTimings)(e.time.from.time)}:${(0, Utils_1.formatTimings)(e.time.from.division)} to ${(0, Utils_1.formatTimings)(e.time.till.time)}:${(0, Utils_1.formatTimings)(e.time.till.division)}`, booking_type: e === null || e === void 0 ? void 0 : e.appointmentType, clinicname: e.hospital && e.hospital.name, consult_fee, conv_fee: ConvenienceFee === null || ConvenienceFee === void 0 ? void 0 : ConvenienceFee.feeAmount, payement_gate_fee: paymentGateWayFee === null || paymentGateWayFee === void 0 ? void 0 : paymentGateWayFee.feeAmount, taxes: tax.feeAmount }, ((subpatient === null || subpatient === void 0 ? void 0 : subpatient.firstName) && {
                     sub_pat_name: (subpatient === null || subpatient === void 0 ? void 0 : subpatient.firstName) &&
                         `${subpatient === null || subpatient === void 0 ? void 0 : subpatient.firstName} ${subpatient === null || subpatient === void 0 ? void 0 : subpatient.lastName}`,
                     sub_pat_age: (0, Patient_Service_1.calculateAge)(subpatient === null || subpatient === void 0 ? void 0 : subpatient.DOB),

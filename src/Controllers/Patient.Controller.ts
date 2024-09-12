@@ -731,52 +731,6 @@ export const ViewAppointment = async (req: Request, res: Response) => {
     let limit: any = req.query.limit;
     limit = limit ? parseInt(limit) : 10;
 
-    // let appointmentData: Array<object> = await appointmentModel
-    //   .find({
-    //     patient: req.currentPatient,
-    //     cancelled: false,
-    //     // "time.date": { $gt: Date() },
-    //   })
-    //   .populate({
-    //     path: "patient",
-    //   })
-    //   .populate({
-    //     path: "hospital",
-    //     select: {
-    //       ...excludeHospitalFields,
-    //       type: 0,
-    //       deleted: 0,
-    //       contactNumber: 0,
-    //     },
-    //   })
-    //   .populate({
-    //     path: "doctors",
-    //     select: {
-    //       ...excludeDoctorFields,
-    //       hospitalDetails: 0,
-    //       // specialization: 0,
-    //       // qualification: 0,
-    //       email: 0,
-    //       active: 0,
-    //       deleted: 0,
-    //       overallExperience: 0,
-    //       gender: 0,
-    //       image: 0,
-    //     },
-    //     populate: {
-    //       path: "specialization qualification",
-    //     },
-    //   })
-    //   .populate({
-    //     path: "subPatient",
-    //     select: {
-    //       parentPatient: 0,
-    //     },
-    //   })
-    //   .sort({ "time.date": -1 })
-    //   .skip(page > 1 ? (page - 1) * 2 : 0)
-    //   .limit(limit);
-
     let appointmentData = await appointmentModel.aggregate([
       {
         $match: {
@@ -898,19 +852,19 @@ export const ViewAppointment = async (req: Request, res: Response) => {
         let subpatient = e?.subPatient;
 
         return {
-          booking_id: e.appointmentId,
-          pat_name: e.patient
+          booking_id: e?.appointmentId,
+          pat_name: e?.patient
             ? `${e?.patient.firstName} ${e.patient.lastName}`
             : "",
           age: `${new Date().getFullYear() - e.patient.DOB.getFullYear()
             } years`,
-          booking_date: e.createdAt,
-          appoinment_date: e.time.date,
-          token: e.appointmentToken,
-          dr_name: e.doctors
+          booking_date: e?.createdAt,
+          appoinment_date: e?.time.date,
+          token: e?.appointmentToken,
+          dr_name: e?.doctors
             ? `${e.doctors.firstName} ${e.doctors.lastName}`
             : "",
-          specilization: e.doctors
+          specilization: e?.doctors
             ? e?.doctors?.specialization.length &&
             e?.doctors?.specialization
               .map((elem: any) => {
@@ -919,11 +873,11 @@ export const ViewAppointment = async (req: Request, res: Response) => {
               .join("")
             : "",
           time_slot: `${formatTimings(e.time.from.time)}:${formatTimings(e.time.from.division)} to ${formatTimings(e.time.till.time)}:${formatTimings(e.time.till.division)}`,
-          booking_type: e.appointmentType,
+          booking_type: e?.appointmentType,
           clinicname: e.hospital && e.hospital.name,
           consult_fee,
-          conv_fee: ConvenienceFee.feeAmount,
-          payement_gate_fee: paymentGateWayFee.feeAmount,
+          conv_fee: ConvenienceFee?.feeAmount,
+          payement_gate_fee: paymentGateWayFee?.feeAmount,
           taxes: tax.feeAmount,
           ...(subpatient?.firstName && {
             sub_pat_name:
