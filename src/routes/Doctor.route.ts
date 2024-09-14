@@ -494,22 +494,24 @@ doctorRouter.get(
 )
 
 doctorRouter.post(
-  "/bookingperiod", 
+  "/bookingperiod",
   oneOf(authenticateDoctor, authenticateHospital),
   doctorController.setDoctorsAdvancedBookingPeriod
 )
 
 doctorRouter.delete(
-  "/bookingperiod", 
+  "/bookingperiod",
   oneOf(authenticateDoctor, authenticateHospital),
   doctorController.deleteDoctorsAdvancedBookingPeriod
 )
 
 doctorRouter.get(
-  "/bookingperiod", 
+  "/bookingperiod",
   oneOf(authenticateDoctor, authenticateHospital),
   doctorController.getDoctorsAdvancedBookingPeriod
 )
+
+doctorRouter.put("/resendotp", oneOf(authenticateDoctor), doctorController.resendOtpToDoctor)
 
 export default doctorRouter;
 

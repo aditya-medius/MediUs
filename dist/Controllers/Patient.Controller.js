@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifyPatientPhoneNumber = exports.canDoctorTakeAppointment = exports.getDoctorsIHaveLikes = exports.checkIfDoctorIsOnHoliday = exports.getPatientsNotification = exports.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod = exports.searchPatientByPhoneNumberOrEmail = exports.checkDoctorAvailability = exports.uploadPrescription = exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.viewAppointById = exports.CancelAppointment = exports.doneAppointment = exports.rescheduleAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = exports.excludeHospitalFields = exports.excludePatientFields = void 0;
+exports.resendOtpToPatient = exports.verifyPatientPhoneNumber = exports.canDoctorTakeAppointment = exports.getDoctorsIHaveLikes = exports.checkIfDoctorIsOnHoliday = exports.getPatientsNotification = exports.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod = exports.searchPatientByPhoneNumberOrEmail = exports.checkDoctorAvailability = exports.uploadPrescription = exports.getDoctorsByCity = exports.getHospitalsByCity = exports.getSpecialityBodyPartAndDisease = exports.getDoctorByDay = exports.ViewSchedule = exports.ViewAppointment = exports.viewAppointById = exports.CancelAppointment = exports.doneAppointment = exports.rescheduleAppointment = exports.BookAppointment = exports.deleteProfile = exports.updatePatientProfile = exports.getPatientByHospitalId = exports.getPatientById = exports.patientLogin = exports.createPatient = exports.getAllPatientsList = exports.excludeHospitalFields = exports.excludePatientFields = void 0;
 const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
 // import { excludePatientFields } from "./Patient.Controller";
 const OTP_Model_1 = __importDefault(require("../Models/OTP.Model"));
@@ -1154,3 +1154,14 @@ const verifyPatientPhoneNumber = (req, res) => __awaiter(void 0, void 0, void 0,
     }
 });
 exports.verifyPatientPhoneNumber = verifyPatientPhoneNumber;
+const resendOtpToPatient = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { phoneNumber } = req.body;
+        yield (0, Utils_1.sendOTPToPhoneNumber)(phoneNumber);
+        return (0, response_1.successResponse)({}, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.resendOtpToPatient = resendOtpToPatient;

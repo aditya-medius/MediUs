@@ -197,4 +197,5 @@ patientRouter.post("/checkIfDoctorIsOnHoliday", (0, middlewareHelper_1.oneOf)(Pa
 patientRouter.post("/canDoctorTakeAppointment", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Hospital_auth_1.authenticateHospital), patientController.canDoctorTakeAppointment);
 patientRouter.get("/getMyLikes/:id", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.getDoctorsIHaveLikes);
 patientRouter.put("/verify/number", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.verifyPatientPhoneNumber);
+patientRouter.put("/resendotp", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient), patientController.resendOtpToPatient);
 exports.default = patientRouter;

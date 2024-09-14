@@ -36,6 +36,7 @@ import {
   formatTimings,
   getAge,
   sendOTPForPasswordChange,
+  sendOTPToPhoneNumber,
   verifyPasswordChangeOTP,
   verifyPhoneNumber,
 } from "../Services/Utils";
@@ -1683,6 +1684,16 @@ export const getHospitalsHoliday = async (req: Request, res: Response) => {
 export const verifyHospitalPhoneNumber = async (req: Request, res: Response) => {
   try {
     await verifyPhoneNumber(req.currentHospital, "hospital")
+    return successResponse({}, "Success", res)
+  } catch (error: any) {
+    return errorResponse(error, res)
+  }
+}
+
+export const resendOtpToHospital = async (req: Request, res: Response) => {
+  try {
+    const { phoneNumber } = req.body
+    await sendOTPToPhoneNumber(phoneNumber as string)
     return successResponse({}, "Success", res)
   } catch (error: any) {
     return errorResponse(error, res)

@@ -161,4 +161,5 @@ hospitalRouter.put("/update/status", (0, middlewareHelper_1.oneOf)(Hospital_auth
 hospitalRouter.put("/holiday", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.addHolidayForHospital);
 hospitalRouter.get("/holiday", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getHospitalsHoliday);
 hospitalRouter.put("/verify/number", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.verifyHospitalPhoneNumber);
+hospitalRouter.put("/resendotp", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.resendOtpToHospital);
 exports.default = hospitalRouter;

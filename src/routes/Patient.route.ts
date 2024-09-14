@@ -360,4 +360,6 @@ patientRouter.get(
 
 patientRouter.put("/verify/number", oneOf(authenticatePatient), patientController.verifyPatientPhoneNumber)
 
+patientRouter.put("/resendotp", oneOf(authenticatePatient), patientController.resendOtpToPatient)
+
 export default patientRouter;
