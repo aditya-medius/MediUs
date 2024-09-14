@@ -10,11 +10,13 @@ export enum AppointmentStatus {
     PRESENT = config.Appointment.Status.Present,
     SCHEDULED = config.Appointment.Status.Scheduled,
     CONSULTED = config.Appointment.Status.Consulted,
-    ABSENT = config.Appointment.Status.Absent
+    ABSENT = config.Appointment.Status.Absent,
+    ACCEPTED = config.Appointment.Status.Accepted
 }
 
 export const AppointStatusOrder = [
     config.Appointment.Status.Present,
+    config.Appointment.Status.Accepted,
     config.Appointment.Status.Scheduled,
     config.Appointment.Status.Consulted,
     config.Appointment.Status.Absent

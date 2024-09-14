@@ -24,7 +24,8 @@
             "Scheduled": "Scheduled",
             "Present": "Present",
             "Consulted": "Consulted",
-            "Absent": "Absent"
+            "Absent": "Absent",
+            "Accepted": "Accepted"
         }
     }
 }

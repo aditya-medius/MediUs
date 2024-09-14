@@ -1317,7 +1317,8 @@ import * as notificationService from "../Services/Notification/Notification.Serv
 import suvedhaModel from "../Models/Suvedha.Model";
 import patientModel from "../Models/Patient.Model";
 import { getDefaultSettings } from "http2";
-import { AppointmentStatus, AppointStatusOrder } from "../Services/Helpers";
+import { AppointmentStatus, AppointStatusOrder, Hospital } from "../Services/Helpers";
+import { getHospitalDetailsById, updateHospitalById } from "../Services/Hospital/Common.Helper";
 
 export const getHospitalsNotification = async (req: Request, res: Response) => {
   try {
@@ -1694,6 +1695,46 @@ export const resendOtpToHospital = async (req: Request, res: Response) => {
   try {
     const { phoneNumber } = req.body
     await sendOTPToPhoneNumber(phoneNumber as string)
+    return successResponse({}, "Success", res)
+  } catch (error: any) {
+    return errorResponse(error, res)
+  }
+}
+
+export const getOtpForPasswordChange = async (req: Request, res: Response) => {
+  try {
+    console.log("SDSjkdnsssh")
+    const hospital: Hospital = await getHospitalDetailsById(req.currentHospital as string)
+    await sendOTPForPasswordChange(hospital.contactNumber)
+    return successResponse({}, "Success", res)
+  } catch (error: any) {
+    return errorResponse(error, res)
+  }
+}
+
+export const verifyOtpForPasswordChange = async (req: Request, res: Response) => {
+  try {
+    const hospital: Hospital = await getHospitalDetailsById(req.currentHospital as string)
+    const isOtpValid = await verifyPasswordChangeOTP(hospital.contactNumber, req.body.otp)
+    if (isOtpValid) {
+      return successResponse({ valid: true }, "Success", res)
+    }
+    return successResponse({ valid: false }, "Success", res)
+  } catch (error: any) {
+    return errorResponse(error, res)
+  }
+}
+
+export const changePassword = async (req: Request, res: Response) => {
+  try {
+    const { password } = req.body;
+    const hospital: Hospital = await getHospitalDetailsById(req.currentHospital as string)
+    if (!hospital) {
+      const error = new Error("Hospital does not exist for this number")
+      return errorResponse(error, res)
+    }
+    const updateQuery = { $set: { password } }
+    await updateHospitalById(req.currentHospital as string, updateQuery)
     return successResponse({}, "Success", res)
   } catch (error: any) {
     return errorResponse(error, res)
