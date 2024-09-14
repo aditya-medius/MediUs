@@ -218,4 +218,5 @@ doctorRouter.get("/overthecounterpayment", (0, middlewareHelper_1.oneOf)(Doctor_
 doctorRouter.post("/bookingperiod", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), doctorController.setDoctorsAdvancedBookingPeriod);
 doctorRouter.delete("/bookingperiod", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), doctorController.deleteDoctorsAdvancedBookingPeriod);
 doctorRouter.get("/bookingperiod", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), doctorController.getDoctorsAdvancedBookingPeriod);
+doctorRouter.put("/resendotp", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor), doctorController.resendOtpToDoctor);
 exports.default = doctorRouter;

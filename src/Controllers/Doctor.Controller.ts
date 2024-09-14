@@ -302,7 +302,7 @@ export const doctorLogin = async (req: Request, res: Response) => {
                   },
                 }
               )
-              .then((result) => console.log("jhdsdsdsd", result));
+              .then((result: any) => console.log("jhdsdsdsd", result));
             return successResponse(
               {
                 token,
@@ -1847,7 +1847,7 @@ export const addHospitalInDoctorProfile = async (
         { doctorDetails: doctorId, hospitalDetails: req.currentHospital },
         { _id: 1 }
       )
-    ).map((e) => e._id.toString());
+    ).map((e: any) => e._id.toString());
 
     if (!all_workingHours.includes(rest.workingHours)) {
       return errorResponse(
@@ -1956,6 +1956,7 @@ import {
   formatTimings,
   getRangeOfDates,
   sendOTPForPasswordChange,
+  sendOTPToPhoneNumber,
   verifyPasswordChangeOTP,
 } from "../Services/Utils";
 import suvedhaModel from "../Models/Suvedha.Model";
@@ -2275,7 +2276,7 @@ export const verifyOTPToUpdateNumber = async (req: Request, res: Response) => {
             },
           }
         )
-        .then((res) => console.log("resss", res));
+        .then((res: any) => console.log("resss", res));
       return successResponse({}, "Success", res);
     } else {
       throw new Error("Invalid OTP");
@@ -2444,6 +2445,16 @@ export const getDoctorsAdvancedBookingPeriod = async (req: Request, res: Respons
 
     const exist = await doctorService.getDoctorsAdvancedBookingPeriod(doctorId as string, hospitalId as string)
     return successResponse(exist, "Success", res)
+  } catch (error: any) {
+    return errorResponse(error, res)
+  }
+}
+
+export const resendOtpToDoctor = async (req: Request, res: Response) => {
+  try {
+    const { phoneNumber } = req.body
+    await sendOTPToPhoneNumber(phoneNumber as string)
+    return successResponse({}, "Success", res)
   } catch (error: any) {
     return errorResponse(error, res)
   }

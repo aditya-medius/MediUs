@@ -41,7 +41,7 @@ import orderModel from "../Models/Order.Model";
 import { checkIfDoctorIsAvailableOnTheDay } from "../Services/Doctor/Doctor.Service";
 import { calculateAge } from "../Services/Patient/Patient.Service";
 import * as patientService from "../Services/Patient/Patient.Service";
-import { digiMilesSMS, formatTimings, verifyPhoneNumber } from "../Services/Utils";
+import { digiMilesSMS, formatTimings, sendOTPToPhoneNumber, verifyPhoneNumber } from "../Services/Utils";
 import feeModel from "../Module/Payment/Model/Fee.Model";
 import { convenienceFee } from "../Services/Admin/Admin.Service";
 import moment from "moment";
@@ -1315,6 +1315,16 @@ export const verifyPatientPhoneNumber = async (req: Request, res: Response) => {
   try {
     await verifyPhoneNumber(req.currentPatient, "patient")
 
+    return successResponse({}, "Success", res)
+  } catch (error: any) {
+    return errorResponse(error, res)
+  }
+}
+
+export const resendOtpToPatient = async (req: Request, res: Response) => {
+  try {
+    const { phoneNumber } = req.body
+    await sendOTPToPhoneNumber(phoneNumber as string)
     return successResponse({}, "Success", res)
   } catch (error: any) {
     return errorResponse(error, res)

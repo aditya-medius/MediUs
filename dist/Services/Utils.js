@@ -322,6 +322,7 @@ const sendOTPToPhoneNumber = (phoneNumber) => __awaiter(void 0, void 0, void 0, 
         $set: { phoneNumber: phoneNumber, otp: otpToken },
     }, { upsert: true });
     exports.digiMilesSMS.sendOTPToPhoneNumber(phoneNumber, OTP);
+    return Promise.resolve();
 });
 exports.sendOTPToPhoneNumber = sendOTPToPhoneNumber;
 const verifyPhoneNumber = (id, idOf) => __awaiter(void 0, void 0, void 0, function* () {

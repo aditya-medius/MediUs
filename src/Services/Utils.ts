@@ -355,6 +355,7 @@ export const sendOTPToPhoneNumber = async (phoneNumber: string) => {
   );
 
   digiMilesSMS.sendOTPToPhoneNumber(phoneNumber, OTP);
+  return Promise.resolve()
 }
 
 export const verifyPhoneNumber = async (id: string, idOf: string) => {
