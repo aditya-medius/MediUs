@@ -307,4 +307,10 @@ hospitalRouter.put("/verify/number", oneOf(authenticateHospital), hospitalContro
 
 hospitalRouter.put("/resendotp", oneOf(authenticateHospital), hospitalController.resendOtpToHospital)
 
+hospitalRouter.get("/otpforpasswordchange", oneOf(authenticateHospital), hospitalController.getOtpForPasswordChange)
+
+hospitalRouter.put("/otpforpasswordchange", oneOf(authenticateHospital), hospitalController.verifyOtpForPasswordChange)
+
+hospitalRouter.put("/change/password", oneOf(authenticateHospital), hospitalController.changePassword)
+
 export default hospitalRouter;
