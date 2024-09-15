@@ -13,9 +13,11 @@ var AppointmentStatus;
     AppointmentStatus[AppointmentStatus["SCHEDULED"] = config.Appointment.Status.Scheduled] = "SCHEDULED";
     AppointmentStatus[AppointmentStatus["CONSULTED"] = config.Appointment.Status.Consulted] = "CONSULTED";
     AppointmentStatus[AppointmentStatus["ABSENT"] = config.Appointment.Status.Absent] = "ABSENT";
+    AppointmentStatus[AppointmentStatus["ACCEPTED"] = config.Appointment.Status.Accepted] = "ACCEPTED";
 })(AppointmentStatus = exports.AppointmentStatus || (exports.AppointmentStatus = {}));
 exports.AppointStatusOrder = [
     config.Appointment.Status.Present,
+    config.Appointment.Status.Accepted,
     config.Appointment.Status.Scheduled,
     config.Appointment.Status.Consulted,
     config.Appointment.Status.Absent

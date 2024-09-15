@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resendOtpToHospital = exports.verifyHospitalPhoneNumber = exports.getHospitalsHoliday = exports.addHolidayForHospital = exports.changeAppointmentStatus = exports.addDoctor = exports.verifyOTPToUpdateNumber = exports.sendOTPToUpdateNumber = exports.getHospitalDetails = exports.doctorsInHospitalWithTimings = exports.verifyPayment = exports.generateOrderId = exports.getPatientsAppointmentsInThisHospital = exports.searchHospitalByPhoneNumber = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.updateHospitalAddress = exports.getHospitalsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.checkVerificationStatus = exports.getDoctorsInHospital = exports.getHospitalById = exports.getAppointmentByDate = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.deleteAnemities = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
+exports.changePassword = exports.verifyOtpForPasswordChange = exports.getOtpForPasswordChange = exports.resendOtpToHospital = exports.verifyHospitalPhoneNumber = exports.getHospitalsHoliday = exports.addHolidayForHospital = exports.changeAppointmentStatus = exports.addDoctor = exports.verifyOTPToUpdateNumber = exports.sendOTPToUpdateNumber = exports.getHospitalDetails = exports.doctorsInHospitalWithTimings = exports.verifyPayment = exports.generateOrderId = exports.getPatientsAppointmentsInThisHospital = exports.searchHospitalByPhoneNumber = exports.getDoctorsListInHospital_withApprovalStatus = exports.getHospitalsSpecilization_AccordingToDoctor = exports.updateHospitalAddress = exports.getHospitalsNotification = exports.getDoctorsOfflineAndOnlineAppointments = exports.getListOfRequestedApprovals_ByHospital = exports.getListOfRequestedApprovals_OfHospital = exports.checkVerificationStatus = exports.getDoctorsInHospital = exports.getHospitalById = exports.getAppointmentByDate = exports.viewAppointment = exports.removeDoctor = exports.searchHospital = exports.updateHospital = exports.deleteHospital = exports.getServices = exports.deleteAnemities = exports.getAnemities = exports.createHospitalAnemity = exports.createHospital = exports.myHospital = exports.getAllHospitalsList = exports.loginWithPassword = exports.login = void 0;
 const Address_Model_1 = __importDefault(require("../Models/Address.Model"));
 const Anemities_Model_1 = __importDefault(require("../Models/Anemities.Model"));
 const Hospital_Model_1 = __importDefault(require("../Models/Hospital.Model"));
@@ -1019,7 +1019,9 @@ const getHospitalById = (req, res) => __awaiter(void 0, void 0, void 0, function
                 Fee: (_e = e === null || e === void 0 ? void 0 : e.hospitalDetails.find((elem) => elem.hospital.toString() === hospitalId)) === null || _e === void 0 ? void 0 : _e.consultationFee.max,
                 workinghour: e === null || e === void 0 ? void 0 : e.workingHours.map((elem) => {
                     var _a, _b, _c, _d;
-                    return `${(0, Utils_1.formatTimings)((_a = elem[WEEK_DAYS[day]]) === null || _a === void 0 ? void 0 : _a.from.time)}:${(0, Utils_1.formatTimings)((_b = elem[WEEK_DAYS[day]]) === null || _b === void 0 ? void 0 : _b.from.division)} to ${(0, Utils_1.formatTimings)((_c = elem[WEEK_DAYS[day]]) === null || _c === void 0 ? void 0 : _c.till.time)}:${(0, Utils_1.formatTimings)((_d = elem[WEEK_DAYS[day]]) === null || _d === void 0 ? void 0 : _d.till.division)}`;
+                    const appointmentStartTime = (0, Utils_1.formatTime)(`${(_a = elem[WEEK_DAYS[day]]) === null || _a === void 0 ? void 0 : _a.from.time}:${(_b = elem[WEEK_DAYS[day]]) === null || _b === void 0 ? void 0 : _b.from.division}`);
+                    const appointmentEndTime = (0, Utils_1.formatTime)(`${(_c = elem[WEEK_DAYS[day]]) === null || _c === void 0 ? void 0 : _c.till.time}:${(_d = elem[WEEK_DAYS[day]]) === null || _d === void 0 ? void 0 : _d.till.division}`);
+                    return `${appointmentStartTime} to ${appointmentEndTime}`;
                 }),
                 capacityAndToken: e === null || e === void 0 ? void 0 : e.workingHours.map((elem) => {
                     return {
@@ -1135,6 +1137,7 @@ const notificationService = __importStar(require("../Services/Notification/Notif
 const Suvedha_Model_1 = __importDefault(require("../Models/Suvedha.Model"));
 const Patient_Model_1 = __importDefault(require("../Models/Patient.Model"));
 const Helpers_1 = require("../Services/Helpers");
+const Common_Helper_1 = require("../Services/Hospital/Common.Helper");
 const getHospitalsNotification = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         /* Notification jaha pe sender hospital hai */
@@ -1466,3 +1469,46 @@ const resendOtpToHospital = (req, res) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.resendOtpToHospital = resendOtpToHospital;
+const getOtpForPasswordChange = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        console.log("SDSjkdnsssh");
+        const hospital = yield (0, Common_Helper_1.getHospitalDetailsById)(req.currentHospital);
+        yield (0, Utils_1.sendOTPForPasswordChange)(hospital.contactNumber);
+        return (0, response_1.successResponse)({}, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.getOtpForPasswordChange = getOtpForPasswordChange;
+const verifyOtpForPasswordChange = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const hospital = yield (0, Common_Helper_1.getHospitalDetailsById)(req.currentHospital);
+        const isOtpValid = yield (0, Utils_1.verifyPasswordChangeOTP)(hospital.contactNumber, req.body.otp);
+        if (isOtpValid) {
+            return (0, response_1.successResponse)({ valid: true }, "Success", res);
+        }
+        return (0, response_1.successResponse)({ valid: false }, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.verifyOtpForPasswordChange = verifyOtpForPasswordChange;
+const changePassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { password } = req.body;
+        const hospital = yield (0, Common_Helper_1.getHospitalDetailsById)(req.currentHospital);
+        if (!hospital) {
+            const error = new Error("Hospital does not exist for this number");
+            return (0, response_1.errorResponse)(error, res);
+        }
+        const updateQuery = { $set: { password } };
+        yield (0, Common_Helper_1.updateHospitalById)(req.currentHospital, updateQuery);
+        return (0, response_1.successResponse)({}, "Success", res);
+    }
+    catch (error) {
+        return (0, response_1.errorResponse)(error, res);
+    }
+});
+exports.changePassword = changePassword;

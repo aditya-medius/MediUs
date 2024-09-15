@@ -48,7 +48,7 @@ import doctorModel from "../Models/Doctors.Model";
 import hospitalModel from "../Models/Hospital.Model";
 import {
   digiMilesSMS,
-  formatTimings,
+  formatTime,
   sendNotificationToDoctor,
   sendNotificationToHospital,
   sendNotificationToPatient,
@@ -145,7 +145,7 @@ patientRouter.post(
         await prescriptionValidtiyService.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod(
           { doctorId, patientId, hospitalId, subPatientId }
         );
-      req.body["appointmentType"] = valid ? "Follow up" : "Fresh";
+      req.body["appointmentType"] = valid ? AppointmentType.FOLLOW_UP : AppointmentType.FRESH;
 
       if (req.currentPatient) {
         req.body.appointment["appointmentBookedBy"] = "Patient";
@@ -178,25 +178,29 @@ patientRouter.post(
           hospitalFirebaseToken = H.firebaseToken,
           patientFirebaseToken = P.firebaseToken;
 
-        const fromTime = formatTimings(req.body.appointment.time.from.time)
-        const fromDivision = formatTimings(req.body.appointment.time.from.division)
+        // const fromTime = formatTimings(req.body.appointment.time.from.time)
+        // const fromDivision = formatTimings(req.body.appointment.time.from.division, true)
 
-        const tillTime = formatTimings(req.body.appointment.time.till.time)
-        const tillDivision = formatTimings(req.body.appointment.time.till.division)
+        // const tillTime = formatTimings(req.body.appointment.time.till.time)
+        // const tillDivision = formatTimings(req.body.appointment.time.till.division, true)
+
+        const appointmentStartTime = formatTime(`${req.body.appointment.time.from.time}:${req.body.appointment.time.from.division}`)
+        const appointmentEndTime = formatTime(`${req.body.appointment.time.till.time}:${req.body.appointment.time.till.division}`)
+
 
         sendNotificationToDoctor(doctorFirebaseToken, {
           title: "New appointment",
           body: `${P.firstName} ${P.lastName} has booked an appointment at ${H.name
             } and ${moment(req.body.appointment.time.date).format(
               "DD-MM-YYYY"
-            )} ${fromTime}:${fromDivision}-${tillTime}:${tillDivision} `,
+            )} ${appointmentStartTime}-${appointmentEndTime} `,
         });
         sendNotificationToHospital(hospitalFirebaseToken, {
           title: "New appointment",
           body: `${P.firstName} ${P.lastName} has booked an appointment with ${D.firstName
             } ${D.lastName} and ${moment(req.body.appointment.time.date).format(
               "DD-MM-YYYY"
-            )} ${fromTime}:${fromDivision}-${tillTime}:${tillDivision} `,
+            )} ${appointmentStartTime}-${appointmentEndTime} `,
         });
 
         sendNotificationToPatient(patientFirebaseToken, {
@@ -204,7 +208,7 @@ patientRouter.post(
           body: `${P.firstName} ${P.lastName} has booked an appointment for ${D.firstName
             } ${D.lastName} at ${H.name} and ${moment(
               req.body.appointment.time.date
-            ).format("DD-MM-YYYY")} ${fromTime}:${fromDivision}-${tillTime}:${tillDivision} `,
+            ).format("DD-MM-YYYY")} ${appointmentStartTime}-${appointmentEndTime} `,
         });
 
         let name = `${P.firstName} ${P.lastName}`;
@@ -219,7 +223,7 @@ patientRouter.post(
           `${D.firstName} ${D.lastName}`,
           H.name,
           moment(req.body.appointment.time.date).format("DD-MM-YYYY"),
-          `${fromTime}:${fromDivision}-${tillTime}:${tillDivision}`
+          `${appointmentStartTime}-${appointmentEndTime}`
         );
       });
     } catch (error: any) {

@@ -378,16 +378,6 @@ export const verifyPhoneNumber = async (id: string, idOf: string) => {
   return
 }
 
-
-type NumberOrString = number | string
-
-export const formatTimings = (time: NumberOrString): NumberOrString => {
-  if (typeof time === "string") {
-    return time
-  }
-
-  if (time < 10) {
-    return `0${time}`
-  }
-  return time.toString();
+export const formatTime = (time: string): string => {
+  return moment(time, 'HH:mm').format('hh:mm A');
 }

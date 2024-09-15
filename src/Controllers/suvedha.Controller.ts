@@ -17,7 +17,7 @@ export const createProfile = async (req: Request, res: Response) => {
   }
 };
 import moment, { weekdays } from "moment";
-import { formatTimings } from "../Services/Utils";
+import { formatTime } from "../Services/Utils";
 
 export const getDoctors = async (req: Request, res: Response) => {
   try {
@@ -128,6 +128,10 @@ export const getDoctorInformation = async (req: Request, res: Response) => {
           let currentDate = moment(time).format("DD-MM-YYYY");
           if (e[day]) {
             let { from, till } = e[day];
+
+            const appointmentStartTime = formatTime(`${from.time}:${from.division}`)
+            const appointmentEndTime = formatTime(`${till.time}:${till.division}`)
+
             let find = e.holidayCalendar?.find((elem: any) => {
               let date = moment(elem.date).format("DD-MM-YYYY");
               return date === currentDate;
@@ -135,7 +139,7 @@ export const getDoctorInformation = async (req: Request, res: Response) => {
             return [
               {
                 available: find ? false : true,
-                Time: `${formatTimings(from.time)}:${formatTimings(from.division)} to ${formatTimings(till.time)}:${formatTimings(till.division)}`,
+                Time: `${appointmentStartTime} to ${appointmentEndTime}`,
               },
             ];
           }

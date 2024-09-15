@@ -367,68 +367,6 @@ const getDoctorsListInHospital_withApprovalStatus = (hospitalId) => __awaiter(vo
                             },
                         },
                     ],
-                    // doctors: [
-                    //   {
-                    //     $lookup: {
-                    //       from: "doctors",
-                    //       localField: "doctors",
-                    //       foreignField: "_id",
-                    //       as: "doctors",
-                    //     },
-                    //   },
-                    //   {
-                    //     $addFields: {
-                    //       doctor: "$doctors",
-                    //     },
-                    //   },
-                    //   {
-                    //     $project: {
-                    //       doctor: 1,
-                    //     },
-                    //   },
-                    //   {
-                    //     $unwind: "$doctor",
-                    //   },
-                    //   {
-                    //     $lookup: {
-                    //       from: qualification,
-                    //       localField: "doctor.qualification",
-                    //       foreignField: "_id",
-                    //       as: "doctor.qualification",
-                    //     },
-                    //   },
-                    //   {
-                    //     $lookup: {
-                    //       from: specialization,
-                    //       localField: "doctor.specialization",
-                    //       foreignField: "_id",
-                    //       as: "doctor.specialization",
-                    //     },
-                    //   },
-                    //   {
-                    //     $addFields: {
-                    //       status: "$approved.approvalStatus",
-                    //       experience: {
-                    //         $function: {
-                    //           body: function (experience: any) {
-                    //             experience = new Date(experience);
-                    //             let currentDate = new Date();
-                    //             let age: number | string =
-                    //               currentDate.getFullYear() - experience.getFullYear();
-                    //             if (age > 0) {
-                    //               age = `${age} years`;
-                    //             } else {
-                    //               age = `${age} months`;
-                    //             }
-                    //             return age;
-                    //           },
-                    //           lang: "js",
-                    //           args: ["$doctor.overallExperience"],
-                    //         },
-                    //       },
-                    //     },
-                    //   },
-                    // ],
                 },
             },
             {
