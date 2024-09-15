@@ -105,7 +105,7 @@ patientRouter.post("/verifyPayment", (0, middlewareHelper_1.oneOf)(Patient_auth_
     try {
         let doctorId = req.body.appointment.doctors, patientId = req.body.appointment.patient, hospitalId = req.body.appointment.hospital, subPatientId = req.body.appointment.subPatient;
         let valid = yield prescriptionValidtiyService.checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod({ doctorId, patientId, hospitalId, subPatientId });
-        req.body["appointmentType"] = valid ? "Follow up" : "Fresh";
+        req.body["appointmentType"] = valid ? Helpers_1.AppointmentType.FOLLOW_UP : Helpers_1.AppointmentType.FRESH;
         if (req.currentPatient) {
             req.body.appointment["appointmentBookedBy"] = "Patient";
         }
@@ -128,27 +128,29 @@ patientRouter.post("/verifyPayment", (0, middlewareHelper_1.oneOf)(Patient_auth_
         Promise.all(arr).then((result) => {
             const [D, H, P, SP] = result;
             const doctorFirebaseToken = D.firebaseToken, hospitalFirebaseToken = H.firebaseToken, patientFirebaseToken = P.firebaseToken;
-            const fromTime = (0, Utils_1.formatTimings)(req.body.appointment.time.from.time);
-            const fromDivision = (0, Utils_1.formatTimings)(req.body.appointment.time.from.division);
-            const tillTime = (0, Utils_1.formatTimings)(req.body.appointment.time.till.time);
-            const tillDivision = (0, Utils_1.formatTimings)(req.body.appointment.time.till.division);
+            // const fromTime = formatTimings(req.body.appointment.time.from.time)
+            // const fromDivision = formatTimings(req.body.appointment.time.from.division, true)
+            // const tillTime = formatTimings(req.body.appointment.time.till.time)
+            // const tillDivision = formatTimings(req.body.appointment.time.till.division, true)
+            const appointmentStartTime = (0, Utils_1.formatTime)(`${req.body.appointment.time.from.time}:${req.body.appointment.time.from.division}`);
+            const appointmentEndTime = (0, Utils_1.formatTime)(`${req.body.appointment.time.till.time}:${req.body.appointment.time.till.division}`);
             (0, Utils_1.sendNotificationToDoctor)(doctorFirebaseToken, {
                 title: "New appointment",
-                body: `${P.firstName} ${P.lastName} has booked an appointment at ${H.name} and ${(0, moment_1.default)(req.body.appointment.time.date).format("DD-MM-YYYY")} ${fromTime}:${fromDivision}-${tillTime}:${tillDivision} `,
+                body: `${P.firstName} ${P.lastName} has booked an appointment at ${H.name} and ${(0, moment_1.default)(req.body.appointment.time.date).format("DD-MM-YYYY")} ${appointmentStartTime}-${appointmentEndTime} `,
             });
             (0, Utils_1.sendNotificationToHospital)(hospitalFirebaseToken, {
                 title: "New appointment",
-                body: `${P.firstName} ${P.lastName} has booked an appointment with ${D.firstName} ${D.lastName} and ${(0, moment_1.default)(req.body.appointment.time.date).format("DD-MM-YYYY")} ${fromTime}:${fromDivision}-${tillTime}:${tillDivision} `,
+                body: `${P.firstName} ${P.lastName} has booked an appointment with ${D.firstName} ${D.lastName} and ${(0, moment_1.default)(req.body.appointment.time.date).format("DD-MM-YYYY")} ${appointmentStartTime}-${appointmentEndTime} `,
             });
             (0, Utils_1.sendNotificationToPatient)(patientFirebaseToken, {
                 title: "New appointment",
-                body: `${P.firstName} ${P.lastName} has booked an appointment for ${D.firstName} ${D.lastName} at ${H.name} and ${(0, moment_1.default)(req.body.appointment.time.date).format("DD-MM-YYYY")} ${fromTime}:${fromDivision}-${tillTime}:${tillDivision} `,
+                body: `${P.firstName} ${P.lastName} has booked an appointment for ${D.firstName} ${D.lastName} at ${H.name} and ${(0, moment_1.default)(req.body.appointment.time.date).format("DD-MM-YYYY")} ${appointmentStartTime}-${appointmentEndTime} `,
             });
             let name = `${P.firstName} ${P.lastName}`;
             if (SP) {
                 name = `${SP.firstName} ${SP.lastName}`;
             }
-            Utils_1.digiMilesSMS.sendAppointmentConfirmationNotification(P.phoneNumber, name, `${D.firstName} ${D.lastName}`, H.name, (0, moment_1.default)(req.body.appointment.time.date).format("DD-MM-YYYY"), `${fromTime}:${fromDivision}-${tillTime}:${tillDivision}`);
+            Utils_1.digiMilesSMS.sendAppointmentConfirmationNotification(P.phoneNumber, name, `${D.firstName} ${D.lastName}`, H.name, (0, moment_1.default)(req.body.appointment.time.date).format("DD-MM-YYYY"), `${appointmentStartTime}-${appointmentEndTime}`);
         });
     }
     catch (error) {

@@ -680,43 +680,43 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
                     as: "doctors",
                 },
             },
-            {
-                $lookup: {
-                    from: "subpatients",
-                    localField: "subPatient",
-                    foreignField: "_id",
-                    as: "subPatient",
-                },
-            },
-            {
-                $lookup: {
-                    from: "appointmentpayments",
-                    localField: "_id",
-                    foreignField: "appointmentId",
-                    as: "appointmentpayments",
-                },
-            },
-            {
-                $lookup: {
-                    from: "orders",
-                    localField: "appointmentpayments.orderId",
-                    foreignField: "_id",
-                    as: "orders",
-                },
-            },
-            {
-                $lookup: {
-                    from: "specializations",
-                    localField: "doctors.specialization",
-                    foreignField: "_id",
-                    as: "specials",
-                },
-            },
-            {
-                $addFields: {
-                    "doctors.specialization": "$specials",
-                },
-            },
+            // {
+            //   $lookup: {
+            //     from: "subpatients",
+            //     localField: "subPatient",
+            //     foreignField: "_id",
+            //     as: "subPatient",
+            //   },
+            // },
+            // {
+            //   $lookup: {
+            //     from: "appointmentpayments",
+            //     localField: "_id",
+            //     foreignField: "appointmentId",
+            //     as: "appointmentpayments",
+            //   },
+            // },
+            // {
+            //   $lookup: {
+            //     from: "orders",
+            //     localField: "appointmentpayments.orderId",
+            //     foreignField: "_id",
+            //     as: "orders",
+            //   },
+            // },
+            // {
+            //   $lookup: {
+            //     from: "specializations",
+            //     localField: "doctors.specialization",
+            //     foreignField: "_id",
+            //     as: "specials",
+            //   },
+            // },
+            // {
+            //   $addFields: {
+            //     "doctors.specialization": "$specials",
+            //   },
+            // },
             {
                 $unwind: "$patient",
             },
@@ -726,27 +726,28 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
             {
                 $unwind: "$doctors",
             },
-            {
-                $unwind: { path: "$subPatient", preserveNullAndEmptyArrays: true },
-            },
-            {
-                $unwind: "$appointmentpayments",
-            },
-            {
-                $unwind: "$orders",
-            },
+            // {
+            //   $unwind: { path: "$subPatient", preserveNullAndEmptyArrays: true },
+            // },
+            // {
+            //   $unwind: "$appointmentpayments",
+            // },
+            // {
+            //   $unwind: "$orders",
+            // },
             {
                 $sort: {
                     "time.date": -1,
                 },
             },
-            {
-                $skip: page > 1 ? (page - 1) * 2 : 0,
-            },
-            {
-                $limit: limit,
-            },
+            // {
+            //   $skip: page > 1 ? (page - 1) * 2 : 0,
+            // },
+            // {
+            //   $limit: limit,
+            // },
         ]);
+        // let appointmentData = await appointmentModel.find({ _id: req.currentPatient })
         const page2 = appointmentData.length / 2;
         let allAppointment = appointmentData;
         if (allAppointment.length > 0) {
@@ -761,6 +762,8 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
                 var _a, _b;
                 const consult_fee = e.doctors.hospitalDetails.find((hospital) => hospital.hospital.toString() === e.hospital._id.toString()).consultationFee.max;
                 let subpatient = e === null || e === void 0 ? void 0 : e.subPatient;
+                const appointmentStartTime = (0, Utils_1.formatTime)(`${e.time.from.time}:${e.time.from.division}`);
+                const appointmentEndTime = (0, Utils_1.formatTime)(`${e.time.till.time}:${e.time.till.division}`);
                 return Object.assign(Object.assign({ booking_id: e === null || e === void 0 ? void 0 : e.appointmentId, pat_name: (e === null || e === void 0 ? void 0 : e.patient)
                         ? `${e === null || e === void 0 ? void 0 : e.patient.firstName} ${e.patient.lastName}`
                         : "", age: `${new Date().getFullYear() - e.patient.DOB.getFullYear()} years`, booking_date: e === null || e === void 0 ? void 0 : e.createdAt, appoinment_date: e === null || e === void 0 ? void 0 : e.time.date, token: e === null || e === void 0 ? void 0 : e.appointmentToken, dr_name: (e === null || e === void 0 ? void 0 : e.doctors)
@@ -770,12 +773,12 @@ const ViewAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
                             ((_b = e === null || e === void 0 ? void 0 : e.doctors) === null || _b === void 0 ? void 0 : _b.specialization.map((elem) => {
                                 return elem.specialityName;
                             }).join(""))
-                        : "", time_slot: `${(0, Utils_1.formatTimings)(e.time.from.time)}:${(0, Utils_1.formatTimings)(e.time.from.division)} to ${(0, Utils_1.formatTimings)(e.time.till.time)}:${(0, Utils_1.formatTimings)(e.time.till.division)}`, booking_type: e === null || e === void 0 ? void 0 : e.appointmentType, clinicname: e.hospital && e.hospital.name, consult_fee, conv_fee: ConvenienceFee === null || ConvenienceFee === void 0 ? void 0 : ConvenienceFee.feeAmount, payement_gate_fee: paymentGateWayFee === null || paymentGateWayFee === void 0 ? void 0 : paymentGateWayFee.feeAmount, taxes: tax === null || tax === void 0 ? void 0 : tax.feeAmount }, ((subpatient === null || subpatient === void 0 ? void 0 : subpatient.firstName) && {
+                        : "", time_slot: `${appointmentStartTime} to ${appointmentEndTime}`, booking_type: e === null || e === void 0 ? void 0 : e.appointmentType, clinicname: e.hospital && e.hospital.name, consult_fee, conv_fee: ConvenienceFee === null || ConvenienceFee === void 0 ? void 0 : ConvenienceFee.feeAmount, payement_gate_fee: paymentGateWayFee === null || paymentGateWayFee === void 0 ? void 0 : paymentGateWayFee.feeAmount, taxes: tax === null || tax === void 0 ? void 0 : tax.feeAmount }, ((subpatient === null || subpatient === void 0 ? void 0 : subpatient.firstName) && {
                     sub_pat_name: (subpatient === null || subpatient === void 0 ? void 0 : subpatient.firstName) &&
                         `${subpatient === null || subpatient === void 0 ? void 0 : subpatient.firstName} ${subpatient === null || subpatient === void 0 ? void 0 : subpatient.lastName}`,
                     sub_pat_age: (0, Patient_Service_1.calculateAge)(subpatient === null || subpatient === void 0 ? void 0 : subpatient.DOB),
                     sub_pat_gender: subpatient === null || subpatient === void 0 ? void 0 : subpatient.gender,
-                })), { parent_gender: e.patient.gender });
+                })), { parent_gender: e.patient.gender, appointment_type: e === null || e === void 0 ? void 0 : e.appointmentType, appointment_status: e === null || e === void 0 ? void 0 : e.appointmentStatus });
             });
             return (0, response_1.successResponse)(
             // { past: older_apppointmentData, upcoming: allAppointment },

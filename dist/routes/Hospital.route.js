@@ -44,6 +44,7 @@ const feeService = __importStar(require("../Module/Payment/Service/Fee.Service")
 const Suvedha_auth_1 = require("../authentication/Suvedha.auth");
 const Prescription_Validity_Controller_1 = require("../Controllers/Prescription-Validity.Controller");
 const Admin_auth_1 = require("../authentication/Admin.auth");
+const Helpers_1 = require("../Services/Helpers");
 const hospitalRouter = express_1.default.Router();
 hospitalRouter.get("/", 
 // oneOf(authenticateHospital),
@@ -139,7 +140,7 @@ hospitalRouter.post("/verifyPayment", (0, middlewareHelper_1.oneOf)(Hospital_aut
             hospitalId,
             subPatientId,
         });
-        req.body["appointmentType"] = valid ? "Follow up" : "Fresh";
+        req.body["appointmentType"] = valid ? Helpers_1.AppointmentType.FOLLOW_UP : Helpers_1.AppointmentType.FRESH;
         if (req.currentHospital) {
             req.body.appointment["appointmentBookedBy"] = "Hospital";
         }
@@ -162,4 +163,7 @@ hospitalRouter.put("/holiday", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.aut
 hospitalRouter.get("/holiday", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getHospitalsHoliday);
 hospitalRouter.put("/verify/number", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.verifyHospitalPhoneNumber);
 hospitalRouter.put("/resendotp", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.resendOtpToHospital);
+hospitalRouter.get("/otpforpasswordchange", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.getOtpForPasswordChange);
+hospitalRouter.put("/otpforpasswordchange", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.verifyOtpForPasswordChange);
+hospitalRouter.put("/change/password", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.changePassword);
 exports.default = hospitalRouter;

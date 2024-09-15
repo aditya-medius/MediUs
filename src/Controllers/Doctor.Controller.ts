@@ -1214,7 +1214,9 @@ export const getDoctorWorkingInHospitals = async (
         fee: e?.consultationFee?.min,
         prescription_validity: e?.prescription?.validateTill,
         time: e?.workingHours?.map((elem: any) => {
-          return `${formatTimings(elem[WEEK_DAYS[day]]?.from.time)}:${formatTimings(elem[WEEK_DAYS[day]]?.from.division)} to ${formatTimings(elem[WEEK_DAYS[day]]?.till.time)}:${formatTimings(elem[WEEK_DAYS[day]]?.till.division)}`;
+          const appointmentStartTime = formatTime(`${elem[WEEK_DAYS[day]]?.from.time}:${elem[WEEK_DAYS[day]]?.from.division}`)
+          const appointmentEndTime = formatTime(`${elem[WEEK_DAYS[day]]?.till.time}:${elem[WEEK_DAYS[day]]?.till.division}`)
+          return `${appointmentStartTime} to ${appointmentEndTime}`;
         }),
 
         capacityAndToken: e?.workingHours.map((elem: any) => {
@@ -1953,7 +1955,7 @@ import prescriptionModel from "../Models/Prescription.Model";
 import addressModel from "../Models/Address.Model";
 import {
   digiMilesSMS,
-  formatTimings,
+  formatTime,
   getRangeOfDates,
   sendOTPForPasswordChange,
   sendOTPToPhoneNumber,

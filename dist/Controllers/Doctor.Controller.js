@@ -1069,7 +1069,9 @@ const getDoctorWorkingInHospitals = (req, res) => __awaiter(void 0, void 0, void
                 prescription_validity: (_f = e === null || e === void 0 ? void 0 : e.prescription) === null || _f === void 0 ? void 0 : _f.validateTill,
                 time: (_g = e === null || e === void 0 ? void 0 : e.workingHours) === null || _g === void 0 ? void 0 : _g.map((elem) => {
                     var _a, _b, _c, _d;
-                    return `${(0, Utils_1.formatTimings)((_a = elem[WEEK_DAYS[day]]) === null || _a === void 0 ? void 0 : _a.from.time)}:${(0, Utils_1.formatTimings)((_b = elem[WEEK_DAYS[day]]) === null || _b === void 0 ? void 0 : _b.from.division)} to ${(0, Utils_1.formatTimings)((_c = elem[WEEK_DAYS[day]]) === null || _c === void 0 ? void 0 : _c.till.time)}:${(0, Utils_1.formatTimings)((_d = elem[WEEK_DAYS[day]]) === null || _d === void 0 ? void 0 : _d.till.division)}`;
+                    const appointmentStartTime = (0, Utils_1.formatTime)(`${(_a = elem[WEEK_DAYS[day]]) === null || _a === void 0 ? void 0 : _a.from.time}:${(_b = elem[WEEK_DAYS[day]]) === null || _b === void 0 ? void 0 : _b.from.division}`);
+                    const appointmentEndTime = (0, Utils_1.formatTime)(`${(_c = elem[WEEK_DAYS[day]]) === null || _c === void 0 ? void 0 : _c.till.time}:${(_d = elem[WEEK_DAYS[day]]) === null || _d === void 0 ? void 0 : _d.till.division}`);
+                    return `${appointmentStartTime} to ${appointmentEndTime}`;
                 }),
                 capacityAndToken: e === null || e === void 0 ? void 0 : e.workingHours.map((elem) => {
                     return {

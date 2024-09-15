@@ -41,7 +41,7 @@ import orderModel from "../Models/Order.Model";
 import { checkIfDoctorIsAvailableOnTheDay } from "../Services/Doctor/Doctor.Service";
 import { calculateAge } from "../Services/Patient/Patient.Service";
 import * as patientService from "../Services/Patient/Patient.Service";
-import { digiMilesSMS, formatTimings, sendOTPToPhoneNumber, verifyPhoneNumber } from "../Services/Utils";
+import { digiMilesSMS, formatTime, sendOTPToPhoneNumber, verifyPhoneNumber } from "../Services/Utils";
 import feeModel from "../Module/Payment/Model/Fee.Model";
 import { convenienceFee } from "../Services/Admin/Admin.Service";
 import moment from "moment";
@@ -762,43 +762,43 @@ export const ViewAppointment = async (req: Request, res: Response) => {
           as: "doctors",
         },
       },
-      {
-        $lookup: {
-          from: "subpatients",
-          localField: "subPatient",
-          foreignField: "_id",
-          as: "subPatient",
-        },
-      },
-      {
-        $lookup: {
-          from: "appointmentpayments",
-          localField: "_id",
-          foreignField: "appointmentId",
-          as: "appointmentpayments",
-        },
-      },
-      {
-        $lookup: {
-          from: "orders",
-          localField: "appointmentpayments.orderId",
-          foreignField: "_id",
-          as: "orders",
-        },
-      },
-      {
-        $lookup: {
-          from: "specializations",
-          localField: "doctors.specialization",
-          foreignField: "_id",
-          as: "specials",
-        },
-      },
-      {
-        $addFields: {
-          "doctors.specialization": "$specials",
-        },
-      },
+      // {
+      //   $lookup: {
+      //     from: "subpatients",
+      //     localField: "subPatient",
+      //     foreignField: "_id",
+      //     as: "subPatient",
+      //   },
+      // },
+      // {
+      //   $lookup: {
+      //     from: "appointmentpayments",
+      //     localField: "_id",
+      //     foreignField: "appointmentId",
+      //     as: "appointmentpayments",
+      //   },
+      // },
+      // {
+      //   $lookup: {
+      //     from: "orders",
+      //     localField: "appointmentpayments.orderId",
+      //     foreignField: "_id",
+      //     as: "orders",
+      //   },
+      // },
+      // {
+      //   $lookup: {
+      //     from: "specializations",
+      //     localField: "doctors.specialization",
+      //     foreignField: "_id",
+      //     as: "specials",
+      //   },
+      // },
+      // {
+      //   $addFields: {
+      //     "doctors.specialization": "$specials",
+      //   },
+      // },
       {
         $unwind: "$patient",
       },
@@ -808,27 +808,29 @@ export const ViewAppointment = async (req: Request, res: Response) => {
       {
         $unwind: "$doctors",
       },
-      {
-        $unwind: { path: "$subPatient", preserveNullAndEmptyArrays: true },
-      },
-      {
-        $unwind: "$appointmentpayments",
-      },
-      {
-        $unwind: "$orders",
-      },
+      // {
+      //   $unwind: { path: "$subPatient", preserveNullAndEmptyArrays: true },
+      // },
+      // {
+      //   $unwind: "$appointmentpayments",
+      // },
+      // {
+      //   $unwind: "$orders",
+      // },
       {
         $sort: {
           "time.date": -1,
         },
       },
-      {
-        $skip: page > 1 ? (page - 1) * 2 : 0,
-      },
-      {
-        $limit: limit,
-      },
+      // {
+      //   $skip: page > 1 ? (page - 1) * 2 : 0,
+      // },
+      // {
+      //   $limit: limit,
+      // },
     ]);
+
+    // let appointmentData = await appointmentModel.find({ _id: req.currentPatient })
     const page2 = appointmentData.length / 2;
 
     let allAppointment = appointmentData;
@@ -851,6 +853,9 @@ export const ViewAppointment = async (req: Request, res: Response) => {
 
         let subpatient = e?.subPatient;
 
+        const appointmentStartTime = formatTime(`${e.time.from.time}:${e.time.from.division}`)
+        const appointmentEndTime = formatTime(`${e.time.till.time}:${e.time.till.division}`)
+
         return {
           booking_id: e?.appointmentId,
           pat_name: e?.patient
@@ -872,7 +877,7 @@ export const ViewAppointment = async (req: Request, res: Response) => {
               })
               .join("")
             : "",
-          time_slot: `${formatTimings(e.time.from.time)}:${formatTimings(e.time.from.division)} to ${formatTimings(e.time.till.time)}:${formatTimings(e.time.till.division)}`,
+          time_slot: `${appointmentStartTime} to ${appointmentEndTime}`,
           booking_type: e?.appointmentType,
           clinicname: e.hospital && e.hospital.name,
           consult_fee,
@@ -887,6 +892,8 @@ export const ViewAppointment = async (req: Request, res: Response) => {
             sub_pat_gender: subpatient?.gender,
           }),
           parent_gender: e.patient.gender,
+          appointment_type: e?.appointmentType,
+          appointment_status: e?.appointmentStatus
         };
       });
       return successResponse(

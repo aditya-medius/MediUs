@@ -19,6 +19,7 @@ import * as feeService from "../Module/Payment/Service/Fee.Service";
 import { authenticateSuvedha } from "../authentication/Suvedha.auth";
 import { checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod } from "../Controllers/Prescription-Validity.Controller";
 import { authenticateAdmin } from "../authentication/Admin.auth";
+import { AppointmentType } from "../Services/Helpers";
 const hospitalRouter = express.Router();
 
 hospitalRouter.get(
@@ -248,7 +249,7 @@ hospitalRouter.post(
           hospitalId,
           subPatientId,
         });
-      req.body["appointmentType"] = valid ? "Follow up" : "Fresh";
+      req.body["appointmentType"] = valid ? AppointmentType.FOLLOW_UP : AppointmentType.FRESH;
 
       if (req.currentHospital) {
         req.body.appointment["appointmentBookedBy"] = "Hospital";

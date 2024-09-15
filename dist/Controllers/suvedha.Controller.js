@@ -147,6 +147,8 @@ const getDoctorInformation = (req, res) => __awaiter(void 0, void 0, void 0, fun
                     let currentDate = (0, moment_1.default)(time).format("DD-MM-YYYY");
                     if (e[day]) {
                         let { from, till } = e[day];
+                        const appointmentStartTime = (0, Utils_1.formatTime)(`${from.time}:${from.division}`);
+                        const appointmentEndTime = (0, Utils_1.formatTime)(`${till.time}:${till.division}`);
                         let find = (_a = e.holidayCalendar) === null || _a === void 0 ? void 0 : _a.find((elem) => {
                             let date = (0, moment_1.default)(elem.date).format("DD-MM-YYYY");
                             return date === currentDate;
@@ -154,7 +156,7 @@ const getDoctorInformation = (req, res) => __awaiter(void 0, void 0, void 0, fun
                         return [
                             {
                                 available: find ? false : true,
-                                Time: `${(0, Utils_1.formatTimings)(from.time)}:${(0, Utils_1.formatTimings)(from.division)} to ${(0, Utils_1.formatTimings)(till.time)}:${(0, Utils_1.formatTimings)(till.division)}`,
+                                Time: `${appointmentStartTime} to ${appointmentEndTime}`,
                             },
                         ];
                     }
