@@ -26,7 +26,7 @@ const getTokenNumber = (body) => __awaiter(void 0, void 0, void 0, function* () 
                     hospital: new mongoose_1.default.Types.ObjectId(hospital),
                     "time.from.time": time.from.time,
                     "time.till.time": time.till.time,
-                    appointmentType
+                    // appointmentType
                 },
             },
         ]);
