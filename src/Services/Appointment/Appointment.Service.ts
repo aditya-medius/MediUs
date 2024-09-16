@@ -12,7 +12,7 @@ export const getTokenNumber = async (body: any) => {
           hospital: new mongoose.Types.ObjectId(hospital),
           "time.from.time": time.from.time,
           "time.till.time": time.till.time,
-          appointmentType
+          // appointmentType
         },
       },
     ]);
