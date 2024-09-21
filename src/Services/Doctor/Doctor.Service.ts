@@ -210,7 +210,7 @@ export const setConsultationFeeForDoctor = async (
         },
       }
     );
-    return Promise.resolve(true);
+    return Promise.resolve(response);
   } catch (error: any) {
     return Promise.reject(error);
   }
@@ -1138,7 +1138,6 @@ export const deleteThatDoctorTakesOverTheCounterPayments = async (doctorId: stri
 export const checkIfDoctorTakesOverTheCounterPaymentsForAHospital = async (doctorId: string, hospitalId: string) => {
   try {
     const exist = await overTheCounterModel.exists({ doctorId, hospitalId })
-    console.log("checkIfDoctorTakesOverTheCounterPaymentsForAHospital exist", exist)
     return Promise.resolve(exist)
   } catch (error) {
     return Promise.reject(error)

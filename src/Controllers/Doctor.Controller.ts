@@ -2119,8 +2119,6 @@ export const getPrescriptionValidityAndFeesOfDoctorInHospital = async (
 export const likeADoctor = async (req: Request, res: Response) => {
   try {
     let { likedDoctorId, likedById } = req.body;
-    console.log("bvdsds dsdds", req.currentHospital);
-    console.log("dsdsdsdssd", req.currentSuvedha);
     let hospitalExist = await hospitalService.doesHospitalExist(likedById);
     let reference;
     if (hospitalExist) {
@@ -2393,8 +2391,7 @@ export const deleteThatDoctorTakesOverTheCounterPayments = async (req: Request, 
 
 export const checkIfDoctorTakesOverTheCounterPaymentsForAHospital = async (req: Request, res: Response) => {
   try {
-    const { doctorId, hospitalId } = req.query
-    console.log("checkIfDoctorTakesOverTheCounterPaymentsForAHospital: ", req.query)
+    const { doctorId, hospitalId } = req.query;
     if (!(doctorId && hospitalId)) {
       const error = new Error("Invalid doctor or hospital")
       throw error
