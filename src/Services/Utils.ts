@@ -10,7 +10,6 @@ import axios from "axios";
 import hospitalModel from "../Models/Hospital.Model";
 import patientModel from "../Models/Patient.Model";
 import doctorModel from "../Models/Doctors.Model";
-import { Weekdays } from "./Helpers";
 
 export const phoneNumberRegex: RegExp = /^[0]?[6789]\d{9}$/;
 

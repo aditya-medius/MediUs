@@ -206,7 +206,7 @@ const setConsultationFeeForDoctor = (doctorId, hospitalId, consultationFee) => _
                 "hospitalDetails.$.consultationFee": consultationFee,
             },
         });
-        return Promise.resolve(true);
+        return Promise.resolve(response);
     }
     catch (error) {
         return Promise.reject(error);
@@ -1057,7 +1057,6 @@ exports.deleteThatDoctorTakesOverTheCounterPayments = deleteThatDoctorTakesOverT
 const checkIfDoctorTakesOverTheCounterPaymentsForAHospital = (doctorId, hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const exist = yield OverTheCounterPayment_1.default.exists({ doctorId, hospitalId });
-        console.log("checkIfDoctorTakesOverTheCounterPaymentsForAHospital exist", exist);
         return Promise.resolve(exist);
     }
     catch (error) {

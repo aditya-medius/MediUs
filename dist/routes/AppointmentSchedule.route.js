@@ -30,6 +30,7 @@ const Doctor_auth_1 = require("../authentication/Doctor.auth");
 const Patient_auth_1 = require("../authentication/Patient.auth");
 const Suvedha_auth_1 = require("../authentication/Suvedha.auth");
 const Admin_auth_1 = require("../authentication/Admin.auth");
+const Controllers_1 = require("../Controllers");
 const appointmentScheduleRouter = express_1.default.Router();
 appointmentScheduleRouter.get("/findHospitalBySpecialityOrBodyPart/:term", hospitalController.searchHospital);
 appointmentScheduleRouter.put("/doctors/in/hospital", hospitalController.doctorsInHospitalWithTimings);
@@ -42,4 +43,6 @@ appointmentScheduleRouter.get("/getDoctorsInHospital", (0, middlewareHelper_1.on
 appointmentScheduleRouter.put("/getHospitalById/:id", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital, Suvedha_auth_1.authenticateSuvedha, Admin_auth_1.authenticateAdmin), hospitalController.getHospitalById);
 appointmentScheduleRouter.get("/viewAppointment/:page", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.viewAppointment);
 appointmentScheduleRouter.get("/findHospitalBySpecialityOrBodyPart/:term", hospitalController.searchHospital);
+appointmentScheduleRouter.post("/doctorsAppointmentDetails", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), Controllers_1.setDoctorsAppointmentDetails);
+appointmentScheduleRouter.get("/doctorsAppointmentDetails", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), Controllers_1.getDoctorsAppointmentDetails);
 exports.default = appointmentScheduleRouter;

@@ -9,6 +9,7 @@ import { authenticateDoctor } from "../authentication/Doctor.auth";
 import { authenticatePatient } from "../authentication/Patient.auth";
 import { authenticateSuvedha } from "../authentication/Suvedha.auth";
 import { authenticateAdmin } from "../authentication/Admin.auth";
+import { getDoctorsAppointmentDetails, setDoctorsAppointmentDetails } from "../Controllers";
 
 const appointmentScheduleRouter = express.Router();
 
@@ -34,6 +35,8 @@ appointmentScheduleRouter.get("/viewAppointment/:page", oneOf(authenticateHospit
 
 appointmentScheduleRouter.get("/findHospitalBySpecialityOrBodyPart/:term", hospitalController.searchHospital);
 
+appointmentScheduleRouter.post("/doctorsAppointmentDetails", oneOf(authenticateDoctor, authenticateHospital), setDoctorsAppointmentDetails)
 
+appointmentScheduleRouter.get("/doctorsAppointmentDetails", oneOf(authenticateDoctor, authenticateHospital), getDoctorsAppointmentDetails)
 
 export default appointmentScheduleRouter;

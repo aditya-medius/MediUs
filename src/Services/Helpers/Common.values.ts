@@ -34,3 +34,5 @@ export enum Gender {
     MALE = config.common.Gender.Male,
     FEMALE = config.common.Gender.Female
 }
+
+export type PromiseFunction<T extends Object> = () => Promise<T>

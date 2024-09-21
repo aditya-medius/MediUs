@@ -1816,8 +1816,6 @@ exports.getPrescriptionValidityAndFeesOfDoctorInHospital = getPrescriptionValidi
 const likeADoctor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let { likedDoctorId, likedById } = req.body;
-        console.log("bvdsds dsdds", req.currentHospital);
-        console.log("dsdsdsdssd", req.currentSuvedha);
         let hospitalExist = yield hospitalService.doesHospitalExist(likedById);
         let reference;
         if (hospitalExist) {
@@ -2051,7 +2049,6 @@ exports.deleteThatDoctorTakesOverTheCounterPayments = deleteThatDoctorTakesOverT
 const checkIfDoctorTakesOverTheCounterPaymentsForAHospital = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { doctorId, hospitalId } = req.query;
-        console.log("checkIfDoctorTakesOverTheCounterPaymentsForAHospital: ", req.query);
         if (!(doctorId && hospitalId)) {
             const error = new Error("Invalid doctor or hospital");
             throw error;
