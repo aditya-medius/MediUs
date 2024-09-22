@@ -7,7 +7,7 @@ var ErrorTypes;
     ErrorTypes["ValidationError"] = "ValidationError";
     ErrorTypes["NotFoundError"] = "NotFoundError";
     ErrorTypes["DatabaseError"] = "DatabaseError";
-    ErrorTypes["UnauthorizedError"] = "UnauthorizedError";
+    ErrorTypes["UnauthorizedError"] = "Unauthorized";
     ErrorTypes["UnsupportedRequestBody"] = "UnsupportedRequestBody";
     ErrorTypes["InvalidObjectId"] = "InvalidObjectId";
     ErrorTypes["MissingAuthToken"] = "MissingAuthToken";

@@ -18,7 +18,7 @@ const setDoctorsAppointmentDetails = (req, res) => __awaiter(void 0, void 0, voi
         const doctorScheduleDetials = {
             doctorId,
             hospitalId,
-            consultationFee: consultationFee === null || consultationFee === void 0 ? void 0 : consultationFee.max,
+            consultationFee: consultationFee,
             validateTill,
             bookingPeriod
         };
