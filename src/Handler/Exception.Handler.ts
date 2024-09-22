@@ -1,8 +1,10 @@
-import { isValidObjectId } from "mongoose";
 import { errorResponse, successResponse } from "../Services/response"
 import { Request, Response } from "express";
 import mongoose from 'mongoose';
 import { PromiseFunction } from "../Services/Helpers";
+import { ErrorFactory, ErrorTypes } from "./Error.Factory";
+
+const errorFactory = new ErrorFactory()
 
 export class ExceptionHandler<T extends Object> {
 
@@ -33,14 +35,12 @@ export class ExceptionHandler<T extends Object> {
   validateObjectIds(...ids: Array<string>) {
     ids.forEach((id: string) => {
       if (!mongoose.Types.ObjectId.isValid(id)) {
-        const error = new Error("Invalid Object id")
+        errorFactory.invalidValueErrorMessage = "ObjectId(s)";
+        const errorMessage = errorFactory.invalidValueErrorMessage;
+        const error = errorFactory.createError(ErrorTypes.InvalidObjectId, errorMessage)
         throw error
       }
     })
     return this;
-  }
-
-  throwError(error: any) {
-    return Promise.reject(error)
   }
 }

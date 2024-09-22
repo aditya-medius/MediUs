@@ -10,7 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.tokenNikalo = exports.oneOf = void 0;
-const response_1 = require("./response");
+const Handler_1 = require("../Handler");
+const errorFactory = new Handler_1.ErrorFactory();
 const oneOf = (...middlewares) => {
     return (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         let middlewareSuccess;
@@ -23,8 +24,8 @@ const oneOf = (...middlewares) => {
             next();
         }
         else {
-            const error = new Error("Invalid Token");
-            return (0, response_1.errorResponse)(error, res);
+            const errorMessage = errorFactory.invalidTokenErrorMessage;
+            throw errorFactory.createError(Handler_1.ErrorTypes.UnauthorizedError, errorMessage);
         }
     });
 };
@@ -35,8 +36,8 @@ const tokenNikalo = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
         next();
     }
     else {
-        const error = new Error("Token is missing");
-        return (0, response_1.errorResponse)(error, res);
+        const errorMessage = errorFactory.missingAuthTokenError;
+        throw errorFactory.createError(Handler_1.ErrorTypes.MissingAuthToken, errorMessage);
     }
 });
 exports.tokenNikalo = tokenNikalo;

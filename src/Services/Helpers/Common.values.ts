@@ -4,13 +4,13 @@ export interface Holiday {
 }
 
 export const Weekdays = [
-    "sunday",
-    "monday",
-    "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday",
+    config.Weekdays.Sunday,
+    config.Weekdays.Monday,
+    config.Weekdays.Tuesday,
+    config.Weekdays.Wednesday,
+    config.Weekdays.Thursday,
+    config.Weekdays.Friday,
+    config.Weekdays.Saturday,
 ];
 
 export interface offDatesAndDays {
@@ -36,3 +36,10 @@ export enum Gender {
 }
 
 export type PromiseFunction<T extends Object> = () => Promise<T>
+
+
+export enum ErrorMessage {
+    invalidValueErrorMessage = config.Error.InvalidValueMessage,
+    invalidTokenErrorMessage = config.Error.InvalidTokenErrorMessage,
+    missingAuthToken = config.Error.MissingAuthToken
+}

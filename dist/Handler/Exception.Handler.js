@@ -15,6 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExceptionHandler = void 0;
 const response_1 = require("../Services/response");
 const mongoose_1 = __importDefault(require("mongoose"));
+const Error_Factory_1 = require("./Error.Factory");
+const errorFactory = new Error_Factory_1.ErrorFactory();
 class ExceptionHandler {
     constructor(cb) {
         this.callback = cb;
@@ -44,14 +46,13 @@ class ExceptionHandler {
     validateObjectIds(...ids) {
         ids.forEach((id) => {
             if (!mongoose_1.default.Types.ObjectId.isValid(id)) {
-                const error = new Error("Invalid Object id");
+                errorFactory.invalidValueErrorMessage = "ObjectId(s)";
+                const errorMessage = errorFactory.invalidValueErrorMessage;
+                const error = errorFactory.createError(Error_Factory_1.ErrorTypes.InvalidObjectId, errorMessage);
                 throw error;
             }
         });
         return this;
-    }
-    throwError(error) {
-        return Promise.reject(error);
     }
 }
 exports.ExceptionHandler = ExceptionHandler;

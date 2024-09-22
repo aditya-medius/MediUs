@@ -1,6 +1,8 @@
 import { ExceptionHandler } from "../../Handler"
 import prescriptionValidityModel from "../../Models/Prescription-Validity.Model"
+import workingHourModel from "../../Models/WorkingHours.Model"
 import * as doctorService from "../Doctor/Doctor.Service"
+import { Weekdays } from "../Helpers"
 
 
 export const setAdvancedBookingPeriodForDoctor = async (doctorId: string, hospitalId: string, bookingPeriod: number) => {
@@ -68,5 +70,25 @@ export const getAdvancedBookingPeriodForDoctor = async (doctorId: string, hospit
         const result = await doctorService.getDoctorsAdvancedBookingPeriod(doctorId, hospital)
         return Promise.resolve(result)
     })
+    return await exceptionHandler.handleServiceExceptions();
+}
+
+export const updateWorkingHoursCapacity = async (workingHourId: string, capacity: number): Promise<boolean> => {
+    const exceptionHandler = new ExceptionHandler<boolean>(async (): Promise<boolean> => {
+        let workingHour = await workingHourModel.findOne({
+            _id: workingHourId,
+        });
+
+        Object.keys(workingHour.toJSON()).forEach((elem: any) => {
+            if (Weekdays.includes(elem)) {
+                console.log("elem", elem)
+                workingHour[elem].capacity = capacity
+            }
+        })
+
+        await workingHour.save();
+        return Promise.resolve(true)
+    })
+
     return await exceptionHandler.handleServiceExceptions();
 }

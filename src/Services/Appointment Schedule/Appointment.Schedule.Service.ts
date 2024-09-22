@@ -1,16 +1,19 @@
 import { getPrescriptionValidityAndFeesOfDoctorInHospital } from "../../Controllers/Prescription-Validity.Controller"
-import { ExceptionHandler } from "../../Handler"
+import { ErrorFactory, ErrorTypes, ExceptionHandler } from "../../Handler"
 import { checkIfDoctorTakesOverTheCounterPaymentsForAHospital } from "../Doctor/Doctor.Service"
 import { DoctorScheduleDetails as DocSch, DoctorScheduleDetailsResponse as DocRes } from "../Helpers"
-import { getAdvancedBookingPeriodForDoctor, setAdvancedBookingPeriodForDoctor, setConsultationFeeForDoctor, setPrescriptionValidityForDoctor } from "./Appointment.Schedule.Util"
+import { getAdvancedBookingPeriodForDoctor, setAdvancedBookingPeriodForDoctor, setConsultationFeeForDoctor, setPrescriptionValidityForDoctor, updateWorkingHoursCapacity } from "./Appointment.Schedule.Util"
+
+const errorFactory = new ErrorFactory();
 
 export const setAppointmentDetailsForDoctors = async (doctorScheduleDetails: DocSch) => {
     const { doctorId, hospitalId, validateTill, bookingPeriod, consultationFee } = doctorScheduleDetails
     const exceptionHandler = new ExceptionHandler<boolean>(async (): Promise<boolean> => {
 
         if (!(bookingPeriod && consultationFee && validateTill)) {
-            const error = new Error("Invalid values to update")
-            throw error
+            errorFactory.invalidValueErrorMessage = "booking period, consultation fee, capacity"
+            const errorMessage = errorFactory.invalidValueErrorMessage;
+            throw errorFactory.createError(ErrorTypes.UnsupportedRequestBody, errorMessage)
         }
 
         await Promise.all([
@@ -26,20 +29,29 @@ export const setAppointmentDetailsForDoctors = async (doctorScheduleDetails: Doc
 }
 
 export const getAppointmentDetailsForDoctors = async (doctorId: string, hospitalId: string): Promise<DocRes> => {
-
     const exceptionHandler = new ExceptionHandler<DocRes>(async (): Promise<DocRes> => {
-
         const [bookingPeriodRes, PrescipriptionValidityResAndConsultationFeeRes, acceptsOverTheCounterPayment] = await Promise.all([
             getAdvancedBookingPeriodForDoctor(doctorId, hospitalId),
             getPrescriptionValidityAndFeesOfDoctorInHospital(hospitalId, doctorId),
             checkIfDoctorTakesOverTheCounterPaymentsForAHospital(doctorId, hospitalId)
         ])
-
         const [prescriptionValidity, consultationFee] = PrescipriptionValidityResAndConsultationFeeRes
-
         return Promise.resolve({ bookingPeriod: bookingPeriodRes, doctorId, hospitalId, validateTill: prescriptionValidity?.prescription?.validateTill, consultationFee: consultationFee?.consultationFee, acceptsOverTheCounterPayment })
     })
 
     const result: DocRes = await exceptionHandler.validateObjectIds(doctorId, hospitalId).handleServiceExceptions()
     return result;
+}
+
+export const updateWorkingHoursCapacityForDoctor = async (workingHourId: string, capacity: number): Promise<boolean> => {
+    const exceptionHandler = new ExceptionHandler<boolean>(async (): Promise<boolean> => {
+        if (!capacity || typeof capacity !== "number") {
+            errorFactory.invalidValueErrorMessage = "capacity"
+            const errorMessage = errorFactory.invalidValueErrorMessage;
+            throw errorFactory.createError(ErrorTypes.UnsupportedRequestBody, errorMessage)
+        }
+        return await updateWorkingHoursCapacity(workingHourId, capacity)
+    })
+
+    return exceptionHandler.validateObjectIds(workingHourId).handleServiceExceptions();
 }

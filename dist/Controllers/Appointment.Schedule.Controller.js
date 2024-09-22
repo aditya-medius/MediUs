@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDoctorsAppointmentDetails = exports.setDoctorsAppointmentDetails = void 0;
+exports.updateWorkingHoursCapacity = exports.getDoctorsAppointmentDetails = exports.setDoctorsAppointmentDetails = void 0;
 const Appointment_Schedule_1 = require("../Services/Appointment Schedule");
 const Handler_1 = require("../Handler");
 const setDoctorsAppointmentDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -35,3 +35,11 @@ const getDoctorsAppointmentDetails = (req, res) => __awaiter(void 0, void 0, voi
     return yield exceptionHandler.handleResponseException(req, res);
 });
 exports.getDoctorsAppointmentDetails = getDoctorsAppointmentDetails;
+const updateWorkingHoursCapacity = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const exceptionHandler = new Handler_1.ExceptionHandler(() => __awaiter(void 0, void 0, void 0, function* () {
+        const { workingHourId, capacity } = req.body;
+        return yield (0, Appointment_Schedule_1.updateWorkingHoursCapacityForDoctor)(workingHourId, capacity);
+    }));
+    return yield exceptionHandler.handleResponseException(req, res);
+});
+exports.updateWorkingHoursCapacity = updateWorkingHoursCapacity;
