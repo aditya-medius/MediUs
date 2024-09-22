@@ -1,5 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { errorResponse } from "./response";
+import { ErrorFactory, ErrorTypes } from "../Handler";
+
+const errorFactory = new ErrorFactory();
 
 export const oneOf = (...middlewares: any): any => {
   return async (
@@ -16,7 +19,8 @@ export const oneOf = (...middlewares: any): any => {
     if (middlewareSuccessArray.indexOf(true) > -1) {
       next();
     } else {
-      const error: Error = new Error("Invalid Token");
+      const errorMessage = errorFactory.invalidTokenErrorMessage;
+      const error = errorFactory.createError(ErrorTypes.UnauthorizedError, errorMessage)
       return errorResponse(error, res);
     }
   };
@@ -31,7 +35,8 @@ export const tokenNikalo = async (
     req.headers["auth-header"] = `${req.query.token}`;
     next();
   } else {
-    const error: Error = new Error("Token is missing");
+    const errorMessage = errorFactory.missingAuthTokenError
+    const error = errorFactory.createError(ErrorTypes.MissingAuthToken, errorMessage)
     return errorResponse(error, res);
   }
 };

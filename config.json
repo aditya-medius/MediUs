@@ -1,4 +1,13 @@
 {
+    "Weekdays": {
+        "Sunday": "sunday",
+        "Monday": "monday",
+        "Tuesday": "tuesday",
+        "Wednesday": "wednesday",
+        "Thursday": "thursday",
+        "Friday": "friday",
+        "Saturday": "saturday"
+    },
     "common": {
         "UserStatus": {
             "inactive": "inactive",
@@ -27,5 +36,11 @@
             "Absent": "Absent",
             "Accepted": "Accepted"
         }
+    },
+    "Error": {
+        "InvalidValueName": "Unsupported data",
+        "InvalidValueMessage": "Invalid Value for {{value}}",
+        "InvalidTokenErrorMessage": "Invalid token",
+        "MissingAuthToken": "Missing Auth Token"
     }
 }

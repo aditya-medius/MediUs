@@ -9,17 +9,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAppointmentDetailsForDoctors = exports.setAppointmentDetailsForDoctors = void 0;
+exports.updateWorkingHoursCapacityForDoctor = exports.getAppointmentDetailsForDoctors = exports.setAppointmentDetailsForDoctors = void 0;
 const Prescription_Validity_Controller_1 = require("../../Controllers/Prescription-Validity.Controller");
 const Handler_1 = require("../../Handler");
 const Doctor_Service_1 = require("../Doctor/Doctor.Service");
 const Appointment_Schedule_Util_1 = require("./Appointment.Schedule.Util");
+const errorFactory = new Handler_1.ErrorFactory();
 const setAppointmentDetailsForDoctors = (doctorScheduleDetails) => __awaiter(void 0, void 0, void 0, function* () {
     const { doctorId, hospitalId, validateTill, bookingPeriod, consultationFee } = doctorScheduleDetails;
     const exceptionHandler = new Handler_1.ExceptionHandler(() => __awaiter(void 0, void 0, void 0, function* () {
         if (!(bookingPeriod && consultationFee && validateTill)) {
-            const error = new Error("Invalid values to update");
-            throw error;
+            errorFactory.invalidValueErrorMessage = "booking period, consultation fee, capacity";
+            const errorMessage = errorFactory.invalidValueErrorMessage;
+            throw errorFactory.createError(Handler_1.ErrorTypes.UnsupportedRequestBody, errorMessage);
         }
         yield Promise.all([
             (0, Appointment_Schedule_Util_1.setAdvancedBookingPeriodForDoctor)(doctorId, hospitalId, bookingPeriod),
@@ -46,3 +48,15 @@ const getAppointmentDetailsForDoctors = (doctorId, hospitalId) => __awaiter(void
     return result;
 });
 exports.getAppointmentDetailsForDoctors = getAppointmentDetailsForDoctors;
+const updateWorkingHoursCapacityForDoctor = (workingHourId, capacity) => __awaiter(void 0, void 0, void 0, function* () {
+    const exceptionHandler = new Handler_1.ExceptionHandler(() => __awaiter(void 0, void 0, void 0, function* () {
+        if (!capacity || typeof capacity !== "number") {
+            errorFactory.invalidValueErrorMessage = "capacity";
+            const errorMessage = errorFactory.invalidValueErrorMessage;
+            throw errorFactory.createError(Handler_1.ErrorTypes.UnsupportedRequestBody, errorMessage);
+        }
+        return yield (0, Appointment_Schedule_Util_1.updateWorkingHoursCapacity)(workingHourId, capacity);
+    }));
+    return exceptionHandler.validateObjectIds(workingHourId).handleServiceExceptions();
+});
+exports.updateWorkingHoursCapacityForDoctor = updateWorkingHoursCapacityForDoctor;

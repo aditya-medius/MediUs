@@ -45,4 +45,5 @@ appointmentScheduleRouter.get("/viewAppointment/:page", (0, middlewareHelper_1.o
 appointmentScheduleRouter.get("/findHospitalBySpecialityOrBodyPart/:term", hospitalController.searchHospital);
 appointmentScheduleRouter.post("/doctorsAppointmentDetails", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), Controllers_1.setDoctorsAppointmentDetails);
 appointmentScheduleRouter.get("/doctorsAppointmentDetails", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), Controllers_1.getDoctorsAppointmentDetails);
+appointmentScheduleRouter.put("/updateWorkingHoursCapacity", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), Controllers_1.updateWorkingHoursCapacity);
 exports.default = appointmentScheduleRouter;

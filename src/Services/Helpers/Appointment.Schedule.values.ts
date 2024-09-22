@@ -6,4 +6,4 @@ export type DoctorScheduleDetails = {
     validateTill: number
 }
 
-export type DoctorScheduleDetailsResponse = DoctorScheduleDetails | { acceptsOverTheCounterPayment: boolean }
+export type DoctorScheduleDetailsResponse = DoctorScheduleDetails & { acceptsOverTheCounterPayment: boolean }

@@ -1,15 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Gender = exports.UserStatus = exports.UserType = exports.Weekdays = void 0;
+exports.ErrorMessage = exports.Gender = exports.UserStatus = exports.UserType = exports.Weekdays = void 0;
 const config = require("../../../config.json");
 exports.Weekdays = [
-    "sunday",
-    "monday",
-    "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday",
+    config.Weekdays.Sunday,
+    config.Weekdays.Monday,
+    config.Weekdays.Tuesday,
+    config.Weekdays.Wednesday,
+    config.Weekdays.Thursday,
+    config.Weekdays.Friday,
+    config.Weekdays.Saturday,
 ];
 var UserType;
 (function (UserType) {
@@ -28,3 +28,9 @@ var Gender;
     Gender[Gender["MALE"] = config.common.Gender.Male] = "MALE";
     Gender[Gender["FEMALE"] = config.common.Gender.Female] = "FEMALE";
 })(Gender = exports.Gender || (exports.Gender = {}));
+var ErrorMessage;
+(function (ErrorMessage) {
+    ErrorMessage[ErrorMessage["invalidValueErrorMessage"] = config.Error.InvalidValueMessage] = "invalidValueErrorMessage";
+    ErrorMessage[ErrorMessage["invalidTokenErrorMessage"] = config.Error.InvalidTokenErrorMessage] = "invalidTokenErrorMessage";
+    ErrorMessage[ErrorMessage["missingAuthToken"] = config.Error.MissingAuthToken] = "missingAuthToken";
+})(ErrorMessage = exports.ErrorMessage || (exports.ErrorMessage = {}));

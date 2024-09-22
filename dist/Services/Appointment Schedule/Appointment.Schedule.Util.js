@@ -31,10 +31,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAdvancedBookingPeriodForDoctor = exports.setPrescriptionValidityForDoctor = exports.setConsultationFeeForDoctor = exports.setAdvancedBookingPeriodForDoctor = void 0;
+exports.updateWorkingHoursCapacity = exports.getAdvancedBookingPeriodForDoctor = exports.setPrescriptionValidityForDoctor = exports.setConsultationFeeForDoctor = exports.setAdvancedBookingPeriodForDoctor = void 0;
 const Handler_1 = require("../../Handler");
 const Prescription_Validity_Model_1 = __importDefault(require("../../Models/Prescription-Validity.Model"));
+const WorkingHours_Model_1 = __importDefault(require("../../Models/WorkingHours.Model"));
 const doctorService = __importStar(require("../Doctor/Doctor.Service"));
+const Helpers_1 = require("../Helpers");
 const setAdvancedBookingPeriodForDoctor = (doctorId, hospitalId, bookingPeriod) => __awaiter(void 0, void 0, void 0, function* () {
     const exceptionHandler = new Handler_1.ExceptionHandler(() => __awaiter(void 0, void 0, void 0, function* () {
         if (!bookingPeriod) {
@@ -89,3 +91,20 @@ const getAdvancedBookingPeriodForDoctor = (doctorId, hospital) => __awaiter(void
     return yield exceptionHandler.handleServiceExceptions();
 });
 exports.getAdvancedBookingPeriodForDoctor = getAdvancedBookingPeriodForDoctor;
+const updateWorkingHoursCapacity = (workingHourId, capacity) => __awaiter(void 0, void 0, void 0, function* () {
+    const exceptionHandler = new Handler_1.ExceptionHandler(() => __awaiter(void 0, void 0, void 0, function* () {
+        let workingHour = yield WorkingHours_Model_1.default.findOne({
+            _id: workingHourId,
+        });
+        Object.keys(workingHour.toJSON()).forEach((elem) => {
+            if (Helpers_1.Weekdays.includes(elem)) {
+                console.log("elem", elem);
+                workingHour[elem].capacity = capacity;
+            }
+        });
+        yield workingHour.save();
+        return Promise.resolve(true);
+    }));
+    return yield exceptionHandler.handleServiceExceptions();
+});
+exports.updateWorkingHoursCapacity = updateWorkingHoursCapacity;

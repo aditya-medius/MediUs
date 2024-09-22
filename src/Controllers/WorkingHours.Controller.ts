@@ -122,6 +122,7 @@ export const getWorkingHours = async (req: Request, res: Response) => {
             });
             if (index < 0) {
               WHObj2.push({
+                id: e?._id,
                 from: e[data].from,
                 till: e[data].till,
                 Days: [{ day: data, capacity: e[data].capacity, id: e._id }],

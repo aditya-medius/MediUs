@@ -124,6 +124,7 @@ const getWorkingHours = (req, res) => __awaiter(void 0, void 0, void 0, function
                         });
                         if (index < 0) {
                             WHObj2.push({
+                                id: e === null || e === void 0 ? void 0 : e._id,
                                 from: e[data].from,
                                 till: e[data].till,
                                 Days: [{ day: data, capacity: e[data].capacity, id: e._id }],

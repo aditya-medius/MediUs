@@ -9,7 +9,7 @@ import { authenticateDoctor } from "../authentication/Doctor.auth";
 import { authenticatePatient } from "../authentication/Patient.auth";
 import { authenticateSuvedha } from "../authentication/Suvedha.auth";
 import { authenticateAdmin } from "../authentication/Admin.auth";
-import { getDoctorsAppointmentDetails, setDoctorsAppointmentDetails } from "../Controllers";
+import { getDoctorsAppointmentDetails, setDoctorsAppointmentDetails, updateWorkingHoursCapacity } from "../Controllers";
 
 const appointmentScheduleRouter = express.Router();
 
@@ -38,5 +38,7 @@ appointmentScheduleRouter.get("/findHospitalBySpecialityOrBodyPart/:term", hospi
 appointmentScheduleRouter.post("/doctorsAppointmentDetails", oneOf(authenticateDoctor, authenticateHospital), setDoctorsAppointmentDetails)
 
 appointmentScheduleRouter.get("/doctorsAppointmentDetails", oneOf(authenticateDoctor, authenticateHospital), getDoctorsAppointmentDetails)
+
+appointmentScheduleRouter.put("/updateWorkingHoursCapacity", oneOf(authenticateDoctor, authenticateHospital), updateWorkingHoursCapacity)
 
 export default appointmentScheduleRouter;
