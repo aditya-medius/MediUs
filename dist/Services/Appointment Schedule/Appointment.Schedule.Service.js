@@ -35,14 +35,14 @@ const setAppointmentDetailsForDoctors = (doctorScheduleDetails) => __awaiter(voi
 exports.setAppointmentDetailsForDoctors = setAppointmentDetailsForDoctors;
 const getAppointmentDetailsForDoctors = (doctorId, hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
     const exceptionHandler = new Handler_1.ExceptionHandler(() => __awaiter(void 0, void 0, void 0, function* () {
-        var _a;
+        var _a, _b;
         const [bookingPeriodRes, PrescipriptionValidityResAndConsultationFeeRes, acceptsOverTheCounterPayment] = yield Promise.all([
             (0, Appointment_Schedule_Util_1.getAdvancedBookingPeriodForDoctor)(doctorId, hospitalId),
             (0, Prescription_Validity_Controller_1.getPrescriptionValidityAndFeesOfDoctorInHospital)(hospitalId, doctorId),
             (0, Doctor_Service_1.checkIfDoctorTakesOverTheCounterPaymentsForAHospital)(doctorId, hospitalId)
         ]);
-        const [prescriptionValidity, consultationFee] = PrescipriptionValidityResAndConsultationFeeRes;
-        return Promise.resolve({ bookingPeriod: bookingPeriodRes, doctorId, hospitalId, validateTill: (_a = prescriptionValidity === null || prescriptionValidity === void 0 ? void 0 : prescriptionValidity.prescription) === null || _a === void 0 ? void 0 : _a.validateTill, consultationFee: consultationFee === null || consultationFee === void 0 ? void 0 : consultationFee.consultationFee, acceptsOverTheCounterPayment });
+        let [prescriptionValidity, consultationFee] = PrescipriptionValidityResAndConsultationFeeRes;
+        return Promise.resolve({ bookingPeriod: bookingPeriodRes, doctorId, hospitalId, validateTill: (_a = prescriptionValidity === null || prescriptionValidity === void 0 ? void 0 : prescriptionValidity.prescription[0]) === null || _a === void 0 ? void 0 : _a.validateTill, consultationFee: (_b = consultationFee === null || consultationFee === void 0 ? void 0 : consultationFee.consultationFee) === null || _b === void 0 ? void 0 : _b.max, acceptsOverTheCounterPayment });
     }));
     const result = yield exceptionHandler.validateObjectIds(doctorId, hospitalId).handleServiceExceptions();
     return result;

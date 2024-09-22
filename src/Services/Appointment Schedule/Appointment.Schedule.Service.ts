@@ -35,8 +35,8 @@ export const getAppointmentDetailsForDoctors = async (doctorId: string, hospital
             getPrescriptionValidityAndFeesOfDoctorInHospital(hospitalId, doctorId),
             checkIfDoctorTakesOverTheCounterPaymentsForAHospital(doctorId, hospitalId)
         ])
-        const [prescriptionValidity, consultationFee] = PrescipriptionValidityResAndConsultationFeeRes
-        return Promise.resolve({ bookingPeriod: bookingPeriodRes, doctorId, hospitalId, validateTill: prescriptionValidity?.prescription?.validateTill, consultationFee: consultationFee?.consultationFee, acceptsOverTheCounterPayment })
+        let [prescriptionValidity, consultationFee] = PrescipriptionValidityResAndConsultationFeeRes
+        return Promise.resolve({ bookingPeriod: bookingPeriodRes, doctorId, hospitalId, validateTill: prescriptionValidity?.prescription[0]?.validateTill, consultationFee: consultationFee?.consultationFee?.max, acceptsOverTheCounterPayment })
     })
 
     const result: DocRes = await exceptionHandler.validateObjectIds(doctorId, hospitalId).handleServiceExceptions()
