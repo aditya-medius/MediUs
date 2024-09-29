@@ -41,6 +41,7 @@
         "InvalidValueName": "Unsupported data",
         "InvalidValueMessage": "Invalid Value for {{value}}",
         "InvalidTokenErrorMessage": "Invalid token",
-        "MissingAuthToken": "Missing Auth Token"
+        "MissingAuthToken": "Missing Auth Token",
+        "IncorrectType": "Incorrect Type for {{value}}({{incorrectType}}), correct type is {{correctType}}"
     }
 }

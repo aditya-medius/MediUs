@@ -1,22 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ErrorFactory = exports.ErrorTypes = void 0;
+exports.ErrorFactory = void 0;
+const Classes_1 = require("../Classes");
 const Helpers_1 = require("../Services/Helpers");
-var ErrorTypes;
-(function (ErrorTypes) {
-    ErrorTypes["ValidationError"] = "ValidationError";
-    ErrorTypes["NotFoundError"] = "NotFoundError";
-    ErrorTypes["DatabaseError"] = "DatabaseError";
-    ErrorTypes["UnauthorizedError"] = "Unauthorized";
-    ErrorTypes["UnsupportedRequestBody"] = "UnsupportedRequestBody";
-    ErrorTypes["InvalidObjectId"] = "InvalidObjectId";
-    ErrorTypes["MissingAuthToken"] = "MissingAuthToken";
-})(ErrorTypes = exports.ErrorTypes || (exports.ErrorTypes = {}));
-class ErrorFactory {
+class ErrorFactory extends Classes_1.Base {
     constructor() {
-        this._invalidValueErrorMessage = Helpers_1.ErrorMessage.invalidValueErrorMessage;
-        this._invalidTokenErrorMessage = Helpers_1.ErrorMessage.invalidTokenErrorMessage;
-        this._missingToken = Helpers_1.ErrorMessage.missingAuthToken;
+        super(...arguments);
+        this._invalidValueErrorMessage = Helpers_1.ErrorMessage.invalidValueErrorMessage.toString();
+        this._invalidTokenErrorMessage = Helpers_1.ErrorMessage.invalidTokenErrorMessage.toString();
+        this._missingAuthToken = Helpers_1.ErrorMessage.missingAuthToken.toString();
+        this._incorrectType = Helpers_1.ErrorMessage.incorrectType.toString();
     }
     createError(type, message, statusCode = 400) {
         const error = new Error(message);
@@ -26,18 +19,29 @@ class ErrorFactory {
     }
     // Invalid value error
     set invalidValueErrorMessage(value) {
-        this._invalidValueErrorMessage.toString().replace("{{value}}", value);
+        this._invalidValueErrorMessage = this._invalidValueErrorMessage.replace("{{value}}", value);
     }
     get invalidValueErrorMessage() {
-        return this._invalidValueErrorMessage.toString();
+        return this._invalidValueErrorMessage;
     }
     // Invalid (auth) token error
     get invalidTokenErrorMessage() {
-        return this._invalidTokenErrorMessage.toString();
+        return this._invalidTokenErrorMessage;
     }
     // Missing Auth token error
     get missingAuthTokenError() {
-        return this._missingToken.toString();
+        return this._missingAuthToken;
+    }
+    // Incorrect Type error
+    set incorrectType(val) {
+        const { value, incorrectType, correctType } = val;
+        this._incorrectType = this._incorrectType
+            .replace("{{value}}", value)
+            .replace("{{incorrectType}}", incorrectType)
+            .replace("{{correctType}}", correctType);
+    }
+    get incorrectType() {
+        return this._incorrectType;
     }
 }
 exports.ErrorFactory = ErrorFactory;

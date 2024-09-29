@@ -894,7 +894,6 @@ export const getHospitalsWorkingHourInDoctor = async (
         [day]: { $exists: true },
       })
       .lean();
-
     return Promise.resolve(workingHours);
   } catch (error: any) {
     return Promise.reject(error);
@@ -906,8 +905,6 @@ export const getHospitalsPrescriptionValidityInDoctor = async (
   hospitalId: Array<string>
 ) => {
   try {
-    console.log("doctorsd", doctorId);
-    console.log("hsiusihjbsss", hospitalId);
     let prescription = await prescriptionModel
       .find({
         hospitalId: { $in: hospitalId },
@@ -957,7 +954,7 @@ export const hospitalsInDoctor = async (doctorId: string, timings: string) => {
     //   //   path: "hospitalDetails.hospital.address.city hospitalDetails.hospital.address.locality",
     //   // },
     // });
-
+    
     let hospitals: Array<string> = doctors.hospitalDetails.map((e: any) =>
       e?.hospital?._id?.toString()
     );
@@ -1005,10 +1002,6 @@ export const hospitalsInDoctor = async (doctorId: string, timings: string) => {
         available: true,
         scheduleAvailable: true,
       };
-
-      console.log("exisy", exist)
-      console.log("WH", WH)
-
 
       if (exist) {
         obj = {

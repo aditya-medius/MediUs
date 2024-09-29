@@ -26,6 +26,8 @@ import suvedhaRouter from "./routes/Suvedha.route";
 import { setSpecializationActiveStatus } from "./Services/Doctor/Doctor.Service";
 import appointmentScheduleRouter from "./routes/AppointmentSchedule.route";
 import appointmentBookingRouter from "./routes/Appointment.Booking.route";
+import appointmentPreBookingRouter from "./routes/Appointment.PreBooking.route";
+import appointment from "./routes/Appointment.route";
 // Cron Jobs
 cronJobService.cronFunctions.forEach((e: Function) => {
   e();
@@ -42,8 +44,10 @@ app.use("/apiDocs", swaggerUi.serve, swaggerUi.setup(swaggerDoc));
 app.use("/doctor", doctorRouter);
 app.use("/hospital", hospitalRouter);
 app.use("/admin", adminRouter);
-app.use("/appointment/schedule", appointmentScheduleRouter)
-app.use("/appointment/book", appointmentBookingRouter)
+// app.use("/appointment/prebooking", appointmentPreBookingRouter)
+// app.use("/appointment/schedule", appointmentScheduleRouter)
+// app.use("/appointment/book", appointmentBookingRouter)
+app.use("/appointment", appointment)
 app.use("/patient", patientRouter);
 app.use("/feedback", feedbackRouter);
 app.use("/common", commonRouter);

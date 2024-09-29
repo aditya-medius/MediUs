@@ -1,38 +1,47 @@
 import { Request, Response } from "express";
-import { errorResponse, successResponse } from "../Services/response";
-import { getAppointmentDetailsForDoctors, setAppointmentDetailsForDoctors, updateWorkingHoursCapacityForDoctor } from "../Services/Appointment Schedule";
+import { AppointmentScheduleService } from "../Services/Appointment Schedule";
 import { DoctorScheduleDetails } from "../Services/Helpers";
-import { ExceptionHandler } from "../Handler";
+import { AutoBind, TaskManager, TaskRunner } from "../Manager";
+import { Base } from "../Classes";
 
-export const setDoctorsAppointmentDetails = async (req: Request, res: Response) => {
-    const exceptionHandler = new ExceptionHandler(async () => {
-        const { doctorId, hospitalId, bookingPeriod, consultationFee, validateTill } = req.body
-        const doctorScheduleDetials: DoctorScheduleDetails = {
+@AutoBind
+export class AppointmentScheduleController implements Base<AppointmentScheduleController> {
+    private readonly appointmentScheduleService = new AppointmentScheduleService();
+
+    constructor() {
+    }
+
+    Init = (): AppointmentScheduleController => new AppointmentScheduleController();
+
+    @TaskRunner.Bundle(true)
+    async setDoctorsAppointmentDetails(req: Request, res: Response) {
+        const { doctorId, hospitalId, bookingPeriod, consultationFee, validateTill } = req.body;
+        const doctorScheduleDetails: DoctorScheduleDetails = {
             doctorId,
             hospitalId,
-            consultationFee: consultationFee,
+            consultationFee,
             validateTill,
-            bookingPeriod
-        }
-        return await setAppointmentDetailsForDoctors(doctorScheduleDetials)
-    })
+            bookingPeriod,
+        };
+        return await this.appointmentScheduleService.setAppointmentDetailsForDoctors(doctorScheduleDetails);
+    }
 
-    return await exceptionHandler.handleResponseException(req, res)
-}
+    @TaskRunner.Bundle(true)
+    async getDoctorsAppointmentDetails(req: Request, res: Response) {
+        const taskManager = new TaskManager(async () => {
+            const { doctorId, hospitalId } = req.query
+            return await this.appointmentScheduleService.getAppointmentDetailsForDoctors(doctorId as string, hospitalId as string)
+        })
+        return await taskManager.execute(req, res)
+    }
 
-export const getDoctorsAppointmentDetails = async (req: Request, res: Response) => {
-    const exceptionHandler = new ExceptionHandler(async () => {
-        const { doctorId, hospitalId } = req.query
-        return await getAppointmentDetailsForDoctors(doctorId as string, hospitalId as string)
-    })
-    return await exceptionHandler.handleResponseException(req, res)
-}
+    @TaskRunner.Bundle(true)
+    async updateWorkingHoursCapacity(req: Request, res: Response) {
+        const taskManager = new TaskManager(async () => {
+            const { workingHourId, capacity } = req.body
+            return await this.appointmentScheduleService.updateWorkingHoursCapacityForDoctor(workingHourId, capacity)
+        })
 
-export const updateWorkingHoursCapacity = async (req: Request, res: Response) => {
-    const exceptionHandler = new ExceptionHandler(async () => {
-        const { workingHourId, capacity } = req.body
-        return await updateWorkingHoursCapacityForDoctor(workingHourId, capacity)
-    })
-
-    return await exceptionHandler.handleResponseException(req, res)
+        return await taskManager.execute(req, res)
+    }
 }

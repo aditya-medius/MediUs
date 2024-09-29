@@ -1,14 +1,29 @@
+import { Base } from "../../Classes"
 import { getPrescriptionValidityAndFeesOfDoctorInHospital } from "../../Controllers/Prescription-Validity.Controller"
-import { ErrorFactory, ErrorTypes, ExceptionHandler } from "../../Handler"
+import { ErrorFactory, ValidationHandler } from "../../Handler"
+import { TaskRunner } from "../../Manager"
 import { checkIfDoctorTakesOverTheCounterPaymentsForAHospital } from "../Doctor/Doctor.Service"
-import { DoctorScheduleDetails as DocSch, DoctorScheduleDetailsResponse as DocRes } from "../Helpers"
-import { getAdvancedBookingPeriodForDoctor, setAdvancedBookingPeriodForDoctor, setConsultationFeeForDoctor, setPrescriptionValidityForDoctor, updateWorkingHoursCapacity } from "./Appointment.Schedule.Util"
+import { DoctorScheduleDetails as DocSch, DoctorScheduleDetailsResponse as DocRes, ErrorTypes } from "../Helpers"
+import { AppointmentScheduleUtil } from "./Appointment.Schedule.Util"
 
 const errorFactory = new ErrorFactory();
 
-export const setAppointmentDetailsForDoctors = async (doctorScheduleDetails: DocSch) => {
-    const { doctorId, hospitalId, validateTill, bookingPeriod, consultationFee } = doctorScheduleDetails
-    const exceptionHandler = new ExceptionHandler<boolean>(async (): Promise<boolean> => {
+export class AppointmentScheduleService implements Base<AppointmentScheduleService> {
+    private readonly appointmentScheduleUtil: AppointmentScheduleUtil
+    private readonly validationHandler: ValidationHandler = new ValidationHandler();
+
+    constructor() {
+        this.appointmentScheduleUtil = new AppointmentScheduleUtil(this.validationHandler)
+    }
+
+    Init = (): AppointmentScheduleService => new AppointmentScheduleService();
+
+    @TaskRunner.Bundle()
+    async setAppointmentDetailsForDoctors(doctorScheduleDetails: DocSch) {
+
+        const { doctorId, hospitalId, validateTill, bookingPeriod, consultationFee } = doctorScheduleDetails
+
+        this.validationHandler.validateObjectIds(doctorId, hospitalId)
 
         if (!(bookingPeriod && consultationFee && validateTill)) {
             errorFactory.invalidValueErrorMessage = "booking period, consultation fee, capacity"
@@ -17,41 +32,34 @@ export const setAppointmentDetailsForDoctors = async (doctorScheduleDetails: Doc
         }
 
         await Promise.all([
-            setAdvancedBookingPeriodForDoctor(doctorId, hospitalId, bookingPeriod),
-            setConsultationFeeForDoctor(doctorId, hospitalId, consultationFee),
-            setPrescriptionValidityForDoctor(doctorId, hospitalId, validateTill),
+            this.appointmentScheduleUtil.setAdvancedBookingPeriodForDoctor(doctorId, hospitalId, bookingPeriod),
+            this.appointmentScheduleUtil.setConsultationFeeForDoctor(doctorId, hospitalId, consultationFee),
+            this.appointmentScheduleUtil.setPrescriptionValidityForDoctor(doctorId, hospitalId, validateTill),
         ])
 
         return Promise.resolve(true)
-    })
+    }
 
-    return await exceptionHandler.validateObjectIds(doctorId, hospitalId).handleServiceExceptions()
-}
+    @TaskRunner.Bundle()
+    async getAppointmentDetailsForDoctors(doctorId: string, hospitalId: string): Promise<DocRes> {
+        this.validationHandler.validateObjectIds(doctorId, hospitalId)
 
-export const getAppointmentDetailsForDoctors = async (doctorId: string, hospitalId: string): Promise<DocRes> => {
-    const exceptionHandler = new ExceptionHandler<DocRes>(async (): Promise<DocRes> => {
         const [bookingPeriodRes, PrescipriptionValidityResAndConsultationFeeRes, acceptsOverTheCounterPayment] = await Promise.all([
-            getAdvancedBookingPeriodForDoctor(doctorId, hospitalId),
+            this.appointmentScheduleUtil.getAdvancedBookingPeriodForDoctor(doctorId, hospitalId),
             getPrescriptionValidityAndFeesOfDoctorInHospital(hospitalId, doctorId),
             checkIfDoctorTakesOverTheCounterPaymentsForAHospital(doctorId, hospitalId)
         ])
         let [prescriptionValidity, consultationFee] = PrescipriptionValidityResAndConsultationFeeRes
         return Promise.resolve({ bookingPeriod: bookingPeriodRes, doctorId, hospitalId, validateTill: prescriptionValidity?.prescription[0]?.validateTill, consultationFee: consultationFee?.consultationFee?.max, acceptsOverTheCounterPayment })
-    })
+    }
 
-    const result: DocRes = await exceptionHandler.validateObjectIds(doctorId, hospitalId).handleServiceExceptions()
-    return result;
-}
-
-export const updateWorkingHoursCapacityForDoctor = async (workingHourId: string, capacity: number): Promise<boolean> => {
-    const exceptionHandler = new ExceptionHandler<boolean>(async (): Promise<boolean> => {
+    @TaskRunner.Bundle()
+    async updateWorkingHoursCapacityForDoctor(workingHourId: string, capacity: number): Promise<boolean> {
         if (!capacity || typeof capacity !== "number") {
             errorFactory.invalidValueErrorMessage = "capacity"
             const errorMessage = errorFactory.invalidValueErrorMessage;
             throw errorFactory.createError(ErrorTypes.UnsupportedRequestBody, errorMessage)
         }
-        return await updateWorkingHoursCapacity(workingHourId, capacity)
-    })
-
-    return exceptionHandler.validateObjectIds(workingHourId).handleServiceExceptions();
+        return await this.appointmentScheduleUtil.updateWorkingHoursCapacity(workingHourId, capacity)
+    }
 }

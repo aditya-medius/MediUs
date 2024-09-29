@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -30,7 +34,9 @@ const Doctor_auth_1 = require("../authentication/Doctor.auth");
 const Patient_auth_1 = require("../authentication/Patient.auth");
 const Suvedha_auth_1 = require("../authentication/Suvedha.auth");
 const Admin_auth_1 = require("../authentication/Admin.auth");
+// import { AppointmentScheduleController, getDoctorsAppointmentDetails, setDoctorsAppointmentDetails, updateWorkingHoursCapacity } from "../Controllers";
 const Controllers_1 = require("../Controllers");
+const appointmentScheduleController = new Controllers_1.AppointmentScheduleController();
 const appointmentScheduleRouter = express_1.default.Router();
 appointmentScheduleRouter.get("/findHospitalBySpecialityOrBodyPart/:term", hospitalController.searchHospital);
 appointmentScheduleRouter.put("/doctors/in/hospital", hospitalController.doctorsInHospitalWithTimings);
@@ -43,7 +49,7 @@ appointmentScheduleRouter.get("/getDoctorsInHospital", (0, middlewareHelper_1.on
 appointmentScheduleRouter.put("/getHospitalById/:id", (0, middlewareHelper_1.oneOf)(Patient_auth_1.authenticatePatient, Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital, Suvedha_auth_1.authenticateSuvedha, Admin_auth_1.authenticateAdmin), hospitalController.getHospitalById);
 appointmentScheduleRouter.get("/viewAppointment/:page", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital), hospitalController.viewAppointment);
 appointmentScheduleRouter.get("/findHospitalBySpecialityOrBodyPart/:term", hospitalController.searchHospital);
-appointmentScheduleRouter.post("/doctorsAppointmentDetails", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), Controllers_1.setDoctorsAppointmentDetails);
-appointmentScheduleRouter.get("/doctorsAppointmentDetails", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), Controllers_1.getDoctorsAppointmentDetails);
-appointmentScheduleRouter.put("/updateWorkingHoursCapacity", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), Controllers_1.updateWorkingHoursCapacity);
+appointmentScheduleRouter.post("/doctorsAppointmentDetails", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), appointmentScheduleController.setDoctorsAppointmentDetails);
+appointmentScheduleRouter.get("/doctorsAppointmentDetails", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), appointmentScheduleController.getDoctorsAppointmentDetails);
+appointmentScheduleRouter.put("/updateWorkingHoursCapacity", (0, middlewareHelper_1.oneOf)(Doctor_auth_1.authenticateDoctor, Hospital_auth_1.authenticateHospital), appointmentScheduleController.updateWorkingHoursCapacity);
 exports.default = appointmentScheduleRouter;
