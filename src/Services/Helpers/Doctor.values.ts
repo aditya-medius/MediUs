@@ -1,4 +1,4 @@
-import { Gender } from "./Common.values";
+import { Gender } from "./Common.enum";
 import { Hospital } from "./Hospital.values";
 
 export interface Doctor {

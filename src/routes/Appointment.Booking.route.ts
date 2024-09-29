@@ -4,14 +4,12 @@ import { authenticateHospital } from "../authentication/Hospital.auth";
 import { checkIfPatientAppointmentIsWithinPrescriptionValidityPeriod } from "../Controllers/Prescription-Validity.Controller";
 import { AppointmentType } from "../Services/Helpers";
 import { errorResponse } from "../Services/response";
-import * as hospitalController from "../Controllers/Hospital.Controller";
-import { authenticateDoctor } from "../authentication/Doctor.auth";
 import { authenticatePatient } from "../authentication/Patient.auth";
 import { authenticateSuvedha } from "../authentication/Suvedha.auth";
-import { authenticateAdmin } from "../authentication/Admin.auth";
-import * as paymentController from "../Controllers/AppointmentPayment.Controller";
+import { AppointmentBookingController } from "../Controllers";
 
 const appointmentBookingRouter = express.Router();
+const appointmentBookingController = AppointmentBookingController.Init()
 
 appointmentBookingRouter.post(
     "/verifyPayment",
@@ -43,11 +41,11 @@ appointmentBookingRouter.post(
         }
     },
 
-    hospitalController.verifyPayment
+    appointmentBookingController.verifyPayment
 );
 
 
-appointmentBookingRouter.post("/generateOrderId", oneOf(authenticatePatient, authenticateHospital, authenticateSuvedha), paymentController.generateOrderId);
+appointmentBookingRouter.post("/generateOrderId", oneOf(authenticatePatient, authenticateHospital, authenticateSuvedha), appointmentBookingController.generateOrderId);
 
 
 export default appointmentBookingRouter

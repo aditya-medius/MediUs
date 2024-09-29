@@ -12,12 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ExceptionHandler = void 0;
+exports.TaskManager = void 0;
 const response_1 = require("../Services/response");
 const mongoose_1 = __importDefault(require("mongoose"));
 const Error_Factory_1 = require("./Error.Factory");
 const errorFactory = new Error_Factory_1.ErrorFactory();
-class ExceptionHandler {
+class TaskManager {
     constructor(cb) {
         this.callback = cb;
     }
@@ -55,4 +55,4 @@ class ExceptionHandler {
         return this;
     }
 }
-exports.ExceptionHandler = ExceptionHandler;
+exports.TaskManager = TaskManager;

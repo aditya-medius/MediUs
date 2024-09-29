@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { errorResponse } from "./response";
-import { ErrorFactory, ErrorTypes } from "../Handler";
+import { ErrorFactory } from "../Handler";
+import { ErrorTypes } from "./Helpers";
 
 const errorFactory = new ErrorFactory();
 

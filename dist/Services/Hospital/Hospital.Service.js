@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -825,8 +829,6 @@ const getHospitalsWorkingHourInDoctor = (doctorId, hospitalId, day) => __awaiter
 exports.getHospitalsWorkingHourInDoctor = getHospitalsWorkingHourInDoctor;
 const getHospitalsPrescriptionValidityInDoctor = (doctorId, hospitalId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log("doctorsd", doctorId);
-        console.log("hsiusihjbsss", hospitalId);
         let prescription = yield Prescription_Model_1.default
             .find({
             hospitalId: { $in: hospitalId },
@@ -886,8 +888,6 @@ const hospitalsInDoctor = (doctorId, timings) => __awaiter(void 0, void 0, void 
             let WH = workingHours.filter((elem) => { var _a; return elem.hospitalDetails.toString() === ((_a = e === null || e === void 0 ? void 0 : e.hospital) === null || _a === void 0 ? void 0 : _a._id.toString()); });
             let PRES = prescriptions.find((elem) => { var _a; return elem.hospitalId.toString() === ((_a = e === null || e === void 0 ? void 0 : e.hospital) === null || _a === void 0 ? void 0 : _a._id.toString()); });
             let obj = Object.assign(Object.assign({}, e), { workingHours: WH, prescription: PRES, available: true, scheduleAvailable: true });
-            console.log("exisy", exist);
-            console.log("WH", WH);
             if (exist) {
                 obj = Object.assign(Object.assign({}, e), { available: false, workingHours: WH, prescription: PRES, scheduleAvailable: true });
             }

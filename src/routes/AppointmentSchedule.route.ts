@@ -9,7 +9,10 @@ import { authenticateDoctor } from "../authentication/Doctor.auth";
 import { authenticatePatient } from "../authentication/Patient.auth";
 import { authenticateSuvedha } from "../authentication/Suvedha.auth";
 import { authenticateAdmin } from "../authentication/Admin.auth";
-import { getDoctorsAppointmentDetails, setDoctorsAppointmentDetails, updateWorkingHoursCapacity } from "../Controllers";
+// import { AppointmentScheduleController, getDoctorsAppointmentDetails, setDoctorsAppointmentDetails, updateWorkingHoursCapacity } from "../Controllers";
+import { AppointmentScheduleController } from "../Controllers";
+
+const appointmentScheduleController = new AppointmentScheduleController()
 
 const appointmentScheduleRouter = express.Router();
 
@@ -35,10 +38,10 @@ appointmentScheduleRouter.get("/viewAppointment/:page", oneOf(authenticateHospit
 
 appointmentScheduleRouter.get("/findHospitalBySpecialityOrBodyPart/:term", hospitalController.searchHospital);
 
-appointmentScheduleRouter.post("/doctorsAppointmentDetails", oneOf(authenticateDoctor, authenticateHospital), setDoctorsAppointmentDetails)
+appointmentScheduleRouter.post("/doctorsAppointmentDetails", oneOf(authenticateDoctor, authenticateHospital), appointmentScheduleController.setDoctorsAppointmentDetails)
 
-appointmentScheduleRouter.get("/doctorsAppointmentDetails", oneOf(authenticateDoctor, authenticateHospital), getDoctorsAppointmentDetails)
+appointmentScheduleRouter.get("/doctorsAppointmentDetails", oneOf(authenticateDoctor, authenticateHospital), appointmentScheduleController.getDoctorsAppointmentDetails)
 
-appointmentScheduleRouter.put("/updateWorkingHoursCapacity", oneOf(authenticateDoctor, authenticateHospital), updateWorkingHoursCapacity)
+appointmentScheduleRouter.put("/updateWorkingHoursCapacity", oneOf(authenticateDoctor, authenticateHospital), appointmentScheduleController.updateWorkingHoursCapacity)
 
 export default appointmentScheduleRouter;
