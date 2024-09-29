@@ -11,7 +11,7 @@ const appointmetPreBookingUtil = AppointmentPreBookingService.Init()
 const appointmentPreBookingService = AppointmentPreBookingService.Init(appointmetPreBookingUtil)
 const appointmentPreBookingController = AppointmentPreBooking.Init(appointmentPreBookingService);
 
-appointmentPreBookingRouter.get("/getDetails/:doctorId", oneOf(authenticateHospital, authenticatePatient), appointmentPreBookingController.details)
+appointmentPreBookingRouter.get("/details/:doctorId", oneOf(authenticateHospital, authenticatePatient), appointmentPreBookingController.details)
 
 
 export default appointmentPreBookingRouter
