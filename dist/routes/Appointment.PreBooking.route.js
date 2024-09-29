@@ -13,5 +13,5 @@ const appointmentPreBookingRouter = express_1.default.Router();
 const appointmetPreBookingUtil = Appointment_Pre_Booking_1.AppointmentPreBookingService.Init();
 const appointmentPreBookingService = Appointment_Pre_Booking_1.AppointmentPreBookingService.Init(appointmetPreBookingUtil);
 const appointmentPreBookingController = Controllers_1.AppointmentPreBooking.Init(appointmentPreBookingService);
-appointmentPreBookingRouter.get("/getDetails/:doctorId", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital, Patient_auth_1.authenticatePatient), appointmentPreBookingController.details);
+appointmentPreBookingRouter.get("/details/:doctorId", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital, Patient_auth_1.authenticatePatient), appointmentPreBookingController.details);
 exports.default = appointmentPreBookingRouter;
