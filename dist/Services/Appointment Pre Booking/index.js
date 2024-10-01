@@ -15,3 +15,6 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./Appointment.PreBooking.Service"), exports);
+__exportStar(require("./Appointment.PreBooking.ForHospital.Service"), exports);
+__exportStar(require("./Appointment.PreBooking.ForPatient.Service"), exports);
+__exportStar(require("./Appointment.PreBooking.Common.Service"), exports);

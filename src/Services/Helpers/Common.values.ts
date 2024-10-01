@@ -25,3 +25,8 @@ export type HospitalExist = {
     hospital: string,
     exist?: boolean
 }
+
+export type DoctorExist = {
+    doctor: string,
+    exist: boolean
+}
