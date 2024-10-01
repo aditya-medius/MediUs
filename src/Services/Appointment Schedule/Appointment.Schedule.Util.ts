@@ -8,7 +8,7 @@ import prescriptionValidityModel from "../../Models/Prescription-Validity.Model"
 import workingHourModel from "../../Models/WorkingHours.Model"
 import { AdvancedBookingPeriod, IsAdvancedBookingPeriodValid, OverTheCounterPayment } from "../../SchemaTypes"
 import * as doctorService from "../Doctor/Doctor.Service"
-import { ErrorTypes, HospitalExist, Weekdays } from "../Helpers"
+import { DoctorExist, ErrorTypes, HospitalExist, Weekdays } from "../Helpers"
 import { isAdvancedBookingValid } from "../Patient/Patient.Service"
 
 const errorFactory = new ErrorFactory()
@@ -148,4 +148,27 @@ export class AppointmentScheduleUtil extends Base<AppointmentScheduleUtil> {
         })
         return isValidPeriod
     }
+
+    @TaskRunner.Bundle()
+    async checkIfDoctorTakesOverTheCounterPaymentsForMultipleDoctors(hospitalId: string, doctorIds: Array<string>): Promise<Array<DoctorExist>> {
+        this.validationHandler.validateObjectIds(...doctorIds, hospitalId);
+        const payments = await overTheCounterModel.find({ hospitalId, doctorId: { $in: doctorIds } }).lean() as Array<OverTheCounterPayment>
+        const result = payments?.map((data: OverTheCounterPayment) => {
+
+            let mapData: DoctorExist = { doctor: data.doctorId.toString(), exist: false }
+            if (doctorIds.includes(data?.doctorId?.toString())) {
+                mapData["exist"] = true
+            }
+            return mapData
+        })
+        return Promise.resolve(result)
+    }
+
+    @TaskRunner.Bundle()
+    async getDoctorsAdvancedBookingPeriodForMultipleDoctors(hospitalId: string, doctorIds: Array<string>): Promise<AdvancedBookingPeriod[]> {
+        this.validationHandler.validateObjectIds(...doctorIds, hospitalId);
+        let bookingPeriodRecord: AdvancedBookingPeriod[] = await advancedBookingPeriodModel.find({ hospitalId, doctorId: { $in: doctorIds } }).lean() as AdvancedBookingPeriod[]
+        return Promise.resolve(bookingPeriodRecord)
+    }
+
 }

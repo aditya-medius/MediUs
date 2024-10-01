@@ -9,12 +9,19 @@ export class AppointmentPreBooking extends Base<AppointmentPreBooking> {
         super();
     }
 
-
     @TaskRunner.Bundle(true)
     async details(req: Request, res: Response) {
         const { doctorId } = req.params
         const { timings } = req.query
-        const preBookingDetails = await this.appointmentPreBookingService.getAppointmentPreBookingDetails(doctorId, timings as string)
+        const preBookingDetails = await this.appointmentPreBookingService.getAppointmentPreBookingDetailsForPatient(doctorId, timings as string)
         return Promise.resolve(preBookingDetails);
+    }
+
+    @TaskRunner.Bundle(true)
+    async hospitalDetails(req: Request, res: Response) {
+        const { hospitalId } = req.params;
+        const { timings } = req.query;
+        const preBookingDetails = await this.appointmentPreBookingService.getAppointmentPreBookingDetailsForHospital(hospitalId, timings as string)
+        return Promise.resolve(preBookingDetails)
     }
 }

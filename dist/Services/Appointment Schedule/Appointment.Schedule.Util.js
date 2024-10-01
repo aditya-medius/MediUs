@@ -169,6 +169,28 @@ class AppointmentScheduleUtil extends Classes_1.Base {
         });
         return isValidPeriod;
     }
+    checkIfDoctorTakesOverTheCounterPaymentsForMultipleDoctors(hospitalId, doctorIds) {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.validationHandler.validateObjectIds(...doctorIds, hospitalId);
+            const payments = yield OverTheCounterPayment_1.default.find({ hospitalId, doctorId: { $in: doctorIds } }).lean();
+            const result = payments === null || payments === void 0 ? void 0 : payments.map((data) => {
+                var _a;
+                let mapData = { doctor: data.doctorId.toString(), exist: false };
+                if (doctorIds.includes((_a = data === null || data === void 0 ? void 0 : data.doctorId) === null || _a === void 0 ? void 0 : _a.toString())) {
+                    mapData["exist"] = true;
+                }
+                return mapData;
+            });
+            return Promise.resolve(result);
+        });
+    }
+    getDoctorsAdvancedBookingPeriodForMultipleDoctors(hospitalId, doctorIds) {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.validationHandler.validateObjectIds(...doctorIds, hospitalId);
+            let bookingPeriodRecord = yield AdvancedBookingPeriod_1.default.find({ hospitalId, doctorId: { $in: doctorIds } }).lean();
+            return Promise.resolve(bookingPeriodRecord);
+        });
+    }
 }
 __decorate([
     Manager_1.TaskRunner.Bundle()
@@ -191,4 +213,10 @@ __decorate([
 __decorate([
     Manager_1.TaskRunner.Bundle()
 ], AppointmentScheduleUtil.prototype, "getDoctorsAdvancedBookingPeriodForMultipleHospitals", null);
+__decorate([
+    Manager_1.TaskRunner.Bundle()
+], AppointmentScheduleUtil.prototype, "checkIfDoctorTakesOverTheCounterPaymentsForMultipleDoctors", null);
+__decorate([
+    Manager_1.TaskRunner.Bundle()
+], AppointmentScheduleUtil.prototype, "getDoctorsAdvancedBookingPeriodForMultipleDoctors", null);
 exports.AppointmentScheduleUtil = AppointmentScheduleUtil;

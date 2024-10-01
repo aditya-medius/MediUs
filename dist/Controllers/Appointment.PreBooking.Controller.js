@@ -27,7 +27,15 @@ let AppointmentPreBooking = class AppointmentPreBooking extends Classes_1.Base {
         return __awaiter(this, void 0, void 0, function* () {
             const { doctorId } = req.params;
             const { timings } = req.query;
-            const preBookingDetails = yield this.appointmentPreBookingService.getAppointmentPreBookingDetails(doctorId, timings);
+            const preBookingDetails = yield this.appointmentPreBookingService.getAppointmentPreBookingDetailsForPatient(doctorId, timings);
+            return Promise.resolve(preBookingDetails);
+        });
+    }
+    hospitalDetails(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { hospitalId } = req.params;
+            const { timings } = req.query;
+            const preBookingDetails = yield this.appointmentPreBookingService.getAppointmentPreBookingDetailsForHospital(hospitalId, timings);
             return Promise.resolve(preBookingDetails);
         });
     }
@@ -35,6 +43,9 @@ let AppointmentPreBooking = class AppointmentPreBooking extends Classes_1.Base {
 __decorate([
     Manager_1.TaskRunner.Bundle(true)
 ], AppointmentPreBooking.prototype, "details", null);
+__decorate([
+    Manager_1.TaskRunner.Bundle(true)
+], AppointmentPreBooking.prototype, "hospitalDetails", null);
 AppointmentPreBooking = __decorate([
     Manager_1.AutoBind
 ], AppointmentPreBooking);
