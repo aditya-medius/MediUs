@@ -88,7 +88,7 @@ patientRouter.post(
         default: {
           const error = new Error("error")
           error.message = "Invalid appointmentType value";
-          throw error
+          return errorResponse(error, res);
         }
       }
 

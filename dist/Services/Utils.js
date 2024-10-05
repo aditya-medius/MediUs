@@ -274,6 +274,7 @@ exports.firebaseAxiosPatient.interceptors.request.use((req) => {
     return req;
 });
 const sendNotificationToDoctor = (doctorFirebaseToken, notification) => __awaiter(void 0, void 0, void 0, function* () {
+    return;
     exports.firebaseAxiosDoctor.post("/fcm/send", {
         to: doctorFirebaseToken,
         notification,
@@ -281,6 +282,7 @@ const sendNotificationToDoctor = (doctorFirebaseToken, notification) => __awaite
 });
 exports.sendNotificationToDoctor = sendNotificationToDoctor;
 const sendNotificationToHospital = (hospitalFirebaseToken, notification) => __awaiter(void 0, void 0, void 0, function* () {
+    return;
     exports.firebaseAxiosHospital.post("/fcm/send", {
         to: hospitalFirebaseToken,
         notification,
@@ -288,6 +290,7 @@ const sendNotificationToHospital = (hospitalFirebaseToken, notification) => __aw
 });
 exports.sendNotificationToHospital = sendNotificationToHospital;
 const sendNotificationToPatient = (patientFirebaseToken, notification) => __awaiter(void 0, void 0, void 0, function* () {
+    return;
     exports.firebaseAxiosPatient.post("/fcm/send", {
         to: patientFirebaseToken,
         notification,

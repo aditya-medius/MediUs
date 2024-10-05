@@ -14,6 +14,7 @@ const appointmentPreBookingCommonService = Appointment_Pre_Booking_1.Appointment
 const appointmentPreBookingForPatientService = Appointment_Pre_Booking_1.AppointmentPreBookingForPatientService.Init(appointmentPreBookingCommonService);
 const appointmentPreBookingForHospitalService = Appointment_Pre_Booking_1.AppointmentPreBookingForHospitalService.Init(appointmentPreBookingCommonService);
 const appointmentPreBookingService = Appointment_Pre_Booking_1.AppointmentPreBookingService.Init(appointmentPreBookingForPatientService, appointmentPreBookingForHospitalService);
+// const appointmentPreBookingService = AppointmentPreBookingService.Init()
 const appointmentPreBookingController = Controllers_1.AppointmentPreBooking.Init(appointmentPreBookingService);
 appointmentPreBookingRouter.get("/hospital/details/:hospitalId", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital, Patient_auth_1.authenticatePatient), appointmentPreBookingController.hospitalDetails);
 appointmentPreBookingRouter.get("/details/:doctorId", (0, middlewareHelper_1.oneOf)(Hospital_auth_1.authenticateHospital, Patient_auth_1.authenticatePatient), appointmentPreBookingController.details);

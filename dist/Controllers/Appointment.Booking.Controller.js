@@ -5,6 +5,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -38,12 +41,19 @@ let AppointmentBookingController = AppointmentBookingController_1 = class Appoin
     }
 };
 __decorate([
-    Manager_1.TaskRunner.Bundle(true)
+    Manager_1.TaskRunner.Bundle(true),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
 ], AppointmentBookingController.prototype, "verifyPayment", null);
 __decorate([
-    Manager_1.TaskRunner.Bundle(true)
+    Manager_1.TaskRunner.Bundle(true),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
 ], AppointmentBookingController.prototype, "generateOrderId", null);
 AppointmentBookingController = AppointmentBookingController_1 = __decorate([
-    Manager_1.AutoBind
+    Manager_1.AutoBind,
+    __metadata("design:paramtypes", [])
 ], AppointmentBookingController);
 exports.AppointmentBookingController = AppointmentBookingController;

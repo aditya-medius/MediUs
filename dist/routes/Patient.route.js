@@ -89,7 +89,7 @@ patientRouter.post("/BookAppointment", (0, middlewareHelper_1.oneOf)(Patient_aut
             default: {
                 const error = new Error("error");
                 error.message = "Invalid appointmentType value";
-                throw error;
+                return (0, response_1.errorResponse)(error, res);
             }
         }
         req.body["appointmentType"] = appointmentType;

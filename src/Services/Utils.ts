@@ -276,6 +276,7 @@ export const sendNotificationToDoctor = async (
   doctorFirebaseToken: string,
   notification: { body: string; title: string }
 ) => {
+  return
   firebaseAxiosDoctor.post("/fcm/send", {
     to: doctorFirebaseToken,
     notification,
@@ -286,6 +287,7 @@ export const sendNotificationToHospital = async (
   hospitalFirebaseToken: string,
   notification: { body: string; title: string }
 ) => {
+  return
   firebaseAxiosHospital.post("/fcm/send", {
     to: hospitalFirebaseToken,
     notification,
@@ -296,6 +298,7 @@ export const sendNotificationToPatient = async (
   patientFirebaseToken: string,
   notification: { body: string; title: string }
 ) => {
+  return
   firebaseAxiosPatient.post("/fcm/send", {
     to: patientFirebaseToken,
     notification,
