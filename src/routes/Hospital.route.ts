@@ -249,13 +249,10 @@ hospitalRouter.post(
           hospitalId,
           subPatientId,
         });
-      // req.body["appointmentType"] = valid ? AppointmentType.FOLLOW_UP : AppointmentType.FRESH;
 
       if (req.currentHospital) {
         req.body.appointment["appointmentBookedBy"] = "Hospital";
       }
-
-      req.body.appointment["appointmentType"] = req.body["appointmentType"]
 
       next();
     } catch (error: any) {
