@@ -86,7 +86,6 @@ export const BookAppointment = async (body: any, isHospital = false) => {
       return [`${workingDay}.working`, `${workingDay}.from.division`, `${workingDay}.from.time`, `${workingDay}.till.div`, `${workingDay}.till.time`]
     })()
 
-    console.log("body", body)
     const WorkingHourQuery = {
       doctorDetails: body.doctors,
       hospitalDetails: body.hospital,

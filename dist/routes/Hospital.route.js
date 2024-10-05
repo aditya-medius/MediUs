@@ -48,7 +48,6 @@ const feeService = __importStar(require("../Module/Payment/Service/Fee.Service")
 const Suvedha_auth_1 = require("../authentication/Suvedha.auth");
 const Prescription_Validity_Controller_1 = require("../Controllers/Prescription-Validity.Controller");
 const Admin_auth_1 = require("../authentication/Admin.auth");
-const Helpers_1 = require("../Services/Helpers");
 const hospitalRouter = express_1.default.Router();
 hospitalRouter.get("/", 
 // oneOf(authenticateHospital),
@@ -144,7 +143,7 @@ hospitalRouter.post("/verifyPayment", (0, middlewareHelper_1.oneOf)(Hospital_aut
             hospitalId,
             subPatientId,
         });
-        req.body["appointmentType"] = valid ? Helpers_1.AppointmentType.FOLLOW_UP : Helpers_1.AppointmentType.FRESH;
+        // req.body["appointmentType"] = valid ? AppointmentType.FOLLOW_UP : AppointmentType.FRESH;
         if (req.currentHospital) {
             req.body.appointment["appointmentBookedBy"] = "Hospital";
         }

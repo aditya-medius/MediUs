@@ -95,7 +95,6 @@ const BookAppointment = (body, isHospital = false) => __awaiter(void 0, void 0, 
             const workingDay = [WEEK_DAYS[day]];
             return [`${workingDay}.working`, `${workingDay}.from.division`, `${workingDay}.from.time`, `${workingDay}.till.div`, `${workingDay}.till.time`];
         })();
-        console.log("body", body);
         const WorkingHourQuery = {
             doctorDetails: body.doctors,
             hospitalDetails: body.hospital,
