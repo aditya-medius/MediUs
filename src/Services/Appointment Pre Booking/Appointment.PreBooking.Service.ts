@@ -4,6 +4,7 @@ import { TaskRunner } from "../../Manager";
 import { ErrorTypes, HospitalExist, Weekdays } from "../Helpers";
 import { AppointmentPreBookingForPatientService } from "./Appointment.PreBooking.ForPatient.Service";
 import { AppointmentPreBookingForHospitalService } from "./Appointment.PreBooking.ForHospital.Service";
+import { inject } from "inversify";
 
 export class AppointmentPreBookingService extends Base<AppointmentPreBookingService> {
 

@@ -28,6 +28,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -193,30 +196,57 @@ class AppointmentScheduleUtil extends Classes_1.Base {
     }
 }
 __decorate([
-    Manager_1.TaskRunner.Bundle()
+    Manager_1.TaskRunner.Bundle(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, Number]),
+    __metadata("design:returntype", Promise)
 ], AppointmentScheduleUtil.prototype, "setAdvancedBookingPeriodForDoctor", null);
 __decorate([
-    Manager_1.TaskRunner.Bundle()
+    Manager_1.TaskRunner.Bundle(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, Object]),
+    __metadata("design:returntype", Promise)
 ], AppointmentScheduleUtil.prototype, "setConsultationFeeForDoctor", null);
 __decorate([
-    Manager_1.TaskRunner.Bundle()
+    Manager_1.TaskRunner.Bundle(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, Number]),
+    __metadata("design:returntype", Promise)
 ], AppointmentScheduleUtil.prototype, "setPrescriptionValidityForDoctor", null);
 __decorate([
-    Manager_1.TaskRunner.Bundle()
+    Manager_1.TaskRunner.Bundle(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
 ], AppointmentScheduleUtil.prototype, "getAdvancedBookingPeriodForDoctor", null);
 __decorate([
-    Manager_1.TaskRunner.Bundle()
+    Manager_1.TaskRunner.Bundle(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Number]),
+    __metadata("design:returntype", Promise)
 ], AppointmentScheduleUtil.prototype, "updateWorkingHoursCapacity", null);
 __decorate([
-    Manager_1.TaskRunner.Bundle()
+    Manager_1.TaskRunner.Bundle(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Array]),
+    __metadata("design:returntype", Promise)
 ], AppointmentScheduleUtil.prototype, "checkIfDoctorTakesOverTheCounterPaymentsForMultipleHospital", null);
 __decorate([
-    Manager_1.TaskRunner.Bundle()
+    Manager_1.TaskRunner.Bundle(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Array]),
+    __metadata("design:returntype", Promise)
 ], AppointmentScheduleUtil.prototype, "getDoctorsAdvancedBookingPeriodForMultipleHospitals", null);
 __decorate([
-    Manager_1.TaskRunner.Bundle()
+    Manager_1.TaskRunner.Bundle(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Array]),
+    __metadata("design:returntype", Promise)
 ], AppointmentScheduleUtil.prototype, "checkIfDoctorTakesOverTheCounterPaymentsForMultipleDoctors", null);
 __decorate([
-    Manager_1.TaskRunner.Bundle()
+    Manager_1.TaskRunner.Bundle(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Array]),
+    __metadata("design:returntype", Promise)
 ], AppointmentScheduleUtil.prototype, "getDoctorsAdvancedBookingPeriodForMultipleDoctors", null);
 exports.AppointmentScheduleUtil = AppointmentScheduleUtil;

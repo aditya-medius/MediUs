@@ -81,12 +81,25 @@ export const BookAppointment = async (body: any, isHospital = false) => {
 
     const day = requestDate.getDay();
 
-    // @TODO check if working hour exist first
-    let capacity = await workingHourModel.findOne({
+    const [working, fromDiv, fromTime, tillDiv, tillTime] = (() => {
+      const workingDay = [WEEK_DAYS[day]]
+      return [`${workingDay}.working`, `${workingDay}.from.division`, `${workingDay}.from.time`, `${workingDay}.till.div`, `${workingDay}.till.time`]
+    })()
+
+    console.log("body", body)
+    const WorkingHourQuery = {
       doctorDetails: body.doctors,
       hospitalDetails: body.hospital,
-      [WEEK_DAYS[day]]: { $exists: true },
-    });
+      [working]: true,
+      [fromDiv]: body.time.from.division,
+      [fromTime]: body.time.from.time,
+      [tillDiv]: body.time.till.division,
+      [tillTime]: body.time.till.time
+    }
+
+    // @TODO check if working hour exist first
+    let capacity = await workingHourModel.findOne(WorkingHourQuery);
+
     if (!capacity) {
       let error: Error = new Error("Error");
       error.message = "Cannot create appointment";
@@ -206,7 +219,7 @@ export const canDoctorTakeAppointment = async (body: any) => {
 
   const bookingPeriod = await advancedBookingPeriodModel.findOne({ doctorId: body.doctors, hospitalId: body.hospital }, "bookingPeriod")
   const advancedBookingPeriod = bookingPeriod?.bookingPeriod;
-  
+
   if (bookingPeriod && !isAdvancedBookingValid(moment(time), advancedBookingPeriod)) {
     const error: Error = new Error("Cannot book appointment for this day");
     error.name = "Not available";

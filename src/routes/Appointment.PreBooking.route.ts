@@ -11,6 +11,8 @@ const appointmentPreBookingCommonService = AppointmentPreBookingCommonService.In
 const appointmentPreBookingForPatientService = AppointmentPreBookingForPatientService.Init(appointmentPreBookingCommonService)
 const appointmentPreBookingForHospitalService = AppointmentPreBookingForHospitalService.Init(appointmentPreBookingCommonService)
 const appointmentPreBookingService = AppointmentPreBookingService.Init(appointmentPreBookingForPatientService, appointmentPreBookingForHospitalService)
+// const appointmentPreBookingService = AppointmentPreBookingService.Init()
+
 const appointmentPreBookingController = AppointmentPreBooking.Init(appointmentPreBookingService);
 
 appointmentPreBookingRouter.get("/hospital/details/:hospitalId", oneOf(authenticateHospital, authenticatePatient), appointmentPreBookingController.hospitalDetails)

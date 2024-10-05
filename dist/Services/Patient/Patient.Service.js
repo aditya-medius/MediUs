@@ -91,12 +91,22 @@ const BookAppointment = (body, isHospital = false) => __awaiter(void 0, void 0, 
         // body.time.date = new Date(body.time.date);
         const requestDate = new Date(body.time.date);
         const day = requestDate.getDay();
-        // @TODO check if working hour exist first
-        let capacity = yield WorkingHours_Model_1.default.findOne({
+        const [working, fromDiv, fromTime, tillDiv, tillTime] = (() => {
+            const workingDay = [WEEK_DAYS[day]];
+            return [`${workingDay}.working`, `${workingDay}.from.division`, `${workingDay}.from.time`, `${workingDay}.till.div`, `${workingDay}.till.time`];
+        })();
+        console.log("body", body);
+        const WorkingHourQuery = {
             doctorDetails: body.doctors,
             hospitalDetails: body.hospital,
-            [WEEK_DAYS[day]]: { $exists: true },
-        });
+            [working]: true,
+            [fromDiv]: body.time.from.division,
+            [fromTime]: body.time.from.time,
+            [tillDiv]: body.time.till.division,
+            [tillTime]: body.time.till.time
+        };
+        // @TODO check if working hour exist first
+        let capacity = yield WorkingHours_Model_1.default.findOne(WorkingHourQuery);
         if (!capacity) {
             let error = new Error("Error");
             error.message = "Cannot create appointment";

@@ -9,8 +9,11 @@ import { doctorsInHospital, hospitalsInDoctor } from "../Hospital/Hospital.Servi
 import { formatTime } from "../Utils";
 import moment from "moment";
 import { AppointmentPreBookingCommonService } from "./Appointment.PreBooking.Common.Service";
+import { IAppointmentPreBookingForHospitalService } from "./IAppointment.PreBooking.ForHospital.Service";
+import { provide } from "inversify-binding-decorators";
 
-export class AppointmentPreBookingForHospitalService extends Base<AppointmentPreBookingForHospitalService> {
+// @provide("IAppointmentPreBookingForHospitalService")
+export class AppointmentPreBookingForHospitalService extends Base<AppointmentPreBookingForHospitalService> implements IAppointmentPreBookingForHospitalService {
     private appointmentScheduleUtil: AppointmentScheduleUtil = AppointmentScheduleUtil.Init(ValidationHandler.Init())
     private errorFactory: ErrorFactory = ErrorFactory.Init();
 
