@@ -1319,7 +1319,7 @@ import * as notificationService from "../Services/Notification/Notification.Serv
 import suvedhaModel from "../Models/Suvedha.Model";
 import patientModel from "../Models/Patient.Model";
 import { getDefaultSettings } from "http2";
-import { AppointmentStatus, AppointStatusOrder, Hospital } from "../Services/Helpers";
+import { AppointmentStatus, AppointStatusOrder, Hospital, Weekdays } from "../Services/Helpers";
 import { getHospitalDetailsById, updateHospitalById } from "../Services/Hospital/Common.Helper";
 
 export const getHospitalsNotification = async (req: Request, res: Response) => {
@@ -1512,9 +1512,9 @@ export const doctorsInHospitalWithTimings = async (
           (elem: any) => elem.hospital.toString() === hospitalId
         )?.consultationFee?.max,
         workinghour: e?.workingHours.map((elem: any) => {
-          return `${elem[WEEK_DAYS[day]]?.from.time}:${elem[WEEK_DAYS[day]]?.from.division
-            } to ${elem[WEEK_DAYS[day]]?.till.time}:${elem[WEEK_DAYS[day]]?.till.division
-            }`;
+          const appointmentStartTime = formatTime(`${elem[Weekdays[day]]?.from.time}:${elem[Weekdays[day]]?.from.division}`)
+          const appointmentEndTime = formatTime(`${elem[Weekdays[day]]?.till.time}:${elem[Weekdays[day]]?.till.division}`)
+          return `${appointmentStartTime} to ${appointmentEndTime}`;
         }),
         capacityAndToken: e?.workingHours.map((elem: any) => {
           return {
